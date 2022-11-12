@@ -1,5 +1,5 @@
 ---
-title: "tomsing1.github.io"
+title: "Welcome"
 listing:
   contents: posts
   sort: "date desc"

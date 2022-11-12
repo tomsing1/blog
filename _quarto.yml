@@ -1,0 +1,19 @@
+project:
+  type: website
+  output-dir: docs
+website:
+  title: "tomsing1.github.io"
+  navbar:
+    right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/tomsing1
+      - icon: twitter
+        href: https://twitter.com/thomas_sandmann
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+
+editor: visual
+

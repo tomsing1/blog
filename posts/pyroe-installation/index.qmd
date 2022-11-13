@@ -1,0 +1,42 @@
+---
+title: "Installing pyroe with conda"
+author: "Thomas Sandmann"
+date: "2022-11-12"
+categories: [TIL, conda]
+---
+
+[Alevin-fry](https://www.nature.com/articles/s41592-022-01408-3)
+is a highly accurate and performant method to process single-cell or
+single-nuclei RNA-seq data. For downstream processing, its output can be
+parsed into R with the
+[fishpond::loadFry()](https://rdrr.io/github/mikelove/fishpond/man/loadFry.html)
+function. For analysis using python, the 
+[pyroe](https://github.com/COMBINE-lab/pyroe)
+module is available.
+
+It can be installed either using `pip` or `conda`, and the latter will install
+additional dependencies (e.g. bedtools) and include the `load_fry()` as well.
+
+To install `pyroe` with conda, I first followed 
+[bioconda's instructions](https://bioconda.github.io/)
+to add and configure the required channels:
+
+```bash
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+```
+
+and then installed `pyroe`
+
+```bash
+conda install pyroe
+```
+
+Now I can convert `alevin-fry` output to one of the following formats:
+`zarr`, `csvs`, `h5ad` or `loom`. 
+
+```bash
+pyroe convert --help
+```

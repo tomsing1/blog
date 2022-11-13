@@ -2,29 +2,36 @@
   {
     "objectID": "posts/post-with-code/index.html",
     "href": "posts/post-with-code/index.html",
-    "title": "Post With Code",
+    "title": "Installing pyroe with conda",
     "section": "",
-    "text": "1 + 1\n\n[1] 2"
+    "text": "Image credits: tOrange.biz, CC BY 4.0, via Wikimedia Commons"
   },
   {
     "objectID": "posts/welcome/index.html",
     "href": "posts/welcome/index.html",
     "title": "Welcome To My Blog",
     "section": "",
-    "text": "Since this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+    "text": "This is Thomas Sandmann’s personal blog, created with Quarto. I am planning to share e.g. “Things I learned today” (TIL) and other pieces of news around Computational Biolgy and Data Science."
   },
   {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Welcome",
     "section": "",
-    "text": "news\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nNov 12, 2022\n\n\nHarlow Malloc\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nNov 9, 2022\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "TIL\n\n\nconda\n\n\n\n\n\n\n\n\n\n\n\nNov 12, 2022\n\n\nThomas Sandmann\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nNov 12, 2022\n\n\nThomas Sandmann\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "About this blog"
+    "text": "Welcome to Thomas Sandmann’s blog."
+  },
+  {
+    "objectID": "posts/pyroe-installation/index.html",
+    "href": "posts/pyroe-installation/index.html",
+    "title": "Installing pyroe with conda",
+    "section": "",
+    "text": "It can be installed either using pip or conda, and the latter will install additional dependencies (e.g. bedtools) and include the load_fry() as well.\nTo install pyroe with conda, I first followed bioconda’s instructions to add and configure the required channels:\nconda config --add channels defaults\nconda config --add channels bioconda\nconda config --add channels conda-forge\nconda config --set channel_priority strict\nand then installed pyroe\nconda install pyroe\nNow I can convert alevin-fry output to one of the following formats: zarr, csvs, h5ad or loom.\npyroe convert --help"
   }
 ]

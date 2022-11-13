@@ -15,4 +15,4 @@ about:
       href: https://github.com/tomsing1
 ---
 
-About this blog
+Welcome to Thomas Sandmann's blog. 

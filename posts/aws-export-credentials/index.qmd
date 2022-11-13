@@ -1,0 +1,149 @@
+---
+title: "Refreshing & exporting temporary AWS credentials"
+author: "Thomas Sandmann"
+date: "2022-11-13"
+freeze: true
+categories: [TIL, AWS]
+---
+
+To increase security when interacting with AWS services, the
+[AWS IAM Identity Center](https://aws.amazon.com/iam/identity-center/)
+(formerly known as AWS SSO) generates temporary credentials
+for different AWS roles.
+
+Today I learned how to configure and refresh these credentials
+in the command line, as well how to export them either as
+environmental variables or write them to the `credentials` file
+where tools that do not interact with AWS SSO natively can
+access them.
+
+### Configuring an AWS SSO profile
+
+First, we need to 
+[configure a named profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html)
+for use with AWS SSO. The following
+[AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+command will interactively walk you through the necessary steps:
+
+```bash
+aws configure sso
+```
+
+The information you provide will be written to the `config` file, located in 
+the `~/.aws` directory on Mac OS. Here is an example:
+
+```
+[profile my-dev-profile]
+sso_start_url = https://my-sso-portal.awsapps.com/start
+sso_region = us-east-1
+sso_account_id = 123456789011
+sso_role_name = readOnly
+region = us-west-2
+output = json
+```
+
+### Logging into the AWS SSO profile
+
+Now we can log into AWS SSO and request temporary credentials:
+
+```bash
+aws sso login --profile my-dev-profile
+```
+
+This command will try to open a web browser for you and prompt you to confirm
+the login. Alternatively, you can copy & paste the displayed URL and manually 
+enter the confirmation code output by the command.
+
+If the login was successful, you can now adopt the `my-dev-profile` when using
+the AWS CLI, e.g.
+
+```bash
+aws s3 ls --profile my-dev-profile
+```
+
+The AWS SSO endpoint recognizes many environmental variables that you can use to
+specify defaults, e.g.
+
+- `AWS_PROFILE`: The profile to use (e.g. my-dev-profile)
+- `AWS_SHARED_CREDENTIALS_FILE`: the location of the shared credentials files
+  (default on Mac OS: ~/.aws/.credentials)
+- `AWS_CONFIG_FILE`: the location of the AWS CLI configuration file 
+  (default on Mac OS: ~/.aws.config)
+
+### Accessing temporary credentials 
+
+The AWS CLI and many of the AWS SKDs will automatically detect and use SSO
+credentials. But other tools might not (yet) be compatible with this
+authentication route. Instead, they might 
+
+- read credentials for a profile from the `credentials` file
+- rely on environmental variables, e.g. `AWS_ACCESS_KEY_ID` and 
+  `AWS_SECRET_ACCESS_KEY`
+  
+To expose the temporary credentials, Ben Kehoe has made the 
+[aws-export-credentials](https://github.com/benkehoe/aws-export-credentials)
+tool available. 
+
+### Installing aws-export-credentials
+
+The recommended way to install `aws-export-credentials` is via 
+[pipx](https://pypa.github.io/pipx/)
+because it will automatically make it available in your PATH. 
+
+1. If you don't have `pipx` available on your system, 
+[install it first](https://pypa.github.io/pipx/#install-pipx).
+2. Next, install aws-export-credentials by executing the following steps in your
+  shell:
+
+```bash
+pipx ensurepath  # in case you haven't run this before
+pipx install aws-export-credentials
+aws-export-credentials --version  # verify the installation
+```
+
+### Updating the credentials file
+
+At the beginning of your workday - or whenever needed - run the following set of
+commands. (Replace the SSO profile with the one you want to adopt.)
+
+```bash
+PROFILE="my-dev-profile"
+
+# retrieve new credentials from AWS
+aws sso login --profile "${PROFILE}"
+
+# write the temporary credentials to the ~/.aws/credentials file
+aws-export-credentials \
+  --profile "${PROFILE}" \
+  --credentials-file-profile "${PROFILE}"
+```
+
+This will refresh the credentials (via `aws sso login`) and then write them 
+to the `my-dev-profile` profiles in the `~/.aws/.credentials` file. Now we can
+access them e.g. in the 
+[aws.s3](https://cloud.r-project.org/web/packages/aws.s3/index.html) R package:
+
+```r
+library(aws.s3)
+library(aws.signature)
+aws.signature::use_credentials(profile = "my-dev-profile")
+aws.s3::bucketlist()
+```
+
+### Exposing environmental variables
+
+Some tools _only_ recognize environmental variables. Luckily, 
+`aws-export-credentials` can automate this process, too:
+
+```bash
+export $(aws-export-credentials --profile my-dev-profile --env-export)
+```
+
+will export `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` variables in your
+shell session.
+
+### Sourcing credentials with an external process
+
+Finally, you can also include a command that looks up credentials as a
+`credential_process` in your config file.
+([More information here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html)) But that's not a use case I have explored, yet.

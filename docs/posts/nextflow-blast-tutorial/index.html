@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Sandmann">
+<meta name="dcterms.date" content="2022-11-15">
+
+<title>Thomas Sandmann’s personal blog - Learning nextflow: blasting multiple sequences</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Thomas Sandmann’s personal blog</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">About</a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/tomsing1"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"><i class="bi bi-linkedin" role="img">
+</i> 
+ </a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/thomas_sandmann"><i class="bi bi-twitter" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Learning nextflow: blasting multiple sequences</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">TIL</div>
+                <div class="quarto-category">nextflow</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Thomas Sandmann </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 15, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p><a href="https://www.nextflow.io/">Nextflow</a> is both a reactive workflow framework and a domain-specific language (DSL). It is gaining lots of tracking in bioinformatics thanks in large part to the <a href="https://nf-co.re/">nf-core</a> open source community that develops and publishes reusable workflows for many use cases.</p>
+<p>To start learning nextflow, I worked through Andrew Severin’s excellent <a href="https://bioinformaticsworkbook.org/dataAnalysis/nextflow/02_creatingAworkflow.htm">Creating a NextFlow workflow</a> tutorial. (The tutorial follows the older DSL1 specification of nextflow, but only a few small modifications were needed to run it under DSL2.)</p>
+<p>Here are notes I took while working through the tutorial:</p>
+<ul>
+<li><p>To make a variable a pipeline parameter prepend it with <code>params.</code>, then specify them in the command line:</p>
+<p><code>main.nf</code>:</p>
+<pre><code>#! /usr/bin/env nextflow
+params.query="file.fasta"
+println "Querying file $params.query"</code></pre>
+<p><code>shell command</code>:</p>
+<pre><code>nextflow run main.nf --query other_file.fasta</code></pre></li>
+<li><p>The <code>-log</code> argument directs logging to the specified file.</p>
+<pre><code>nextflow -log nextflo.log run main.nf </code></pre></li>
+<li><p>To clean up intermediate files automatically upon workflow completion, use the <code>cleanup</code> parameter <em>within</em> a profile.</p>
+<pre><code>profiles {
+  standard {
+      cleanup = true
+  }
+  debug {
+      cleanup = false
+  }
+}</code></pre>
+<ul>
+<li>By convention the <code>standard</code> profile is implicitly used when no other<br>
+profile is specified by the user.</li>
+<li>Cleaning up intermediate files precludes the use of <code>-resume</code>.</li>
+</ul></li>
+<li><p>The <code>nextflow.config</code> file sets the global parameters, e.g.</p>
+<ul>
+<li>process</li>
+<li>manifest</li>
+<li>executor</li>
+<li>profiles</li>
+<li>docker</li>
+<li>singularity</li>
+<li>timeline</li>
+<li>report</li>
+<li>etc</li>
+</ul></li>
+<li><p>Contents of the <code>work</code> folder for a nextflow task:</p>
+<ul>
+<li><code>.command.begin</code> is the begin script if you have one</li>
+<li><code>.command.err</code> is useful when it crashes.</li>
+<li><code>.command.run</code> is the full nextflow pipeline that was run, this is helpful when trouble shooting a nextflow error rather than the script error.</li>
+<li><code>.command.sh</code> shows what was run.</li>
+<li><code>.exitcode</code> will have the exit code in it.</li>
+</ul></li>
+<li><p>Displaying help messages</p>
+<p><code>main.nf</code></p>
+<pre><code>def helpMessage() {
+log.info """
+      Usage:
+      The typical command for running the pipeline is as follows:
+      nextflow run main.nf --query QUERY.fasta --dbDir "blastDatabaseDirectory" --dbName "blastPrefixName"
+
+      Mandatory arguments:
+       --query                        Query fasta file of sequences you wish to BLAST
+       --dbDir                        BLAST database directory (full path required)
+       [...]
+"""
+}
+
+// Show help message
+if (params.help) {
+    helpMessage()
+    exit 0
+}</code></pre>
+<p><code>shell command</code>:</p>
+<pre><code>nextflow run main.nf --help</code></pre></li>
+<li><p>The <code>publishDir</code> directive accepts arguments like <code>mode</code> and <code>pattern</code> to fine tune its behavior, e.g.</p>
+<pre><code>output:
+file("${label}/short_summary.specific.*.txt")
+publishDir "${params.outdir}/BUSCOResults/${label}/", mode: 'copy', pattern: "${label}/short_summary.specific.*.txt"</code></pre></li>
+<li><p><a href="https://www.nextflow.io/docs/latest/dsl2.html#dsl2-migration-notes">DSL2</a> allows piping, e.g.</p>
+<pre><code>workflow {
+  res = Channel
+      .fromPath(params.query)
+      .splitFasta(by: 1, file:true) |
+      runBlast
+  res.collectFile(name: 'blast_output_combined.txt', storeDir: params.outdir)
+}</code></pre></li>
+<li><p>Add a <em>timeline report</em> to the output with</p>
+<pre><code>timeline {
+    enabled = true
+    file = "$params.outdir/timeline.html"
+}</code></pre>
+<p>(in <code>nextflow.config</code>).</p></li>
+<li><p>Add a detailed execution report with</p>
+<pre><code>report {
+enabled = true
+file = "$params.outdir/report.html"
+}</code></pre>
+<p>(in <code>nextflow.config</code>).</p></li>
+<li><p>Include a profile-specific configuration file</p>
+<p><code>nextflow.config</code></p>
+<pre><code>profiles {
+    slurm { includeConfig './configs/slurm.config' }
+}</code></pre>
+<p><code>configs/slurm.config</code></p>
+<pre><code>process {
+    executor = 'slurm'
+    clusterOptions =  '-N 1 -n 16 -t 24:00:00'
+}</code></pre>
+<p>and use it via <code>nextflow run main.nf -profile slurm</code></p></li>
+<li><p>Similarly, refer to a <em>test</em> profile, specified in a separate file:</p>
+<p><code>nextflow.config</code></p>
+<pre><code>test { includeConfig './configs/test.config' }</code></pre></li>
+<li><p>Adding a manifest to <code>nextflow.config</code></p>
+<pre><code>manifest {
+    name = 'isugifNF/tutorial'
+    author = 'Andrew Severin'
+    homePage = 'www.bioinformaticsworkbook.org'
+    description = 'nextflow bash'
+    mainScript = 'main.nf'
+    version = '1.0.0'
+}</code></pre></li>
+<li><p>Using a <code>label</code> for a process allows granular control of a process’ configuration</p>
+<p><code>main.nf</code></p>
+<pre><code>process runBlast { 
+    label 'blast'
+}</code></pre>
+<p><code>nextflow.config</code></p>
+<pre><code>process {
+    executor = 'slurm'
+    clusterOptions =  '-N 1 -n 16 -t 02:00:00'
+    withLabel: blast { module = 'blast-plus' }
+}</code></pre>
+<ul>
+<li>The <code>label</code> has to be placed before the <code>input</code> section.</li>
+</ul></li>
+<li><p>Loading a <code>module</code> specifically for a process</p>
+<pre><code>process runBlast {
+
+    module = 'blast-plus'
+    publishDir "${params.outdir}/blastout"
+
+    input:
+    path queryFile from queryFile_ch
+    .
+    .
+    . // these three dots mean I didn't paste the whole process.
+}</code></pre></li>
+<li><p>Enabling <code>docker</code> in the <code>nextflow.config</code></p>
+<pre><code>docker { docker.enabled = true }</code></pre>
+<ul>
+<li>The docker container can be specified in the process, e.g.</li>
+</ul>
+<pre><code>container = 'ncbi/blast'</code></pre>
+<p>or</p>
+<pre><code>container = `quay.io/biocontainers/blast/2.2.31--pl526he19e7b1_5`</code></pre>
+<ul>
+<li>We can include additional options to pass to the container as well:</li>
+</ul>
+<pre><code>containerOptions = "--bind $launchDir/$params.outdir/config:/augustus/config"</code></pre></li>
+<li><p><code>projectDir</code> refers to the directory where the main workflow script is located. (It used to be called <code>baseDir</code>.)</p></li>
+<li><p>Refering to local directories from <em>within</em> a docker container: create a channel</p>
+<ul>
+<li>Working in containers, we need a way to pass the database file location directly into the runBlast process without the need of the local path.</li>
+</ul></li>
+<li><p>Repeating a process over each element of a channel with <code>each</code>: <a href="https://www.nextflow.io/docs/latest/process.html#input-repeaters-each">input repeaters</a></p></li>
+</ul>
+<section id="additional-resources" class="level3">
+<h3 class="anchored" data-anchor-id="additional-resources">Additional resources</h3>
+<ul>
+<li><a href="https://carpentries-incubator.github.io/workflows-nextflow/index.html">Software Carpentry course</a></li>
+<li><a href="https://github.com/danrlu/Nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf">Nextflow cheat sheet</a></li>
+<li><a href="https://github.com/nextflow-io/awesome-nextflow">Awesome nextflow</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

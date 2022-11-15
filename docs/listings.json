@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/python-hints/index.html",
       "/posts/fujita_2022/index.html",
       "/posts/aws-export-credentials/index.html",
       "/posts/pyroe-installation/index.html",

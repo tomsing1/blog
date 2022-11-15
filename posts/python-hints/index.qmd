@@ -1,0 +1,20 @@
+---
+title: "Python type hints"
+author: "Thomas Sandmann"
+date: "2022-11-14"
+freeze: true
+categories: [TIL, python]
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+Today I learned about python type hints (again...) as I was tackling the first parts of
+[pybites'](https://pybit.es/)
+[FastAPI](https://fastapi.tiangolo.com/)
+learning track. The following resources were great to get a quick overview:
+
+- [Code Better with Type Hints – Part 1](https://pybit.es/articles/code-better-with-type-hints-part-1/)
+- [Code Better with Type Hints – Part 2](https://pybit.es/articles/code-better-with-type-hints-part-2/)
+- [FastAPI's typing introduction](https://fastapi.tiangolo.com/python-types/)
+- [Pysheet: typing](https://www.pythonsheets.com/notes/python-typing.html)

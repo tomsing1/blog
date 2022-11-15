@@ -10,3 +10,5 @@ listing:
 page-layout: full
 title-block-banner: true
 ---
+
+<a rel="me" href="https://mastodon.social/@thomas_sandmann"></a>

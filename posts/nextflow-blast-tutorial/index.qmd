@@ -14,7 +14,7 @@ use cases.
 
 To start learning nextflow, I worked through Andrew Severin's excellent
 [Creating a NextFlow workflow
-](https://bioinformaticsworkbook.org/dataAnalysis/nextflow/02_creatingAworkflow.htm)
+](https://bioinformaticsworkbook.org/dataAnalysis/nextflow/02_creatingAworkflow.html)
 tutorial. (The tutorial follows the older DSL1 specification of nextflow, but
 only a few small modifications were needed to run it under DSL2.)
 

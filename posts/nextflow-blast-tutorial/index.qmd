@@ -257,6 +257,41 @@ publishDir "${params.outdir}/BUSCOResults/${label}/", mode: 'copy', pattern: "${
 
 - Repeating a process over each element of a channel with `each`: [input repeaters](https://www.nextflow.io/docs/latest/process.html#input-repeaters-each)
 
+- Turning a
+[queue channel](https://www.nextflow.io/docs/latest/channel.html#queue-channel)
+into a 
+[value channel](https://www.nextflow.io/docs/latest/channel.html#value-channel),
+which can be used multiple times.
+  - A value channel is implicitly created by a process when it is invoked with a
+  simple value.
+  - A value channel is also implicitly created as output for a process whose
+  inputs are all value channels.
+  - A queue channel can be converted into a value channel by returning a single
+  value, using e.g. `first`, `last`, `collect`, `count`, `min`, `max`, `reduce`,
+  `sum`, etc. For example: the `runBlast` process receives three inputs in the
+  following example:
+    - the `queryFile_ch` queue channel, with multiple sequences.
+    - the `dbDir_ch` value channel, created by calling `.first()`, which is
+      reused for all elements of `queryFile_ch`
+    - the `dbName_ch` value channel, which is also reused for all elements
+      of `queryFile_ch`
+ 
+  ```
+  workflow {
+    channel.fromPath(params.dbDir).first()
+    .set { dbDir_ch }
+
+    channel.from(params.dbName).first()
+    .set { dbName_ch }
+
+    queryFile_ch = channel
+        .fromPath(params.query)
+        .splitFasta(by: 1, file:true)
+       res = runBlast(queryFile_ch, dbDir_ch, dbName_ch)
+    res.collectFile(name: 'blast_output_combined.txt', storeDir: params.outdir)
+  }
+  ```
+  
 ### Additional resources
 
 - [Software Carpentry course](https://carpentries-incubator.github.io/workflows-nextflow/index.html)

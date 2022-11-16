@@ -307,6 +307,30 @@ file = "$params.outdir/report.html"
 <li>Working in containers, we need a way to pass the database file location directly into the runBlast process without the need of the local path.</li>
 </ul></li>
 <li><p>Repeating a process over each element of a channel with <code>each</code>: <a href="https://www.nextflow.io/docs/latest/process.html#input-repeaters-each">input repeaters</a></p></li>
+<li><p>Turning a <a href="https://www.nextflow.io/docs/latest/channel.html#queue-channel">queue channel</a> into a <a href="https://www.nextflow.io/docs/latest/channel.html#value-channel">value channel</a>, which can be used multiple times.</p>
+<ul>
+<li>A value channel is implicitly created by a process when it is invoked with a simple value.</li>
+<li>A value channel is also implicitly created as output for a process whose inputs are all value channels.</li>
+<li>A queue channel can be converted into a value channel by returning a single value, using e.g.&nbsp;<code>first</code>, <code>last</code>, <code>collect</code>, <code>count</code>, <code>min</code>, <code>max</code>, <code>reduce</code>, <code>sum</code>, etc. For example: the <code>runBlast</code> process receives three inputs in the following example:
+<ul>
+<li>the <code>queryFile_ch</code> queue channel, with multiple sequences.</li>
+<li>the <code>dbDir_ch</code> value channel, created by calling <code>.first()</code>, which is reused for all elements of <code>queryFile_ch</code></li>
+<li>the <code>dbName_ch</code> value channel, which is also reused for all elements of <code>queryFile_ch</code></li>
+</ul></li>
+</ul>
+<pre><code>workflow {
+  channel.fromPath(params.dbDir).first()
+  .set { dbDir_ch }
+
+  channel.from(params.dbName).first()
+  .set { dbName_ch }
+
+  queryFile_ch = channel
+      .fromPath(params.query)
+      .splitFasta(by: 1, file:true)
+     res = runBlast(queryFile_ch, dbDir_ch, dbName_ch)
+  res.collectFile(name: 'blast_output_combined.txt', storeDir: params.outdir)
+}</code></pre></li>
 </ul>
 <section id="additional-resources" class="level3">
 <h3 class="anchored" data-anchor-id="additional-resources">Additional resources</h3>

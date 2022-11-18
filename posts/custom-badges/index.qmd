@@ -36,9 +36,7 @@ and many more.
 Badges can show up to date information. For example, this badge shows the last
 commit to the 
 [github repository for this blog](https://github.com/tomsing1/blog):
-![](https://img.shields.io/github/last-commit/tomsing1/blog)
-
-Badges can be returned either in `svg` (recommended) or `png` formats, from
+![](https://img.shields.io/github/last-commit/tomsing1/blog). They can be returned either in `svg` (recommended) or `png` formats, from
 the `img.shields.io` and `raster.shields.io` servers, respectively.
 
 ### Custom badges

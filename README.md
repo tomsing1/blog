@@ -2,7 +2,7 @@
 # Thomas Sandmann's blog
 
 <!-- badges: start -->
-[![last commit](https://img.shields.io/github/last-commit/tomsing1/blog)](last commit)
+[![](https://img.shields.io/github/last-commit/tomsing1/blog)]
 <!-- badges: end -->
 
 Welcome to my personal blog, created with

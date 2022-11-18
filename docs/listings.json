@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/custom-badges/index.html",
       "/posts/nextflow-blast-tutorial/index.html",
       "/posts/python-hints/index.html",
       "/posts/fujita_2022/index.html",

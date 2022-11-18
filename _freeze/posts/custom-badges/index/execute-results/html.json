@@ -1,0 +1,14 @@
+{
+  "hash": "0c408dce78043bb21d5341550eaad392",
+  "result": {
+    "markdown": "---\ntitle: \"Creating custom badges for your README\"\nauthor: \"Thomas Sandmann\"\ndate: \"2022-11-16\"\nfreeze: true\ncategories: [TIL, R]\neditor: \n  markdown: \n    wrap: 72\n---\n\n\nToday I learned how to create custom badges with [shields.io](https://img.shields.io), \nand how to add them to the `README.md` file on github.\n\n### Predefined badges\n\nMany open source software packages display key pieces of information as\nbadges (aka shields) in their github README, indicating e.g. code coverage,\nunit test results, version numbers, license, etc.\n\nThe [shields.io](https://img.shields.io) website provides many different\nready-to-use badges, covering topics such as \n[test results](https://shields.io/category/test-results), \n[code coverage](https://shields.io/category/coverage),\n[social media logos](https://shields.io/category/social), \n[activity](https://shields.io/category/activity),\nand many more.\n\n![](https://shields.io/badge/downloads-120%2Fweek-green)\n![](https://shields.io/badge/docker%20pulls-765M-066da5)\n![](https://shields.io/badge/change%201011478-merged-blueviolet)\n![](https://shields.io/badge/closed%20issues-899-yellow)\n![](https://shields.io/badge/stars-%E2%98%85%E2%98%85%E2%98%85%E2%98%85%E2%98%86-brightgreen)\n![](https://shields.io/badge/Watch-96-lightgrey?logo=github&style=social)\n\nBadges can show up to date information. For example, this badge shows the last\ncommit to the \n[github repository for this blog](https://github.com/tomsing1/blog):\n![](https://img.shields.io/github/last-commit/tomsing1/blog)\n\nBadges can be returned either in `svg` (recommended) or `png` formats, from\nthe `img.shields.io` and `raster.shields.io` servers, respectively.\n\n### Custom badges\n\nIn addition to predefined outputs, you can also generate your own, entirely\ncustom badges. They can be static like this one\n![](https://img.shields.io/static/v1?label=Static&message=My%20static%20badge&color=blue&style=flat-square)\nor dynamically retrieve information from\n[a JSON endpoint of your choice](https://shields.io/endpoint).\n\n### Adding badges with usethis\n\nIf you work in R, then the \n[usethis R package]()\ncan automatically add the HTML code for a badge to the `README.md` file of your\nrepository.\n\nFor example, the following code adds a badge displaying the date of the latest\ncommit for this blog to its `README.md` file.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(usethis)\nuse_badge(\"last commit\", \n          src = \"https://img.shields.io/github/last-commit/tomsing1/blog\", \n          href = \"last commit\")\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

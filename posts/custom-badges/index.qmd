@@ -1,0 +1,68 @@
+---
+title: "Creating custom badges for your README"
+author: "Thomas Sandmann"
+date: "2022-11-16"
+freeze: true
+categories: [TIL, R]
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+Today I learned how to create custom badges with [shields.io](https://img.shields.io), 
+and how to add them to the `README.md` file on github.
+
+### Predefined badges
+
+Many open source software packages display key pieces of information as
+badges (aka shields) in their github README, indicating e.g. code coverage,
+unit test results, version numbers, license, etc.
+
+The [shields.io](https://img.shields.io) website provides many different
+ready-to-use badges, covering topics such as 
+[test results](https://shields.io/category/test-results), 
+[code coverage](https://shields.io/category/coverage),
+[social media logos](https://shields.io/category/social), 
+[activity](https://shields.io/category/activity),
+and many more.
+
+![](https://shields.io/badge/downloads-120%2Fweek-green)
+![](https://shields.io/badge/docker%20pulls-765M-066da5)
+![](https://shields.io/badge/change%201011478-merged-blueviolet)
+![](https://shields.io/badge/closed%20issues-899-yellow)
+![](https://shields.io/badge/stars-%E2%98%85%E2%98%85%E2%98%85%E2%98%85%E2%98%86-brightgreen)
+![](https://shields.io/badge/Watch-96-lightgrey?logo=github&style=social)
+
+Badges can show up to date information. For example, this badge shows the last
+commit to the 
+[github repository for this blog](https://github.com/tomsing1/blog):
+![](https://img.shields.io/github/last-commit/tomsing1/blog)
+
+Badges can be returned either in `svg` (recommended) or `png` formats, from
+the `img.shields.io` and `raster.shields.io` servers, respectively.
+
+### Custom badges
+
+In addition to predefined outputs, you can also generate your own, entirely
+custom badges. They can be static like this one
+![](https://img.shields.io/static/v1?label=Static&message=My%20static%20badge&color=blue&style=flat-square)
+or dynamically retrieve information from
+[a JSON endpoint of your choice](https://shields.io/endpoint).
+
+### Adding badges with usethis
+
+If you work in R, then the 
+[usethis R package](https://usethis.r-lib.org/)
+can automatically add the HTML code for a badge to the `README.md` file of your
+repository.
+
+For example, the following code adds a badge displaying the date of the latest
+commit for this blog to its `README.md` file.
+
+```{r eval=FALSE}
+library(usethis)
+use_badge("last commit", 
+          src = "https://img.shields.io/github/last-commit/tomsing1/blog", 
+          href = "last commit")
+```
+

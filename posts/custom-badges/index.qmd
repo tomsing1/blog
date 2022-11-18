@@ -1,9 +1,9 @@
 ---
 title: "Creating custom badges for your README"
 author: "Thomas Sandmann"
-date: "2022-11-16"
+date: "2022-11-17"
 freeze: true
-categories: [TIL, R]
+categories: [TIL]
 editor: 
   markdown: 
     wrap: 72
@@ -49,20 +49,13 @@ custom badges. They can be static like this one
 or dynamically retrieve information from
 [a JSON endpoint of your choice](https://shields.io/endpoint).
 
-### Adding badges with usethis
+### Adding badges to a README.md file
 
-If you work in R, then the 
-[usethis R package](https://usethis.r-lib.org/)
-can automatically add the HTML code for a badge to the `README.md` file of your
-repository.
+To embed badges into your `README.md`, simply wrap its URL in
+markdown and surround it with the `badges: start` and `badges: end` tags:
 
-For example, the following code adds a badge displaying the date of the latest
-commit for this blog to its `README.md` file.
-
-```{r eval=FALSE}
-library(usethis)
-use_badge("last commit", 
-          src = "https://img.shields.io/github/last-commit/tomsing1/blog", 
-          href = "last commit")
 ```
-
+<!-- badges: start -->
+![](https://img.shields.io/github/last-commit/tomsing1/blog)
+<!-- badges: end -->
+```

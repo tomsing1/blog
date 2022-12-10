@@ -1,30 +1,39 @@
 ---
-title: "Faster installations with conda"
+title: "2022 normconf: lightning talks"
 author: "Thomas Sandmann"
 date: "2022-12-10"
 freeze: true
-categories: [TIL]
+categories: [TIL, conference]
 editor: 
   markdown: 
     wrap: 72
 ---
 
-Do you use conda (or miniconda) to install software? Then I have good news: 
-[conda is going to become much faster!](https://www.anaconda.com/blog/conda-is-fast-now)
+I am really looking forward to the virtual
+[#normconf](https://normconf.com/)
+conference on 2022-12-15. In addition to a great
+[program](https://normconf.com/#schedule)
+the meeting also features numerous ~ 5 minute
+[lightning talks](https://www.youtube.com/playlist?list=PLYXaKIsOZBstGUTXZXp2azDk8UJhpVVq3)
 
-To take advantage of the speed-ups implemented in the latest conda release, 
-you need to update your conda installation (if you already have one):
+The full list of lightning talks is available
+[here](https://normconf.com/#schedule) 
+but here are my favorites:
 
-```
-conda info
-conda update -n base conda
-```
+- Jacquelin Nolis: [Alaska challenged my preconceived notions of storing sunset data](https://youtu.be/D48NQTNg19s)
+- Jenny Bryan: [How to name files like a normie](https://youtu.be/ES1LTlnpLMk)
+- Chelsea Parlett: [Why Are You The Way That You Are: Sklearn Quirks](https://youtu.be/EvQUVzDJRJ8)
+- Zachary Chetchavat: [Hotkeys for Spreadsheets Cookbook, Practical Solutions from CTRL-Arrow, to F4](https://youtu.be/HF0F4H8BNsE)
+- Shoili Pal: [Data Science Intake Forms](https://youtu.be/6yIkeUKcQjs)
+- Amanda Fioritto: [Qualify: The SQL Filtering Pattern You Never Knew You Needed](https://youtu.be/JqITueHybVk)
+- Juulia Suvilehto: [Trying to convince academics to use git](https://youtu.be/KgxKJjzh-Y4)
+- Anuvabh Dutt: [Config files for fast and reproducible ML experiments](https://youtu.be/KsMx6fOJQGI)
+- Jane Adams: [How to make six figures in an hour](https://youtu.be/MzaOivVxU8M) ([slides](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqblJKTFBGUV9WSmtrSlNsd0VHYmtEMkNDcnFnUXxBQ3Jtc0ttbjNVM2gxNHB5WVppTmN0MnNxa0lmUmozUTREWG1BeFRuNzBtaE5YQ3dWQ2N5amFxZW9vSmdHVVdoa1dHdlljU0RTYldWZ3R0UEtvNzBCQThzT0tPa2VwU1pyd3d5a0N2bkV5TXFyUi1PUms0RnA0MA&q=https%3A%2F%2Fdocs.google.com%2Fpresentation%2Fd%2F1sOLkJ4jk_CFTE6fWOSqGucJtkyhInIWY9I-uaOKmJLM%2Fedit%3Fusp%3Dsharing&v=MzaOivVxU8M))
+- Bryan Bischof: [Toss that (model) in an endpoint](https://youtu.be/QnjY6PJzg84)
+- Sophia Yang: [PyScript: Run Python in your HTML](https://youtu.be/Zbkkbnm07-0)
+- Victor Geislinger: [Staying Alive: Persistent SSH Sessions w/ tmux](https://youtu.be/vRhe4QYrXfM)
+- Tom Baldwin: [Putting Git's commit hash in __version__, two ways](https://youtu.be/dCswm8WXCJ8)
 
-and then switch to the new dependency solver:
 
-```
-conda install -n base conda-libmamba-solver
-conda config --set solver libmamba
-```
 
-That's it - enjoy parallelized downloads & faster installations!
+

@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/conda-speedup/index.html",
       "/posts/rslist-r-package/index.html",
       "/posts/custom-badges/index.html",
       "/posts/nextflow-blast-tutorial/index.html",

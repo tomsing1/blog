@@ -1,0 +1,30 @@
+---
+title: "Faster installations with conda"
+author: "Thomas Sandmann"
+date: "2022-12-10"
+freeze: true
+categories: [TIL]
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+Do you use conda (or miniconda) to install software? Then I have good news: 
+[conda is going to become much faster!](https://www.anaconda.com/blog/conda-is-fast-now)
+
+To take advantage of the speed-ups implemented in the latest conda release, 
+you need to update your conda installation (if you already have one):
+
+```
+conda info
+conda update -n base conda
+```
+
+and then switch to the new dependency solver:
+
+```
+conda install -n base conda-libmamba-solver
+conda config --set solver libmamba
+```
+
+That's it - enjoy parallelized downloads & faster installations!

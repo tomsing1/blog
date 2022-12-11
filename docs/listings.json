@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/r-update-with-rig/index.html",
       "/posts/conda-speedup/index.html",
       "/posts/rslist-r-package/index.html",
       "/posts/2022-normconf/index.html",

@@ -232,6 +232,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">user =</span> <span class="st">"postgres"</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="creating-and-populating-a-table" class="level2">
+<h2 class="anchored" data-anchor-id="creating-and-populating-a-table">Creating and populating a table</h2>
 <p>Because this is a toy example, I start with a fresh table <code>datasets</code>. (In case it already exists from previous experimentation, I drop the table if necessary).</p>
 <p>Let’s define four fields for the table:</p>
 <ul>
@@ -315,6 +318,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 3 attitude The built-in attitude dataset from the datasets R package</code></pre>
 </div>
 </div>
+</section>
+<section id="creating-a-tokenized-index-for-full-text-searches" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-tokenized-index-for-full-text-searches">Creating a tokenized index for full-text searches</h2>
 <p>My goal is to enable full-text search for the <code>description</code> field. First, we need to add a <code>tsvector</code> field and populate it with the tokenized contents of each <code>description</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a column to hold tokens for full text search</span></span>
@@ -364,6 +370,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
+</section>
+<section id="searching" class="level2">
+<h2 class="anchored" data-anchor-id="searching">Searching!</h2>
 <p>Now we are ready to perform our first search. Let’s look up the term <code>data</code> in the <code>description</code> fields. (The <code>ts_headline</code> command returns the location of the match, e.g.&nbsp;the context it was found in.)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field and show the matching location</span></span>
@@ -438,6 +447,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbClearResult</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>That’s it. Thanks again to <a href="https://www.wsj.com/news/author/anthony-debarros">Anthony DeBarros’</a> for his excellent introduction to <a href="https://nostarch.com/practical-sql-2nd-edition">Practical SQL</a>!</p>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
 <details>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

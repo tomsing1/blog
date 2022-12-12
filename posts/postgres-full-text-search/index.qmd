@@ -49,6 +49,8 @@ con <- DBI::dbConnect(
   )
 ```
 
+## Creating and populating a table
+
 Because this is a toy example, I start with a fresh table `datasets`. (In case
 it already exists from previous experimentation, I drop the table if necessary).
 
@@ -136,6 +138,8 @@ for (dataset in buildin_datasets) {
 DBI::dbGetQuery(con, "SELECT name, title from datasets;")
 ```
 
+## Creating a tokenized index for full-text searches
+
 My goal is to enable full-text search for the `description` field. First, we 
 need to add a `tsvector` field and populate it with the tokenized contents 
 of each `description`.
@@ -179,6 +183,8 @@ sql <- glue_sql(
   .con = con)
 DBI::dbExecute(con, sql)
 ```
+
+## Searching!
 
 Now we are ready to perform our first search. Let's look up the term `data` in
 the `description` fields. (The `ts_headline` command returns the location of the
@@ -253,6 +259,8 @@ That's it. Thanks again to
 [Anthony DeBarros'](https://www.wsj.com/news/author/anthony-debarros) 
 for his excellent introduction to 
 [Practical SQL](https://nostarch.com/practical-sql-2nd-edition)!
+
+## Reproducibility
 
 <details>
 ```{r}

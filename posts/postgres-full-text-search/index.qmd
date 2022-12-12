@@ -255,6 +255,64 @@ DBI::dbFetch(res)
 DBI::dbClearResult(res)
 ```
 
+## Adding new entries
+
+We have successfully indexed and searched the existing three entries in our
+database. But what if we add new information? Let's create a new record for the
+`euro` dataset.
+
+```{r}
+new_data = list(
+  name = "euro", 
+  title = "The built-in euro dataset from the datasets R package",
+  description = gsub(
+    "\r?\n|\r", " ", 
+    "The data set euro contains the value of 1 Euro in all currencies
+participating in the European monetary union (Austrian Schilling ATS, 
+Belgian Franc BEF, German Mark DEM, Spanish Peseta ESP, Finnish Markka FIM, 
+French Franc FRF, Irish Punt IEP, Italian Lira ITL, Luxembourg Franc LUF, 
+Dutch Guilder NLG and Portuguese Escudo PTE). These conversion rates were 
+fixed by the European Union on December 31, 1998. To convert old prices to 
+Euro prices, divide by the respective rate and round to 2 digits.")
+)
+```
+
+To enter this record, we not only have to populate the `name`, `title` and
+`description` fields - but also the list of tokens derived from the 
+`description` in the `search_description_text` column. In other words, we have
+to execute the `to_tsvector` function inside our `INSERT` statement:
+
+```{r}
+sql <- glue_sql(
+  "INSERT INTO datasets ({`names(dataset)`*}, search_description_text)
+   VALUES ({new_data*}, to_tsvector({new_data[['description']]}));", 
+  .con = con)
+DBI::dbExecute(con, sql)
+```
+
+Now, when we search for the term `data`, we find both the original and the
+new record:
+
+```{r}
+# search the description field and show the matching location
+term <- "data"
+sql <- glue_sql(
+  "SELECT id, name,
+  ts_headline(description, to_tsquery('english', {term}),
+     'StartSel = <,
+      StopSel = >,
+      MinWords = 5,
+      MaxWords = 7,
+      MaxFragments = 1')
+  FROM datasets
+  WHERE search_description_text @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+res <- suppressMessages(DBI::dbSendStatement(con, sql))
+DBI::dbFetch(res)
+DBI::dbClearResult(res)
+```
+
 That's it. Thanks again to 
 [Anthony DeBarros'](https://www.wsj.com/news/author/anthony-debarros) 
 for his excellent introduction to 

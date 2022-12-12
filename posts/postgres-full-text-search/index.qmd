@@ -138,76 +138,57 @@ for (dataset in buildin_datasets) {
 DBI::dbGetQuery(con, "SELECT name, title from datasets;")
 ```
 
-## Creating a tokenized index for full-text searches
-
-My goal is to enable full-text search for the `description` field. First, we 
-need to add a `tsvector` field and populate it with the tokenized contents 
-of each `description`.
-
-```{r}
-# create a column to hold tokens for full text search
-sql <- glue_sql(
-  "ALTER TABLE datasets
-   ADD COLUMN search_description_text tsvector;", 
-  .con = con)
-res <- suppressMessages(DBI::dbSendStatement(con, sql))
-DBI::dbClearResult(res)
-DBI::dbListFields(con, "datasets")
-```
-
-At this point, the `search_description_text` field is still empty. Let's 
-copy the `descriptions` into it - and tokenize them at the same time. For 
-illustration, we retrieve the tokens for the first dataset:
-
-```{r}
-# copy the description into search tokens
-sql <- glue_sql(
-  "UPDATE datasets
-   SET search_description_text = to_tsvector('english', description);", 
-  .con = con)
-DBI::dbExecute(con, sql)
-DBI::dbGetQuery(con, 
-                "SELECT name, search_description_text from datasets LIMIT 1;")
-```
-
-To speed up the full-text search, we add a
-[Generalized Inverted Index (GIN)](https://www.postgresql.org/docs/current/gin-intro.html#:~:text=GIN%20stands%20for%20Generalized%20Inverted,appear%20within%20the%20composite%20items.)
-index for the `search_description_text` column as well:
-
-```{r}
-# create the search index
-sql <- glue_sql(
-  "CREATE INDEX search_description_idx
-   ON datasets
-   USING gin(search_description_text);",
-  .con = con)
-DBI::dbExecute(con, sql)
-```
-
 ## Searching!
 
-Now we are ready to perform our first search. Let's look up the term `data` in
-the `description` fields. (The `ts_headline` command returns the location of the
-match, e.g. the context it was found in.)
+Our goal is to enable full-text search for the `description` field. 
+Let's look up the term `data`. To perform full-text search, both the records to
+search and our query need to be tokinzed first, with the `to_tsvector` and
+`to_tsquery` functions, respectively.
+
+Here is an example of the tokens that are generated:
+
+```{r}
+sql <- glue_sql(
+  "SELECT to_tsvector('This is a my test phrase, and what 
+                       a beautiful phrase it is.')
+   to_tsquery", con = con)
+DBI::dbGetQuery(con, sql)
+```
+
+The following query correctly returns all records whose descriptions
+contain the word `data`:
+
+```{r}
+# search the description field
+term <- "data"
+sql <- glue_sql(
+  "SELECT id, name
+  FROM datasets
+  WHERE to_tsvector(description) @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+DBI::dbGetQuery(con, sql)
+```
+
+We can enrich the output by returning the output of the `ts_headline` function,
+highlighting the location / context of the the matched term:
 
 ```{r}
 # search the description field and show the matching location
 term <- "data"
 sql <- glue_sql(
   "SELECT id, name,
-  ts_headline(description, to_tsquery('english', {term}),
+    ts_headline(description, to_tsquery('english', {term}),
      'StartSel = <,
       StopSel = >,
       MinWords = 5,
       MaxWords = 7,
       MaxFragments = 1')
   FROM datasets
-  WHERE search_description_text @@ to_tsquery('english', {term})
+  WHERE to_tsvector(description) @@ to_tsquery('english', {term})
   ORDER BY created;",
   .con = con)
-res <- suppressMessages(DBI::dbSendStatement(con, sql))
-DBI::dbFetch(res)
-DBI::dbClearResult(res)
+DBI::dbGetQuery(con, sql)
 ```
 
 We can also combine search terms, e.g. searching for either `employee` _or_ 
@@ -225,12 +206,10 @@ sql <- glue_sql(
       MaxWords = 7,
       MaxFragments = 1')
   FROM datasets
-  WHERE search_description_text @@ to_tsquery('english', {term})
+  WHERE to_tsvector(description) @@ to_tsquery('english', {term})
   ORDER BY created;",
   .con = con)
-res <- suppressMessages(DBI::dbSendStatement(con, sql))
-DBI::dbFetch(res)
-DBI::dbClearResult(res)
+DBI::dbGetQuery(con, sql)
 ```
 
 Similarly, we can narrow our search by requiring both `data` _and_ `employee`
@@ -247,19 +226,65 @@ sql <- glue_sql(
       MaxWords = 7,
       MaxFragments = 1')
   FROM datasets
-  WHERE search_description_text @@ to_tsquery('english', {term})
+  WHERE to_tsvector(description) @@ to_tsquery('english', {term})
   ORDER BY created;",
   .con = con)
-res <- suppressMessages(DBI::dbSendStatement(con, sql))
-DBI::dbFetch(res)
-DBI::dbClearResult(res)
+DBI::dbGetQuery(con, sql)
 ```
 
-## Adding new entries
+## Creating indices
 
-We have successfully indexed and searched the existing three entries in our
-database. But what if we add new information? Let's create a new record for the
-`euro` dataset.
+In the examples above, we performed tokenization of the search term and the 
+`description` field at run time, e.g. when the query was executed. As our
+database grows, this will soon become too cumbersome and degrade performance.
+
+Adding an index to our database will maintain full-text search speed even with
+large datasets. We have two different options:
+
+1. Create an [index based on an expression](https://www.postgresql.org/docs/8.3/indexes-expressional.html).
+2. Create a new field to hold the output of the `to_tsvector` function, and then
+[index this new field](https://www.postgresql.org/docs/8.3/textsearch-tables.html).
+
+### Creating an expression index
+
+A simple way to create a full-text index is to include the `to_tsvector()`
+expression in the definition of the index itself. Here, we add a
+[Generalized Inverted Index (GIN)](https://www.postgresql.org/docs/current/gin-intro.html#:~:text=GIN%20stands%20for%20Generalized%20Inverted,appear%20within%20the%20composite%20items.)
+index for the `description` column:
+
+```{r}
+sql = glue_sql(
+  "CREATE INDEX description_idx ON datasets 
+  USING gin(to_tsvector('english', description));",
+  con = con
+)
+DBI::dbExecute(con, sql)
+```
+
+The same type of query we issued above will now take advantage of the 
+`description_idx`:
+
+```{r}
+# search the description field using its index
+term <- "questioning"
+sql <- glue_sql(
+  "SELECT id, name,
+    ts_headline(description, to_tsquery('english', {term}),
+     'StartSel = <,
+      StopSel = >,
+      MinWords = 5,
+      MaxWords = 7,
+      MaxFragments = 1')
+  FROM datasets
+  WHERE to_tsvector('english', description) @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+DBI::dbGetQuery(con, sql)
+```
+
+The `description` fields of new records, e.g those that are added later, will
+automatically be added to the index. Let's create a new record for the `euro` 
+dataset, for example.
 
 ```{r}
 new_data = list(
@@ -275,23 +300,85 @@ Dutch Guilder NLG and Portuguese Escudo PTE). These conversion rates were
 fixed by the European Union on December 31, 1998. To convert old prices to 
 Euro prices, divide by the respective rate and round to 2 digits.")
 )
-```
-
-To enter this record, we not only have to populate the `name`, `title` and
-`description` fields - but also the list of tokens derived from the 
-`description` in the `search_description_text` column. In other words, we have
-to execute the `to_tsvector` function inside our `INSERT` statement:
-
-```{r}
 sql <- glue_sql(
-  "INSERT INTO datasets ({`names(dataset)`*}, search_description_text)
-   VALUES ({new_data*}, to_tsvector({new_data[['description']]}));", 
+  "INSERT INTO datasets ({`names(dataset)`*})
+   VALUES ({new_data*});", 
   .con = con)
 DBI::dbExecute(con, sql)
 ```
 
-Now, when we search for the term `data`, we find both the original and the
-new record:
+This new record will now be included in the search results for the term `data`,
+for example:
+
+```{r}
+# search the description field using its index
+term <- "data"
+sql <- glue_sql(
+  "SELECT id, name,
+    ts_headline(description, to_tsquery('english', {term}),
+     'StartSel = <,
+      StopSel = >,
+      MinWords = 5,
+      MaxWords = 7,
+      MaxFragments = 1')
+  FROM datasets
+  WHERE to_tsvector('english', description) @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+DBI::dbGetQuery(con, sql)
+```
+
+### Adding a tokenized field for full-text searches
+
+Alternatively, another option is to create a new column to hold the output of 
+the `to_tsvector()` function, and then to index it for future use. 
+Let's create a new column `search_description_text`:
+
+```{r}
+# create a column to hold tokens for full text search
+sql <- glue_sql(
+  "ALTER TABLE datasets
+   ADD COLUMN search_description_text tsvector;", 
+  .con = con)
+DBI::dbExecute(con, sql)
+DBI::dbListFields(con, "datasets")
+```
+
+Next, we tokenize the `descriptions` field, and store the output in our
+new `search_description_text` column:
+
+```{r}
+sql <- glue_sql(
+  "UPDATE datasets
+   SET search_description_text = to_tsvector('english', description);", 
+  .con = con)
+DBI::dbExecute(con, sql)
+```
+
+Here are the tokens generated from the `description` of the first record, for
+example:
+
+```{r}
+DBI::dbGetQuery(con, 
+                "SELECT name, search_description_text from datasets LIMIT 1;")
+```
+
+As before, we can add an index - but this time, we index the pre-tokenized
+`search_description_text` column instead:
+
+```{r}
+# create the search index
+sql <- glue_sql(
+  "CREATE INDEX search_description_idx
+   ON datasets
+   USING gin(search_description_text);",
+  .con = con)
+DBI::dbExecute(con, sql)
+```
+
+Time to run our search again. When we search the `search_description_text` 
+field, we can omit the `to_tsvector()` call, because its has been tokenized
+already:
 
 ```{r}
 # search the description field and show the matching location
@@ -308,10 +395,73 @@ sql <- glue_sql(
   WHERE search_description_text @@ to_tsquery('english', {term})
   ORDER BY created;",
   .con = con)
-res <- suppressMessages(DBI::dbSendStatement(con, sql))
-DBI::dbFetch(res)
-DBI::dbClearResult(res)
+DBI::dbGetQuery(con, sql)
 ```
+
+🚨 But _beware_: because we have precalculated the 
+tokens, any new records added to the database will _not_ automatically be 
+processed, nor will they be indexed!
+
+Let's add a final record, the `morely` dataset:
+
+```{r}
+more_data = list(
+  name = "morley", 
+  title = "The built-in morley dataset from the datasets R package",
+  description = gsub(
+    "\r?\n|\r", " ", 
+    "A classical data of Michelson (but not this one with Morley) on 
+measurements done in 1879 on the speed of light. The data consists of five 
+experiments, each consisting of 20 consecutive ‘runs’. The response is the speed
+of light measurement, suitably coded (km/sec, with 299000 subtracted).")
+)
+```
+
+To enter _this_ record, we not only have to populate the `name`, `title` and
+`description` fields - but also the list of tokens derived from the 
+`description` in the `search_description_text` column. In other words, we have
+to execute the `to_tsvector` function inside our `INSERT` statement:
+
+```{r}
+sql <- glue_sql(
+  "INSERT INTO datasets ({`names(dataset)`*}, search_description_text)
+   VALUES ({more_data*}, to_tsvector({more_data[['description']]}));", 
+  .con = con)
+DBI::dbExecute(con, sql)
+```
+
+Now, our query returns both the original matches and the new record:
+
+```{r}
+# search the description field and show the matching location
+term <- "data"
+sql <- glue_sql(
+  "SELECT id, name,
+  ts_headline(description, to_tsquery('english', {term}),
+     'StartSel = <,
+      StopSel = >,
+      MinWords = 5,
+      MaxWords = 7,
+      MaxFragments = 1')
+  FROM datasets
+  WHERE search_description_text @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+DBI::dbGetQuery(con, sql)
+```
+
+### Choosing between indexing strategies
+
+According to the
+[Postgres documentation](https://www.postgresql.org/docs/8.3/textsearch-tables.html):
+
+> One advantage of the separate-column approach over an expression index is that
+it is not necessary to explicitly specify the text search configuration in 
+queries in order to make use of the index. Another advantage is that searches 
+will be faster, since it will not be necessary to redo the to_tsvector calls to
+verify index matches. The expression-index approach is simpler to set up, 
+however, and it requires less disk space since the tsvector representation is 
+not stored explicitly.
 
 That's it. Thanks again to 
 [Anthony DeBarros'](https://www.wsj.com/news/author/anthony-debarros) 

@@ -319,37 +319,234 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </section>
-<section id="creating-a-tokenized-index-for-full-text-searches" class="level2">
-<h2 class="anchored" data-anchor-id="creating-a-tokenized-index-for-full-text-searches">Creating a tokenized index for full-text searches</h2>
-<p>My goal is to enable full-text search for the <code>description</code> field. First, we need to add a <code>tsvector</code> field and populate it with the tokenized contents of each <code>description</code>.</p>
+<section id="searching" class="level2">
+<h2 class="anchored" data-anchor-id="searching">Searching!</h2>
+<p>Our goal is to enable full-text search for the <code>description</code> field. Let’s look up the term <code>data</code>. To perform full-text search, both the records to search and our query need to be tokinzed first, with the <code>to_tsvector</code> and <code>to_tsquery</code> functions, respectively.</p>
+<p>Here is an example of the tokens that are generated:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a column to hold tokens for full text search</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ALTER TABLE datasets</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">   ADD COLUMN search_description_text tsvector;"</span>, </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(DBI<span class="sc">::</span><span class="fu">dbSendStatement</span>(con, sql))</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbClearResult</span>(res)</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbListFields</span>(con, <span class="st">"datasets"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT to_tsvector('This is a my test phrase, and what </span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="st">                       a beautiful phrase it is.')</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="st">   to_tsquery"</span>, <span class="at">con =</span> con)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                          to_tsquery
+1 'beauti':10 'phrase':6,11 'test':5</code></pre>
+</div>
+</div>
+<p>The following query correctly returns all records whose descriptions contain the word <code>data</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE to_tsvector(description) @@ to_tsquery('english', {term})</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id     name
+1  1   mtcars
+2  3 attitude</code></pre>
+</div>
+</div>
+<p>We can enrich the output by returning the output of the <code>ts_headline</code> function, highlighting the location / context of the the matched term:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field and show the matching location</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="st">    ts_headline(description, to_tsquery('english', {term}),</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE to_tsvector(description) @@ to_tsquery('english', {term})</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id     name                                            ts_headline
+1  1   mtcars               &lt;data&gt; was extracted from the 1974 Motor
+2  3 attitude financial organization, the &lt;data&gt; are aggregated from</code></pre>
+</div>
+</div>
+<p>We can also combine search terms, e.g.&nbsp;searching for either <code>employee</code> <em>or</em> <code>motor</code> terms:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using multiple search terms</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"employee | motor"</span>  <span class="co"># OR</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE to_tsvector(description) @@ to_tsquery('english', {term})</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id     name                                            ts_headline
+1  1   mtcars                from the 1974 &lt;Motor&gt; Trend US magazine
+2  3 attitude clerical &lt;employees&gt; of a large financial organization</code></pre>
+</div>
+</div>
+<p>Similarly, we can narrow our search by requiring both <code>data</code> <em>and</em> <code>employee</code> terms to appear in the same description:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data &amp; employee"</span>  <span class="co"># AND</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE to_tsvector(description) @@ to_tsquery('english', {term})</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id     name                                            ts_headline
+1  3 attitude clerical &lt;employees&gt; of a large financial organization</code></pre>
+</div>
+</div>
+</section>
+<section id="creating-indices" class="level2">
+<h2 class="anchored" data-anchor-id="creating-indices">Creating indices</h2>
+<p>In the examples above, we performed tokenization of the search term and the <code>description</code> field at run time, e.g.&nbsp;when the query was executed. As our database grows, this will soon become too cumbersome and degrade performance.</p>
+<p>Adding an index to our database will maintain full-text search speed even with large datasets. We have two different options:</p>
+<ol type="1">
+<li>Create an <a href="https://www.postgresql.org/docs/8.3/indexes-expressional.html">index based on an expression</a>.</li>
+<li>Create a new field to hold the output of the <code>to_tsvector</code> function, and then <a href="https://www.postgresql.org/docs/8.3/textsearch-tables.html">index this new field</a>.</li>
+</ol>
+<section id="creating-an-expression-index" class="level3">
+<h3 class="anchored" data-anchor-id="creating-an-expression-index">Creating an expression index</h3>
+<p>A simple way to create a full-text index is to include the <code>to_tsvector()</code> expression in the definition of the index itself. Here, we add a <a href="https://www.postgresql.org/docs/current/gin-intro.html#:~:text=GIN%20stands%20for%20Generalized%20Inverted,appear%20within%20the%20composite%20items.">Generalized Inverted Index (GIN)</a> index for the <code>description</code> column:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">=</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CREATE INDEX description_idx ON datasets </span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="st">  USING gin(to_tsvector('english', description));"</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">con =</span> con</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>The same type of query we issued above will now take advantage of the <code>description_idx</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field using its index</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"questioning"</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="st">    ts_headline(description, to_tsquery('english', {term}),</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE to_tsvector('english', description) @@ to_tsquery('english', {term})</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id     name                                       ts_headline
+1  3 attitude responses to seven &lt;questions&gt; in each department</code></pre>
+</div>
+</div>
+<p>The <code>description</code> fields of new records, e.g those that are added later, will automatically be added to the index. Let’s create a new record for the <code>euro</code> dataset, for example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"euro"</span>, </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"The built-in euro dataset from the datasets R package"</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">description =</span> <span class="fu">gsub</span>(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\r</span><span class="st">?</span><span class="sc">\n</span><span class="st">|</span><span class="sc">\r</span><span class="st">"</span>, <span class="st">" "</span>, </span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The data set euro contains the value of 1 Euro in all currencies</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="st">participating in the European monetary union (Austrian Schilling ATS, </span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="st">Belgian Franc BEF, German Mark DEM, Spanish Peseta ESP, Finnish Markka FIM, </span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="st">French Franc FRF, Irish Punt IEP, Italian Lira ITL, Luxembourg Franc LUF, </span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="st">Dutch Guilder NLG and Portuguese Escudo PTE). These conversion rates were </span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="st">fixed by the European Union on December 31, 1998. To convert old prices to </span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="st">Euro prices, divide by the respective rate and round to 2 digits."</span>)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"INSERT INTO datasets ({`names(dataset)`*})</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="st">   VALUES ({new_data*});"</span>, </span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1</code></pre>
+</div>
+</div>
+<p>This new record will now be included in the search results for the term <code>data</code>, for example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field using its index</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data"</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="st">    ts_headline(description, to_tsquery('english', {term}),</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE to_tsvector('english', description) @@ to_tsquery('english', {term})</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id     name                                            ts_headline
+1  1   mtcars               &lt;data&gt; was extracted from the 1974 Motor
+2  3 attitude financial organization, the &lt;data&gt; are aggregated from
+3  4     euro                     &lt;data&gt; set euro contains the value</code></pre>
+</div>
+</div>
+</section>
+<section id="adding-a-tokenized-field-for-full-text-searches" class="level3">
+<h3 class="anchored" data-anchor-id="adding-a-tokenized-field-for-full-text-searches">Adding a tokenized field for full-text searches</h3>
+<p>Alternatively, another option is to create a new column to hold the output of the <code>to_tsvector()</code> function, and then to index it for future use. Let’s create a new column <code>search_description_text</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a column to hold tokens for full text search</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ALTER TABLE datasets</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="st">   ADD COLUMN search_description_text tsvector;"</span>, </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbListFields</span>(con, <span class="st">"datasets"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "id"                      "name"                   
 [3] "title"                   "description"            
 [5] "created"                 "search_description_text"</code></pre>
 </div>
 </div>
-<p>At this point, the <code>search_description_text</code> field is still empty. Let’s copy the <code>descriptions</code> into it - and tokenize them at the same time. For illustration, we retrieve the tokens for the first dataset:</p>
+<p>Next, we tokenize the <code>descriptions</code> field, and store the output in our new <code>search_description_text</code> column:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># copy the description into search tokens</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"UPDATE datasets</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="st">   SET search_description_text = to_tsvector('english', description);"</span>, </span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"UPDATE datasets</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="st">   SET search_description_text = to_tsvector('english', description);"</span>, </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 3</code></pre>
+<pre><code>[1] 4</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                <span class="st">"SELECT name, search_description_text from datasets LIMIT 1;"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here are the tokens generated from the <code>description</code> of the first record, for example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                <span class="st">"SELECT name, search_description_text from datasets LIMIT 1;"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    name
 1 mtcars
@@ -357,158 +554,108 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 1 '10':17 '1973':27 '1974':7 '32':25 '74':28 'aspect':18 'automobil':20,26 'compris':13 'consumpt':15 'data':2 'design':21 'extract':4 'fuel':14 'magazin':11 'model':29 'motor':8 'perform':23 'trend':9 'us':10</code></pre>
 </div>
 </div>
-<p>To speed up the full-text search, we add a <a href="https://www.postgresql.org/docs/current/gin-intro.html#:~:text=GIN%20stands%20for%20Generalized%20Inverted,appear%20within%20the%20composite%20items.">Generalized Inverted Index (GIN)</a> index for the <code>search_description_text</code> column as well:</p>
+<p>As before, we can add an index - but this time, we index the pre-tokenized <code>search_description_text</code> column instead:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create the search index</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CREATE INDEX search_description_idx</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">   ON datasets</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">   USING gin(search_description_text);"</span>,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create the search index</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CREATE INDEX search_description_idx</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="st">   ON datasets</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="st">   USING gin(search_description_text);"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
 </div>
-</section>
-<section id="searching" class="level2">
-<h2 class="anchored" data-anchor-id="searching">Searching!</h2>
-<p>Now we are ready to perform our first search. Let’s look up the term <code>data</code> in the <code>description</code> fields. (The <code>ts_headline</code> command returns the location of the match, e.g.&nbsp;the context it was found in.)</p>
+<p>Time to run our search again. When we search the <code>search_description_text</code> field, we can omit the <code>to_tsvector()</code> call, because its has been tokenized already:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field and show the matching location</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data"</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE search_description_text @@ to_tsquery('english', {term})</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(DBI<span class="sc">::</span><span class="fu">dbSendStatement</span>(con, sql))</span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbFetch</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  id     name                                            ts_headline
-1  1   mtcars               &lt;data&gt; was extracted from the 1974 Motor
-2  3 attitude financial organization, the &lt;data&gt; are aggregated from</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbClearResult</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>We can also combine search terms, e.g.&nbsp;searching for either <code>employee</code> <em>or</em> <code>motor</code> terms:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># using multiple search terms</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"employee | motor"</span>  <span class="co"># OR</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE search_description_text @@ to_tsquery('english', {term})</span></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(DBI<span class="sc">::</span><span class="fu">dbSendStatement</span>(con, sql))</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbFetch</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  id     name                                            ts_headline
-1  1   mtcars                from the 1974 &lt;Motor&gt; Trend US magazine
-2  3 attitude clerical &lt;employees&gt; of a large financial organization</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbClearResult</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Similarly, we can narrow our search by requiring both <code>data</code> <em>and</em> <code>employee</code> terms to appear in the same description:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data &amp; employee"</span>  <span class="co"># AND</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE search_description_text @@ to_tsquery('english', {term})</span></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(DBI<span class="sc">::</span><span class="fu">dbSendStatement</span>(con, sql))</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbFetch</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  id     name                                            ts_headline
-1  3 attitude clerical &lt;employees&gt; of a large financial organization</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbClearResult</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="adding-new-entries" class="level2">
-<h2 class="anchored" data-anchor-id="adding-new-entries">Adding new entries</h2>
-<p>We have successfully indexed and searched the existing three entries in our database. But what if we add new information? Let’s create a new record for the <code>euro</code> dataset.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"euro"</span>, </span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"The built-in euro dataset from the datasets R package"</span>,</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">description =</span> <span class="fu">gsub</span>(</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\r</span><span class="st">?</span><span class="sc">\n</span><span class="st">|</span><span class="sc">\r</span><span class="st">"</span>, <span class="st">" "</span>, </span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"The data set euro contains the value of 1 Euro in all currencies</span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="st">participating in the European monetary union (Austrian Schilling ATS, </span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="st">Belgian Franc BEF, German Mark DEM, Spanish Peseta ESP, Finnish Markka FIM, </span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="st">French Franc FRF, Irish Punt IEP, Italian Lira ITL, Luxembourg Franc LUF, </span></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="st">Dutch Guilder NLG and Portuguese Escudo PTE). These conversion rates were </span></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="st">fixed by the European Union on December 31, 1998. To convert old prices to </span></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="st">Euro prices, divide by the respective rate and round to 2 digits."</span>)</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>To enter this record, we not only have to populate the <code>name</code>, <code>title</code> and <code>description</code> fields - but also the list of tokens derived from the <code>description</code> in the <code>search_description_text</code> column. In other words, we have to execute the <code>to_tsvector</code> function inside our <code>INSERT</code> statement:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"INSERT INTO datasets ({`names(dataset)`*}, search_description_text)</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="st">   VALUES ({new_data*}, to_tsvector({new_data[['description']]}));"</span>, </span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1</code></pre>
-</div>
-</div>
-<p>Now, when we search for the term <code>data</code>, we find both the original and the new record:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field and show the matching location</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data"</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE search_description_text @@ to_tsquery('english', {term})</span></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(DBI<span class="sc">::</span><span class="fu">dbSendStatement</span>(con, sql))</span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbFetch</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field and show the matching location</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data"</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE search_description_text @@ to_tsquery('english', {term})</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  id     name                                            ts_headline
 1  1   mtcars               &lt;data&gt; was extracted from the 1974 Motor
 2  3 attitude financial organization, the &lt;data&gt; are aggregated from
 3  4     euro                     &lt;data&gt; set euro contains the value</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbClearResult</span>(res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>🚨 But <em>beware</em>: because we have precalculated the tokens, any new records added to the database will <em>not</em> automatically be processed, nor will they be indexed!</p>
+<p>Let’s add a final record, the <code>morely</code> dataset:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>more_data <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"morley"</span>, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"The built-in morley dataset from the datasets R package"</span>,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">description =</span> <span class="fu">gsub</span>(</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\r</span><span class="st">?</span><span class="sc">\n</span><span class="st">|</span><span class="sc">\r</span><span class="st">"</span>, <span class="st">" "</span>, </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"A classical data of Michelson (but not this one with Morley) on </span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a><span class="st">measurements done in 1879 on the speed of light. The data consists of five </span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a><span class="st">experiments, each consisting of 20 consecutive ‘runs’. The response is the speed</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="st">of light measurement, suitably coded (km/sec, with 299000 subtracted)."</span>)</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To enter <em>this</em> record, we not only have to populate the <code>name</code>, <code>title</code> and <code>description</code> fields - but also the list of tokens derived from the <code>description</code> in the <code>search_description_text</code> column. In other words, we have to execute the <code>to_tsvector</code> function inside our <code>INSERT</code> statement:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"INSERT INTO datasets ({`names(dataset)`*}, search_description_text)</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="st">   VALUES ({more_data*}, to_tsvector({more_data[['description']]}));"</span>, </span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbExecute</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1</code></pre>
+</div>
+</div>
+<p>Now, our query returns both the original matches and the new record:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># search the description field and show the matching location</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>term <span class="ot">&lt;-</span> <span class="st">"data"</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>sql <span class="ot">&lt;-</span> <span class="fu">glue_sql</span>(</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"SELECT id, name,</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="st">  ts_headline(description, to_tsquery('english', {term}),</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="st">     'StartSel = &lt;,</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="st">      StopSel = &gt;,</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="st">      MinWords = 5,</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxWords = 7,</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="st">      MaxFragments = 1')</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM datasets</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE search_description_text @@ to_tsquery('english', {term})</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY created;"</span>,</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">.con =</span> con)</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(con, sql)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id     name                                            ts_headline
+1  1   mtcars               &lt;data&gt; was extracted from the 1974 Motor
+2  3 attitude financial organization, the &lt;data&gt; are aggregated from
+3  4     euro                     &lt;data&gt; set euro contains the value
+4  5   morley            classical &lt;data&gt; of Michelson (but not this</code></pre>
+</div>
+</div>
+</section>
+<section id="choosing-between-indexing-strategies" class="level3">
+<h3 class="anchored" data-anchor-id="choosing-between-indexing-strategies">Choosing between indexing strategies</h3>
+<p>According to the <a href="https://www.postgresql.org/docs/8.3/textsearch-tables.html">Postgres documentation</a>:</p>
+<blockquote class="blockquote">
+<p>One advantage of the separate-column approach over an expression index is that it is not necessary to explicitly specify the text search configuration in queries in order to make use of the index. Another advantage is that searches will be faster, since it will not be necessary to redo the to_tsvector calls to verify index matches. The expression-index approach is simpler to set up, however, and it requires less disk space since the tsvector representation is not stored explicitly.</p>
+</blockquote>
 <p>That’s it. Thanks again to <a href="https://www.wsj.com/news/author/anthony-debarros">Anthony DeBarros’</a> for his excellent introduction to <a href="https://nostarch.com/practical-sql-2nd-edition">Practical SQL</a>!</p>
+</section>
 </section>
 <section id="reproducibility" class="level2">
 <h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
 <details>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>─ Session info ───────────────────────────────────────────────────────────────
  setting  value

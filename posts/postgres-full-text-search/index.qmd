@@ -37,6 +37,7 @@ passing it the `RPostgres::Postgres()` driver.
 library(DBI)
 library(glue)
 library(RPostgres)
+library(sessioninfo)
 
 # Connect to a (prexisting) postgres database called `full_text_search`
 con <- DBI::dbConnect(
@@ -252,3 +253,9 @@ That's it. Thanks again to
 [Anthony DeBarros'](https://www.wsj.com/news/author/anthony-debarros) 
 for his excellent introduction to 
 [Practical SQL](https://nostarch.com/practical-sql-2nd-edition)!
+
+<details>
+```{r}
+sessioninfo::session_info()
+```
+</details>

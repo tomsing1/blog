@@ -1,0 +1,254 @@
+---
+title: "Full text search in Postgres - the R way"
+author: "Thomas Sandmann"
+date: "2022-12-12"
+freeze: true
+categories: [TIL, R, postgres]
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+I have been learning how to organize, search and modify data in a 
+[Postgres](https://www.postgresql.org/) 
+database by working through 
+[Anthony DeBarros'](https://www.wsj.com/news/author/anthony-debarros) 
+excellent book 
+[Practical SQL](https://nostarch.com/practical-sql-2nd-edition).
+
+Because I currently perform most of my data analyses in R, I am using the 
+great 
+[RPostgres](https://cran.r-project.org/package=RPostgres),
+[DBI](https://cran.r-project.org/package=DBI)
+and
+[glue](https://cran.r-project.org/package=glue)
+packages to interface with Postgres - without ever leaving my R session. 
+
+Today I learned how to create a full text search index and how to search it
+with one or more search terms.
+
+## Connecting to Postgres
+
+For this example, I created a toy database `full_text_search` in my local
+Postgres server. I connect to it with the `DBI::dbConnect` command, and by 
+passing it the `RPostgres::Postgres()` driver.
+
+```{r}
+library(DBI)
+library(glue)
+library(RPostgres)
+
+# Connect to a (prexisting) postgres database called `full_text_search`
+con <- DBI::dbConnect(
+  dbname = "full_text_search",
+  drv = RPostgres::Postgres(),
+  host = "localhost",
+  port = 5432L,
+  user = "postgres"
+  )
+```
+
+Because this is a toy example, I start with a fresh table `datasets`. (In case
+it already exists from previous experimentation, I drop the table if necessary).
+
+Let's define four fields for the table:
+
+- `id`: the unique identifier
+- `name`: the short name of each entry
+- `title`: a longer title
+- `description`: a paragraph describing the entry
+- `created`: a date and time the entry was added to the database 
+
+```{r}
+# drop the `datasets` table if it already exists
+if (DBI::dbExistsTable(con, "datasets")) DBI::dbRemoveTable(con, "datasets")
+
+# create the empty `datasets` table
+sql <- glue_sql("
+      CREATE TABLE IF NOT EXISTS datasets (
+      id bigserial PRIMARY KEY,
+      name text,
+      title text,
+      description text,
+      created timestamp with time zone default current_timestamp not null
+    );", .con = con)
+res <- suppressMessages(DBI::dbSendStatement(con, sql))
+DBI::dbClearResult(res)
+DBI::dbReadTable(con, "datasets")
+```
+
+Initially, our new database is empty. Let's populate them with three entries,
+each describing a popular dataset shipped with R's built-in
+[datasets](https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/00Index.html)
+package.
+
+```{r}
+# some example entries
+buildin_datasets <- list(
+  mtcars = list(
+    "name" = "mtcars", 
+    "title" = "The built-in mtcars dataset from the datasets R package.",
+    "description" = gsub(
+      "\r?\n|\r", " ", 
+      "The data was extracted from the 1974 Motor Trend US magazine, and 
+comprises fuel consumption and 10 aspects of automobile design and
+performance for 32 automobiles (1973–74 models).")
+  ), 
+  airmiles = list(
+    name = "airmiles",
+    title = "The built-in airmiles dataset from the datasets R package",
+    description = gsub(
+      "\r?\n|\r", " ", 
+      "The revenue passenger miles flown by commercial airlines in the United
+States for each year from 1937 to 1960.")
+  ),
+  attitude = list(
+    name = "attitude", 
+    title = "The built-in attitude dataset from the datasets R package",
+    description = gsub(
+      "\r?\n|\r", " ", 
+      "From a survey of the clerical employees of a large financial
+organization, the data are aggregated from the questionnaires of the
+approximately 35 employees for each of 30 (randomly selected) departments. 
+The numbers give the percent proportion of favourable responses to seven
+questions in each department.")
+  )
+)
+```
+
+Next, we loop over each element of the list and use the `glue_sql()` command
+to unpack both the names (`names(dataset)`) and the values of each field for 
+this entry. Then we update the `datasets` table with this new information.
+
+Afterward, we retrieve the `name` and `title` fields to verify the
+correct import:
+
+```{r}
+for (dataset in buildin_datasets) {
+  sql <- glue_sql(
+    "INSERT INTO datasets ({`names(dataset)`*})
+   VALUES ({dataset*});", 
+    .con = con)
+  res <- suppressMessages(DBI::dbSendStatement(con, sql))
+  DBI::dbClearResult(res)
+}
+DBI::dbGetQuery(con, "SELECT name, title from datasets;")
+```
+
+My goal is to enable full-text search for the `description` field. First, we 
+need to add a `tsvector` field and populate it with the tokenized contents 
+of each `description`.
+
+```{r}
+# create a column to hold tokens for full text search
+sql <- glue_sql(
+  "ALTER TABLE datasets
+   ADD COLUMN search_description_text tsvector;", 
+  .con = con)
+res <- suppressMessages(DBI::dbSendStatement(con, sql))
+DBI::dbClearResult(res)
+DBI::dbListFields(con, "datasets")
+```
+
+At this point, the `search_description_text` field is still empty. Let's 
+copy the `descriptions` into it - and tokenize them at the same time. For 
+illustration, we retrieve the tokens for the first dataset:
+
+```{r}
+# copy the description into search tokens
+sql <- glue_sql(
+  "UPDATE datasets
+   SET search_description_text = to_tsvector('english', description);", 
+  .con = con)
+DBI::dbExecute(con, sql)
+DBI::dbGetQuery(con, 
+                "SELECT name, search_description_text from datasets LIMIT 1;")
+```
+
+To speed up the full-text search, we add a
+[Generalized Inverted Index (GIN)](https://www.postgresql.org/docs/current/gin-intro.html#:~:text=GIN%20stands%20for%20Generalized%20Inverted,appear%20within%20the%20composite%20items.)
+index for the `search_description_text` column as well:
+
+```{r}
+# create the search index
+sql <- glue_sql(
+  "CREATE INDEX search_description_idx
+   ON datasets
+   USING gin(search_description_text);",
+  .con = con)
+DBI::dbExecute(con, sql)
+```
+
+Now we are ready to perform our first search. Let's look up the term `data` in
+the `description` fields. (The `ts_headline` command returns the location of the
+match, e.g. the context it was found in.)
+
+```{r}
+# search the description field and show the matching location
+term <- "data"
+sql <- glue_sql(
+  "SELECT id, name,
+  ts_headline(description, to_tsquery('english', {term}),
+     'StartSel = <,
+      StopSel = >,
+      MinWords = 5,
+      MaxWords = 7,
+      MaxFragments = 1')
+  FROM datasets
+  WHERE search_description_text @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+res <- suppressMessages(DBI::dbSendStatement(con, sql))
+DBI::dbFetch(res)
+DBI::dbClearResult(res)
+```
+
+We can also combine search terms, e.g. searching for either `employee` _or_ 
+`motor` terms:
+
+```{r}
+# using multiple search terms
+term <- "employee | motor"  # OR
+sql <- glue_sql(
+  "SELECT id, name,
+  ts_headline(description, to_tsquery('english', {term}),
+     'StartSel = <,
+      StopSel = >,
+      MinWords = 5,
+      MaxWords = 7,
+      MaxFragments = 1')
+  FROM datasets
+  WHERE search_description_text @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+res <- suppressMessages(DBI::dbSendStatement(con, sql))
+DBI::dbFetch(res)
+DBI::dbClearResult(res)
+```
+
+Similarly, we can narrow our search by requiring both `data` _and_ `employee`
+terms to appear in the same description:
+
+```{r}
+term <- "data & employee"  # AND
+sql <- glue_sql(
+  "SELECT id, name,
+  ts_headline(description, to_tsquery('english', {term}),
+     'StartSel = <,
+      StopSel = >,
+      MinWords = 5,
+      MaxWords = 7,
+      MaxFragments = 1')
+  FROM datasets
+  WHERE search_description_text @@ to_tsquery('english', {term})
+  ORDER BY created;",
+  .con = con)
+res <- suppressMessages(DBI::dbSendStatement(con, sql))
+DBI::dbFetch(res)
+DBI::dbClearResult(res)
+```
+
+That's it. Thanks again to 
+[Anthony DeBarros'](https://www.wsj.com/news/author/anthony-debarros) 
+for his excellent introduction to 
+[Practical SQL](https://nostarch.com/practical-sql-2nd-edition)!

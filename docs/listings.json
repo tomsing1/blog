@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/postgres-full-text-search/index.html",
       "/posts/r-update-with-rig/index.html",
       "/posts/conda-speedup/index.html",
       "/posts/rslist-r-package/index.html",

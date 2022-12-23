@@ -1,0 +1,186 @@
+---
+title: "Figure size, layout & tabsets with Quarto"
+author: "Thomas Sandmann"
+date: "2022-12-22"
+freeze: true
+categories: [TIL, R, quarto]
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+In this document, I am experimenting with various attributes
+that organize the layout, size and placement of figures of
+Quarto document. For more details, please check out the
+[official documentation](https://quarto.org/docs/guide/),
+especially the topics on 
+[figures](https://quarto.org/docs/authoring/figures.html)
+and
+[article layout](https://quarto.org/docs/authoring/article-layout.html).
+
+::: {.callout-note}
+
+For illustration, I am displaying both the code that generates 
+a simple plot as well as the attributes that determine how
+it is rendered, e.g. the `:::` tags interspersed with the
+code blocks, and the `#|` attributes within individual
+code cells. See the documentation on 
+[executable blocks](https://quarto.org/docs/output-formats/html-code.html#executable-blocks)
+for details.
+:::
+
+First, let's generate a simple plot, so we can see the effect of different
+attributes on how it is rendered in subsequent code cells.
+
+To start, we render the output without specifying any custom attributes, e.g.
+using the default settings for this Quarto website:
+
+```{r}
+library(ggplot2)
+theme_set(theme_linedraw(base_size = 14))
+p <- ggplot(mtcars, aes(x = mpg, y = drat)) + 
+  geom_point(color = "skyblue", size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", formula = 'y ~ x', se = FALSE) +
+  theme(panel.grid = element_blank())
+p
+```
+
+### Width and height of individual figures
+
+The `fig-width` and `fig-height` attributes specify the 
+dimensions of the image file that is generated. The `out-width` attribute determines the size at which that
+image is displayed in the rendered HTML page.
+
+```
+#| fig-width: 4
+#| figh-height: 5
+#| out-width: "50%"
+#| fig-align: "center"
+```
+
+```{r}
+#| fig-width: 4
+#| figh-height: 5
+#| out-width: "50%"
+#| fig-align: "center"
+p
+```
+
+For example, the same image can be displayed at 50% of the
+width of the enclosing `<div>`.
+
+```
+#| fig-width: 4
+#| figh-height: 5
+#| out-width: "25%"
+#| fig-align: "center"
+```
+
+```{r}
+#| fig-width: 4
+#| figh-height: 5
+#| out-width: "25%"
+#| fig-align: "center"
+p
+```
+
+### Layout: columns and rows
+
+The `layout-ncol` and `layout-nrow` attributes govern the placement 
+of multiple figures within the same element. For example, we
+can place two figures next to each other, in two column. 
+
+The `fig-align` attributes specify the figure alignment within each column. 
+
+::: {.callout-tip}
+The `out-width` attribute is always relative to its
+enclosing element, e.g. here `out-width: "50%"` refers to
+half of the width of a *column*, not the page width. 
+:::
+
+```
+::: {layout-ncol=2}
+```
+
+::: {layout-ncol=2}
+
+```
+#| out-width: "50%"
+#| fig-align: "center"
+```
+
+```
+#| out-width: "30%"
+#| fig-align: "right"
+```
+
+```{r}
+#| out-width: "50%"
+#| fig-align: "center"
+p
+```
+
+
+```{r}
+#| out-width: "30%"
+#| fig-align: "right"
+p
+```
+
+:::
+
+```
+:::
+```
+
+### Tabsets
+
+[Tabsets](https://bookdown.org/yihui/rmarkdown-cookbook/html-tabs.html) 
+can be used to organize contents, e.g. by hiding content
+until the other clicks on the tab's header.
+
+The layout of the first tabset contains just one column and 
+row. 
+
+```
+::: {.panel-tabset}
+```
+
+::: {.panel-tabset}
+
+### panel 1
+
+```{r}
+#| out-width: "50%"
+#| fig-align: "center"
+p
+```
+
+### panel 2
+
+The second panel is subdivided into two columns. (Note the 
+use of the `::::` tag, nested within the `:::` parent tag.)
+
+```
+:::: {layout-ncol=2}
+```
+:::: {layout-ncol=2}
+
+```{r}
+p
+```
+
+```{r}
+p
+```
+
+```
+::::
+```
+
+::::
+:::
+
+```
+:::
+```

@@ -2,11 +2,11 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/quarto-figure-size-and-layout/index.html",
       "/posts/postgres-full-text-search/index.html",
       "/posts/r-update-with-rig/index.html",
       "/posts/conda-speedup/index.html",
       "/posts/rslist-r-package/index.html",
-      "/posts/2022-normconf/index.html",
       "/posts/custom-badges/index.html",
       "/posts/nextflow-blast-tutorial/index.html",
       "/posts/python-hints/index.html",

@@ -1,0 +1,16 @@
+---
+title: "ggnewscale"
+---
+
+```{r}
+library(ggplot2)
+library(ggnewscale)
+```
+
+```{r}
+p <- ggplot(mtcars, aes(x = drat, y = mpg, group = cyl)) +
+  geom_point(aes(color = factor(gear)), size = 2, alpha = 0.8) + 
+  ggnewscale::new_scale_color() +
+  geom_line(aes(color = factor(cyl)))
+print(p)
+```

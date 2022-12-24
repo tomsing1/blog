@@ -159,7 +159,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/thomas_sandmann"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann"><i class="bi bi-mastodon" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -423,17 +423,17 @@ Tip
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<p><img src="index_files/figure-html/upset-1.png" class="img-fluid figure-img" style="width:75.0%"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Each column of the main plot shows the number of genes that are unique to the intersection of the two (or three) indicated comparisons, matching those in the previous Venn diagram.</p>
 <p>For a small number of sets, a Venn diagram might be the preferred e.g.&nbsp;because readers might be familiar this visualization. But an UpSet plot is well suited for the analysis more than three sets. (See <a href="https://upset.app/">more examples here</a> ).</p>
-</section>
-<section id="reproducibility" class="level2">
-<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
 <details>
+<summary>
+Reproducibility
+</summary>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>─ Session info ───────────────────────────────────────────────────────────────
@@ -957,83 +957,81 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb16-255"><a href="#cb16-255" aria-hidden="true" tabindex="-1"></a>functions. Here, we plot the intersections in the main plot, and then add the</span>
 <span id="cb16-256"><a href="#cb16-256" aria-hidden="true" tabindex="-1"></a>size of the individual sets on the right-hand margin.</span>
 <span id="cb16-257"><a href="#cb16-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6</span></span>
-<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3 </span></span>
-<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a><span class="co">#| out-width: "75%"</span></span>
-<span id="cb16-264"><a href="#cb16-264" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: "center"</span></span>
-<span id="cb16-265"><a href="#cb16-265" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">&lt;-</span> <span class="fu">UpSet</span>(m, </span>
-<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a>      <span class="at">set_order =</span> <span class="fu">colnames</span>(m), </span>
-<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a>      <span class="at">comb_order =</span> <span class="fu">order</span>(<span class="fu">comb_degree</span>(m)),</span>
-<span id="cb16-268"><a href="#cb16-268" aria-hidden="true" tabindex="-1"></a>      <span class="at">top_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
-<span id="cb16-269"><a href="#cb16-269" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Distinct diff. genes"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
-<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a>          cs, </span>
-<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(cs)<span class="sc">*</span><span class="fl">1.1</span>),</span>
-<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
-<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a>          <span class="at">height =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
-<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a>        ), </span>
-<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_side =</span> <span class="st">"left"</span>, </span>
-<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_rot =</span> <span class="dv">90</span>),</span>
-<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a>      <span class="at">right_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
-<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a>        <span class="at">which =</span> <span class="st">"row"</span>,</span>
-<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Total"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
-<span id="cb16-281"><a href="#cb16-281" aria-hidden="true" tabindex="-1"></a>          ss, </span>
-<span id="cb16-282"><a href="#cb16-282" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(ss)<span class="sc">*</span><span class="fl">1.1</span>),</span>
-<span id="cb16-283"><a href="#cb16-283" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
-<span id="cb16-284"><a href="#cb16-284" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
-<span id="cb16-285"><a href="#cb16-285" aria-hidden="true" tabindex="-1"></a>          <span class="at">width =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
-<span id="cb16-286"><a href="#cb16-286" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb16-287"><a href="#cb16-287" aria-hidden="true" tabindex="-1"></a>      ),</span>
-<span id="cb16-288"><a href="#cb16-288" aria-hidden="true" tabindex="-1"></a>      <span class="at">column_title =</span> <span class="st">"Intersection between contrasts"</span></span>
-<span id="cb16-289"><a href="#cb16-289" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-290"><a href="#cb16-290" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">=</span> <span class="fu">draw</span>(ht)</span>
-<span id="cb16-291"><a href="#cb16-291" aria-hidden="true" tabindex="-1"></a>od <span class="ot">=</span> <span class="fu">column_order</span>(ht)</span>
-<span id="cb16-292"><a href="#cb16-292" aria-hidden="true" tabindex="-1"></a>rod <span class="ot">=</span> <span class="fu">row_order</span>(ht)</span>
-<span id="cb16-293"><a href="#cb16-293" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Distinct diff. genes"</span>, {</span>
-<span id="cb16-294"><a href="#cb16-294" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(cs[od], </span>
-<span id="cb16-295"><a href="#cb16-295" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">seq_along</span>(cs), </span>
-<span id="cb16-296"><a href="#cb16-296" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">unit</span>(cs[od], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">2</span>, <span class="st">"pt"</span>), </span>
-<span id="cb16-297"><a href="#cb16-297" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), </span>
-<span id="cb16-298"><a href="#cb16-298" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>), <span class="at">rot =</span> <span class="dv">45</span>)</span>
-<span id="cb16-299"><a href="#cb16-299" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb16-300"><a href="#cb16-300" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Total"</span>, {</span>
-<span id="cb16-301"><a href="#cb16-301" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(ss[rod], </span>
-<span id="cb16-302"><a href="#cb16-302" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">unit</span>(ss[rod], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">20</span>, <span class="st">"pt"</span>), </span>
-<span id="cb16-303"><a href="#cb16-303" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">rev</span>(<span class="fu">seq_along</span>(ss)), </span>
-<span id="cb16-304"><a href="#cb16-304" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>), </span>
-<span id="cb16-305"><a href="#cb16-305" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>))</span>
-<span id="cb16-306"><a href="#cb16-306" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb16-307"><a href="#cb16-307" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb16-308"><a href="#cb16-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-309"><a href="#cb16-309" aria-hidden="true" tabindex="-1"></a>Each column of the main plot shows the number of genes that are unique to the</span>
-<span id="cb16-310"><a href="#cb16-310" aria-hidden="true" tabindex="-1"></a>intersection of the two (or three) indicated comparisons, matching those in the</span>
-<span id="cb16-311"><a href="#cb16-311" aria-hidden="true" tabindex="-1"></a>previous Venn diagram. </span>
-<span id="cb16-312"><a href="#cb16-312" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-313"><a href="#cb16-313" aria-hidden="true" tabindex="-1"></a>For a small number of sets, a Venn diagram might be the preferred e.g. because</span>
-<span id="cb16-314"><a href="#cb16-314" aria-hidden="true" tabindex="-1"></a>readers might be familiar this visualization. But an UpSet plot </span>
-<span id="cb16-315"><a href="#cb16-315" aria-hidden="true" tabindex="-1"></a>is well suited for the analysis more than three sets. (See </span>
-<span id="cb16-316"><a href="#cb16-316" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">more examples here</span><span class="co">](https://upset.app/)</span></span>
-<span id="cb16-317"><a href="#cb16-317" aria-hidden="true" tabindex="-1"></a>).</span>
-<span id="cb16-318"><a href="#cb16-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-319"><a href="#cb16-319" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducibility</span></span>
-<span id="cb16-320"><a href="#cb16-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-321"><a href="#cb16-321" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
-<span id="cb16-322"><a href="#cb16-322" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-323"><a href="#cb16-323" aria-hidden="true" tabindex="-1"></a><span class="in">```{r sessioninfo}</span></span>
-<span id="cb16-324"><a href="#cb16-324" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb16-325"><a href="#cb16-325" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
-<span id="cb16-326"><a href="#cb16-326" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-258"><a href="#cb16-258" aria-hidden="true" tabindex="-1"></a><span class="in">```{r upset}</span></span>
+<span id="cb16-259"><a href="#cb16-259" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6</span></span>
+<span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3 </span></span>
+<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a><span class="co">#| out-width: "75%"</span></span>
+<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: "center"</span></span>
+<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">&lt;-</span> <span class="fu">UpSet</span>(m, </span>
+<span id="cb16-264"><a href="#cb16-264" aria-hidden="true" tabindex="-1"></a>      <span class="at">set_order =</span> <span class="fu">colnames</span>(m), </span>
+<span id="cb16-265"><a href="#cb16-265" aria-hidden="true" tabindex="-1"></a>      <span class="at">comb_order =</span> <span class="fu">order</span>(<span class="fu">comb_degree</span>(m)),</span>
+<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a>      <span class="at">top_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
+<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Distinct diff. genes"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
+<span id="cb16-268"><a href="#cb16-268" aria-hidden="true" tabindex="-1"></a>          cs, </span>
+<span id="cb16-269"><a href="#cb16-269" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(cs)<span class="sc">*</span><span class="fl">1.1</span>),</span>
+<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
+<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a>          <span class="at">height =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
+<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a>        ), </span>
+<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_side =</span> <span class="st">"left"</span>, </span>
+<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_rot =</span> <span class="dv">90</span>),</span>
+<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a>      <span class="at">right_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
+<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a>        <span class="at">which =</span> <span class="st">"row"</span>,</span>
+<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Total"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
+<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a>          ss, </span>
+<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(ss)<span class="sc">*</span><span class="fl">1.1</span>),</span>
+<span id="cb16-281"><a href="#cb16-281" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb16-282"><a href="#cb16-282" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
+<span id="cb16-283"><a href="#cb16-283" aria-hidden="true" tabindex="-1"></a>          <span class="at">width =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
+<span id="cb16-284"><a href="#cb16-284" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb16-285"><a href="#cb16-285" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb16-286"><a href="#cb16-286" aria-hidden="true" tabindex="-1"></a>      <span class="at">column_title =</span> <span class="st">"Intersection between contrasts"</span></span>
+<span id="cb16-287"><a href="#cb16-287" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-288"><a href="#cb16-288" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">=</span> <span class="fu">draw</span>(ht)</span>
+<span id="cb16-289"><a href="#cb16-289" aria-hidden="true" tabindex="-1"></a>od <span class="ot">=</span> <span class="fu">column_order</span>(ht)</span>
+<span id="cb16-290"><a href="#cb16-290" aria-hidden="true" tabindex="-1"></a>rod <span class="ot">=</span> <span class="fu">row_order</span>(ht)</span>
+<span id="cb16-291"><a href="#cb16-291" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Distinct diff. genes"</span>, {</span>
+<span id="cb16-292"><a href="#cb16-292" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(cs[od], </span>
+<span id="cb16-293"><a href="#cb16-293" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">seq_along</span>(cs), </span>
+<span id="cb16-294"><a href="#cb16-294" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">unit</span>(cs[od], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">2</span>, <span class="st">"pt"</span>), </span>
+<span id="cb16-295"><a href="#cb16-295" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), </span>
+<span id="cb16-296"><a href="#cb16-296" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>), <span class="at">rot =</span> <span class="dv">45</span>)</span>
+<span id="cb16-297"><a href="#cb16-297" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb16-298"><a href="#cb16-298" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Total"</span>, {</span>
+<span id="cb16-299"><a href="#cb16-299" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(ss[rod], </span>
+<span id="cb16-300"><a href="#cb16-300" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">unit</span>(ss[rod], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">20</span>, <span class="st">"pt"</span>), </span>
+<span id="cb16-301"><a href="#cb16-301" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">rev</span>(<span class="fu">seq_along</span>(ss)), </span>
+<span id="cb16-302"><a href="#cb16-302" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>), </span>
+<span id="cb16-303"><a href="#cb16-303" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>))</span>
+<span id="cb16-304"><a href="#cb16-304" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb16-305"><a href="#cb16-305" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-306"><a href="#cb16-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-307"><a href="#cb16-307" aria-hidden="true" tabindex="-1"></a>Each column of the main plot shows the number of genes that are unique to the</span>
+<span id="cb16-308"><a href="#cb16-308" aria-hidden="true" tabindex="-1"></a>intersection of the two (or three) indicated comparisons, matching those in the</span>
+<span id="cb16-309"><a href="#cb16-309" aria-hidden="true" tabindex="-1"></a>previous Venn diagram. </span>
+<span id="cb16-310"><a href="#cb16-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-311"><a href="#cb16-311" aria-hidden="true" tabindex="-1"></a>For a small number of sets, a Venn diagram might be the preferred e.g. because</span>
+<span id="cb16-312"><a href="#cb16-312" aria-hidden="true" tabindex="-1"></a>readers might be familiar this visualization. But an UpSet plot </span>
+<span id="cb16-313"><a href="#cb16-313" aria-hidden="true" tabindex="-1"></a>is well suited for the analysis more than three sets. (See </span>
+<span id="cb16-314"><a href="#cb16-314" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">more examples here</span><span class="co">](https://upset.app/)</span></span>
+<span id="cb16-315"><a href="#cb16-315" aria-hidden="true" tabindex="-1"></a>).</span>
+<span id="cb16-316"><a href="#cb16-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-317"><a href="#cb16-317" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
+<span id="cb16-318"><a href="#cb16-318" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb16-319"><a href="#cb16-319" aria-hidden="true" tabindex="-1"></a>Reproducibility</span>
+<span id="cb16-320"><a href="#cb16-320" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb16-321"><a href="#cb16-321" aria-hidden="true" tabindex="-1"></a><span class="in">```{r sessioninfo}</span></span>
+<span id="cb16-322"><a href="#cb16-322" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb16-323"><a href="#cb16-323" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb16-324"><a href="#cb16-324" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-325"><a href="#cb16-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-326"><a href="#cb16-326" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
 <span id="cb16-327"><a href="#cb16-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-328"><a href="#cb16-328" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
-<span id="cb16-329"><a href="#cb16-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-330"><a href="#cb16-330" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>Both Venn diagrams and upset plots operate on sets, e.g. they require that</span>
-<span id="cb16-331"><a href="#cb16-331" aria-hidden="true" tabindex="-1"></a>a hard threshold has been applied to the results of a differential expression</span>
-<span id="cb16-332"><a href="#cb16-332" aria-hidden="true" tabindex="-1"></a>analysis. That's problematic, because </span>
-<span id="cb16-333"><a href="#cb16-333" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">p-values themselves display high variability</span><span class="co">](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370685/)</span></span>
-<span id="cb16-334"><a href="#cb16-334" aria-hidden="true" tabindex="-1"></a>and dichotomizing quantitative information looses information. </span>
-<span id="cb16-335"><a href="#cb16-335" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-336"><a href="#cb16-336" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]</span>:</span>
+<span id="cb16-328"><a href="#cb16-328" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>Both Venn diagrams and upset plots operate on sets, e.g. they require that</span>
+<span id="cb16-329"><a href="#cb16-329" aria-hidden="true" tabindex="-1"></a>a hard threshold has been applied to the results of a differential expression</span>
+<span id="cb16-330"><a href="#cb16-330" aria-hidden="true" tabindex="-1"></a>analysis. That's problematic, because </span>
+<span id="cb16-331"><a href="#cb16-331" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">p-values themselves display high variability</span><span class="co">](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370685/)</span></span>
+<span id="cb16-332"><a href="#cb16-332" aria-hidden="true" tabindex="-1"></a>and dichotomizing quantitative information looses information. </span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

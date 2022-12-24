@@ -10,12 +10,11 @@ website:
         href: https://github.com/tomsing1
       - icon: linkedin
         href: https://www.linkedin.com/in/thomas-sandmann/
-      - icon: twitter
-        href: https://twitter.com/thomas_sandmann
+      - icon: mastodon
+        href: https://genomic.social/@thomas_sandmann
 format:
   html:
     theme: sandstone
     css: styles.css
 
 editor: source
-

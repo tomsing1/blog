@@ -237,7 +237,7 @@ the hood, the resulting plot can be annotated / decorated with the same set of
 functions. Here, we plot the intersections in the main plot, and then add the
 size of the individual sets on the right-hand margin.
 
-```{r}
+```{r upset}
 #| fig-width: 6
 #| fig-height: 3 
 #| out-width: "75%"
@@ -296,10 +296,10 @@ is well suited for the analysis more than three sets. (See
 [more examples here](https://upset.app/)
 ).
 
-## Reproducibility
-
 <details>
-
+<summary>
+Reproducibility
+</summary>
 ```{r sessioninfo}
 #| echo: false
 sessioninfo::session_info()
@@ -312,5 +312,3 @@ a hard threshold has been applied to the results of a differential expression
 analysis. That's problematic, because 
 [p-values themselves display high variability](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370685/)
 and dichotomizing quantitative information looses information. 
-
-[^2]:

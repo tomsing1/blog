@@ -3,12 +3,13 @@ title: "Welcome"
 listing:
   contents: posts
   sort: "date desc"
-  type: default
+  type: table
   categories: true
   sort-ui: false
   filter-ui: false
+  fields: [date, title, author, reading-time]
 page-layout: full
 title-block-banner: true
 ---
 
-<a rel="me" href="https://mastodon.social/@thomas_sandmann"></a>
+<a rel="me" href="https://genomic.social/@thomas_sandmann"></a>

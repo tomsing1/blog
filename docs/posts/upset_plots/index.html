@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Sandmann">
+<meta name="dcterms.date" content="2022-12-24">
+
+<title>Thomas Sandmann’s personal blog - UpSet plots: comparing differential expression across contrasts</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Thomas Sandmann’s personal blog</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/tomsing1"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/thomas_sandmann"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">UpSet plots: comparing differential expression across contrasts</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">TIL</div>
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">visualization</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Thomas Sandmann </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 24, 2022</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>Today I learned how to use <a href="https://doi.org/10.1109%2FTVCG.2014.2346248">UpSet plots</a> to visualize the overlap between sets of differentially expressed genes.</p>
+<p>I often analyze RNA-seq experiments with multiple factors, e.g.&nbsp;different treatments, conditions, cell lines, genotypes, time points, etc. The scientific questions typically involve not just one, but multiple comparisons between experimental groups. For example:</p>
+<ul>
+<li>How do wildtype cells respond to drug treatment?</li>
+<li>How do mutant cells respond?</li>
+<li>What is the effect of drug treatment in growth medium A? Or B? Or C?</li>
+<li>Is there a significant difference between treatment effects in wildtype and mutant cells?</li>
+<li>etc</li>
+</ul>
+<p>To answer these questions, I typically fit a single linear model and then extract the comparisons of interest by specifying each of them as as <em>contrast</em>. (Check out the vignette of the excellent <a href="https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html">designmatrices Bioconductor package</a> for details on creating design matrices and extracting contrasts.)</p>
+<p>After applying a suitable p-value / FDR threshold, each comparison / contrast yields a list of differentially expressed genes<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. When the lists are long, it is difficult to assess the degree of overlap, e.g.&nbsp;the number of genes that were detected in multiple contrasts.</p>
+<p>If the number of comparisons is small (say &lt; 5), then a <a href="https://en.wikipedia.org/wiki/Venn_diagram">Venn diagram</a> is an excellent way of displaying how these sets of genes overlap. But when the number of sets increases, so does the number of intersections - and Venn diagrams soon become hard to draw (and interpret).</p>
+<p>Upset plots can be used to clearly visualize larger numbers of sets. Here, I am using the <a href="https://bioconductor.org/packages/release/data/experiment/html/airway.html">airway Bioconductor dataset</a>, an RNA-Seq experiment on four human airway smooth muscle cell lines treated with dexamethasone, to illustrate how to</p>
+<ul>
+<li>Fit a linear model using <a href="https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29">limma/voom</a></li>
+<li>Extract multiple contrasts</li>
+<li>Visualize the numbers and intersections of differentially expressed gene sets using Venn diagrams and UpSet plots.</li>
+</ul>
+<section id="normalization-filtering-linear-modeling" class="level3">
+<h3 class="anchored" data-anchor-id="normalization-filtering-linear-modeling">Normalization, filtering &amp; linear modeling</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(airway)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ComplexHeatmap)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(edgeR)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(limma)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>My typical analysis workflow uses functions from the <a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html">edgeR</a> and <a href="https://bioconductor.org/packages/release/bioc/html/limma.html">limma</a> R packages.</p>
+<p>The <code>airway</code> experiment is multifactorial, and it includes:</p>
+<ul>
+<li>Cells from different donors (<code>cell</code> covariate)</li>
+<li>Treatment with <em>dexamethasone</em> - or not (<code>dex</code> covariate)</li>
+<li>Different read lengths (<code>avgLength</code> covariate)</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(airway, <span class="at">package =</span> <span class="st">"airway"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(<span class="fu">colData</span>(airway), <span class="fu">table</span>(cell, dex))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         dex
+cell      trt untrt
+  N052611   1     1
+  N061011   1     1
+  N080611   1     1
+  N61311    1     1</code></pre>
+</div>
+</div>
+<p>Here, I will focus only on the <code>cell</code> and <code>dex</code> variables, formulating a linear model that includes these two additive predictors: <code>~ 0 + cell + dex</code></p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There are <a href="https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html#alternative-code-for-design-matrices">alternative ways to parameterize a linear model</a>. For example, to obtain the pairwise comparisons between the first and the other three cell, lines (see below) the model <code>~ cell + dex</code> would have returned the same results without the need for contrasts. But for complex multivariate experiments, I personally find it easier to exclude the intercept term and to manually define contrasts of interest.</p>
+</div>
+</div>
+<p>First, the data is normalized with the <a href="https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-3-r25">TMM method</a>. Next, we focus only on genes exceeding a minimal expression threshold by filtering the dataset with the <code>filterByExpr</code> function. Then we are ready to fit the linear model - performing both the <code>voom</code> transformation and the model fitting with the <code>voomLmFit</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>airway <span class="ot">&lt;-</span> <span class="fu">calcNormFactors</span>(airway)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> cell <span class="sc">+</span> dex, <span class="at">data =</span> airway<span class="sc">$</span>samples)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(design) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"cell"</span>, <span class="st">""</span>, <span class="fu">colnames</span>(design))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">filterByExpr</span>(airway, <span class="at">design =</span> design)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">voomLmFit</span>(airway[keep, <span class="fu">row.names</span>(design)], <span class="at">design =</span> design)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For simplicity, we extract three contrasts, comparing gene expression between cell line <code>N052611</code> and each of the other three lines (adjusted for dexamethasone treatment). (These might not be the most biologically interesting comparisons, but this post is focused on visualization - not biology.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># contrasts: differences between the first and all other cell lines</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>contrasts <span class="ot">&lt;-</span> <span class="fu">makeContrasts</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"N061011-N052611"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"N080611-N052611"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"N61311-N052611"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> design</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">contrasts.fit</span>(fit, contrasts)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> limma<span class="sc">::</span><span class="fu">decideTests</span>(fit2)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       N061011-N052611 N080611-N052611 N61311-N052611
+Down               279            1107            913
+NotSig           16336           15046          15329
+Up                 272             734            645</code></pre>
+</div>
+</div>
+</section>
+<section id="venn-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="venn-diagram">Venn diagram</h3>
+<p>Each of the pairwise comparisons yields hundreds of differentially expressed genes (at the default FDR &lt; 5% threshold for each contrast imposed by limma’s <code>decideTests</code> function.) But are these genes similar across cell lines?</p>
+<p>For three comparisons, limma’s built-in <code>vennDiagram</code> function is very useful:</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>limma<span class="sc">::</span><span class="fu">vennDiagram</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  results,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts.col =</span> <span class="st">"black"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">circle.col =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"green3"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">names =</span> <span class="fu">sub</span>(<span class="st">"-"</span>, <span class="st">"/</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">colnames</span>(results)),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">mar =</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">4</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cex =</span> <span class="fu">c</span>(<span class="fl">1.2</span>,<span class="dv">1</span>,<span class="fl">0.7</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" style="width:75.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The diagram shows that only a minority of genes is differentially expressed between all three cell lines and our reference (cell line <code>N052611</code>). Most of the genes are only observed in the comparison between lines <code>N080611</code> and <code>N052611</code>.</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This example doesn’t distinguish between up- and down-regulated genes, e.g.&nbsp;a gene that is up-regulated in one contrast but down-regulated in another would be found in the intersection. To display separate counts for up- and downregulated genes, add the <code>include=c("up", "down")</code> argument to the <code>vennDiagram</code> call.</p>
+</div>
+</div>
+<p>If the number of comparisons increases, Venn diagrams are less useful (e.g. the famous <a href="https://www.nature.com/articles/nature11241/figures/4">banagram</a> with six sets).</p>
+</section>
+<section id="upset-plots" class="level3">
+<h3 class="anchored" data-anchor-id="upset-plots">Upset plots</h3>
+<p>There are multiple R packages that can generate UpSet plots, including e.g. <a href="https://cran.r-project.org/package=UpSetR">UpSetR</a>. I ran into difficulties customizing both the names of the sets <em>and</em> select specific intersections for plotting with <code>UpSetR</code>. Instead, I am using the <code>UpSet</code> function included in the <a href="https://jokergoo.github.io/ComplexHeatmap-reference/book/upset-plot.html">ComplexHeatmap</a> R package here.</p>
+<p>In preparation for plotting, multiple helper functions are available, including</p>
+<ul>
+<li><code>make_comb_mat</code>: calculcate the overlap between different sets, according to the user-specified <code>mode</code>: one of <code>distinct</code>, <code>intersect</code> or <code>union</code>.</li>
+<li><code>comb_degree</code>: return the degree of each combination, e.g.&nbsp;how many sets were included.</li>
+<li><code>set_size</code>: return the size of each input set</li>
+<li><code>comb_size</code>: return the size of each of the intersected sets (e.g.&nbsp;the same sets shown in the Venn diagram above, because the <code>mode</code> was set to <code>distinct</code>).</li>
+</ul>
+<p>For example, let’s first restrict our input to all genes called significant in at least one of the comparisons:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove genes not signif. in any contrast</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> results[<span class="fu">rowSums</span>(<span class="fu">abs</span>(results)) <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we determine the number of genes in each intersection. (Because <code>make_comb_mat</code> includes single sets as well, we exclude them by filtering out all results for intersections of degree one.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the intersection between the differentially expressed gene sets</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">make_comb_mat</span>(<span class="fu">abs</span>(results), <span class="at">mode =</span> <span class="st">"distinct"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># exclude self-intersects (total # of diff. genes will be displayed separately)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> m[<span class="fu">comb_degree</span>(m) <span class="sc">&gt;</span> <span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s check the size of the input sets (e.g.&nbsp;all up- and down-regulated genes in each comparison):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(ss <span class="ot">&lt;-</span> <span class="fu">set_size</span>(m))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>N061011-N052611 N080611-N052611  N61311-N052611 
+            551            1841            1558 </code></pre>
+</div>
+</div>
+<p>and their intersections:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(cs <span class="ot">&lt;-</span> <span class="fu">comb_size</span>(m))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>111 110 101 011 
+172 116 102 405 </code></pre>
+</div>
+</div>
+<p>(Together, these numbers reproduce what was shown in the Venn diagram above.) Now we are ready to generate an UpSet plot!</p>
+<p>Because the <code>UpSet</code> function uses the <code>ComplexHeatmap::Heatmap</code> function under the hood, the resulting plot can be annotated / decorated with the same set of functions. Here, we plot the intersections in the main plot, and then add the size of the individual sets on the right-hand margin.</p>
+<div class="cell" data-layout-align="center">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">&lt;-</span> <span class="fu">UpSet</span>(m, </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">set_order =</span> <span class="fu">colnames</span>(m), </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">comb_order =</span> <span class="fu">order</span>(<span class="fu">comb_degree</span>(m)),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">top_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Distinct diff. genes"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>          cs, </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(cs)<span class="sc">*</span><span class="fl">1.1</span>),</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">height =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        ), </span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_side =</span> <span class="st">"left"</span>, </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_rot =</span> <span class="dv">90</span>),</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">right_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">which =</span> <span class="st">"row"</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Total"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>          ss, </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(ss)<span class="sc">*</span><span class="fl">1.1</span>),</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>          <span class="at">width =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">column_title =</span> <span class="st">"Intersection between contrasts"</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">=</span> <span class="fu">draw</span>(ht)</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>od <span class="ot">=</span> <span class="fu">column_order</span>(ht)</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>rod <span class="ot">=</span> <span class="fu">row_order</span>(ht)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Distinct diff. genes"</span>, {</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(cs[od], </span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">seq_along</span>(cs), </span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">unit</span>(cs[od], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">2</span>, <span class="st">"pt"</span>), </span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), </span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>), <span class="at">rot =</span> <span class="dv">45</span>)</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Total"</span>, {</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(ss[rod], </span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">unit</span>(ss[rod], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">20</span>, <span class="st">"pt"</span>), </span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">rev</span>(<span class="fu">seq_along</span>(ss)), </span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>), </span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>))</span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" style="width:75.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each column of the main plot shows the number of genes that are unique to the intersection of the two (or three) indicated comparisons, matching those in the previous Venn diagram.</p>
+<p>For a small number of sets, a Venn diagram might be the preferred e.g.&nbsp;because readers might be familiar this visualization. But an UpSet plot is well suited for the analysis more than three sets. (See <a href="https://upset.app/">more examples here</a> ).</p>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
+<details>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.2 (2022-10-31)
+ os       macOS Big Sur ... 10.16
+ system   x86_64, darwin17.0
+ ui       X11
+ language (EN)
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       America/Los_Angeles
+ date     2022-12-24
+ pandoc   2.19.2 @ /Applications/RStudio.app/Contents/MacOS/quarto/bin/tools/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package              * version  date (UTC) lib source
+ airway               * 1.18.0   2022-11-03 [1] Bioconductor
+ askpass                1.1      2019-01-13 [1] CRAN (R 4.2.0)
+ Biobase              * 2.58.0   2022-11-01 [1] Bioconductor
+ BiocGenerics         * 0.44.0   2022-11-01 [1] Bioconductor
+ bitops                 1.0-7    2021-04-24 [1] CRAN (R 4.2.0)
+ circlize               0.4.15   2022-05-10 [1] CRAN (R 4.2.0)
+ cli                    3.4.1    2022-09-23 [1] CRAN (R 4.2.0)
+ clue                   0.3-63   2022-11-19 [1] CRAN (R 4.2.0)
+ cluster                2.1.4    2022-08-22 [2] CRAN (R 4.2.2)
+ codetools              0.2-18   2020-11-04 [2] CRAN (R 4.2.2)
+ colorspace             2.0-3    2022-02-21 [1] CRAN (R 4.2.0)
+ ComplexHeatmap       * 2.14.0   2022-11-01 [1] Bioconductor
+ crayon                 1.5.2    2022-09-29 [1] CRAN (R 4.2.0)
+ credentials            1.3.2    2021-11-29 [1] CRAN (R 4.2.0)
+ DelayedArray           0.24.0   2022-11-01 [1] Bioconductor
+ digest                 0.6.31   2022-12-11 [1] CRAN (R 4.2.0)
+ doParallel             1.0.17   2022-02-07 [1] CRAN (R 4.2.0)
+ edgeR                * 3.40.1   2022-12-14 [1] Bioconductor
+ evaluate               0.19     2022-12-13 [1] CRAN (R 4.2.0)
+ fastmap                1.1.0    2021-01-25 [1] CRAN (R 4.2.0)
+ foreach                1.5.2    2022-02-02 [1] CRAN (R 4.2.0)
+ GenomeInfoDb         * 1.34.4   2022-12-01 [1] Bioconductor
+ GenomeInfoDbData       1.2.9    2022-12-12 [1] Bioconductor
+ GenomicRanges        * 1.50.2   2022-12-16 [1] Bioconductor
+ GetoptLong             1.0.5    2020-12-15 [1] CRAN (R 4.2.0)
+ GlobalOptions          0.1.2    2020-06-10 [1] CRAN (R 4.2.0)
+ glue                   1.6.2    2022-02-24 [1] CRAN (R 4.2.0)
+ htmltools              0.5.4    2022-12-07 [1] CRAN (R 4.2.0)
+ htmlwidgets            1.5.4    2021-09-08 [1] CRAN (R 4.2.2)
+ IRanges              * 2.32.0   2022-11-01 [1] Bioconductor
+ iterators              1.0.14   2022-02-05 [1] CRAN (R 4.2.0)
+ jsonlite               1.8.4    2022-12-06 [1] CRAN (R 4.2.0)
+ knitr                  1.41     2022-11-18 [1] CRAN (R 4.2.0)
+ lattice                0.20-45  2021-09-22 [2] CRAN (R 4.2.2)
+ lifecycle              1.0.3    2022-10-07 [1] CRAN (R 4.2.0)
+ limma                * 3.54.0   2022-11-01 [1] Bioconductor
+ locfit                 1.5-9.6  2022-07-11 [1] CRAN (R 4.2.0)
+ magrittr               2.0.3    2022-03-30 [1] CRAN (R 4.2.0)
+ Matrix                 1.5-3    2022-11-11 [1] CRAN (R 4.2.0)
+ MatrixGenerics       * 1.10.0   2022-11-01 [1] Bioconductor
+ matrixStats          * 0.63.0   2022-11-18 [1] CRAN (R 4.2.0)
+ openssl                2.0.5    2022-12-06 [1] CRAN (R 4.2.0)
+ png                    0.1-8    2022-11-29 [1] CRAN (R 4.2.0)
+ RColorBrewer           1.1-3    2022-04-03 [1] CRAN (R 4.2.0)
+ Rcpp                   1.0.9    2022-07-08 [1] CRAN (R 4.2.0)
+ RCurl                  1.98-1.9 2022-10-03 [1] CRAN (R 4.2.0)
+ rjson                  0.2.21   2022-01-09 [1] CRAN (R 4.2.0)
+ rlang                  1.0.6    2022-09-24 [1] CRAN (R 4.2.0)
+ rmarkdown              2.19     2022-12-15 [1] CRAN (R 4.2.0)
+ rstudioapi             0.14     2022-08-22 [1] CRAN (R 4.2.0)
+ S4Vectors            * 0.36.1   2022-12-05 [1] Bioconductor
+ sessioninfo            1.2.2    2021-12-06 [1] CRAN (R 4.2.0)
+ shape                  1.4.6    2021-05-19 [1] CRAN (R 4.2.0)
+ stringi                1.7.8    2022-07-11 [1] CRAN (R 4.2.0)
+ stringr                1.5.0    2022-12-02 [1] CRAN (R 4.2.0)
+ SummarizedExperiment * 1.28.0   2022-11-01 [1] Bioconductor
+ sys                    3.4.1    2022-10-18 [1] CRAN (R 4.2.0)
+ vctrs                  0.5.1    2022-11-16 [1] CRAN (R 4.2.0)
+ xfun                   0.35     2022-11-16 [1] CRAN (R 4.2.0)
+ XVector                0.38.0   2022-11-01 [1] Bioconductor
+ yaml                   2.3.6    2022-10-18 [1] CRAN (R 4.2.0)
+ zlibbioc               1.44.0   2022-11-01 [1] Bioconductor
+
+ [1] /Users/sandmann/Library/R/x86_64/4.2/library
+ [2] /Library/Frameworks/R.framework/Versions/4.2/Resources/library
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</details>
+
+
+<!-- -->
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Both Venn diagrams and upset plots operate on sets, e.g.&nbsp;they require that a hard threshold has been applied to the results of a differential expression analysis. That’s problematic, because <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370685/">p-values themselves display high variability</a> and dichotomizing quantitative information looses information.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb16" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "UpSet plots: comparing differential expression across contrasts"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2022-12-24"</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [TIL, R, visualization]</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>Today I learned how to use</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">UpSet plots</span><span class="co">](https://doi.org/10.1109%2FTVCG.2014.2346248)</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>to visualize the overlap between sets of differentially expressed genes.</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>I often analyze RNA-seq experiments with multiple factors, e.g. different </span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>treatments, conditions, cell lines, genotypes, time points, etc. The scientific</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>questions typically involve not just one, but multiple comparisons between</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>experimental groups. For example:</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>How do wildtype cells respond to drug treatment? </span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>How do mutant cells respond?</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>What is the effect of drug treatment in growth medium A? Or B? Or C?</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Is there a significant difference between treatment effects in wildtype</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  and mutant cells?</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>etc</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>To answer these questions, I typically fit a single linear model and then</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>extract the comparisons of interest by specifying each of them as as *contrast*.</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>(Check out the vignette of the excellent</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">designmatrices Bioconductor package</span><span class="co">](https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html)</span></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>for details on creating design matrices and extracting contrasts.)</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>After applying a suitable p-value / FDR threshold, each comparison / contrast</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>yields a list of differentially expressed genes<span class="ot">[^1]</span>. When the lists are long, it</span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>is difficult to assess the degree of overlap, e.g. the number of genes that were</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>detected in multiple contrasts.</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>If the number of comparisons is small (say &lt; 5), then a </span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Venn diagram</span><span class="co">](https://en.wikipedia.org/wiki/Venn_diagram)</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>is an excellent way of displaying how these sets of genes overlap. But when</span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>the number of sets increases, so does the number of intersections - and Venn</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>diagrams soon become hard to draw (and interpret).</span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>Upset plots can be used to clearly visualize larger numbers of sets. Here, I </span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>am using the </span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">airway Bioconductor dataset</span><span class="co">](https://bioconductor.org/packages/release/data/experiment/html/airway.html)</span>,</span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>an RNA-Seq experiment on four human airway smooth muscle cell lines treated with</span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>dexamethasone, to illustrate how to</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Fit a linear model using </span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">limma/voom</span><span class="co">](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)</span></span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Extract multiple contrasts</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Visualize the numbers and intersections of differentially expressed gene sets</span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>  using Venn diagrams and UpSet plots.</span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a><span class="fu">### Normalization, filtering &amp; linear modeling</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(airway)</span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ComplexHeatmap)</span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(edgeR)</span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(limma)</span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a>My typical analysis workflow uses functions from the </span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">edgeR</span><span class="co">](https://bioconductor.org/packages/release/bioc/html/edgeR.html)</span></span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a>and </span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">limma</span><span class="co">](https://bioconductor.org/packages/release/bioc/html/limma.html)</span></span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a>R packages.</span>
+<span id="cb16-81"><a href="#cb16-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-82"><a href="#cb16-82" aria-hidden="true" tabindex="-1"></a>The <span class="in">`airway`</span> experiment is multifactorial, and it includes:</span>
+<span id="cb16-83"><a href="#cb16-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-84"><a href="#cb16-84" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cells from different donors (<span class="in">`cell`</span> covariate)</span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Treatment with *dexamethasone* - or not (<span class="in">`dex`</span> covariate)</span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Different read lengths (<span class="in">`avgLength`</span> covariate)</span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(airway, <span class="at">package =</span> <span class="st">"airway"</span>)</span>
+<span id="cb16-92"><a href="#cb16-92" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(<span class="fu">colData</span>(airway), <span class="fu">table</span>(cell, dex))</span>
+<span id="cb16-93"><a href="#cb16-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-94"><a href="#cb16-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-95"><a href="#cb16-95" aria-hidden="true" tabindex="-1"></a>Here, I will focus only on the <span class="in">`cell`</span> and <span class="in">`dex`</span> variables, formulating a linear</span>
+<span id="cb16-96"><a href="#cb16-96" aria-hidden="true" tabindex="-1"></a>model that includes these two additive predictors: <span class="in">`~ 0 + cell + dex`</span></span>
+<span id="cb16-97"><a href="#cb16-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-98"><a href="#cb16-98" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb16-99"><a href="#cb16-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-100"><a href="#cb16-100" aria-hidden="true" tabindex="-1"></a>There are </span>
+<span id="cb16-101"><a href="#cb16-101" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">alternative ways to parameterize a linear model</span><span class="co">](https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html#alternative-code-for-design-matrices)</span>. </span>
+<span id="cb16-102"><a href="#cb16-102" aria-hidden="true" tabindex="-1"></a>For example, to obtain the pairwise comparisons between the first and the other</span>
+<span id="cb16-103"><a href="#cb16-103" aria-hidden="true" tabindex="-1"></a>three cell, lines (see below) the model <span class="in">`~ cell + dex`</span> would have returned the</span>
+<span id="cb16-104"><a href="#cb16-104" aria-hidden="true" tabindex="-1"></a>same results without the need for contrasts. But for complex multivariate</span>
+<span id="cb16-105"><a href="#cb16-105" aria-hidden="true" tabindex="-1"></a>experiments, I personally find it easier to exclude the intercept term and</span>
+<span id="cb16-106"><a href="#cb16-106" aria-hidden="true" tabindex="-1"></a>to manually define contrasts of interest.</span>
+<span id="cb16-107"><a href="#cb16-107" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-108"><a href="#cb16-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-109"><a href="#cb16-109" aria-hidden="true" tabindex="-1"></a>First, the data is normalized with the </span>
+<span id="cb16-110"><a href="#cb16-110" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">TMM method</span><span class="co">](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-3-r25)</span>.</span>
+<span id="cb16-111"><a href="#cb16-111" aria-hidden="true" tabindex="-1"></a>Next, we focus only on genes exceeding a minimal expression threshold by</span>
+<span id="cb16-112"><a href="#cb16-112" aria-hidden="true" tabindex="-1"></a>filtering the dataset with the <span class="in">`filterByExpr`</span> function. Then we are ready to</span>
+<span id="cb16-113"><a href="#cb16-113" aria-hidden="true" tabindex="-1"></a>fit the linear model - performing both the <span class="in">`voom`</span> transformation and the </span>
+<span id="cb16-114"><a href="#cb16-114" aria-hidden="true" tabindex="-1"></a>model fitting with the <span class="in">`voomLmFit`</span> function.</span>
+<span id="cb16-115"><a href="#cb16-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-118"><a href="#cb16-118" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-119"><a href="#cb16-119" aria-hidden="true" tabindex="-1"></a>airway <span class="ot">&lt;-</span> <span class="fu">calcNormFactors</span>(airway)</span>
+<span id="cb16-120"><a href="#cb16-120" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> cell <span class="sc">+</span> dex, <span class="at">data =</span> airway<span class="sc">$</span>samples)</span>
+<span id="cb16-121"><a href="#cb16-121" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(design) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"cell"</span>, <span class="st">""</span>, <span class="fu">colnames</span>(design))</span>
+<span id="cb16-122"><a href="#cb16-122" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">filterByExpr</span>(airway, <span class="at">design =</span> design)</span>
+<span id="cb16-123"><a href="#cb16-123" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">voomLmFit</span>(airway[keep, <span class="fu">row.names</span>(design)], <span class="at">design =</span> design)</span>
+<span id="cb16-124"><a href="#cb16-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-125"><a href="#cb16-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-126"><a href="#cb16-126" aria-hidden="true" tabindex="-1"></a>For simplicity, we extract three contrasts, comparing gene expression between</span>
+<span id="cb16-127"><a href="#cb16-127" aria-hidden="true" tabindex="-1"></a>cell line <span class="in">`N052611`</span> and each of the other three lines (adjusted for </span>
+<span id="cb16-128"><a href="#cb16-128" aria-hidden="true" tabindex="-1"></a>dexamethasone treatment). (These might not be the most biologically interesting</span>
+<span id="cb16-129"><a href="#cb16-129" aria-hidden="true" tabindex="-1"></a>comparisons, but this post is focused on visualization - not biology.) </span>
+<span id="cb16-130"><a href="#cb16-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-133"><a href="#cb16-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-134"><a href="#cb16-134" aria-hidden="true" tabindex="-1"></a><span class="co"># contrasts: differences between the first and all other cell lines</span></span>
+<span id="cb16-135"><a href="#cb16-135" aria-hidden="true" tabindex="-1"></a>contrasts <span class="ot">&lt;-</span> <span class="fu">makeContrasts</span>(</span>
+<span id="cb16-136"><a href="#cb16-136" aria-hidden="true" tabindex="-1"></a>  <span class="st">"N061011-N052611"</span>,</span>
+<span id="cb16-137"><a href="#cb16-137" aria-hidden="true" tabindex="-1"></a>  <span class="st">"N080611-N052611"</span>,</span>
+<span id="cb16-138"><a href="#cb16-138" aria-hidden="true" tabindex="-1"></a>  <span class="st">"N61311-N052611"</span>,</span>
+<span id="cb16-139"><a href="#cb16-139" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> design</span>
+<span id="cb16-140"><a href="#cb16-140" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-141"><a href="#cb16-141" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">contrasts.fit</span>(fit, contrasts)</span>
+<span id="cb16-142"><a href="#cb16-142" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> limma<span class="sc">::</span><span class="fu">decideTests</span>(fit2)</span>
+<span id="cb16-143"><a href="#cb16-143" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results)</span>
+<span id="cb16-144"><a href="#cb16-144" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-145"><a href="#cb16-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-146"><a href="#cb16-146" aria-hidden="true" tabindex="-1"></a><span class="fu">### Venn diagram</span></span>
+<span id="cb16-147"><a href="#cb16-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-148"><a href="#cb16-148" aria-hidden="true" tabindex="-1"></a>Each of the pairwise comparisons yields hundreds of differentially expressed</span>
+<span id="cb16-149"><a href="#cb16-149" aria-hidden="true" tabindex="-1"></a>genes (at the default FDR &lt; 5% threshold for each contrast imposed by </span>
+<span id="cb16-150"><a href="#cb16-150" aria-hidden="true" tabindex="-1"></a>limma's <span class="in">`decideTests`</span> function.) But are these genes similar across cell lines?</span>
+<span id="cb16-151"><a href="#cb16-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-152"><a href="#cb16-152" aria-hidden="true" tabindex="-1"></a>For three comparisons, limma's built-in <span class="in">`vennDiagram`</span> function is very useful:</span>
+<span id="cb16-153"><a href="#cb16-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-156"><a href="#cb16-156" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-157"><a href="#cb16-157" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6</span></span>
+<span id="cb16-158"><a href="#cb16-158" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb16-159"><a href="#cb16-159" aria-hidden="true" tabindex="-1"></a><span class="co">#| out-width: "75%"</span></span>
+<span id="cb16-160"><a href="#cb16-160" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: "center"</span></span>
+<span id="cb16-161"><a href="#cb16-161" aria-hidden="true" tabindex="-1"></a>limma<span class="sc">::</span><span class="fu">vennDiagram</span>(</span>
+<span id="cb16-162"><a href="#cb16-162" aria-hidden="true" tabindex="-1"></a>  results,</span>
+<span id="cb16-163"><a href="#cb16-163" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts.col =</span> <span class="st">"black"</span>,</span>
+<span id="cb16-164"><a href="#cb16-164" aria-hidden="true" tabindex="-1"></a>  <span class="at">circle.col =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>, <span class="st">"green3"</span>),</span>
+<span id="cb16-165"><a href="#cb16-165" aria-hidden="true" tabindex="-1"></a>  <span class="at">names =</span> <span class="fu">sub</span>(<span class="st">"-"</span>, <span class="st">"/</span><span class="sc">\n</span><span class="st">"</span>, <span class="fu">colnames</span>(results)),</span>
+<span id="cb16-166"><a href="#cb16-166" aria-hidden="true" tabindex="-1"></a>  <span class="at">mar =</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">4</span>),</span>
+<span id="cb16-167"><a href="#cb16-167" aria-hidden="true" tabindex="-1"></a>  <span class="at">cex =</span> <span class="fu">c</span>(<span class="fl">1.2</span>,<span class="dv">1</span>,<span class="fl">0.7</span>)</span>
+<span id="cb16-168"><a href="#cb16-168" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-169"><a href="#cb16-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-170"><a href="#cb16-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-171"><a href="#cb16-171" aria-hidden="true" tabindex="-1"></a>The diagram shows that only a minority of genes is differentially expressed</span>
+<span id="cb16-172"><a href="#cb16-172" aria-hidden="true" tabindex="-1"></a>between all three cell lines and our reference (cell line <span class="in">`N052611`</span>). Most of</span>
+<span id="cb16-173"><a href="#cb16-173" aria-hidden="true" tabindex="-1"></a>the genes are only observed in the comparison between lines <span class="in">`N080611`</span> and </span>
+<span id="cb16-174"><a href="#cb16-174" aria-hidden="true" tabindex="-1"></a><span class="in">`N052611`</span>.</span>
+<span id="cb16-175"><a href="#cb16-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-176"><a href="#cb16-176" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb16-177"><a href="#cb16-177" aria-hidden="true" tabindex="-1"></a>This example doesn't distinguish between up- and down-regulated genes, e.g. a </span>
+<span id="cb16-178"><a href="#cb16-178" aria-hidden="true" tabindex="-1"></a>gene that is up-regulated in one contrast but down-regulated in another would</span>
+<span id="cb16-179"><a href="#cb16-179" aria-hidden="true" tabindex="-1"></a>be found in the intersection. To display separate counts for up- and </span>
+<span id="cb16-180"><a href="#cb16-180" aria-hidden="true" tabindex="-1"></a>downregulated genes, add the <span class="in">`include=c("up", "down")`</span> argument to the </span>
+<span id="cb16-181"><a href="#cb16-181" aria-hidden="true" tabindex="-1"></a><span class="in">`vennDiagram`</span> call.</span>
+<span id="cb16-182"><a href="#cb16-182" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb16-183"><a href="#cb16-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-184"><a href="#cb16-184" aria-hidden="true" tabindex="-1"></a>If the number of comparisons increases, Venn diagrams are less useful (e.g.</span>
+<span id="cb16-185"><a href="#cb16-185" aria-hidden="true" tabindex="-1"></a>the famous </span>
+<span id="cb16-186"><a href="#cb16-186" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">banagram</span><span class="co">](https://www.nature.com/articles/nature11241/figures/4)</span> </span>
+<span id="cb16-187"><a href="#cb16-187" aria-hidden="true" tabindex="-1"></a>with six sets).</span>
+<span id="cb16-188"><a href="#cb16-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-189"><a href="#cb16-189" aria-hidden="true" tabindex="-1"></a><span class="fu">### Upset plots</span></span>
+<span id="cb16-190"><a href="#cb16-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-191"><a href="#cb16-191" aria-hidden="true" tabindex="-1"></a>There are multiple R packages that can generate UpSet plots, including e.g.</span>
+<span id="cb16-192"><a href="#cb16-192" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">UpSetR</span><span class="co">](https://cran.r-project.org/package=UpSetR)</span>. I ran into </span>
+<span id="cb16-193"><a href="#cb16-193" aria-hidden="true" tabindex="-1"></a>difficulties customizing both the names of the sets *and* select specific</span>
+<span id="cb16-194"><a href="#cb16-194" aria-hidden="true" tabindex="-1"></a>intersections for plotting with <span class="in">`UpSetR`</span>. Instead, I am using the <span class="in">`UpSet`</span></span>
+<span id="cb16-195"><a href="#cb16-195" aria-hidden="true" tabindex="-1"></a>function included in the </span>
+<span id="cb16-196"><a href="#cb16-196" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ComplexHeatmap</span><span class="co">](https://jokergoo.github.io/ComplexHeatmap-reference/book/upset-plot.html)</span></span>
+<span id="cb16-197"><a href="#cb16-197" aria-hidden="true" tabindex="-1"></a>R package here.</span>
+<span id="cb16-198"><a href="#cb16-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-199"><a href="#cb16-199" aria-hidden="true" tabindex="-1"></a>In preparation for plotting, multiple helper functions are available, including</span>
+<span id="cb16-200"><a href="#cb16-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-201"><a href="#cb16-201" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`make_comb_mat`</span>: calculcate the overlap between different sets, according to</span>
+<span id="cb16-202"><a href="#cb16-202" aria-hidden="true" tabindex="-1"></a>  the user-specified <span class="in">`mode`</span>: one of <span class="in">`distinct`</span>, <span class="in">`intersect`</span> or <span class="in">`union`</span>.</span>
+<span id="cb16-203"><a href="#cb16-203" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`comb_degree`</span>: return the degree of each combination, e.g. how many sets were</span>
+<span id="cb16-204"><a href="#cb16-204" aria-hidden="true" tabindex="-1"></a>  included.</span>
+<span id="cb16-205"><a href="#cb16-205" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`set_size`</span>: return the size of each input set</span>
+<span id="cb16-206"><a href="#cb16-206" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`comb_size`</span>: return the size of each of the intersected sets (e.g. the </span>
+<span id="cb16-207"><a href="#cb16-207" aria-hidden="true" tabindex="-1"></a>same sets shown in the Venn diagram above, because the <span class="in">`mode`</span> was set to </span>
+<span id="cb16-208"><a href="#cb16-208" aria-hidden="true" tabindex="-1"></a><span class="in">`distinct`</span>).</span>
+<span id="cb16-209"><a href="#cb16-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-210"><a href="#cb16-210" aria-hidden="true" tabindex="-1"></a>For example, let's first restrict our input to all genes called significant</span>
+<span id="cb16-211"><a href="#cb16-211" aria-hidden="true" tabindex="-1"></a>in at least one of the comparisons:</span>
+<span id="cb16-212"><a href="#cb16-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-215"><a href="#cb16-215" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-216"><a href="#cb16-216" aria-hidden="true" tabindex="-1"></a><span class="co"># remove genes not signif. in any contrast</span></span>
+<span id="cb16-217"><a href="#cb16-217" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> results[<span class="fu">rowSums</span>(<span class="fu">abs</span>(results)) <span class="sc">&gt;</span> <span class="dv">0</span>, ]</span>
+<span id="cb16-218"><a href="#cb16-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-219"><a href="#cb16-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-220"><a href="#cb16-220" aria-hidden="true" tabindex="-1"></a>Next, we determine the number of genes in each intersection. (Because </span>
+<span id="cb16-221"><a href="#cb16-221" aria-hidden="true" tabindex="-1"></a><span class="in">`make_comb_mat`</span> includes single sets as well, we exclude them by filtering out</span>
+<span id="cb16-222"><a href="#cb16-222" aria-hidden="true" tabindex="-1"></a>all results for intersections of degree one.)</span>
+<span id="cb16-223"><a href="#cb16-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-226"><a href="#cb16-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-227"><a href="#cb16-227" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate the intersection between the differentially expressed gene sets</span></span>
+<span id="cb16-228"><a href="#cb16-228" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">make_comb_mat</span>(<span class="fu">abs</span>(results), <span class="at">mode =</span> <span class="st">"distinct"</span>)</span>
+<span id="cb16-229"><a href="#cb16-229" aria-hidden="true" tabindex="-1"></a><span class="co"># exclude self-intersects (total # of diff. genes will be displayed separately)</span></span>
+<span id="cb16-230"><a href="#cb16-230" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> m[<span class="fu">comb_degree</span>(m) <span class="sc">&gt;</span> <span class="dv">1</span>]</span>
+<span id="cb16-231"><a href="#cb16-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-232"><a href="#cb16-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-233"><a href="#cb16-233" aria-hidden="true" tabindex="-1"></a>Let's check the size of the input sets (e.g. all up- and down-regulated genes</span>
+<span id="cb16-234"><a href="#cb16-234" aria-hidden="true" tabindex="-1"></a>in each comparison):</span>
+<span id="cb16-235"><a href="#cb16-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-238"><a href="#cb16-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-239"><a href="#cb16-239" aria-hidden="true" tabindex="-1"></a>(ss <span class="ot">&lt;-</span> <span class="fu">set_size</span>(m))</span>
+<span id="cb16-240"><a href="#cb16-240" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-241"><a href="#cb16-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-242"><a href="#cb16-242" aria-hidden="true" tabindex="-1"></a>and their intersections:</span>
+<span id="cb16-243"><a href="#cb16-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-246"><a href="#cb16-246" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-247"><a href="#cb16-247" aria-hidden="true" tabindex="-1"></a>(cs <span class="ot">&lt;-</span> <span class="fu">comb_size</span>(m))</span>
+<span id="cb16-248"><a href="#cb16-248" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-249"><a href="#cb16-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-250"><a href="#cb16-250" aria-hidden="true" tabindex="-1"></a>(Together, these numbers reproduce what was shown in the Venn diagram above.)</span>
+<span id="cb16-251"><a href="#cb16-251" aria-hidden="true" tabindex="-1"></a>Now we are ready to generate an UpSet plot!</span>
+<span id="cb16-252"><a href="#cb16-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-253"><a href="#cb16-253" aria-hidden="true" tabindex="-1"></a>Because the <span class="in">`UpSet`</span> function uses the <span class="in">`ComplexHeatmap::Heatmap`</span> function under</span>
+<span id="cb16-254"><a href="#cb16-254" aria-hidden="true" tabindex="-1"></a>the hood, the resulting plot can be annotated / decorated with the same set of</span>
+<span id="cb16-255"><a href="#cb16-255" aria-hidden="true" tabindex="-1"></a>functions. Here, we plot the intersections in the main plot, and then add the</span>
+<span id="cb16-256"><a href="#cb16-256" aria-hidden="true" tabindex="-1"></a>size of the individual sets on the right-hand margin.</span>
+<span id="cb16-257"><a href="#cb16-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6</span></span>
+<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3 </span></span>
+<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a><span class="co">#| out-width: "75%"</span></span>
+<span id="cb16-264"><a href="#cb16-264" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: "center"</span></span>
+<span id="cb16-265"><a href="#cb16-265" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">&lt;-</span> <span class="fu">UpSet</span>(m, </span>
+<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a>      <span class="at">set_order =</span> <span class="fu">colnames</span>(m), </span>
+<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a>      <span class="at">comb_order =</span> <span class="fu">order</span>(<span class="fu">comb_degree</span>(m)),</span>
+<span id="cb16-268"><a href="#cb16-268" aria-hidden="true" tabindex="-1"></a>      <span class="at">top_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
+<span id="cb16-269"><a href="#cb16-269" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Distinct diff. genes"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
+<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a>          cs, </span>
+<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(cs)<span class="sc">*</span><span class="fl">1.1</span>),</span>
+<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
+<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a>          <span class="at">height =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
+<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a>        ), </span>
+<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_side =</span> <span class="st">"left"</span>, </span>
+<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a>        <span class="at">annotation_name_rot =</span> <span class="dv">90</span>),</span>
+<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a>      <span class="at">right_annotation =</span> <span class="fu">HeatmapAnnotation</span>(</span>
+<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a>        <span class="at">which =</span> <span class="st">"row"</span>,</span>
+<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Total"</span> <span class="ot">=</span> <span class="fu">anno_barplot</span>(</span>
+<span id="cb16-281"><a href="#cb16-281" aria-hidden="true" tabindex="-1"></a>          ss, </span>
+<span id="cb16-282"><a href="#cb16-282" aria-hidden="true" tabindex="-1"></a>          <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(ss)<span class="sc">*</span><span class="fl">1.1</span>),</span>
+<span id="cb16-283"><a href="#cb16-283" aria-hidden="true" tabindex="-1"></a>          <span class="at">border =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb16-284"><a href="#cb16-284" aria-hidden="true" tabindex="-1"></a>          <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fill =</span> <span class="st">"black"</span>), </span>
+<span id="cb16-285"><a href="#cb16-285" aria-hidden="true" tabindex="-1"></a>          <span class="at">width =</span> <span class="fu">unit</span>(<span class="dv">4</span>, <span class="st">"cm"</span>)</span>
+<span id="cb16-286"><a href="#cb16-286" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb16-287"><a href="#cb16-287" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb16-288"><a href="#cb16-288" aria-hidden="true" tabindex="-1"></a>      <span class="at">column_title =</span> <span class="st">"Intersection between contrasts"</span></span>
+<span id="cb16-289"><a href="#cb16-289" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-290"><a href="#cb16-290" aria-hidden="true" tabindex="-1"></a>ht <span class="ot">=</span> <span class="fu">draw</span>(ht)</span>
+<span id="cb16-291"><a href="#cb16-291" aria-hidden="true" tabindex="-1"></a>od <span class="ot">=</span> <span class="fu">column_order</span>(ht)</span>
+<span id="cb16-292"><a href="#cb16-292" aria-hidden="true" tabindex="-1"></a>rod <span class="ot">=</span> <span class="fu">row_order</span>(ht)</span>
+<span id="cb16-293"><a href="#cb16-293" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Distinct diff. genes"</span>, {</span>
+<span id="cb16-294"><a href="#cb16-294" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(cs[od], </span>
+<span id="cb16-295"><a href="#cb16-295" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">seq_along</span>(cs), </span>
+<span id="cb16-296"><a href="#cb16-296" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">unit</span>(cs[od], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">2</span>, <span class="st">"pt"</span>), </span>
+<span id="cb16-297"><a href="#cb16-297" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>), </span>
+<span id="cb16-298"><a href="#cb16-298" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>), <span class="at">rot =</span> <span class="dv">45</span>)</span>
+<span id="cb16-299"><a href="#cb16-299" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb16-300"><a href="#cb16-300" aria-hidden="true" tabindex="-1"></a><span class="fu">decorate_annotation</span>(<span class="st">"Total"</span>, {</span>
+<span id="cb16-301"><a href="#cb16-301" aria-hidden="true" tabindex="-1"></a>  <span class="fu">grid.text</span>(ss[rod], </span>
+<span id="cb16-302"><a href="#cb16-302" aria-hidden="true" tabindex="-1"></a>            <span class="at">x =</span> <span class="fu">unit</span>(ss[rod], <span class="st">"native"</span>) <span class="sc">+</span> <span class="fu">unit</span>(<span class="dv">20</span>, <span class="st">"pt"</span>), </span>
+<span id="cb16-303"><a href="#cb16-303" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">rev</span>(<span class="fu">seq_along</span>(ss)), </span>
+<span id="cb16-304"><a href="#cb16-304" aria-hidden="true" tabindex="-1"></a>            <span class="at">default.units =</span> <span class="st">"native"</span>, <span class="at">just =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>), </span>
+<span id="cb16-305"><a href="#cb16-305" aria-hidden="true" tabindex="-1"></a>            <span class="at">gp =</span> <span class="fu">gpar</span>(<span class="at">fontsize =</span> <span class="dv">8</span>, <span class="at">col =</span> <span class="st">"#404040"</span>))</span>
+<span id="cb16-306"><a href="#cb16-306" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb16-307"><a href="#cb16-307" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-308"><a href="#cb16-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-309"><a href="#cb16-309" aria-hidden="true" tabindex="-1"></a>Each column of the main plot shows the number of genes that are unique to the</span>
+<span id="cb16-310"><a href="#cb16-310" aria-hidden="true" tabindex="-1"></a>intersection of the two (or three) indicated comparisons, matching those in the</span>
+<span id="cb16-311"><a href="#cb16-311" aria-hidden="true" tabindex="-1"></a>previous Venn diagram. </span>
+<span id="cb16-312"><a href="#cb16-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-313"><a href="#cb16-313" aria-hidden="true" tabindex="-1"></a>For a small number of sets, a Venn diagram might be the preferred e.g. because</span>
+<span id="cb16-314"><a href="#cb16-314" aria-hidden="true" tabindex="-1"></a>readers might be familiar this visualization. But an UpSet plot </span>
+<span id="cb16-315"><a href="#cb16-315" aria-hidden="true" tabindex="-1"></a>is well suited for the analysis more than three sets. (See </span>
+<span id="cb16-316"><a href="#cb16-316" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">more examples here</span><span class="co">](https://upset.app/)</span></span>
+<span id="cb16-317"><a href="#cb16-317" aria-hidden="true" tabindex="-1"></a>).</span>
+<span id="cb16-318"><a href="#cb16-318" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-319"><a href="#cb16-319" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducibility</span></span>
+<span id="cb16-320"><a href="#cb16-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-321"><a href="#cb16-321" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
+<span id="cb16-322"><a href="#cb16-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-323"><a href="#cb16-323" aria-hidden="true" tabindex="-1"></a><span class="in">```{r sessioninfo}</span></span>
+<span id="cb16-324"><a href="#cb16-324" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb16-325"><a href="#cb16-325" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb16-326"><a href="#cb16-326" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-327"><a href="#cb16-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-328"><a href="#cb16-328" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
+<span id="cb16-329"><a href="#cb16-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-330"><a href="#cb16-330" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>Both Venn diagrams and upset plots operate on sets, e.g. they require that</span>
+<span id="cb16-331"><a href="#cb16-331" aria-hidden="true" tabindex="-1"></a>a hard threshold has been applied to the results of a differential expression</span>
+<span id="cb16-332"><a href="#cb16-332" aria-hidden="true" tabindex="-1"></a>analysis. That's problematic, because </span>
+<span id="cb16-333"><a href="#cb16-333" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">p-values themselves display high variability</span><span class="co">](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370685/)</span></span>
+<span id="cb16-334"><a href="#cb16-334" aria-hidden="true" tabindex="-1"></a>and dichotomizing quantitative information looses information. </span>
+<span id="cb16-335"><a href="#cb16-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-336"><a href="#cb16-336" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]</span>:</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

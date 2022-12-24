@@ -1,0 +1,316 @@
+---
+title: "UpSet plots: comparing differential expression across contrasts"
+author: "Thomas Sandmann"
+date: "2022-12-24"
+freeze: true
+categories: [TIL, R, visualization]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+---
+
+Today I learned how to use
+[UpSet plots](https://doi.org/10.1109%2FTVCG.2014.2346248)
+to visualize the overlap between sets of differentially expressed genes.
+
+I often analyze RNA-seq experiments with multiple factors, e.g. different 
+treatments, conditions, cell lines, genotypes, time points, etc. The scientific
+questions typically involve not just one, but multiple comparisons between
+experimental groups. For example:
+
+- How do wildtype cells respond to drug treatment? 
+- How do mutant cells respond?
+- What is the effect of drug treatment in growth medium A? Or B? Or C?
+- Is there a significant difference between treatment effects in wildtype
+  and mutant cells?
+- etc
+
+To answer these questions, I typically fit a single linear model and then
+extract the comparisons of interest by specifying each of them as as *contrast*.
+(Check out the vignette of the excellent
+[designmatrices Bioconductor package](https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html)
+for details on creating design matrices and extracting contrasts.)
+
+After applying a suitable p-value / FDR threshold, each comparison / contrast
+yields a list of differentially expressed genes[^1]. When the lists are long, it
+is difficult to assess the degree of overlap, e.g. the number of genes that were
+detected in multiple contrasts.
+
+If the number of comparisons is small (say < 5), then a 
+[Venn diagram](https://en.wikipedia.org/wiki/Venn_diagram)
+is an excellent way of displaying how these sets of genes overlap. But when
+the number of sets increases, so does the number of intersections - and Venn
+diagrams soon become hard to draw (and interpret).
+
+Upset plots can be used to clearly visualize larger numbers of sets. Here, I 
+am using the 
+[airway Bioconductor dataset](https://bioconductor.org/packages/release/data/experiment/html/airway.html),
+an RNA-Seq experiment on four human airway smooth muscle cell lines treated with
+dexamethasone, to illustrate how to
+
+- Fit a linear model using 
+[limma/voom](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)
+- Extract multiple contrasts
+- Visualize the numbers and intersections of differentially expressed gene sets
+  using Venn diagrams and UpSet plots.
+
+### Normalization, filtering & linear modeling
+
+```{r}
+#| message: false
+#| warning: false
+library(airway)
+library(ComplexHeatmap)
+library(edgeR)
+library(limma)
+```
+
+My typical analysis workflow uses functions from the 
+[edgeR](https://bioconductor.org/packages/release/bioc/html/edgeR.html)
+and 
+[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)
+R packages.
+
+The `airway` experiment is multifactorial, and it includes:
+
+- Cells from different donors (`cell` covariate)
+- Treatment with *dexamethasone* - or not (`dex` covariate)
+- Different read lengths (`avgLength` covariate)
+
+```{r}
+data(airway, package = "airway")
+with(colData(airway), table(cell, dex))
+```
+
+Here, I will focus only on the `cell` and `dex` variables, formulating a linear
+model that includes these two additive predictors: `~ 0 + cell + dex`
+
+::: {.callout-note}
+
+There are 
+[alternative ways to parameterize a linear model](https://bioconductor.org/packages/release/workflows/vignettes/RNAseq123/inst/doc/designmatrices.html#alternative-code-for-design-matrices). 
+For example, to obtain the pairwise comparisons between the first and the other
+three cell, lines (see below) the model `~ cell + dex` would have returned the
+same results without the need for contrasts. But for complex multivariate
+experiments, I personally find it easier to exclude the intercept term and
+to manually define contrasts of interest.
+:::
+
+First, the data is normalized with the 
+[TMM method](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-3-r25).
+Next, we focus only on genes exceeding a minimal expression threshold by
+filtering the dataset with the `filterByExpr` function. Then we are ready to
+fit the linear model - performing both the `voom` transformation and the 
+model fitting with the `voomLmFit` function.
+
+```{r}
+airway <- calcNormFactors(airway)
+design <- model.matrix(~ 0 + cell + dex, data = airway$samples)
+colnames(design) <- sub("cell", "", colnames(design))
+keep <- filterByExpr(airway, design = design)
+fit <- voomLmFit(airway[keep, row.names(design)], design = design)
+```
+
+For simplicity, we extract three contrasts, comparing gene expression between
+cell line `N052611` and each of the other three lines (adjusted for 
+dexamethasone treatment). (These might not be the most biologically interesting
+comparisons, but this post is focused on visualization - not biology.) 
+
+```{r}
+# contrasts: differences between the first and all other cell lines
+contrasts <- makeContrasts(
+  "N061011-N052611",
+  "N080611-N052611",
+  "N61311-N052611",
+  levels = design
+)
+fit2 <- contrasts.fit(fit, contrasts)
+results <- limma::decideTests(fit2)
+summary(results)
+```
+
+### Venn diagram
+
+Each of the pairwise comparisons yields hundreds of differentially expressed
+genes (at the default FDR < 5% threshold for each contrast imposed by 
+limma's `decideTests` function.) But are these genes similar across cell lines?
+
+For three comparisons, limma's built-in `vennDiagram` function is very useful:
+
+```{r}
+#| fig-width: 6
+#| fig-height: 6
+#| out-width: "75%"
+#| fig-align: "center"
+limma::vennDiagram(
+  results,
+  counts.col = "black",
+  circle.col = c("red", "blue", "green3"),
+  names = sub("-", "/\n", colnames(results)),
+  mar = rep(0,4),
+  cex = c(1.2,1,0.7)
+)
+```
+
+The diagram shows that only a minority of genes is differentially expressed
+between all three cell lines and our reference (cell line `N052611`). Most of
+the genes are only observed in the comparison between lines `N080611` and 
+`N052611`.
+
+::: {.callout-tip}
+This example doesn't distinguish between up- and down-regulated genes, e.g. a 
+gene that is up-regulated in one contrast but down-regulated in another would
+be found in the intersection. To display separate counts for up- and 
+downregulated genes, add the `include=c("up", "down")` argument to the 
+`vennDiagram` call.
+:::
+
+If the number of comparisons increases, Venn diagrams are less useful (e.g.
+the famous 
+[banagram](https://www.nature.com/articles/nature11241/figures/4) 
+with six sets).
+
+### Upset plots
+
+There are multiple R packages that can generate UpSet plots, including e.g.
+[UpSetR](https://cran.r-project.org/package=UpSetR). I ran into 
+difficulties customizing both the names of the sets *and* select specific
+intersections for plotting with `UpSetR`. Instead, I am using the `UpSet`
+function included in the 
+[ComplexHeatmap](https://jokergoo.github.io/ComplexHeatmap-reference/book/upset-plot.html)
+R package here.
+
+In preparation for plotting, multiple helper functions are available, including
+
+- `make_comb_mat`: calculcate the overlap between different sets, according to
+  the user-specified `mode`: one of `distinct`, `intersect` or `union`.
+- `comb_degree`: return the degree of each combination, e.g. how many sets were
+  included.
+- `set_size`: return the size of each input set
+- `comb_size`: return the size of each of the intersected sets (e.g. the 
+same sets shown in the Venn diagram above, because the `mode` was set to 
+`distinct`).
+
+For example, let's first restrict our input to all genes called significant
+in at least one of the comparisons:
+
+```{r}
+# remove genes not signif. in any contrast
+results <- results[rowSums(abs(results)) > 0, ]
+```
+
+Next, we determine the number of genes in each intersection. (Because 
+`make_comb_mat` includes single sets as well, we exclude them by filtering out
+all results for intersections of degree one.)
+
+```{r}
+# calculate the intersection between the differentially expressed gene sets
+m <- make_comb_mat(abs(results), mode = "distinct")
+# exclude self-intersects (total # of diff. genes will be displayed separately)
+m <- m[comb_degree(m) > 1]
+```
+
+Let's check the size of the input sets (e.g. all up- and down-regulated genes
+in each comparison):
+
+```{r}
+(ss <- set_size(m))
+```
+
+and their intersections:
+
+```{r}
+(cs <- comb_size(m))
+```
+
+(Together, these numbers reproduce what was shown in the Venn diagram above.)
+Now we are ready to generate an UpSet plot!
+
+Because the `UpSet` function uses the `ComplexHeatmap::Heatmap` function under
+the hood, the resulting plot can be annotated / decorated with the same set of
+functions. Here, we plot the intersections in the main plot, and then add the
+size of the individual sets on the right-hand margin.
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3 
+#| out-width: "75%"
+#| fig-align: "center"
+ht <- UpSet(m, 
+      set_order = colnames(m), 
+      comb_order = order(comb_degree(m)),
+      top_annotation = HeatmapAnnotation(
+        "Distinct diff. genes" = anno_barplot(
+          cs, 
+          ylim = c(0, max(cs)*1.1),
+          border = FALSE, 
+          gp = gpar(fill = "black"), 
+          height = unit(4, "cm")
+        ), 
+        annotation_name_side = "left", 
+        annotation_name_rot = 90),
+      right_annotation = HeatmapAnnotation(
+        which = "row",
+        "Total" = anno_barplot(
+          ss, 
+          ylim = c(0, max(ss)*1.1),
+          border = FALSE, 
+          gp = gpar(fill = "black"), 
+          width = unit(4, "cm")
+        )
+      ),
+      column_title = "Intersection between contrasts"
+)
+ht = draw(ht)
+od = column_order(ht)
+rod = row_order(ht)
+decorate_annotation("Distinct diff. genes", {
+  grid.text(cs[od], 
+            x = seq_along(cs), 
+            y = unit(cs[od], "native") + unit(2, "pt"), 
+            default.units = "native", just = c("left", "bottom"), 
+            gp = gpar(fontsize = 8, col = "#404040"), rot = 45)
+})
+decorate_annotation("Total", {
+  grid.text(ss[rod], 
+            x = unit(ss[rod], "native") + unit(20, "pt"), 
+            y = rev(seq_along(ss)), 
+            default.units = "native", just = c("right", "bottom"), 
+            gp = gpar(fontsize = 8, col = "#404040"))
+})
+```
+
+Each column of the main plot shows the number of genes that are unique to the
+intersection of the two (or three) indicated comparisons, matching those in the
+previous Venn diagram. 
+
+For a small number of sets, a Venn diagram might be the preferred e.g. because
+readers might be familiar this visualization. But an UpSet plot 
+is well suited for the analysis more than three sets. (See 
+[more examples here](https://upset.app/)
+).
+
+## Reproducibility
+
+<details>
+
+```{r sessioninfo}
+#| echo: false
+sessioninfo::session_info()
+```
+
+</details>
+
+[^1]: Both Venn diagrams and upset plots operate on sets, e.g. they require that
+a hard threshold has been applied to the results of a differential expression
+analysis. That's problematic, because 
+[p-values themselves display high variability](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370685/)
+and dichotomizing quantitative information looses information. 
+
+[^2]:

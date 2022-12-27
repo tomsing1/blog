@@ -1,0 +1,805 @@
+---
+title: "Interactive GSEA results: visualizations with reactable & plotly"
+author: "Thomas Sandmann"
+date: "2022-12-27"
+freeze: true
+categories: [TIL, R, visualization]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    page-layout: full
+    code-fold: true
+    code-summary: "Show the code"
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+---
+
+As a Computational Biologist, I frequently analyze data from high throughput
+experiments, including transcriptomics, proteomics or metabolomics results. As a
+first step, I usually examine the behavior of individual analysis - genes,
+proteins or metabolites - and obtain a long list of effect sizes, p- or 
+q-values.
+
+Frequently, another layer of analysis focuses on the behavior of predefined gene
+sets, e.g. groups of genes whose up- or down-regulation reflects the activity of
+a biological process, a metabolic pathway or is indicative of a cellular state.
+
+There are numerous methods to perform 
+[gene set enrichment (GSEA)](https://en.wikipedia.org/wiki/Gene_set_enrichment_analysis),
+over-representation (ORA) or pathway analysis, with 
+[more than 140 R packages on Bioconductor](https://www.bioconductor.org/packages/release/BiocViews.html#___GeneSetEnrichment)
+alone. 
+
+::: {.callout-note}
+How the gene sets are actually defined, e.g. whether they reflect
+the underlying biology of the system under study, is likely more critical than 
+the exact choice of algorithm - but that's a discussion for another day.)
+:::
+
+## Sharing analysis results
+
+Regardless of the chosen statistical approach, GSEA or ORA analyses typically
+produce set-level statistics, e.g. a summary of the effect size across all
+members of a gene set alongside a statistic, p-value, etc.
+
+To share results with my collaborators, I would like to enable them to 
+
+1. Browse set-level results to hone in on specific pathways / processes of
+   interest.
+2. Visualize the behavior of the analytes in the set.
+3. Drill down to a subset of analytes and export e.g. gene-level results
+
+The pioneering
+[ReportingTools Bioconductor package](https://bioconductor.org/packages/release/bioc/html/ReportingTools.html) 
+creates static web pages for gene-set enrichment results, including gene- and 
+set-level plots and statistics. But all of the plots are generated in advance, 
+and interactivity is limited.
+
+In this blog post, I take advantage of the
+[reactable](https://cran.r-project.org/package=reactable),
+[plotly](https://cran.r-project.org/package=plotly),
+[crosstalk](https://cran.r-project.org/package=crosstalk)
+and 
+[htmlwidgets](https://cran.r-project.org/package=htmlwidgets)
+R packages to create a stand-alone **interactive HTML report**, allowing my
+collaborators to explore the results without the need for a server.
+
+I learned a lot about these incredibly useful packages!
+
+### Features
+
+Here, I am combining several interactive elements, linked through `SharedData`
+objects via `crosstalk`:
+
+- At the top, an interactive volcano plot showing the effects sizes (mean 
+  trimmed log2 fold changes) and nominal p-values for each tested gene set.
+- Below, a nested `reatable` table displays the results for each set. When
+  a row is expanded
+  - It shows a volcano plot with *gene-level* results, as well
+  as a linked table with the corresponding statistics. 
+  - The reader can hone in on specific genes by selecting points in the volcano
+  plot, or by searching the table.
+
+```{r}
+#| results: hide
+#| message: false
+#| warning: false
+library(Biobase)
+library(crosstalk)
+library(dplyr)
+library(htmltools)
+library(plotly)
+library(reactable)
+library(sparrow)
+library(stringr)
+library(htmlwidgets)  
+library(V8)  # to create static HTML
+
+if (Biobase::package.version("htmlwidgets") > "1.5.4") {
+  # see https://github.com/ramnathv/htmlwidgets/issues/457
+  stop(
+    "htmlwidgets version 1.6.0 is not compatible with nested reactable tables."
+  )
+}
+
+#' Retrieve gene-level statistics for a single gene set
+#' 
+#' @param stats named list of data.frames with gene-level statistics, one for
+#' each gene set 
+#' @gene_set_name Scalar character, the name of an element of `stats`.
+#' in `data`.
+#' @return A data.frame with results for a single gene set
+.get_gene_data <- function(mg, gene_set_name, keep.cols = c(
+  "symbol", "entrez_id", "logFC", "pval", "CI.L", "CI.R", "pval", "padj")) {
+  sparrow::geneSet(mg, name = gene_set_name) %>%
+    dplyr::select(tidyselect::any_of(keep.cols)) %>%
+    dplyr::arrange(pval)
+}
+
+#' @importFrom htmltools tags
+.entrez_url <- function(value) {
+  if(!is.na(value) & nzchar(value)) {
+    url <- sprintf("http://www.ncbi.nlm.nih.gov/gene/%s",
+                   value)
+    return(htmltools::tags$a(href = url, target = "_blank", 
+                             as.character(value)))
+  } else {
+    return(value)
+  }
+}
+
+#' @importFrom htmltools tags
+.symbol_url <- function(value) {
+  if(!is.na(value) & nzchar(value)) {
+    url <- sprintf(
+      "https://www.genenames.org/tools/search/#!/?query=%s",
+      value)
+    return(
+      htmltools::tags$a(href = url, target = "_blank", as.character(value))
+    )
+  } else {
+    return(value)
+  }
+}
+
+#' @importFrom htmltools tags
+.msigdb_url <- function(value) {
+  if(!is.na(value) & nzchar(value)) {
+    url <- sprintf(
+      "https://www.gsea-msigdb.org/gsea/msigdb/human/geneset/%s.html",
+      value)
+    return(
+      htmltools::tags$a(href = url, target = "_blank", as.character(value))
+    )
+  } else {
+    return(value)
+  }
+}
+
+#' Create a reactable table with gene-level results
+#' 
+#' @param data A data.frame or a `SharedData` object.
+#' @param defaultColDef A list that defines the default configuration for a 
+#' column, typically the output of the [reactable::colDef] function.
+#' @param columns A list of column definitions, each generated with the 
+#' [reactable::colDef] function.
+#' @param theme A `reactableTheme` object, typically generated with a call to
+#' the [reactable::reactableTheme] function.
+#' @param striped Scalar flag, display stripes?
+#' @param bordered Scalar flag, display borders?
+#' @param highlight Scalar flag, highlight selected rows?
+#' @param searchable Scalar flag, add search box?
+#' @param defaultPageSize Scalar integer, the default number of rows to display.
+#' @param elementId Scalar character, an (optional) element identifier
+#' @param ... Additional arguments for the [reactable::reactable] function.
+#' @return A `reactable` object.
+#' @export
+#' @importFrom reactable colDef reactable colFormat
+#' @examples
+#' \dontrun{
+#' df <- data.frame(
+#'    symbol = c("TP53", "KRAS", "PIK3CA"),
+#'    pval = runif(3, 0, 1),
+#'    logFC = rnorm(3)
+#' )
+#' stats_table(df)
+#' }
+stats_table <- function(
+    data, 
+    defaultColDef = reactable::colDef(
+      align = "center",
+      minWidth = 100,
+      sortNALast = TRUE
+    ),
+    columns = list(
+      symbol = reactable::colDef(
+        name = "Symbol",
+        cell = .symbol_url
+      ),
+      entrezid = reactable::colDef(
+        name = "EntrezId",
+        cell = .entrez_url
+      ),
+      entrez_id = reactable::colDef(
+        name = "EntrezId",
+        cell = .entrez_url
+      ),
+      entrez = reactable::colDef(
+        name = "EntrezId",
+        cell = .entrez_url
+      ),
+      pval = reactable::colDef(
+        name = "P-value",
+        format = reactable::colFormat(digits = 4)),
+      padj = reactable::colDef(
+        name = "P-value",
+        format = reactable::colFormat(digits = 4)),
+      t = reactable::colDef(
+        name = "t-statistic",
+        format = reactable::colFormat(digits = 2)),
+      B = reactable::colDef(
+        name = "log-odds",
+        format = reactable::colFormat(digits = 2)),
+      AveExpr = reactable::colDef(
+        name = "Mean expr",
+        format = reactable::colFormat(digits = 2)),
+      CI.L = reactable::colDef(
+        name = "Lower 95% CI",
+        format = reactable::colFormat(digits = 2)),
+      CI.R = reactable::colDef(
+        name = "Upper 95% CI",
+        format = reactable::colFormat(digits = 2)),
+      logFC = reactable::colDef(
+        name = "logFC", 
+        format = reactable::colFormat(digits = 2),
+        style = function(value) {
+          if (value > 0) {
+            color <- "firebrick"
+          } else if (value < 0) {
+            color <- "navy"
+          } else {
+            color <- "lightgrey"
+          }
+          list(color = color, fontWeight = "bold")
+        }
+      )
+    ),
+    theme = reactable::reactableTheme(
+      stripedColor = "#f6f8fa",
+      highlightColor = "#f0f5f9",
+      cellPadding = "8px 12px",
+      style = list(
+        fontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, 
+        Arial, sans-serif")
+    ),
+    striped = FALSE,
+    bordered = FALSE,
+    highlight = TRUE,
+    searchable = TRUE,
+    defaultPageSize = 10L,
+    elementId = NULL,
+    ...
+) {
+  reactable::reactable(
+    data = data,
+    searchable = searchable,
+    striped = striped,
+    bordered = bordered,
+    highlight = highlight,
+    selection = "multiple",
+    onClick = "select",
+    rowStyle = list(cursor = "pointer"),
+    theme = theme,
+    defaultPageSize = defaultPageSize,
+    defaultColDef = defaultColDef,
+    columns = columns,
+    elementId = elementId,
+    ...
+  )
+}
+
+#' Wrap stats_table() output in a div html tag
+#' 
+#' @param style Scalar character, the style tag for the tag
+#' @param elementId Scalar character, the element identifier
+#' @param ... Arguments passed on to the `stats_table` function.
+#' @return A `shiny.tag` object.
+#' @importFrom htmltools div tags
+.stats_table_div <- function(
+    style = paste0(
+      "width: 50%;",
+      "float: right;",
+      "padding-top: 1rem;"
+    ),
+    elementId = NULL,
+    ...) {
+  if (is.null(elementId)) {
+    elementId <- basename(tempfile(pattern = "id"))
+  }    
+  htmltools::div(
+    style = style,
+    htmltools::tagList(
+      stats_table(..., elementId = elementId),
+      # download button
+      htmltools::tags$button(
+        "\u21E9 Download as CSV",
+        onclick = sprintf("Reactable.downloadDataCSV('%s', 'gene-results.csv')",
+                          elementId)
+      )
+    )    
+  )
+}
+
+#' Create an interactive volcano plot
+#' 
+#' @param data A data.frame or a `SharedData` object.
+#' @param x A `formula` defining the column of `data` mapped to the x-axis.
+#' @param y A `formula` defining the column of `data` mapped to the y-axis.
+#' @param text A `formula` defining the column of `data` mapped to the tooltip.
+#' @param title Scalar character, the title of the plot.
+#' @param xlab Scalar character, the title of the x-axis
+#' @param ylab Scalar character, the title pf the y-axis
+#' @param title.width Scalar integer, the target line width (passed on to the
+#' [stringr::str_wrap] function.
+#' @param opacity Scalar numeric between 0 and 1, the opacity of the points.
+#' @param marker A list defining the size, line and color limits of the points.
+#' @param colors Character vector of colors used to shade the points.
+#' @param highlight.color Scalar character, the color used to highlight selected
+#' points.
+#' @param webGL Scalar flag, use webGL to render the plot?
+#' @param width Scalar numeric or scalar character, width of the plot
+#' @param height Scalar numeric or scalar character, height of the plot
+#' @param ... Additional arguments passed to the [plotly::plot_ly] function.
+#' @return A `plotly` object.
+#' @importFrom plotly plot_ly add_trace config layout highlight toWebGL
+#' @importFrom grDevices colorRampPalette
+#' @export
+#' @examples
+#' \dontrun{
+#' df <- data.frame(
+#'    symbol = letters,
+#'    pval = runif(length(letters), 0, 1),
+#'    logFC = rnorm(length(letters))
+#' )
+#' volcano_plot(df)
+#' }
+volcano_plot <- function(
+    data, 
+    x = ~logFC,
+    y = ~-log10(pval),
+    text = ~symbol,
+    title = "",
+    xlab = "Fold change (log2)",
+    ylab = "-log10(pval)",
+    title.width = 35L,
+    opacity = 0.5,
+    marker = list(
+      color = ~logFC,
+      size = 10, 
+      cmax = 3,
+      cmid = 0,
+      cmin = -3,
+      line = list(color = "grey", width = 1)),
+    colors = grDevices::colorRampPalette(
+      c('navy', 'lightgrey', 'firebrick'))(15),
+    highlight.color = "red",
+    webGL = FALSE,
+    width = NULL,
+    height = NULL,
+    ...) {
+  p <- plotly::plot_ly(
+    width = width,
+    height = height
+  ) %>% 
+    plotly::add_trace(
+      data = data, 
+      name = "",
+      type = 'scatter',
+      mode = 'markers',
+      x = x,
+      y = y,
+      text = text,
+      hoverinfo ="text",
+      opacity = opacity,
+      colors = colors,
+      marker = marker,
+      ...
+    ) %>%
+    plotly::config(displaylogo = FALSE) %>%
+    plotly::layout(
+        xaxis = list(title = xlab),
+        yaxis = list(title = ylab),
+        title = stringr::str_wrap(
+          stringr::str_replace_all(title, "_", " "),
+          width = title.width)
+    ) %>%
+    plotly::highlight(
+      color = highlight.color,
+      on = "plotly_selected",
+      off = "plotly_deselect"
+    )
+  if (isTRUE(webGL)) p <- plotly::toWebGL(p)
+  return(p)
+}
+
+#' Create an interactive volcano plot for gene-set results
+#' 
+#' @param data A data.frame or a `SharedData` object.
+#' @param x A `formula` defining the column of `data` mapped to the x-axis.
+#' @param y A `formula` defining the column of `data` mapped to the y-axis.
+#' @param text A `formula` defining the column of `data` mapped to the tooltip.
+#' @param xlab Scalar character, the title of the x-axis
+#' @param text.width Scalar integer, the target line width (passed on to the
+#' [stringr::str_wrap] function.
+#' @param hovertemplate Scalar character defining the tooltip template.
+#' @param marker A list defining the size, line and color limits of the points.
+#' @param width Scalar numeric or scalar character, width of the plot
+#' @param height Scalar numeric or scalar character, height of the plot
+#' @param ... Additional arguments passed to the [volcano_plot] function.
+#' @return A `plotly` object.
+#' @importFrom grDevices colorRampPalette
+#' @importFrom stringr str_wrap str_replace_all
+#' @export
+#' @examples
+#' \dontrun{
+#' df <- data.frame(
+#'    name = paste("Set", letters),
+#'    pval = runif(length(letters), 0, 1),
+#'    mean.logFC.trim = rnorm(length(letters)),
+#'    n = sample(1:100, size = length(letters))
+#' )
+#' volcano_gene_set_plot(df)
+#' }
+volcano_gene_set_plot <- function(
+    data,
+    text = ~stringr::str_wrap(
+          stringr::str_replace_all(name, "_", " "),
+          width = text.width),
+    text.width = 25,
+    x = ~mean.logFC.trim,
+    y = ~-log10(pval),
+    marker = list(
+      color = ~mean.logFC.trim,
+      size = ~n, 
+      sizemode = 'area', 
+      cmax = 2,
+      cmid = 0,
+      cmin = -2,
+      line = list(color = "grey", width = 1)
+    ), 
+    hovertemplate = paste(
+            '<b>%{text}</b>',
+            '<br><i>logFC</i>: %{x:.2f}',
+            '<br><i>-log10(pval)</i>: %{y:.2f}',
+            '<br><i>n</i>: %{marker.size}',
+            '<br>'),
+    xlab = "Fold change (log2)",
+    width = NULL,
+    height = NULL,
+    ...)
+{
+  volcano_plot(
+    data = data, 
+    text = text, 
+    x = x, 
+    y = y,
+    marker = marker, 
+    xlab = xlab,
+    hovertemplate = hovertemplate,
+    width = width,
+    height = height,
+    ...)
+}
+
+#' Wrap volcano_plot() output in a div html tag
+#' 
+#' @param helptext Scalar character, text to display below the plot.
+#' @param style Scalar character, the style tag for the tag
+#' @param ... Arguments passed on to the `volcano_plot` function.
+#' @return A `shiny.tag` object.
+#' @importFrom htmltools div tagList p
+.volcano_plot_div <- function(
+    helptext = paste("Draw a rectangle / use the lasso tool to select points,",
+                     "double-click to deselect all."), 
+    style = paste0(
+      "width: 50%;",
+      "float: left;",
+      "padding-right: 1rem;",
+      "padding-top: 4rem;"
+    ), 
+    ...) {
+  htmltools::div(
+    style = style, {
+      htmltools::tagList(
+        volcano_plot(...),
+        htmltools::p(helptext)
+      )
+    }
+  )
+}
+
+#' Helper function to combine gene-level outputs into a single div
+#' 
+#' @param data A data.frame with gene-set results.
+#' @param stats A named list of data.frames whose names much match the `name`
+#' column of `data`.
+#' @param index Scalar count, the row of `data` to plot.
+#' @return A `shiny.tag` object containing the output of the 
+#' `.volcano_plot_div()` and `.stats_table_div()` functions.
+#' @importFrom crosstalk SharedData
+#' @importfrom htmltools tagList div
+.row_details <- function(data, mg, index) {
+  gene_data <- .get_gene_data(mg = mg, gene_set_name = data$name[index])
+  gd <- crosstalk::SharedData$new(gene_data)
+  htmltools::div(
+    htmltools::tagList(
+      # volcano plot
+      .volcano_plot_div(data = gd, title = data$name[index]),
+      # interactive gene-stat table
+      .stats_table_div(data = gd)
+    )
+  )
+}
+
+#' Create a nested gene set result table
+#' 
+#' @param mg A `SparrowResult` object
+#' @param max.pval Scalar numeric, the largest (uncorrected) p-value for which
+#' to return results.
+#' @param max.results Scalar integer, the top number of rows to return
+#' (ordered by p-value).
+#' @param color.up Scalar character, the color for positive log2 fold changes.
+#' @param color.down Scalar character, the color for negative log2 fold changes.
+#' @param color.ns Scalar character, the color for zero log2 fold change.
+#' @param theme A `reactableTheme` object, typically generated with a call to
+#' the [reactable::reactableTheme] function.
+#' @param defaultColDef A list that defines the default configuration for a 
+#' column, typically the output of the [reactable::colDef] function.
+#' @param columns A list of column definitions, each generated with the 
+#' [reactable::colDef] function.
+#' @param bordered Scalar flag, display borders?
+#' @param highlight Scalar flag, highlight selected rows?
+#' @param searchable Scalar flag, add search box?
+#' @param striped Scalar flag, alternate row shading?
+#' @param defaultPageSize Scalar integer, the default number of rows to display.
+#' @param pageSizeOptions Integer vector that will populate the pagination menu.
+#' @param paginationType Scalar character, the pagination control to use. Either
+#' `numbers` for page number buttons (the default), `jump` for a page jump, or 
+#' `simple` to show 'Previous' and 'Next' buttons only.
+#' @param elementId Scalar character, an (optional) element identifier
+#' @param defaultSorted Character vector of column names to sort by default. Or
+#' to customize sort order, a named list with values of `asc` or `desc`.
+#' @param name_url A function that returns a `shiny.tag` (usually an 
+#' `<a href></a>` tag) for each element of the `name` column of `data` to link
+#' to more information about the gene set (e.g. on the MSigDb website, etc).
+#' @param ... Additional arguments for the [reactable::reactable] function.
+#' @importFrom reactable reactable reactableTheme colDef colFormat
+#' @return A `reactable` object with one row for each row in `data`, each of
+#' which can be expanded into the output of the `.row_details()` function
+#' for that specific gene set.
+#' @export
+#' @examples
+#' \dontrun{
+#' library(sparrow)
+#' vm <- sparrow::exampleExpressionSet()
+#' gdb <- sparrow::exampleGeneSetDb()
+#' mg <- sparrow::seas(vm, gdb, c('fry'), design = vm$design, 
+#'                     contrast = 'tumor')
+#' gene_set_table(mg, max.results = 10)
+#' }
+gene_set_table <- function(
+    mg,
+    max.pval = 0.05,
+    max.results = Inf,
+    keep.cols = c("collection", "name", "n", "pval", "padj", 
+                      "mean.logFC.trim"),
+    method = resultNames(mg)[1],
+    color.up = "firebrick", 
+    color.down = "navy",
+    color.ns = "grey50",
+    theme = reactable::reactableTheme(
+      stripedColor = "grey95",
+      highlightColor = "grey80",
+      cellPadding = "8px 12px",
+      style = list(
+        fontFamily = "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, 
+        Arial, sans-serif")
+    ),
+    defaultColDef = reactable::colDef(
+      header = function(value) value,
+      align = "center",
+      minWidth = 100,
+      headerStyle = list(background = "#f7f7f8"),
+      sortNALast = TRUE
+    ),
+    name_url = function(value) {value},
+    columns = list(
+      collection = reactable::colDef(
+        name = "Collection"),
+      name = reactable::colDef(
+        name = "Gene set",
+        cell = name_url,
+        minWidth = 150),
+      pval = reactable::colDef(
+        name = "P-value", aggregate = "min",
+        format = reactable::colFormat(digits = 4)),
+      padj = reactable::colDef(
+        name = "FDR", aggregate = "min",
+        format = reactable::colFormat(digits = 4)),
+      Direction =  reactable::colDef(
+        name = "dir", minWidth = 45, 
+        cell = function(value) {
+          if (value == "Up")  "\u2B06" else "\u2B07"
+        }),
+      logFC = reactable::colDef(
+        name = "logFC", format = reactable::colFormat(digits = 2),
+        style = function(value) {
+          if (value > 0) {
+            color <- color.up
+          } else if (value < 0) {
+            color <- color.down
+          } else {
+            color <- color.ns
+          }
+          list(color = color, fontWeight = "bold")
+        }
+      ),
+      mean.logFC.trim = reactable::colDef(
+        name = "logFC", format = reactable::colFormat(digits = 2),
+        style = function(value) {
+          if (value > 0) {
+            color <- color.up
+          } else if (value < 0) {
+            color <- color.down
+          } else {
+            color <- color.ns
+          }
+          list(color = color, fontWeight = "bold")
+        }
+      )
+    ),
+    elementId = "expansion-table",
+    static = TRUE,
+    filterable = TRUE,
+    searchable = TRUE,
+    bordered = TRUE,
+    striped = FALSE,
+    highlight = TRUE,
+    defaultPageSize = 25L,
+    showPageSizeOptions = TRUE,
+    pageSizeOptions = sort(unique(c(25, 50, 100, nrow(data)))),
+    paginationType = "simple",
+    defaultSorted = list(pval = "asc")
+) {
+  data = sparrow::result(mg, method) %>%
+    dplyr::slice_min(n = max.results, order_by = pval) %>%
+    dplyr::filter(pval <= max.pval) %>%
+    dplyr::select(tidyselect::any_of(keep.cols))
+  if (nrow(data) == 0) {
+    warning("None of the gene sets pass the `max.pval` threshold.")
+    return(NULL)
+  }
+  reactable::reactable(
+    data,
+    elementId = elementId,
+    defaultColDef = defaultColDef,
+    static = static,
+    filterable = filterable,
+    searchable = searchable,
+    bordered = bordered,
+    highlight = highlight,
+    theme = theme,
+    defaultPageSize = defaultPageSize,
+    showPageSizeOptions = showPageSizeOptions,
+    pageSizeOptions = pageSizeOptions,
+    paginationType = paginationType,
+    defaultSorted = defaultSorted,
+    columns = columns,
+    details = function(index) {
+      .row_details(data = data, mg = mg, index)
+    }
+  )
+}
+
+#' Wrapper to create a div HTML tag
+#' @param mg A `SparrowResult` object
+#' @param method Scalar character, which results to return from `mg`.
+#' @param max.pal Scalar numeric, return only results wiht an (uncorrected)
+#' <= `max.pal`.
+#' @param verbose Scalar flag, show messages?
+#' @param title Scalar character, the `h1` title for the element
+#' @param elementId Scalar character, the element identifier for the interactive
+#' table.
+#' @param style Scalar character, the style tag for the tag
+#' @param ... Additional arguments passed on to the `gene_set_table` function.
+#' @return A `shiny.tag` object containing the output of the 
+#' `gene_set_table()` function.
+#' @importFrom htmltools div h1 tagList tags
+#' @export
+gene_set_report <- function(
+    mg,
+    method = resultNames(mg)[1], 
+    max.pval = 0.05,
+    max.results = Inf,
+    verbose = TRUE,
+    title = "Gene set enrichment analysis",
+    elementId = "expansion-table",
+    style = "",
+    ...
+) {
+  if (!is.finite(max.results)) {
+    message.log <- sprintf(
+      paste("Reporting all '%s' results with (uncorrected)",
+            "p-value <= %s"), 
+      method, max.pval)
+  } else {
+    message.log <- sprintf(
+      paste("Reporting up to %s '%s' results with (uncorrected)",
+            "p-value <= %s"), 
+      max.results, method, max.pval)
+  }
+  if (isTRUE(verbose)) {
+    message(message.log)
+  }
+  htmltools::div(
+    style = style, 
+    {
+      htmltools::tagList(
+        htmltools::h1(title),
+        htmltools::p(message.log),
+        # volcano plot
+        sparrow::result(mg, method) %>%
+          dplyr::slice_min(n = max.results, order_by = pval) %>%
+          volcano_gene_set_plot(width = "50%"),
+        htmltools::br(),
+        # expansion button
+        htmltools::tags$button(
+          "Expand/collapse all rows",
+          onclick = sprintf("Reactable.toggleAllRowsExpanded('%s')", elementId)
+        ),
+        gene_set_table(mg = mg, max.pval = max.pval, max.results = max.results,
+                       ...)
+      )
+    })
+}
+
+# gene set enrichment analysis with the sparrow Bioconductor package
+vm <- exampleExpressionSet()
+gdb <- exampleGeneSetDb()
+mg <- seas(vm, gdb, c('fry'), design = vm$design, contrast = 'tumor')
+```
+
+```{r}
+# create an interactive report
+htmltools::browsable(
+  gene_set_report(mg, method = "fry", max.pval = 0.05, max.results = Inf)
+)
+```
+
+<br><br>
+
+### Details 
+
+#### Gene set enrichment analysis
+
+In this example, I am using 
+[Steve Lianoglou's](https://genomic.social/@lianos)
+[sparrow Bioconductor package](https://www.bioconductor.org/packages/release/bioc/html/sparrow.html)
+to perform gene set enrichment analysis. But any other method could be used,
+as long as both set-level and gene-level differential expression statistics
+can be obtained.
+
+`sparrow` supports numerous GSEA and ORA methods. Here, I am using the 
+[fry algorithm](https://academic.oup.com/bioinformatics/article/26/17/2176/200022)
+from the 
+[limma Bioconductor package](https://bioconductor.org/packages/release/bioc/html/limma.html)
+for illustration.
+
+#### Dependencies
+
+::: {.callout-warn}
+At the time of writing, the current release of the `reactable` R package
+(v0.4.1) is not compatible with the latest release of the `htmlwidgets` 
+(v1.6.0). This issue
+[has already been fixed in reactable's development version](https://github.com/glin/reactable/issues/304), 
+which is available from 
+[github](https://github.com/glin/reactable)
+Alternatively, you can use the previous release of `htmlwidgets` (v1.5.4), e.g. 
+by installing it with 
+`remotes::install_version("htmlwidgets", version = "1.5.4")`.
+:::
+
+<details>
+<summary>
+Reproducibility
+</summary>
+
+```{r sessioninfo}
+#| echo: false
+sessioninfo::session_info()
+```
+</details>

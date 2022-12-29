@@ -3,3 +3,8 @@
 .DS_store
 README.html
 README_files/
+env
+.Renviron
+.Rprofile
+
+/env/

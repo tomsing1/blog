@@ -70,6 +70,18 @@ collaborators to explore the results without the need for a server.
 
 I learned a lot about these incredibly useful packages!
 
+::: {.callout-note}
+At the time of writing, the current release of the `reactable` R package
+(v0.4.1) is not compatible with the latest release of the `htmlwidgets` 
+(v1.6.0). This issue
+[has already been fixed in reactable's development version](https://github.com/glin/reactable/issues/304), 
+which is available from 
+[github](https://github.com/glin/reactable)
+Alternatively, you can use the previous release of `htmlwidgets` (v1.5.4), e.g. 
+by installing it with 
+`remotes::install_version("htmlwidgets", version = "1.5.4")`.
+:::
+
 ### Features
 
 Here, I am combining several interactive elements, linked through `SharedData`
@@ -98,13 +110,6 @@ library(sparrow)
 library(stringr)
 library(htmlwidgets)  
 library(V8)  # to create static HTML
-
-if (Biobase::package.version("htmlwidgets") > "1.5.4") {
-  # see https://github.com/ramnathv/htmlwidgets/issues/457
-  stop(
-    "htmlwidgets version 1.6.0 is not compatible with nested reactable tables."
-  )
-}
 
 #' Retrieve gene-level statistics for a single gene set
 #' 
@@ -779,23 +784,11 @@ from the
 [limma Bioconductor package](https://bioconductor.org/packages/release/bioc/html/limma.html)
 for illustration.
 
-#### Dependencies
-
-::: {.callout-warn}
-At the time of writing, the current release of the `reactable` R package
-(v0.4.1) is not compatible with the latest release of the `htmlwidgets` 
-(v1.6.0). This issue
-[has already been fixed in reactable's development version](https://github.com/glin/reactable/issues/304), 
-which is available from 
-[github](https://github.com/glin/reactable)
-Alternatively, you can use the previous release of `htmlwidgets` (v1.5.4), e.g. 
-by installing it with 
-`remotes::install_version("htmlwidgets", version = "1.5.4")`.
-:::
+#### Reproducibility
 
 <details>
 <summary>
-Reproducibility
+SessionInfo
 </summary>
 
 ```{r sessioninfo}

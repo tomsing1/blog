@@ -15,4 +15,16 @@ about:
       href: https://github.com/tomsing1
 ---
 
-Welcome to Thomas Sandmann's blog. 
+Welcome to Thomas Sandmann's blog. Originally from Germany, my professional
+journey includes a degree in Biochemistry, a PhD in Developmental Biology
+from [EMBL](https://www.embl.org/), postdoctoral research at
+[Temasek Lifescience Laboratories](http://www.tll.org.sg/) and at the
+[German Cancer research Center](https://www.dkfz.de/en/index.html). Afterwards,
+I worked as a Computational Biologist at [Genentech](https://www.gene.com/)
+and [Verily](https://verily.com/). In 2016 I joined
+[Denali Therapeutics](https://www.denalitherapeutics.com/), where I am 
+collaborating with colleagues across the organization to generate, analyze and
+understand genomics & genetics data.
+
+This blog collects the personal lessons I am learning along the way. <br>
+(Opinions are my own and not the views of my employer.)

@@ -1,0 +1,343 @@
+---
+title: "AWS dynamodb"
+---
+
+This document assumes that the AWS credentials and region are available to the
+[paws R package](https://github.com/paws-r/paws/blob/main/docs/credentials.md)
+e.g. as environmental variables.
+
+The following code is based on the 
+[GettingStarted](https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/python/example_code/dynamodb/GettingStarted)
+section of the python section in the
+[AWS SDK documentation](https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/python/example_code/dynamodb).
+
+```{r}
+library(paws)
+library(jsonlite)
+library(utils)
+```
+
+```{r}
+.extract_error_code <- function(cond) {
+  strsplit(cond$error_response$`__type`, "#", fixed = TRUE)[[1]][-1]
+}
+
+#' Determines whether a table exists.
+#' @param svc A service client for dynamodb
+#' @param table_name Scalar character, the name of the table
+#' @return Scalar flag indicating if the table exists
+#' @examples
+#' \dontrun{
+#' svc <- dynamodb()
+#' table_exists(svc, "test_table")
+#' }
+table_exists <- function(svc, table_name) {
+  table_name %in% list_tables(svc)
+}
+
+#' Creates an Amazon DynamoDB table that can be used to store movie data.
+#' @param svc A service client for dynamodb
+#' @param table_name Scalar character, the name of the table
+#' \dontrun{
+#' svc <- dynamodb()
+#' table_create(svc, "test_table")
+#' }
+create_table <- function(svc, table_name) {
+  response <- svc$create_table(
+    TableName = table_name,
+    KeySchema = list(
+      list(AttributeName =  'year', KeyType = 'HASH'),  # Partition key
+      list(AttributeName =  'title', KeyType = 'RANGE')  # Sort key
+    ),
+    AttributeDefinitions = list(
+      list(AttributeName =  'year', AttributeType = 'N'),
+      list(AttributeName =  'title', AttributeType = 'S')
+    ),
+    ProvisionedThroughput = list(
+      ReadCapacityUnits =  1, WriteCapacityUnits = 1
+    )
+  )
+  return(invisible(response))
+}
+
+list_tables <- function(svc) {
+  response <- svc$list_tables()$TableNames
+  return(response)
+}
+
+delete_table <- function(svc, table_name) {
+  response <- svc$delete_table(table_name)
+  return(invisible(response))
+}
+
+#' Fills an Amazon DynamoDB table with the specified data
+#' @param svc A service client for dynamodb
+#' @param table_name Scalar character, the name of the table
+#' @param movies The data to put in the table. Each item must contain at least
+#' the keys required by the schema that was specified when the
+#' table was created.
+write_batch <- function(svc, table_name, movies, batch_size = 25L) {
+  if (batch_size > 25L) {
+    stop("The maximum batch size is 25.")
+  }
+  batches <- split(movies, ceiling(seq_along(movies) / batch_size))
+  for (batch in batches) {
+    svc$batch_write_item(
+      RequestItems = setNames(
+        list(
+          unname(lapply(batch, function(item) {
+            list(
+              PutRequest = list(Item = list(item))
+              )
+          }))
+        ),
+        table_name
+      )
+    )
+  }
+  return(TRUE)
+}
+
+#' Adds a movie to the table.
+#' @param title Scalar character, the title of the movie.
+#' @param year Scalar character, the release year of the movie.
+#' @param plot Scalar character, the plot summary of the movie.
+#' @param rating Scalar number, the quality rating of the movie.
+add_movie <- function(svc, table_name, title, year, plot, rating) {
+  response <- svc$put_item(
+    TableName = table_name,
+    Item = list(
+      year = list(N = year),
+      title = list(S = title),
+      info = list(
+        M = list( 
+          plot = list(S = plot), 
+          rating = list(N = rating)
+        )
+      )
+    )
+  )
+  return(invisible(response))
+}
+
+get_movie <- function(svc, table_name, title, year) {
+  response <- svc$get_item(
+    TableName = table_name,
+    Key = list(year = year, title = title)
+    )
+  return(response)
+}
+
+update_movie <- function(svc, table_name, title, year, rating, plot) {
+  response <- svc$update_item(
+    TableName = table_name,
+    Key = list(year = list(N = year), title = list(S = title)),
+    UpdateExpression = "SET info.rating = :r, info.plot = :p",
+    ExpressionAttributeValues = list(
+      `:r` = list(N = rating),
+      `:p` = list(S = plot)
+    ),
+  ReturnValues = "UPDATED_NEW"
+  )
+  return(invisible(response))
+}
+
+query_movies <- function(svc, table_name, year) {
+  response <- svc$query(
+    TableName = table_name,
+    ProjectionExpression = "title",
+    KeyConditionExpression = "#Y = :v1",
+    ExpressionAttributeValues = list(`:v1` = list(N = year)),
+    ExpressionAttributeNames = list(`#Y`= "year")
+  )
+  return(response[["Items"]])
+}
+
+#' Scan for movies that were released in a range of years
+#' @param year_range The range of years to retrieve, a vector with two elements.
+scan_movies <- function(svc, table_name, year_range) {
+  movies = list()
+  done = FALSE
+  start_key = NULL
+  while (!isTRUE(done)) {
+    if (is.null(start_key)) {
+      response <- svc$scan(
+        TableName = table_name, 
+        FilterExpression = sprintf("year between %s AND %s", 
+                                   year_range[1], year_range[2]), 
+        ProjectionExpression = "#yr, title, info.rating", 
+        ExpressionAttributeNames = list("#yr" = "year")
+      ) 
+    } else {
+      response = svc$scan(
+        TableName = table_name, 
+        FilterExpression = sprintf("year between %s AND %s", 
+                                   year_range[1], year_range[2]), 
+        ProjectionExpression = "#yr, title, info.rating", 
+        ExpressionAttributeNames = list("#yr" = "year"),
+        ExclusiveStartKey = start_key
+      ) 
+    }
+   movies <- append(movies, response[['Items']])
+   start_key <-  response.[['LastEvaluatedKey']]
+   done <- is.null(start_key)
+  }
+  return(movies)
+}
+
+#' Delete a movie from the table.
+#' @param title The title of the movie to delete.
+#' @param year The release year of the movie to delete.
+delete_movie <- function(svc, table_name, title, year) {
+  response <- svc$delete_item(TableName = table_name, 
+                  Key=list('year': year, 'title': title))
+  return(invisible(response))
+}
+
+delete_table <- function(svc, table_name) {
+  response <- svc$delete_table(table_name)
+  return(invisible(response))
+}
+
+get_sample_movie_data <- function(movie_file_name) {
+  if (!file.exists(movie_file_name)) {
+    url <- paste0('https://docs.aws.amazon.com/amazondynamodb/',
+             'latest/developerguide/samples/moviedata.zip')
+    tmp_file <- file.path(tempdir(), basename(url))
+    download.file(url,tmp_file)
+    movie_file_name <- utils::unzip(tmp_file, exdir = tempdir(), 
+                                    overwrite = TRUE)
+  } 
+  movie_data = jsonlite::read_json(movie_file_name)
+  return(movie_data[1:250])
+}
+```
+
+```{r}
+# run the scenario
+svc <- paws::dynamodb()
+table_name <- 'doc-example-table-movies'
+movie_file_name <- 'moviedata.json'
+
+movies_exist <- table_exists(svc, table_name)
+
+if (!isTRUE(movies_exist)) {
+  message("Creating table ", table_name, "...")
+  create_table(svc, table_name)
+  message("Created table ", table_name, ".")
+}
+
+my_movie <- list(
+  title = "Avatar: The Way of Water",
+  year = "2022",
+  rating = 8,
+  plot = paste(
+    "More than a decade after the Na'vi repelled the human invasion",
+    "of Pandora by the Resources Development Administration (RDA),[a] Jake",
+    "Sully lives as chief of the Omaticaya clan and raises a family with",
+    "Neytiri, which includes sons Neteyam and Lo'ak, daughter Tuk, adopted",
+    "daughter Kiri (born from Grace Augustine's inert avatar), and a human",
+    "boy named Spider, the son of Colonel Miles Quaritch who was born on",
+    "Pandora and was unable to be transported to Earth in cryostasis due to",
+    "his infancy. To the Na'vi's dismay, the RDA returns to prepare their",
+    "homeworld Pandora for human colonization, as Earth is dying. Among the",
+    "new RDA arrivals are 'recombinants', Na'vi avatars implanted with the",
+    "minds and memories of deceased human soldiers, with Quaritch's",
+    "recombinant serving as their leader."
+  )
+)
+
+with(
+  my_movie, 
+  add_movie(svc, table_name,
+            title = title,
+            year = year, 
+            plot = plot, 
+            rating = rating)
+)
+message("\nAdded '", my_movie[['title']], "' to ", table_name, ".")
+
+# update the rating for our movie
+my_movie[["rating"]] <- 9
+with(
+  my_movie, 
+  update_movie(svc, table_name, title = title, year = year, 
+               rating = rating, plot = plot)
+)
+
+# add 250 more movies from a JSON file
+if (!isTRUE(movies_exist)) {
+  movie_data = get_sample_movie_data(movie_file_name)
+  message(sprintf("Reading data from '%s' into your table.", movie_file_name))
+  write_batch(svc, table_name, movies = movie_data)
+  message(sprintf("Wrote %s movies into table '%s'.", 
+                  length(movie_data), table_name))
+}
+    
+title = "The Lord of the Rings: The Fellowship of the Ring"
+    if Question.ask_question(
+            f"Let's move on...do you want to get info about '{title}'? (y/n) ",
+            Question.is_yesno):
+        movie = movies.get_movie(title, 2001)
+        print("\nHere's what I found:")
+        pprint(movie)
+    print('-'*88)
+
+    ask_for_year = True
+    while ask_for_year:
+        release_year = Question.ask_question(
+            f"\nLet's get a list of movies released in a given year. Enter a year between "
+            f"1972 and 2018: ", Question.is_int, Question.in_range(1972, 2018))
+        releases = movies.query_movies(release_year)
+        if releases:
+            print(f"There were {len(releases)} movies released in {release_year}:")
+            for release in releases:
+                print(f"\t{release['title']}")
+            ask_for_year = False
+        else:
+            print(f"I don't know about any movies released in {release_year}!")
+            ask_for_year = Question.ask_question("Try another year? (y/n) ", Question.is_yesno)
+    print('-'*88)
+
+    years = Question.ask_questions([
+        Question(
+            'first',
+            f"\nNow let's scan for movies released in a range of years. Enter a year: ",
+            Question.is_int, Question.in_range(1972, 2018)),
+        Question(
+            'second', "Now enter another year: ",
+            Question.is_int, Question.in_range(1972, 2018))])
+    releases = movies.scan_movies(years)
+    if releases:
+        count = Question.ask_question(
+            f"\nFound {len(releases)} movies. How many do you want to see? ",
+            Question.is_int, Question.in_range(1, len(releases)))
+        print(f"\nHere are your {count} movies:\n")
+        pprint(releases[:count])
+    else:
+        print(f"I don't know about any movies released between {years['first']} "
+              f"and {years['second']}.")
+    print('-'*88)
+
+    if Question.ask_question(
+            f"\nLet's remove your movie from the table. Do you want to remove "
+            f"'{my_movie['title']}'? (y/n)", Question.is_yesno):
+        movies.delete_movie(my_movie['title'], my_movie['year'])
+        print(f"\nRemoved '{my_movie['title']}' from the table.")
+    print('-'*88)
+
+    if Question.ask_question(f"\nDelete the table? (y/n) ", Question.is_yesno):
+        movies.delete_table()
+        print(f"Deleted {table_name}.")
+    else:
+        print("Don't forget to delete the table when you're done or you might incur "
+              "charges on your account.")
+
+    print("\nThanks for watching!")
+    print('-'*88)
+```
+
+```{r cleanup}
+svc$delete_table(table_name)
+```
+

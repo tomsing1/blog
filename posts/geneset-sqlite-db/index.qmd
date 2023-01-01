@@ -90,11 +90,11 @@ mh <- jsonlite::read_json(json_file, simplifyVector = TRUE)
 ```
 
 ::: {.callout-note}
-
+### Gene symbols
 Each of the `r length(mh)` sets in the collection contains between 
 `r min(lengths(lapply(mh, \(x) x$geneSymbols)))` and
 `r max(lengths(lapply(mh, \(x) x$geneSymbols)))` official
-[gene symbols](https://rosalind.info/glossary/gene-symbol/), specifing the
+[gene symbols](https://rosalind.info/glossary/gene-symbol/), specifying the
 members of the gene set.
 
 :::
@@ -170,6 +170,7 @@ mh2 <- lapply(names(mh), \(gs) c("name" = gs, mh[[gs]]))
 ```
 
 ::: {.callout-note}
+### Unique identifiers
 The `docdb_create()` function accepts either  a data.frame, a JSON string or a
 list as its `value` argument.
 
@@ -236,6 +237,7 @@ results <- nodbi::docdb_query(
 ```
 
 ::: {.callout-note collapse="true"}
+### Unnesting columns
 
 Because the set contains more than one `geneSymbol`, we obtain a nested
 data.frame. We can unnest it e.g. with the `tidyr` R package
@@ -273,6 +275,7 @@ Depending on comfortable you are reading / writing SQL, this might be a nicer
 approach. 
 
 ::: {.callout-note}
+### Limitations
 SQLite's JSON operators are somewhat limited, e.g. there is no straightforward
 way to ask whether a column _contains_ one or more gene identifiers (e.g. the
 query we performed above using a query JSON string). Indexing a SQLite JSON
@@ -374,8 +377,9 @@ head(geneset)
 
 Next, we identify all unique gene symbols, annotate them with their Entrez ids
 (using the
-[org.Mm.eg.db Bioconductor annotation package](https://bioconductor.org/packages/release/data/annotation/html/org.Mm.eg.db.html)
-), and store both identifier types in the `element` data.frame.
+[org.Mm.eg.db](https://bioconductor.org/packages/release/data/annotation/html/org.Mm.eg.db.html)
+Bioconductor annotation package), and store both identifier types in the
+`element` data.frame.
 
 ```{r warning=FALSE, message=FALSE}
 gene_symbols <- unique(unlist(purrr::map(mh2, "geneSymbols")))
@@ -402,6 +406,19 @@ head(elementset)
 ```
 
 Next, we write each data.frame into a separate table in our SQLite database.
+
+::: {.callout-note collapse="true"}
+### Verifying foreign keys
+
+By default, SQLite does 
+[not verify that foreign keys actually exist](https://www.sqlite.org/pragma.html#pragma_foreign_keys)
+in the referenced table. To make this a requirement, we can enable checking
+with the following command:
+
+```{r}
+dbExecute(con, 'PRAGMA foreign_keys = 1;')
+```
+:::
 
 ```{r}
 dbExecute(con, 
@@ -462,9 +479,11 @@ result %>%
 ### Pulling data into a BiocSet
 
 Finally, we can easily pull selected (or even all) gene sets into a Bioconductor
-`BiocSet` object for analysis in R. (But the database does _not require_ us to
-use R, e.g. python users can connect to the same SQLite database and retrieve
-the information in a form that is most useful to them.)
+`BiocSet` object for analysis in R. Importantly, the database does _not require_
+us to use R: e.g. python users can connect to the same SQLite database 
+(e.g. using 
+[sqlalchemy](https://www.sqlalchemy.org/)
+) and retrieve the information in whatever form that is most useful to them.
 
 For example, let's retrieve all gene sets whose name ends in the letter `N`,
 store them in a list and create a `BiocSet` object.
@@ -519,7 +538,7 @@ abstraction like `dplyr` makes it accessible to a broader audience.
 ::: {.callout-warn}
 
 Defining a schema is much harder when we deal with datasets that are less
-standardized, changing over time, etc.
+standardized, deeply nested, changing over time, etc.
 
 :::
 

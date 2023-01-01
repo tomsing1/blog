@@ -89,12 +89,15 @@ objects via `crosstalk`:
 
 - At the top, an interactive volcano plot showing the effects sizes (mean 
   trimmed log2 fold changes) and nominal p-values for each tested gene set.
-- Below, a nested `reatable` table displays the results for each set. When
+- Below, a nested `reactable` table displays the results for each set. When
   a row is expanded
   - It shows a volcano plot with *gene-level* results, as well
   as a linked table with the corresponding statistics. 
   - The reader can hone in on specific genes by selecting points in the volcano
   plot, or by searching the table.
+
+First, we define a set of helper functions are, which are composed into the 
+main `gene_set_report()` function.
 
 ```{r}
 #| results: hide
@@ -751,17 +754,33 @@ gene_set_report <- function(
       )
     })
 }
+```
 
+Next, we perform a gene set enrichment analysis with
+[sparrow's](https://bioconductor.org/packages/release/bioc/html/sparrow.html)
+`seas` function. It returns a convenient `SparrowResult` S4 object with both
+gene-set statistics and gene-level differential expression results.
+
+```{r}
+#| code-fold: false
 # gene set enrichment analysis with the sparrow Bioconductor package
 vm <- exampleExpressionSet()
 gdb <- exampleGeneSetDb()
 mg <- seas(vm, gdb, c('fry'), design = vm$design, contrast = 'tumor')
 ```
 
+Finally, we pass the `mg` object to our `gene_set_report()` function, together
+with arguments requesting that all gene-set results passing a p-value threshold 
+of < 0.05 are included. We also pass the `.msigdb_url` helper function to the
+`name_url` argument, to link the name of each gene set to its description on the 
+[msigdb website](https://www.gsea-msigdb.org/gsea/msigdb/).
+
 ```{r}
+#| code-fold: false
 # create an interactive report
 htmltools::browsable(
-  gene_set_report(mg, method = "fry", max.pval = 0.05, max.results = Inf)
+  gene_set_report(mg, method = "fry", max.pval = 0.05, max.results = Inf, 
+                  name_url = .msigdb_url)
 )
 ```
 

@@ -154,7 +154,7 @@ or
 [AWS dynamodb](https://en.wikipedia.org/wiki/Amazon_DynamoDB).
 
 In addition, traditional relational database engines - including `SQLite` and
-`Postgres` can also store unstructured data in dedicated `JSON` fields.
+`Postgres` - can also store unstructured data in dedicated `JSON` fields.
 
 The
 [nodbi R package](https://docs.ropensci.org/nodbi/)
@@ -185,7 +185,7 @@ mh2 <- lapply(names(mh), \(gs) c("name" = gs, mh[[gs]]))
 
 ::: {.callout-note}
 ### Unique identifiers
-The `docdb_create()` function accepts either  a data.frame, a JSON string or a
+The `docdb_create()` function accepts either a data.frame, a JSON string or a
 list as its `value` argument.
 
 If you include a field `_id` in your list, it will be used as the primary key
@@ -265,10 +265,10 @@ tidyr::unnest(results, cols = c(geneSymbols))
 
 Formulating the queries as JSON strings is tedious, though. Alternatively,
 SQLite also supports querying JSON columns using SQL (muddying the border
-between `noSQL` and `SQL`). Specifically, we can use SQLite's 
+between `noSQL` and `SQL`). For example, we can use SQLite's 
 [-> and ->> operators](https://www.sqlite.org/json1.html#jptr) and the 
 `json_each()` SQL function to create a query that returns the names of all gene
-sets that include the `Abca1` gene:
+sets that include e.g. the `Abca1` gene:
 
 ```{r include=FALSE}
 con <- src$con
@@ -366,10 +366,10 @@ es_elementset(es)[sample(nrow(es_elementset(es)), size = 10), ]
 Each of these tables can be augmented with additional metadata, e.g. we could
 add 
 [Entrez](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1761442/)
-gene identifiers to the `es_element`, or a long-form descriptions for each set 
-to the `es_set` tibble.
+gene identifiers to the `es_element` (see below), or long-form descriptions for
+each set to the `es_set` tibble.
 
-These three tables can also be represented in a relational database, using
+These three tables can easily be represented in a relational database, using
 the `element` and `set` columns as primary keys.
 
 ### Creating and populating a relational database
@@ -406,7 +406,8 @@ element <- data.frame(
 head(element)
 ```
 
-and finally the `element_set` join table:
+Finally, we create the `element_set` *join table*, connecting gene sets to
+their constituent genes:
 
 ```{r}
 elementset <- purrr::map_df(mh2, \(gs) {

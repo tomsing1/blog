@@ -93,7 +93,7 @@ summarize and represent specific well-defined biological states or processes
 
 ```{r include=FALSE}
 json_file <- paste0(
-  "https://raw.githubusercontent.com/tomsing1/blog/sqlite/posts/",
+  "https://raw.githubusercontent.com/tomsing1/blog/main/posts/",
   "geneset-sqlite-db/mh.all.v2022.1.Mm.json")
 mh <- jsonlite::read_json(json_file, simplifyVector = TRUE)
 ```

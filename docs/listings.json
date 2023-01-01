@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/geneset-sqlite-db/index.html",
       "/posts/interactive-gene-set-results/index.html",
       "/posts/upset_plots/index.html",
       "/posts/quarto-figure-size-and-layout/index.html",

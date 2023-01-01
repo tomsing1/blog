@@ -1,0 +1,619 @@
+---
+title: "SQL and noSQL approaches to creating & querying databases (using R)"
+author: "Thomas Sandmann"
+date: "2023-01-02"
+freeze: true
+categories: [TIL, R, databases]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: inline
+---
+
+## Creating, polulating and querying SQL and noSQL databases with R
+
+The first step of any data analysis is to obtain and explore the available
+data, often by accessing and querying a database. There many great introductions
+on how to _read_ data into an R session. But I found it harder to find tutorials
+on how to _create_ and _populate_ a new database from scratch.
+
+In this document, I explore both noSQL and SQL approaches to data management.
+As an example use case, we store a collection of gene sets, specifically the
+[mouse MSigDb hallmark gene sets (MH)](http://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp?collection=MH),
+either as unstructured documents or in relational tables.
+
+### Motivation
+
+Bioconductor offers well designed S4 Classes to store gene set collections, 
+including e.g. in a list-like
+[GSEABase::GeneSetCollection](https://bioconductor.org/packages/release/bioc/html/GSEABase.html)
+or a set of three `tibbles` within a
+[BiocSet::BiocSet](https://bioconductor.org/packages/release/bioc/html/BiocSet.html)
+object. 
+**So why could we be interested in storing this information in a database?**
+
+- A database (e.g. SQLite, Postgres, etc) offers a standardized way to
+store, manage and access information in a *language-agnostic* way. E.g. some of 
+my  colleagues use python for their analyses and are comfortable retrieving gene
+set information from a database, but not necessarily from an R S4 object.
+- Gene sets capture knowledge from multiple experiments, studies and sources.
+If you are part of a larger organization a single *source of truth*, available
+in a central location, is very useful.
+- Collaborators might not be interested / able to access information
+programmatically, e.g. they may prefer a web application to search, share and
+edit gene sets. Many tools to build web applications have built-in 
+capabilities to interact with a database.
+- As the number of gene sets grows, sharing them in the form of one or more
+files might become cumbersome. A hosted database (e.g. 
+[Postgres](https://www.postgresql.org/)
+or
+[MariaDB](https://mariadb.org/)
+) allows users to retrieve only the information they need.
+
+In this tutorial, I am using the 
+[SQLite](https://www.sqlite.org/index.html)
+engine to explore *both* relational and non-relational ways to manage gene sets. 
+`SQLite` can be embedded into applications, and does not require a central
+server, making it ideal for experimentation. (But as you move into a scenario
+where multiple users need to access a central, it is time to switch to a hosted
+database instead; my favorite is [Postgres](https://www.postgresql.org/).)
+
+```{r message=FALSE}
+library(BiocSet)
+library(dm)
+library(dplyr)
+library(jsonlite)
+library(nodbi)
+library(org.Mm.eg.db)
+library(purrr)
+library(RSQLite)
+library(tibble)
+library(tidyr)
+```
+
+## The Mouse Hallmarks MSigDB collection
+
+At the time of writing, 
+[Mouse Molecular Signatures Database (MSigDB)](https://www.gsea-msigdb.org/gsea/msigdb/mouse/collections.jsp?targetSpeciesDB=Mouse)
+contains 15918 gene sets, organized into numerous different collections. For
+example, the 50
+[hallmark gene sets (MH)](http://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp?collection=MH)
+summarize and represent specific well-defined biological states or processes
+(
+[Liberzon et al, Cell Systems, 2015](https://doi.org/10.1016%2Fj.cels.2015.12.004)
+). 
+
+```{r include=FALSE}
+json_file <- paste0(
+  "https://raw.githubusercontent.com/tomsing1/blog/main/posts/",
+  "geneset-sqlite-db/mh.all.v2022.1.Mm.json")
+mh <- jsonlite::read_json(json_file, simplifyVector = TRUE)
+```
+
+::: {.callout-note}
+### Gene symbols
+Each of the `r length(mh)` sets in the collection contains between 
+`r min(lengths(lapply(mh, \(x) x$geneSymbols)))` and
+`r max(lengths(lapply(mh, \(x) x$geneSymbols)))` official
+[gene symbols](https://rosalind.info/glossary/gene-symbol/), specifying the
+members of the gene set.
+:::
+
+Here, I will use the hallmarks collection as an example but the overall approach
+can be applied to other gene set collection in a similar way. (You might need
+additional / different annotation fields, though.)
+
+The mouse hallmarks collection is available in different formats, including as a
+[JSON file](https://raw.githubusercontent.com/tomsing1/blog/main/posts/geneset-sqlite-db/mh.all.v2022.1.Mm.json). 
+Let's start by reading it into an R session as nested list `mh`.
+
+```{r}
+json_file <- paste0(
+  "https://raw.githubusercontent.com/tomsing1/blog/sqlite/posts/",
+  "geneset-sqlite-db/mh.all.v2022.1.Mm.json")
+mh <- jsonlite::read_json(json_file, simplifyVector = TRUE)
+```
+
+Each of the `r length(mh)` elements in the JSON file corresponds to a different
+gene set,
+
+```{r}
+head(names(mh))
+```
+each gene set is a nested list with the following elements,
+
+```{r}
+lengths(mh[[1]])
+```
+
+and the gene symbols that make up the set are listed in the `geneSymbols` 
+vector:
+
+```{r}
+head(mh[[1]]$geneSymbols)
+```
+
+## noSQL: storing gene sets as unstructured documents
+
+Each gene set is represented as a list - so why not store it in the same
+way? A
+[noSQL](https://en.wikipedia.org/wiki/NoSQL)
+database is designed to store unstructed information, e.g. data models that are 
+not organized in tables, making them flexible and scalable. 
+Examples of `noSQL` databases include e.g.
+[Mongodb](https://www.mongodb.com/),
+[CouchDB](https://couchdb.apache.org/)
+or
+[AWS dynamodb](https://en.wikipedia.org/wiki/Amazon_DynamoDB).
+
+In addition, traditional relational database engines - including `SQLite` and
+`Postgres` - can also store unstructured data in dedicated `JSON` fields.
+
+The
+[nodbi R package](https://docs.ropensci.org/nodbi/)
+provides a unified interface to multiple `noSQL` implementations, including 
+`SQLite`. (If you are interested in a deeper look at how to create & query 
+a JSON field in SQLite with raw SQL, check out
+[this gist](https://gist.github.com/tomsing1/304762fce66353310b254e8b22094a6e)
+).
+
+### Creating & populating a noSQL database with the `nodbi` R package
+
+To experiment with its `noSQL` mode, we create a temporary `SQLite` database in
+memory. (For real data, you definitely want to provide a file path as the 
+`dbname` instead!) 
+
+```{r}
+src <- nodbi::src_sqlite(dbname = ":memory:")
+```
+
+Right now, the names of the gene sets are only stored as the `names()` of the
+list elements, e.g. not in a field _within_ each sub-list itself. To make sure
+they are included in each database record, we add them to each sub-list in a new
+`name` field.
+
+```{r}
+mh2 <- lapply(names(mh), \(gs) c("name" = gs, mh[[gs]]))
+```
+
+::: {.callout-note}
+### Unique identifiers
+The `docdb_create()` function accepts either a data.frame, a JSON string or a
+list as its `value` argument.
+
+If you include a field `_id` in your list, it will be used as the primary key
+for each element. If no `_id` field is found, then the `_id` field is created
+automatically with a call to the `uuid::UUIDgenerate()` function.
+
+If you provide a `data.frames()` with row.names, they will be used to populate 
+the `_id` field.
+:::
+
+Now we are ready to create a new SQLite table `hallmarks` and populate it with
+the  `r length(mh)` gene sets. 
+
+```{r message=FALSE, warning=FALSE}
+docdb_create(src, key = "hallmarks", value = mh2)
+```
+We can retrieve the full set of records as a `data.frame` with the `docdb_get()`
+function. (Here we select a subset of the returned columns due to space 
+constraints.) Because each gene set contains multiple `geneSymbols`, this field
+is a list-column.
+
+```{r}
+docdb_get(src, "hallmarks")[1:4, c("name", "geneSymbols", "pmid")]
+```
+### Querying with JSON filters
+
+More commonly, users might want to retrieve one or more gene sets by name.
+The `docdb_query()` function accepts a `query` argument specifying the
+desired filter criteria (as 
+[MongoDB JSON](https://www.mongodb.com/docs/manual/tutorial/query-documents/#specify-equality-condition)
+).
+
+```{r}
+results <- nodbi::docdb_query(
+  src = src, key = "hallmarks",
+  query = '{"name": "HALLMARK_ADIPOGENESIS"}')
+results[, c("name", "geneSymbols", "pmid")]
+```
+
+The `fields` argument allows us to return only specific columns. (Specifying a 
+field as `1` or `0` will include or exclude it, respectively.)
+
+```{r}
+nodbi::docdb_query(
+  src = src, key = "hallmarks",
+  query = '{"name": "HALLMARK_ADIPOGENESIS"}',
+  fields = '{"name": 1, "geneSymbols": 1}'
+)
+```
+
+We can also identify gene sets containing at least one of the given gene
+symbols:
+
+```{r}
+results <- nodbi::docdb_query(
+  src = src, key = "hallmarks",
+  query = paste0('{"$or":[',
+                 '{"geneSymbols": "Abca1"},', 
+                 '{"geneSymbols": "Gapdh"}',
+                 ']}'),
+  fields = '{"name": 1, "geneSymbols": 1}'
+)
+```
+
+::: {.callout-note collapse="true"}
+### Unnesting columns
+
+Because the set contains more than one `geneSymbol`, we obtain a nested
+data.frame. We can unnest it e.g. with the `tidyr` R package
+
+```{r}
+tidyr::unnest(results, cols = c(geneSymbols))
+```
+:::
+
+### Querying using SQL
+
+Formulating the queries as JSON strings is tedious, though. Alternatively,
+SQLite also supports querying JSON columns using SQL (muddying the border
+between `noSQL` and `SQL`). For example, we can use SQLite's 
+[-> and ->> operators](https://www.sqlite.org/json1.html#jptr) and the 
+`json_each()` SQL function to create a query that returns the names of all gene
+sets that include e.g. the `Abca1` gene:
+
+```{r include=FALSE}
+con <- src$con
+```
+
+```{sql connection=con}
+SELECT hallmarks.json->>'name' as name
+FROM hallmarks, json_each(hallmarks.json, '$.geneSymbols')
+WHERE json_each.value LIKE '%Abca1%'
+```
+
+```{r include=FALSE}
+dbDisconnect(con)
+rm(src)
+```
+
+Depending on comfortable you are reading / writing SQL, this might be a nicer
+approach. 
+
+::: {.callout-note}
+### Limitations
+SQLite's JSON operators are somewhat limited, e.g. there is no straightforward
+way to ask whether a column _contains_ one or more gene identifiers (e.g. the
+query we performed above using a query JSON string). Indexing a SQLite JSON
+column also comes with limitations. 
+
+The Postgres database engine 
+[supports JSON and binary JSONB fields)](https://www.postgresql.org/docs/current/functions-json.html) 
+with indexing & additional operators like the `@>` contains operator.
+:::
+
+### noSQL summary
+
+This example highlights some of the advantages of a noSQL solution:
+
+- Rapid ingestion of data without the need for a rigid schema.
+- Simple retrieval of individual object identified by their primary key.
+
+But also some of the disadvantages:
+
+- Queries that descend into the (potentially nested) objects must be carefully
+constructed.
+- Increasing database performance with indices is more complicated than for 
+relational databases (see below.)
+
+Next, we will try another approach: reshaping the gene set collection into a set
+of tables and modeling the relationship between them.s
+
+## SQL: storing gene sets in a relational database
+
+R has excellent support for interacting with 
+[relational database](https://en.wikipedia.org/wiki/Relational_database),
+e.g. via the foundational
+['Common Database Interface' (DBI) package](https://cran.r-project.org/package=DBI)
+and the numerous database-specific packages built on top of it, including the
+[RSQLite](https://cran.r-project.org/web/packages/RSQLite/index.html),
+[RPostgres](https://cran.r-project.org/web/packages/RPostgres/index.html)
+and many others.
+
+To take advantage of a relational database we have perform a little more work 
+up-front. But this effort is amply repaid by simplifying subsequent queries.
+
+### Learning from Bioconductor: BiocSet's three tables
+
+The `BiocSet` Class from the eponymous Bioconductor package represents a 
+collection of gene sets in three tibbles. Let's create a simple `BiocSet` with
+two gene sets for illustration:
+
+```{r}
+set_names <- purrr::map_chr(mh2[1:2], "name")
+gene_ids <- purrr::map(mh2[1:2], "geneSymbols")
+es <- BiocSet(setNames(gene_ids, set_names))
+```
+
+The first two tibbles represent genes (called `elements`) and `sets`, 
+respectively:
+
+1. `es_element`: one row per gene
+
+```{r}
+head(es_element(es))
+```
+
+2. `es_set`: one row per gene set
+
+```{r}
+es_set(es)
+```
+
+The third table establishes the 
+[many-to-many relationship](https://en.wikipedia.org/wiki/Many-to-many_(data_model))
+between genes and sets, e.g. it tracks which gene is a member of each set.
+
+3. `es_elementset`: gene x set combination
+
+```{r}
+# we are showing 10 random rows
+set.seed(42)
+es_elementset(es)[sample(nrow(es_elementset(es)), size = 10), ]
+```
+
+Each of these tables can be augmented with additional metadata, e.g. we could
+add 
+[Entrez](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1761442/)
+gene identifiers to the `es_element` (see below), or long-form descriptions for
+each set to the `es_set` tibble.
+
+These three tables can easily be represented in a relational database, using
+the `element` and `set` columns as primary keys.
+
+### Creating and populating a relational database
+
+Let's start with a fresh SQLite database.
+
+```{r}
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+```
+
+First, we create the `geneset` data.frame that lists all gene sets, and we also
+include their MSigDb URLs as metadata:
+
+```{r}
+geneset <- data.frame(
+  geneset = purrr::map_chr(mh2, "name"),
+  url = purrr::map_chr(mh2, "msigdbURL"))
+head(geneset)
+```
+
+Next, we identify all unique gene symbols, annotate them with their Entrez ids
+(using the
+[org.Mm.eg.db](https://bioconductor.org/packages/release/data/annotation/html/org.Mm.eg.db.html)
+Bioconductor annotation package), and store both identifier types in the
+`element` data.frame.
+
+```{r warning=FALSE, message=FALSE}
+gene_symbols <- unique(unlist(purrr::map(mh2, "geneSymbols")))
+element <- data.frame(
+  element = gene_symbols,
+  entrezid = mapIds(org.Mm.eg.db, keys = gene_symbols, keytype = "SYMBOL", 
+                    column = "ENTREZID")
+  )
+head(element)
+```
+
+Finally, we create the `element_set` *join table*, connecting gene sets to
+their constituent genes:
+
+```{r}
+elementset <- purrr::map_df(mh2, \(gs) {
+  with(gs, 
+       data.frame(
+         element = geneSymbols,
+         geneset = name
+       )
+  )
+})
+head(elementset)
+```
+
+Next, we write each data.frame into a separate table in our SQLite database.
+
+::: {.callout-note collapse="true"}
+### Verifying foreign keys
+
+By default, SQLite does 
+[not verify that foreign keys actually exist](https://www.sqlite.org/pragma.html#pragma_foreign_keys)
+in the referenced table. To make this a requirement, we can enable checking
+with the following command:
+
+```{r}
+dbExecute(con, 'PRAGMA foreign_keys = 1;')
+```
+:::
+
+```{r}
+dbExecute(con, 
+          "CREATE TABLE tbl_geneset (geneset TEXT PRIMARY KEY, url TEXT)")
+dbWriteTable(con, name = "tbl_geneset", value = geneset, overwrite = TRUE)
+
+dbExecute(con, 
+          "CREATE TABLE tbl_element (element TEXT PRIMARY KEY, entrezid TEXT)")
+dbWriteTable(con, name = "tbl_element", value = element, overwrite = TRUE)
+
+dbExecute(con, paste(
+  "CREATE TABLE tbl_elementset (",
+  "element TEXT,", 
+  "geneset TEXT,",
+  "FOREIGN KEY(geneset) REFERENCES tbl_geneset(geneset),",
+  "FOREIGN KEY(element) REFERENCES tbl_element(element)",
+  ")")
+  )
+dbWriteTable(con, name = "tbl_elementset", value = elementset, overwrite = TRUE)
+```
+```{r}
+dbListTables(con)
+```
+### Plotting relationships
+
+As we create and need to keep track of multiple tables, it is useful to
+visualize their contents (fields, columns) and relationships in a
+*model diagram*. The awesome
+[dm R package](https://dm.cynkra.com/index.html), 
+designed to bring an existing relational data model into your R session, can
+be used to generate diagrams like the one shown below. (`dm` can identify the
+keys in postgres and SQL server database engines automatically, but for SQLite
+we need to specify them ourselves with the `dm_add_pk()` and `dm_add_fk()`
+functions.)
+
+```{r message=FALSE}
+#| out-width: "50%"
+#| fig-align: "center"
+#| fig.widh: 5
+#| fig.height: 2.5
+#| fig-cap: "Model diagram"
+dm_from_con(con, learn_keys = FALSE) %>%
+  dm_add_pk(tbl_element, element) %>%
+  dm_add_pk(tbl_geneset, geneset) %>%
+  dm_add_fk(tbl_elementset, element, tbl_element) %>%
+  dm_add_fk(tbl_elementset, geneset, tbl_geneset) %>%
+  dm_draw(view_type = "all")
+```
+
+### Querying the database
+
+Great! Now we are ready to query our database. To make our lives easier, we will
+use the 
+[dplyr](https://cran.r-project.org/package=dplyr)
+package to translate our R syntax into SQL. (But we could just as well use plain
+SQL instead.)
+
+First we define the remote tables by connecting to our brand new database:
+
+```{r}
+tbl_geneset <- tbl(con, "tbl_geneset")
+tbl_element <- tbl(con, "tbl_element")
+tbl_elementset <- tbl(con, "tbl_elementset")
+```
+
+Let's return the gene symbols and entrez identifiers that make up the 
+`HALLMARK_APOPTOSIS` gene set and display the first 5 (in alphabetical order of
+the gene symbols).
+
+```{r}
+result <- tbl_elementset %>% 
+  dplyr::filter(geneset == "HALLMARK_ADIPOGENESIS") %>%
+  dplyr::inner_join(tbl_element, by = "element") %>%
+  dplyr::slice_min(n = 5, order_by = element)
+result
+```
+
+And now let's add the gene set's URL as well:
+
+```{r}
+result %>%
+  dplyr::left_join(tbl_geneset, by = "geneset")
+```
+
+### Pulling data into a BiocSet
+
+Finally, we can easily pull selected (or even all) gene sets into a Bioconductor
+`BiocSet` object for analysis in R. Importantly, the database does _not require_
+us to use R: e.g. python users can connect to the same SQLite database 
+(e.g. using 
+[sqlalchemy](https://www.sqlalchemy.org/)
+) and retrieve the information in whatever form is most useful to them.
+
+For example, let's retrieve all gene sets whose name ends in the letter `N`,
+store them in a list and create a `BiocSet` object.
+
+```{r}
+gene_set_list <- with(
+  tbl_elementset %>% 
+    dplyr::filter(geneset %like% '%N') %>%
+    collect(), 
+  split(element, geneset)
+)
+es <- BiocSet(gene_set_list)
+```
+
+Next, we add gene set metadata to the `es_set` tibble, by joining it with the
+(richer) information in the database. This will add the `url` column.
+
+```{r}
+es <- left_join_set(es, 
+  tbl_geneset, by = c(set = "geneset"), 
+  copy = TRUE
+)
+es_set(es)
+```
+
+And finally, let's also add the `entrezid` column from out database 
+to the `es_element` table:
+
+```{r}
+es <- left_join_element(es, 
+  tbl_element, by = "element", 
+  copy = TRUE
+)
+es_element(es)
+```
+### SQL summary
+
+- For this example the effort required to transform the dataset into a set of
+three tables - the starting point for import into a relational database - was 
+minimal. 
+- Given the use case, e.g. management of a gene set collections, the number of
+times that data is added to the database is likely much smaller than the number 
+of times it is queried. That makes it worth the effort to transform it once - 
+and benefit from this upfront cost ever after.
+- Because we knew exactly which properties / annotations we wanted to capture
+in the database, defining the database tables and their relationships (e.g. the
+[schema](https://en.wikipedia.org/wiki/Database_schema)
+) was not an obstacle, either.
+- Enabling users to query the data using simple SQL or via a higher level
+abstraction like `dplyr` makes it accessible to a broader audience.
+
+::: {.callout-warn}
+
+Defining a schema is much harder when we deal with datasets that are less
+standardized, deeply nested, changing over time, etc.
+
+:::
+
+## References
+
+If you are new to working with databases, then you might find these two great
+books useful:
+
+- [SQL for Data Scientists: A Beginner's Guide for Building Datasets for Analysis](https://www.wiley.com/en-us/SQL+for+Data+Scientists:+A+Beginner's+Guide+for+Building+Datasets+for+Analysis-p-9781119669388) by 
+[Renee M. P. Teate](https://twitter.com/BecomingDataSci) is a great starting 
+place to learn SQL. It mainly focusses on accessing existing databases.
+- [Practical SQL: A Beginner’s Guide to Storytelling with Data](https://anthonydebarros.com/practical-sql-a-beginners-guide-to-storytelling-with-data/) by 
+[Anthony DeBarros](https://anthonydebarros.com/about/) teaches readers how
+to create & populate a Postgres database, and how to index and search it 
+effectively.
+
+<details>
+<summary>
+SessionInfo
+</summary>
+
+```{r}
+#| echo: false
+sessioninfo::session_info()
+```
+
+</details>

@@ -117,7 +117,7 @@ Let's start by reading it into an R session as nested list `mh`.
 
 ```{r}
 json_file <- paste0(
-  "https://raw.githubusercontent.com/tomsing1/blog/sqlite/posts/",
+  "https://raw.githubusercontent.com/tomsing1/blog/main/posts/",
   "geneset-sqlite-db/mh.all.v2022.1.Mm.json")
 mh <- jsonlite::read_json(json_file, simplifyVector = TRUE)
 ```

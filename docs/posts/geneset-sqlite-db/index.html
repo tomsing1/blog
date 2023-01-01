@@ -124,6 +124,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-252872073-1', { 'storage': 'none' });
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
 <script src="../../site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
 <script src="../../site_libs/viz-1.8.2/viz.js"></script>
 <link href="../../site_libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
@@ -295,7 +309,7 @@ Gene symbols
 <p>The mouse hallmarks collection is available in different formats, including as a <a href="https://raw.githubusercontent.com/tomsing1/blog/main/posts/geneset-sqlite-db/mh.all.v2022.1.Mm.json">JSON file</a>. Let’s start by reading it into an R session as nested list <code>mh</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>json_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/sqlite/posts/"</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/main/posts/"</span>,</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset-sqlite-db/mh.all.v2022.1.Mm.json"</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> jsonlite<span class="sc">::</span><span class="fu">read_json</span>(json_file, <span class="at">simplifyVector =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -1291,7 +1305,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-117"><a href="#cb60-117" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-120"><a href="#cb60-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb60-121"><a href="#cb60-121" aria-hidden="true" tabindex="-1"></a>json_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
-<span id="cb60-122"><a href="#cb60-122" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/sqlite/posts/"</span>,</span>
+<span id="cb60-122"><a href="#cb60-122" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/main/posts/"</span>,</span>
 <span id="cb60-123"><a href="#cb60-123" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset-sqlite-db/mh.all.v2022.1.Mm.json"</span>)</span>
 <span id="cb60-124"><a href="#cb60-124" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> jsonlite<span class="sc">::</span><span class="fu">read_json</span>(json_file, <span class="at">simplifyVector =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb60-125"><a href="#cb60-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>

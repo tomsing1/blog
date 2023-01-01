@@ -320,10 +320,17 @@ of tables and modeling the relationship between them.s
 
 ## SQL: storing gene sets in a relational database
 
-To take advantage of a 
+R has excellent support for interacting with 
 [relational database](https://en.wikipedia.org/wiki/Relational_database),
-we have perform a little more work up-front. But this effort is repaid by 
-simplifying subsequent queries.
+e.g. via the foundational
+['Common Database Interface' (DBI) package](https://cran.r-project.org/package=DBI)
+and the numerous database-specific packages built on top of it, including the
+[RSQLite](https://cran.r-project.org/web/packages/RSQLite/index.html),
+[RPostgres](https://cran.r-project.org/web/packages/RPostgres/index.html)
+and many others.
+
+To take advantage of a relational database we have perform a little more work 
+up-front. But this effort is amply repaid by simplifying subsequent queries.
 
 ### Learning from Bioconductor: BiocSet's three tables
 

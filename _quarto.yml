@@ -12,6 +12,8 @@ website:
         href: https://www.linkedin.com/in/thomas-sandmann/
       - icon: mastodon
         href: https://genomic.social/@thomas_sandmann
+      - icon: rss
+        href: index.xml
   site-url: https://tomsing1.github.io/blog/
   favicon: favicon.png
   description: |

@@ -8,8 +8,11 @@ listing:
   sort-ui: false
   filter-ui: false
   fields: [date, title, author, reading-time]
+  feed: 
+    categories: [R]
 page-layout: full
 title-block-banner: true
+
 ---
 
 <a rel="me" href="https://genomic.social/@thomas_sandmann"></a>

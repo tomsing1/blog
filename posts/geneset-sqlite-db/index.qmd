@@ -483,7 +483,7 @@ Finally, we can easily pull selected (or even all) gene sets into a Bioconductor
 us to use R: e.g. python users can connect to the same SQLite database 
 (e.g. using 
 [sqlalchemy](https://www.sqlalchemy.org/)
-) and retrieve the information in whatever form that is most useful to them.
+) and retrieve the information in whatever form is most useful to them.
 
 For example, let's retrieve all gene sets whose name ends in the letter `N`,
 store them in a list and create a `BiocSet` object.

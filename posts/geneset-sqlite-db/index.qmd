@@ -9,6 +9,7 @@ editor:
     wrap: 72
 format:
   html:
+    toc: true
     code-tools:
       source: true
       toggle: false

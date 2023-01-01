@@ -1,7 +1,7 @@
 ---
-title: "Experimenting with SQLite: storing gene set collections"
+title: "SQL and noSQL approaches to creating & querying databases (using R)"
 author: "Thomas Sandmann"
-date: "2022-12-30"
+date: "2023-01-02"
 freeze: true
 categories: [TIL, R, databases]
 editor:
@@ -17,13 +17,19 @@ editor_options:
   chunk_output_type: inline
 ---
 
-## Gene set collection & SQLite
+## Creating, polulating and querying SQL and noSQL databases with R
 
-In this document, I explore different approaches to store a gene set collection
-(e.g. the 
-[MSigDb hallmark gene sets (MH)](http://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp?collection=MH)
-)
-in a relational database.
+The first step of any data analysis is to obtain and explore the available
+data, often by accessing and querying a database. There many great introductions
+on how to _read_ data into an R session. But I found it harder to find tutorials
+on how to _create_ and _populate_ a new database from scratch.
+
+In this document, I explore both noSQL and SQL approaches to data management.
+As an example use case, we store a collection of gene sets, specifically the
+[mouse MSigDb hallmark gene sets (MH)](http://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp?collection=MH),
+either as unstructured documents or in relational tables.
+
+### Motivation
 
 Bioconductor offers well designed S4 Classes to store gene set collections, 
 including e.g. in a list-like
@@ -33,9 +39,9 @@ or a set of three `tibbles` within a
 object. 
 **So why could we be interested in storing this information in a database?**
 
-- A database (e.g. SQLite, Postgres, etc) offers a highly standardized way to
-store and manage information in a *language-agnostic* way. E.g. some of my 
-colleagues use python for their analyses and are comfortable retrieving gene
+- A database (e.g. SQLite, Postgres, etc) offers a standardized way to
+store, manage and access information in a *language-agnostic* way. E.g. some of 
+my  colleagues use python for their analyses and are comfortable retrieving gene
 set information from a database, but not necessarily from an R S4 object.
 - Gene sets capture knowledge from multiple experiments, studies and sources.
 If you are part of a larger organization a single *source of truth*, available
@@ -51,7 +57,7 @@ or
 [MariaDB](https://mariadb.org/)
 ) allows users to retrieve only the information they need.
 
-Here, I am using the 
+In this tutorial, I am using the 
 [SQLite](https://www.sqlite.org/index.html)
 engine to explore *both* relational and non-relational ways to manage gene sets. 
 `SQLite` can be embedded into applications, and does not require a central
@@ -61,8 +67,8 @@ database instead; my favorite is [Postgres](https://www.postgresql.org/).)
 
 ```{r message=FALSE}
 library(BiocSet)
+library(dm)
 library(dplyr)
-library(here)
 library(jsonlite)
 library(nodbi)
 library(org.Mm.eg.db)
@@ -79,13 +85,15 @@ At the time of writing,
 contains 15918 gene sets, organized into numerous different collections. For
 example, the 50
 [hallmark gene sets (MH)](http://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp?collection=MH)
-summarize and represent specific well-defined biological states or processes (
-[Liberzon et al, 2015](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4707969/)
+summarize and represent specific well-defined biological states or processes
+(
+[Liberzon et al, Cell Systems, 2015](https://doi.org/10.1016%2Fj.cels.2015.12.004)
 ). 
 
-
 ```{r include=FALSE}
-json_file <- here::here("posts", "geneset-sqlite-db", "mh.all.v2022.1.Mm.json")
+json_file <- paste0(
+  "https://raw.githubusercontent.com/tomsing1/blog/sqlite/posts/",
+  "geneset-sqlite-db/mh.all.v2022.1.Mm.json")
 mh <- jsonlite::read_json(json_file, simplifyVector = TRUE)
 ```
 
@@ -96,16 +104,22 @@ Each of the `r length(mh)` sets in the collection contains between
 `r max(lengths(lapply(mh, \(x) x$geneSymbols)))` official
 [gene symbols](https://rosalind.info/glossary/gene-symbol/), specifying the
 members of the gene set.
-
 :::
 
 Here, I will use the hallmarks collection as an example but the overall approach
 can be applied to other gene set collection in a similar way. (You might need
 additional / different annotation fields, though.)
 
-The mouse hallmarks collection is available (after logging into the MSigDb
-website) in different formats, including as a JSON file. Here, I have read it 
-into my R session as the nested list `mh`.
+The mouse hallmarks collection is available in different formats, including as a
+[JSON file](https://raw.githubusercontent.com/tomsing1/blog/main/posts/geneset-sqlite-db/mh.all.v2022.1.Mm.json). 
+Let's start by reading it into an R session as nested list `mh`.
+
+```{r}
+json_file <- paste0(
+  "https://raw.githubusercontent.com/tomsing1/blog/sqlite/posts/",
+  "geneset-sqlite-db/mh.all.v2022.1.Mm.json")
+mh <- jsonlite::read_json(json_file, simplifyVector = TRUE)
+```
 
 Each of the `r length(mh)` elements in the JSON file corresponds to a different
 gene set,
@@ -120,7 +134,7 @@ lengths(mh[[1]])
 ```
 
 and the gene symbols that make up the set are listed in the `geneSymbols` 
-sublist:
+vector:
 
 ```{r}
 head(mh[[1]]$geneSymbols)
@@ -337,8 +351,9 @@ head(es_element(es))
 es_set(es)
 ```
 
-The third table establishes the many-to-many relationship between genes and
-sets.
+The third table establishes the 
+[many-to-many relationship](https://en.wikipedia.org/wiki/Many-to-many_(data_model))
+between genes and sets, e.g. it tracks which gene is a member of each set.
 
 3. `es_elementset`: gene x set combination
 
@@ -351,8 +366,8 @@ es_elementset(es)[sample(nrow(es_elementset(es)), size = 10), ]
 Each of these tables can be augmented with additional metadata, e.g. we could
 add 
 [Entrez](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1761442/)
-gene identifiers to the `es_element`, or a long-formdescriptions for each set to
-the `es_set` tibble.
+gene identifiers to the `es_element`, or a long-form descriptions for each set 
+to the `es_set` tibble.
 
 These three tables can also be represented in a relational database, using
 the `element` and `set` columns as primary keys.
@@ -442,14 +457,41 @@ dbWriteTable(con, name = "tbl_elementset", value = elementset, overwrite = TRUE)
 ```{r}
 dbListTables(con)
 ```
+### Plotting relationships
+
+As we create and need to keep track of multiple tables, it is useful to
+visualize their contents (fields, columns) and relationships in a
+*model diagram*. The awesome
+[dm R package](https://dm.cynkra.com/index.html), 
+designed to bring an existing relational data model into your R session, can
+be used to generate diagrams like the one shown below. (`dm` can identify the
+keys in postgres and SQL server database engines automatically, but for SQLite
+we need to specify them ourselves with the `dm_add_pk()` and `dm_add_fk()`
+functions.)
+
+```{r message=FALSE}
+#| out-width: "50%"
+#| fig-align: "center"
+#| fig.widh: 5
+#| fig.height: 2.5
+#| fig-cap: "Model diagram"
+dm_from_con(con, learn_keys = FALSE) %>%
+  dm_add_pk(tbl_element, element) %>%
+  dm_add_pk(tbl_geneset, geneset) %>%
+  dm_add_fk(tbl_elementset, element, tbl_element) %>%
+  dm_add_fk(tbl_elementset, geneset, tbl_geneset) %>%
+  dm_draw(view_type = "all")
+```
 
 ### Querying the database
 
-Great! Now we are ready to query our databse. To make our lives easier, we will
+Great! Now we are ready to query our database. To make our lives easier, we will
 use the 
 [dplyr](https://cran.r-project.org/package=dplyr)
-package to translate our R syntax into SQL. First we define the remote tables
-by connecting to our brand new database:
+package to translate our R syntax into SQL. (But we could just as well use plain
+SQL instead.)
+
+First we define the remote tables by connecting to our brand new database:
 
 ```{r}
 tbl_geneset <- tbl(con, "tbl_geneset")
@@ -541,6 +583,19 @@ Defining a schema is much harder when we deal with datasets that are less
 standardized, deeply nested, changing over time, etc.
 
 :::
+
+## References
+
+If you are new to working with databases, then you might find these two great
+books useful:
+
+- [SQL for Data Scientists: A Beginner's Guide for Building Datasets for Analysis](https://www.wiley.com/en-us/SQL+for+Data+Scientists:+A+Beginner's+Guide+for+Building+Datasets+for+Analysis-p-9781119669388) by 
+[Renee M. P. Teate](https://twitter.com/BecomingDataSci) is a great starting 
+place to learn SQL. It mainly focusses on accessing existing databases.
+- [Practical SQL: A Beginner’s Guide to Storytelling with Data](https://anthonydebarros.com/practical-sql-a-beginners-guide-to-storytelling-with-data/) by 
+[Anthony DeBarros](https://anthonydebarros.com/about/) teaches readers how
+to create & populate a Postgres database, and how to index and search it 
+effectively.
 
 <details>
 <summary>

@@ -37,13 +37,28 @@ library(tidyr)
 work_dir <- here("posts", "nextflow-core-quantseq")
 ```
 
+## tl;dr
+
+- This analysis compares the performance of the 
+  [nf-core/rnaseq workflow](https://nf-co.re/rnaseq)
+  for QuantSeq FWD 3' tag RNAseq data.
+- The differential expression analysis results are highly
+  concordant with those obtained in the original publication.
+- With the appropriate settings, the 
+  [nf-core/rnaseq workflow](https://nf-co.re/rnaseq) is a valid data processing
+  pipeline for this data type.
+
 ### Differential expression analysis
 
 Next, we use Bioconductor/R packages to reproduce results downstream results 
-published by Xia et al. We perform the same analysis twice with either
+published in a preprint by [Xia et al](https://www.biorxiv.org/content/10.1101/2021.01.19.426731v1).
 
-1. the original counts matrix published by the authors
+We perform the same analysis twice with either
+
+1. the original counts matrix published by the authors [^1]
 2. the output of the nf-core/rnaseq workflow
+
+[^1]: Full disclosure: I am a co-author of this publication.
 
 #### Sample annotations
 
@@ -105,7 +120,7 @@ our linear model.
 #### Xia et al's original count data
 
 First, we retrieve the authors' count matrix from [NCBI GEO](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE158152), available
-as a Supplementary Excel file. In addition, we also retrieve 
+as a Supplementary Excel file.
 
 ```{r}
 url <- paste0("https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE158152&",
@@ -144,7 +159,6 @@ gene_data <- data.frame(
   gene_name = raw_counts$symbol,
   row.names = raw_counts$feature_id
 )
-colnames(gene_data) <- c("gene_id", "gene_name")
 
 col_data <- data.frame(
   sample_anno[colnames(count_data),
@@ -209,7 +223,8 @@ via limma's empirical Bayes approach.
 We use the `limma::treat()` function to test the null hypothesis that genes
 display significant differential expression _greater than_ 1.2-fold. This is
 more stringent than the conventional null hypothesis of zero change. (Please
-consult the `limma::treat()` help page for details.)
+consult the `limma::treat()` 
+[help page](https://rdrr.io/bioc/limma/man/ebayes.html) for details.)
 
 :::
 
@@ -292,6 +307,7 @@ and fit the same linear model as before
 
 ```{r}
 #| code-fold: true
+#| results: hide
 design <- model.matrix(~ genotype + sex + batch, data = dge_nfcore$samples)
 colnames(design) <- sub("genotype", "", colnames(design))
 keep <- filterByExpr(dge_nfcore, design = design, min.count = 25)
@@ -347,7 +363,10 @@ For example, the following plots show the normalized expression of a few
 highly differentially expressed genes (known markers of active microglia).
 
 ```{r}
+#| fig-width: 4.25
+#| fig-height: 4.25
 #| code-fold: true
+#| layout-ncol: 2
 tt <- rbind(
   topTreat(fit, coef = "Hom", number = Inf)[
     , c("gene_id", "gene_name", "logFC", "P.Value", "adj.P.Val")] %>%
@@ -364,11 +383,7 @@ tt <- rbind(
   dplyr::arrange(nfcore) %>%
   as.data.frame() %>%
   tibble::column_to_rownames("gene_id")
-print(tt)
-```
 
-```{r}
-#| code-fold: true
 geo <- cpm(dge, normalized.lib.sizes = TRUE) %>%
   as.data.frame() %>%
   cbind(dge$genes) %>%
@@ -397,13 +412,7 @@ cpms <- bind_rows(
   dplyr::select(geo, any_of(intersect(colnames(geo), colnames(nfcore)))),
   dplyr::select(nfcore, any_of(intersect(colnames(geo), colnames(nfcore))))
 )
-```
 
-```{r}
-#| fig-width: 4.25
-#| fig-height: 4.25
-#| code-fold: true
-#| layout-ncol: 2
 for (gene in topTreat(fit, coef = "Hom", number = 6)[["gene_id"]]) {
  p <- cpms %>%
     dplyr::filter(gene_id == gene) %>%
@@ -413,7 +422,7 @@ for (gene in topTreat(fit, coef = "Hom", number = 6)[["gene_id"]]) {
     labs(title = dge$genes[gene, "gene_name"],
          y = "Normalized expression (CPM)",
          x = element_blank(),
-         subtitle = sprintf("FDR nf-core: %s, FDR GEO: %s",
+         subtitle = sprintf("FDR nf-core: %s\nFDR GEO: %s",
                        tt[gene, "nfcore"],
                        tt[gene, "geo"]
                        )
@@ -434,7 +443,7 @@ p_cor <- cor(
 
 The log2 fold estimates for the `Hom` vs `WT` comparison are highly correlated
 across the two analysis workflows (Pearson correlation coefficient 
-R = `r signif(p_cor, 2)` ):s
+R = `r signif(p_cor, 2)` ):
 
 ```{r}
 #| fig-width: 4.5
@@ -486,17 +495,21 @@ that the vast majority display significant close to the 5% threshold in the
 nf-core/rnaseq output as well. (This is in line with the high overall
 correlation of the t-statistics observed above.)
 
+```{r}
+print(tt[genes, ])
+```
+
 #### Examples
 
 Finally, we plot the normalized gene expression estimates for the 
 `r length(genes)` discordant genes.
 
 ```{r}
-#| fig-width: 4.25
+#| fig-width: 3
 #| fig-height: 4.25
 #| code-fold: true
 #| layout-ncol: 2
-for (gene in row.names(tt)) {
+for (gene in genes) {
  p <- cpms %>%
     dplyr::filter(gene_id == gene) %>%
     ggplot(aes(x = genotype, y = cpm)) + 
@@ -505,7 +518,7 @@ for (gene in row.names(tt)) {
     labs(title = dge$genes[gene, "gene_name"],
          y = "Normalized expression (CPM)",
          x = element_blank(),
-         subtitle = sprintf("FDR nf-core: %s, FDR GEO: %s",
+         subtitle = sprintf("FDR nf-core: %s\nFDR GEO: %s",
                        tt[gene, "nfcore"],
                        tt[gene, "geo"]
                        )

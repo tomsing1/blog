@@ -2,6 +2,10 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/nextflow-core-quantseq-4-nugent/index.html",
+      "/posts/nextflow-core-quantseq-3-xia/index.html",
+      "/posts/nextflow-core-quantseq-1-settings/index.html",
+      "/posts/nextflow-core-quantseq-2-output/index.html",
       "/posts/geneset-sqlite-db/index.html",
       "/posts/interactive-gene-set-results/index.html",
       "/posts/upset_plots/index.html",

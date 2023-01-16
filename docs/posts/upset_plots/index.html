@@ -9,7 +9,7 @@
 <meta name="author" content="Thomas Sandmann">
 <meta name="dcterms.date" content="2022-12-24">
 
-<title>Thomas Sandmann’s personal blog - UpSet plots: comparing differential expression across contrasts</title>
+<title>Thomas Sandmann’s blog - UpSet plots: comparing differential expression across contrasts</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -95,6 +95,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -123,6 +124,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-XNBDW4FYSC"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XNBDW4FYSC', { 'anonymize_ip': true});
+</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -136,7 +146,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
     <a class="navbar-brand" href="../../index.html">
-    <span class="navbar-title">Thomas Sandmann’s personal blog</span>
+    <span class="navbar-title">Thomas Sandmann’s blog</span>
     </a>
   </div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -160,6 +170,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://genomic.social/@thomas_sandmann"><i class="bi bi-mastodon" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml"><i class="bi bi-rss" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -446,7 +461,7 @@ Reproducibility
  collate  en_US.UTF-8
  ctype    en_US.UTF-8
  tz       America/Los_Angeles
- date     2022-12-24
+ date     2023-01-16
  pandoc   2.19.2 @ /Applications/RStudio.app/Contents/MacOS/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────
@@ -457,7 +472,7 @@ Reproducibility
  BiocGenerics         * 0.44.0   2022-11-01 [1] Bioconductor
  bitops                 1.0-7    2021-04-24 [1] CRAN (R 4.2.0)
  circlize               0.4.15   2022-05-10 [1] CRAN (R 4.2.0)
- cli                    3.4.1    2022-09-23 [1] CRAN (R 4.2.0)
+ cli                    3.5.0    2022-12-20 [1] CRAN (R 4.2.0)
  clue                   0.3-63   2022-11-19 [1] CRAN (R 4.2.0)
  cluster                2.1.4    2022-08-22 [2] CRAN (R 4.2.2)
  codetools              0.2-18   2020-11-04 [2] CRAN (R 4.2.2)
@@ -528,7 +543,7 @@ Reproducibility
 </section>
 
 
-<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>Both Venn diagrams and upset plots operate on sets, e.g.&nbsp;they require that a hard threshold has been applied to the results of a differential expression analysis. That’s problematic, because <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3370685/">p-values themselves display high variability</a> and dichotomizing quantitative information looses information.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>

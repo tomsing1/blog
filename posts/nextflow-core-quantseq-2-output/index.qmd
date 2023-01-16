@@ -1,0 +1,190 @@
+---
+title: "QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output"
+author: "Thomas Sandmann"
+date: "2023-01-16"
+freeze: true
+categories: [nextflow, NGS]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+::: {.callout-note collapse="false"}
+
+This is the second of four posts documenting my progress toward
+processing and analyzing 
+[QuantSeq FWD 3' tag RNAseq](https://www.lexogen.com/quantseq-3mrna-sequencing/) 
+data 
+with the 
+[nf-core/rnaseq](https://nf-co.re/rnaseq)
+workflow. 
+
+1. [Configuring & executing the nf-core/rnaseq workflow](../nextflow-core-quantseq-1-settings/index.html)
+2. **Exploring the workflow outputs**
+3. [Validating the workflow by reproducing results published by Xia et al (no UMIs)](../nextflow-core-quantseq-3-xia/index.html)
+4. [Validating the workflow by reproducing results published by Nugent et al (including UMIs)](../nextflow-core-quantseq-4-nugent/index.html)
+
+Many thanks to [Harshil Patel](https://github.com/drpatelh), 
+[António Miguel de Jesus Domingues](https://github.com/adomingues/)
+and 
+[Matthias Zepper](https://github.com/matthiasZepper/)
+for their generous guidance & input via [nf-core slack](nfcore.slack.com).
+(Any mistakes are mine.)
+:::
+
+## tl;dr
+
+- This post documents the output files & folders of the
+  [nf-core/rnaseq workflow (v 3.10.1)](https://nf-co.re/rnaseq),
+  run with default settings with the `star_salmon` aligner / quantitation method.
+- For additional information, e.g. on the content of the
+  [MultiQC](https://multiqc.info/)
+  report, please see the
+  [official nf-core/rnaseq documentation](https://nf-co.re/rnaseq/3.10.1/output).
+
+## Reports
+
+### MultiQC report
+
+The MultiQC HTML report is a one-stop-shop that summarises QC metrics across the workflow. It can be found int he `multiqc` folder, in a subdirectory named according to the aligner & quantifier combination used (default: `star_salmon`).
+
+![multiqc report](images/multiqc.png)
+
+### Pipeline info
+
+The `pipeline_info` folder contains html reports and text (CSV, TXT, YML) files with information about the run, including the versions of the software tools used. 
+
+![pipeline info](images/pipeline_info.png)
+
+### FastQC reports
+
+The `fastqc` folder contains the output of the
+[fastqc](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+tool. Most of the reported metrics are included in the MultiQC report as well, but the HTML reports for individual samples are available here if needed.
+
+![FastQC report](images/fastqc.png)
+
+### Trim Galore reports
+
+The `trimgalore` folder contains
+
+- trimming reports for each sample
+- the `fastqc` sub-folder with quality metrics for the _trimmed_ FASTQ files
+
+![Trim Galore](images/trimgalore.png)
+
+### umitools
+
+This folder contains the log files returned by
+[UMI-tools](https://github.com/CGATOxford/UMI-tools)
+
+![UMI-tools](images/umitools.png)
+
+## Workflow results
+
+The main output of the workflow is available in the `star_salmon` subdirectory. (This folder is named after the selected alignment & quantification strategy, e.g. `star_salmon` is present only if this tool combination was used.)
+
+It contains multiple folders, as well as the (deduplicated) sorted BAM files for each sample.
+
+### bigwig
+
+Genome coverage in [bigWig](https://genome.ucsc.edu/goldenPath/help/bigWig.html) format for each sample.
+
+![BigWig files](images/bigwig.png)
+
+### DESeq2 object & QC metrics
+
+The workflow aggregates all counts into a DESeq2 R objects, performs QC and exploratory analyses and serializes the object as `deseq2.dds.RData`.
+
+![DESeq2 object & QC metrics](images/deseq2.png)
+
+### Dupradar
+
+The 
+[dupRadar](https://bioconductor.org/packages/release/bioc/html/dupRadar.html)
+Bioconductor package performs duplication rate quality control.
+
+![dupRadar](images/dupradar.png)
+
+### Featurecounts
+
+Output from 
+[featurecounts](https://academic.oup.com/bioinformatics/article/30/7/923/232889?login=false)
+tool is _only_ used to generate QC metrics. For actual quantitation of the gene-level results, the output of 
+[salmon](https://combine-lab.github.io/salmon/) (default) or
+[rsem](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-12-323)
+are used.
+
+The metrics reported in the `featurecounts` folder are included in the MultiQC report.
+
+![featureCounts](images/featurecounts.png)
+
+### STAR log files
+
+This folder contains log files output by the `STAR` aligner.
+
+![STAR logs](images/log.png)
+
+### Qualimap
+
+The [qualimap](http://qualimap.conesalab.org/) package generates QC metrics from BAM files.
+
+![Qualimap](images/qualimap.png)
+
+### RSEQC
+
+The output of the [rseqc](https://rseqc.sourceforge.net/) QC control package are in this directory.
+
+![RSEQC](images/rseqc.png)
+
+## Alignments & gene-level counts
+
+The `star_salmon` folder also contains the main results of the workflow: gene-level counts and alignments (BAM files).
+
+### Salmon quantitation
+
+#### Aggregated
+
+The workflow outputs salmon quantitation results aggregated across all samples. Different types of counts (e.g. raw, length-scaled, TPMs) are available - the choice for downstream analyses depends on the chosen approach. Please see [tximport](https://bioconductor.org/packages/release/bioc/vignettes/tximport/inst/doc/tximport.html#Downstream_DGE_in_Bioconductor) for details.
+
+![Salmon aggrated output](images/salmon_aggregated.png)
+
+#### By sample
+
+In addition, the salmon outputs for individual samples are avialable in sub-folders, one for each sample.
+
+![Salmon output for each sample](images/salmon_by_sample.png)
+
+### STAR alignments
+
+The sorted (and, in the case of datasets that include UMIs, deduplicated) BAM files and their indices are available:
+
+![STAR alignments](images/star_bam.png)
+
+## Genome, gene annotations & indices
+
+If the workflow was exectuted with the `"save_reference": true` parameter, then all reference files (FASTA, GTF, BED, etc) and the indices generated for STAR, salmon and rsem are returned in the `genome` folder within the output directory:
+
+![genome folder](images/save_reference.png)
+
+These files can be reused for future runs, shortening the execuction time of the workflow.
+
+Next, we will compare how the gene-counts returned of the `nf-core/rnaseq`
+workflow compare to those posted on GEO by the authors of the two datasets
+[we processed in the first post in this series](../nextflow-core-quantseq-1-settings/index.html) by
+performing a differential expression analysis in the 
+[third](../nextflow-core-quantseq-3-xia/index.html) and
+[fourth](../nextflow-core-quantseq-4-nugent/index.html)
+posts in this series.
+
+

@@ -1,11 +1,9 @@
 ---
-title: >
-  QuantSeq 3' tag RNAseq analysis with nf-core/rnaseq: 1. configuring & 
-  executing the nf-core/rnaseq workflow
+title: "QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow"
 author: "Thomas Sandmann"
 date: "2023-01-16"
 freeze: true
-categories: [TIL, R, nextflow, NGS]
+categories: [nextflow, NGS]
 editor:
   markdown:
     wrap: 72
@@ -31,7 +29,7 @@ with the
 [nf-core/rnaseq](https://nf-co.re/rnaseq)
 workflow. 
 
-1. **Configuring & executing the nf-core/rnaseq workflow*](../nextflow-core-quantseq-1-settings/index.html)**
+1. **Configuring the nf-core/rnaseq workflow**
 2. [Exploring the workflow outputs](../nextflow-core-quantseq-2-output/index.html)
 3. [Validating the workflow by reproducing results published by Xia et al (no UMIs)](../nextflow-core-quantseq-3-xia/index.html)
 4. [Validating the workflow by reproducing results published by Nugent et al (including UMIs)](../nextflow-core-quantseq-4-nugent/index.html)
@@ -49,8 +47,8 @@ for their generous guidance & input via [nf-core slack](nfcore.slack.com).
 - This tutorial documents how to configure & execute the
   [nf-core/rnaseq workflow](https://nf-co.re/rnaseq)
   for the processing of raw QuantSeq 3' FWD RNA-seq data.
-- It highlights recommended parameters settings and applies them to two
-  published datasets, one with and one without UMIs.
+- It highlights [custom nf-core/rnaseq parameters settings](#custom-arguments)
+  and applies them to two published datasets, one with and one without UMIs.
 
 ## Installing Nextflow
 

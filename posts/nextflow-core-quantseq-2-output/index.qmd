@@ -1,10 +1,9 @@
 ---
-title: >
-  QuantSeq 3' tag RNAseq analysis with nf-core/rnaseq: 2. exploring the outputs
+title: "QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output"
 author: "Thomas Sandmann"
-date: "2023-01-15"
+date: "2023-01-16"
 freeze: true
-categories: [TIL,nextflow, NGS]
+categories: [nextflow, NGS]
 editor:
   markdown:
     wrap: 72
@@ -31,7 +30,7 @@ with the
 workflow. 
 
 1. [Configuring & executing the nf-core/rnaseq workflow](../nextflow-core-quantseq-1-settings/index.html)
-2. [Exploring the workflow outputs](../nextflow-core-quantseq-2-output/index.html)
+2. **Exploring the workflow outputs**
 3. [Validating the workflow by reproducing results published by Xia et al (no UMIs)](../nextflow-core-quantseq-3-xia/index.html)
 4. [Validating the workflow by reproducing results published by Nugent et al (including UMIs)](../nextflow-core-quantseq-4-nugent/index.html)
 
@@ -184,8 +183,8 @@ Next, we will compare how the gene-counts returned of the `nf-core/rnaseq`
 workflow compare to those posted on GEO by the authors of the two datasets
 [we processed in the first post in this series](../nextflow-core-quantseq-1-settings/index.html) by
 performing a differential expression analysis in the 
-[third](../nextflow-core-quantseq-3-xia/index.html)] and
-[fourth](../nextflow-core-quantseq-4-nugent/index.html)]
+[third](../nextflow-core-quantseq-3-xia/index.html) and
+[fourth](../nextflow-core-quantseq-4-nugent/index.html)
 posts in this series.
 
 

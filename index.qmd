@@ -2,7 +2,9 @@
 title: "Welcome"
 listing:
   contents: posts
-  sort: "date desc"
+  sort:
+    - "date desc"
+    - "title"
   type: table
   categories: true
   sort-ui: false

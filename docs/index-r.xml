@@ -13,726 +13,6 @@
 <generator>quarto-1.2.280</generator>
 <lastBuildDate>Mon, 16 Jan 2023 08:00:00 GMT</lastBuildDate>
 <item>
-  <title>QuantSeq RNAseq analysis (4): Validating published results (with UMIs)</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<div class="callout-note callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Note
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
-<div class="callout-body-container callout-body">
-<p>This is the fourth of four posts documenting my progress toward processing and analyzing <a href="https://www.lexogen.com/quantseq-3mrna-sequencing/">QuantSeq FWD 3’ tag RNAseq</a> data with the <a href="https://nf-co.re/rnaseq">nf-core/rnaseq</a> workflow.</p>
-<ol type="1">
-<li><a href="../nextflow-core-quantseq-1-settings/index.html">Configuring &amp; executing the nf-core/rnaseq workflow</a></li>
-<li><a href="../nextflow-core-quantseq-2-output/index.html">Exploring the workflow outputs</a></li>
-<li><a href="../nextflow-core-quantseq-3-xia/index.html">Validating the workflow by reproducing results published by Xia et al (no UMIs)</a></li>
-<li><strong>Validating the workflow by reproducing results published by Nugent et al (including UMIs)</strong></li>
-</ol>
-<p>Many thanks to <a href="https://github.com/drpatelh">Harshil Patel</a>, <a href="https://github.com/adomingues/">António Miguel de Jesus Domingues</a> and <a href="https://github.com/matthiasZepper/">Matthias Zepper</a> for their generous guidance &amp; input via <a href="nfcore.slack.com">nf-core slack</a>. (Any mistakes are mine.)</p>
-</div>
-</div>
-</div>
-<section id="tldr" class="level2">
-<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
-<ul>
-<li>This analysis compares the performance of the <a href="https://nf-co.re/rnaseq">nf-core/rnaseq workflow</a> for QuantSeq FWD 3’ tag RNAseq data with unique molecular identifiers (UMIs).</li>
-<li>The differential expression analysis results are highly concordant with those obtained in the original publication.</li>
-<li>With the appropriate settings, the <a href="https://nf-co.re/rnaseq">nf-core/rnaseq workflow</a> is a valid data processing pipeline for this data type.</li>
-</ul>
-<p>The <a href="../nextflow-core-quantseq-1-settings/index.html">first post in this series</a> walked through the preprocesssing of QuantSeq FWD data published in a preprint by <a href="https://pubmed.ncbi.nlm.nih.gov/31902528/">Nugent et al, 2020</a>, who used the <a href="https://www.lexogen.com/quantseq-3mrna-sequencing/">QuantSeq FWD</a> library preparation protocol and added unique molecular identifiers (UMIs). The UMIs were used to identify and remove PCR duplicates during the data preprocessing steps.</p>
-<p>Here, we use Bioconductor/R packages to reproduce the downstream results. We perform the same analysis twice with either</p>
-<ol type="1">
-<li>the original counts matrix published by the authors <sup>1</sup></li>
-<li>the output of the nf-core/rnaseq workflow</li>
-</ol>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">library</span>(dplyr)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;">library</span>(edgeR)</span>
-<span id="cb1-3"><span class="fu" style="color: #4758AB;">library</span>(ggplot2)</span>
-<span id="cb1-4"><span class="fu" style="color: #4758AB;">library</span>(here)</span>
-<span id="cb1-5"><span class="fu" style="color: #4758AB;">library</span>(org.Mm.eg.db)</span>
-<span id="cb1-6"><span class="fu" style="color: #4758AB;">library</span>(SummarizedExperiment)</span>
-<span id="cb1-7"><span class="fu" style="color: #4758AB;">library</span>(tibble)</span>
-<span id="cb1-8"><span class="fu" style="color: #4758AB;">library</span>(tidyr)</span></code></pre></div>
-</div>
-<div class="cell">
-
-</div>
-</section>
-<section id="sample-annotations" class="level2">
-<h2 class="anchored" data-anchor-id="sample-annotations">Sample annotations</h2>
-<p>We start by retrieving the sample annotation table, listing e.g.&nbsp;the <code>sex</code>, and <code>genotype</code> for each mouse, and the <code>batch</code> for each collected sample.</p>
-<p>This information is available in the <a href="https://www.ncbi.nlm.nih.gov/Traces/study/?query_key=4&amp;WebEnv=MCID_63c1d2b51518446806822e1d&amp;o=acc_s%3Aa#">SRA Run Explorer</a>. (I saved it in the <a href="sample_metadata.csv">sample_metadata.csv CSV file</a> if you want to follow along&gt;.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">sample_sheet <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">file.path</span>(work_dir, <span class="st" style="color: #20794D;">"sample_metadata.csv"</span>)</span>
-<span id="cb2-2">sample_anno <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">read.csv</span>(sample_sheet, <span class="at" style="color: #657422;">row.names =</span> <span class="st" style="color: #20794D;">"Experiment"</span>)</span>
-<span id="cb2-3"><span class="fu" style="color: #4758AB;">head</span>(sample_anno[, <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"Run"</span>, <span class="st" style="color: #20794D;">"Animal.ID"</span>, <span class="st" style="color: #20794D;">"Age"</span>, <span class="st" style="color: #20794D;">"age_unit"</span>, <span class="st" style="color: #20794D;">"Cell_type"</span>,</span>
-<span id="cb2-4">                     <span class="st" style="color: #20794D;">"sex"</span>, <span class="st" style="color: #20794D;">"Genotype"</span>, <span class="st" style="color: #20794D;">"Sample.Name"</span>)])</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                  Run Animal.ID Age age_unit Cell_type    sex  Genotype
-SRX6420531 SRR9659551       IL1   2   months astrocyte female TREM2 +/+
-SRX6420532 SRR9659552       IL1   2   months microglia female TREM2 +/+
-SRX6420533 SRR9659553      IL10   2   months astrocyte female TREM2 -/-
-SRX6420534 SRR9659554      IL10   2   months microglia female TREM2 -/-
-SRX6420535 SRR9659555      IL11  16   months astrocyte female TREM2 +/+
-SRX6420536 SRR9659556      IL11  16   months microglia female TREM2 +/+
-           Sample.Name
-SRX6420531  GSM3933549
-SRX6420532  GSM3933550
-SRX6420533  GSM3933551
-SRX6420534  GSM3933552
-SRX6420535  GSM3933553
-SRX6420536  GSM3933554</code></pre>
-</div>
-</div>
-<p>Because our SRA metadata doesn’t include the GEO sample title, I saved the identifier mappings in the <a href="GEO_sample_ids.csv">GEO_sample_ids.csv CSV file</a>.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">geo_ids <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">read.csv</span>(<span class="fu" style="color: #4758AB;">file.path</span>(work_dir, <span class="st" style="color: #20794D;">"GEO_sample_ids.csv"</span>))</span>
-<span id="cb4-2"><span class="fu" style="color: #4758AB;">head</span>(geo_ids)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  sample_name sample_id
-1  GSM3933549     IL1_A
-2  GSM3933550     IL1_M
-3  GSM3933551    IL10_A
-4  GSM3933552    IL10_M
-5  GSM3933553    IL11_A
-6  GSM3933554    IL11_M</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;">colnames</span>(sample_anno)<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">tolower</span>(<span class="fu" style="color: #4758AB;">colnames</span>(sample_anno))</span>
-<span id="cb6-2"><span class="fu" style="color: #4758AB;">colnames</span>(sample_anno) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sub</span>(<span class="st" style="color: #20794D;">"."</span>, <span class="st" style="color: #20794D;">"_"</span>, <span class="fu" style="color: #4758AB;">colnames</span>(sample_anno), </span>
-<span id="cb6-3">                             <span class="at" style="color: #657422;">fixed =</span> <span class="cn" style="color: #8f5902;">TRUE</span>) </span>
-<span id="cb6-4">sample_anno <span class="ot" style="color: #003B4F;">&lt;-</span> sample_anno[, <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"sample_name"</span>, <span class="st" style="color: #20794D;">"animal_id"</span>, <span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">"sex"</span>,</span>
-<span id="cb6-5">                               <span class="st" style="color: #20794D;">"age"</span>, <span class="st" style="color: #20794D;">"cell_type"</span>)]</span>
-<span id="cb6-6">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">factor</span>(sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype, </span>
-<span id="cb6-7">                               <span class="at" style="color: #657422;">levels =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"TREM2 +/+"</span>, <span class="st" style="color: #20794D;">"TREM2 -/-"</span>))</span>
-<span id="cb6-8">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype <span class="ot" style="color: #003B4F;">&lt;-</span> dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">recode_factor</span>(</span>
-<span id="cb6-9">  sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype,<span class="st" style="color: #20794D;">"TREM2 +/+"</span> <span class="ot" style="color: #003B4F;">=</span> <span class="st" style="color: #20794D;">"WT"</span>, <span class="st" style="color: #20794D;">"TREM2 -/-"</span> <span class="ot" style="color: #003B4F;">=</span> <span class="st" style="color: #20794D;">"KO"</span>)</span>
-<span id="cb6-10">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>age <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">factor</span>(sample_anno<span class="sc" style="color: #5E5E5E;">$</span>age)</span>
-<span id="cb6-11">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>sample_title <span class="ot" style="color: #003B4F;">&lt;-</span> geo_ids[</span>
-<span id="cb6-12">  <span class="fu" style="color: #4758AB;">match</span>(sample_anno<span class="sc" style="color: #5E5E5E;">$</span>sample_name, geo_ids<span class="sc" style="color: #5E5E5E;">$</span>sample_name), <span class="st" style="color: #20794D;">"sample_id"</span>]</span>
-<span id="cb6-13"><span class="fu" style="color: #4758AB;">head</span>(sample_anno)</span></code></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>           sample_name animal_id genotype    sex age cell_type sample_title
-SRX6420531  GSM3933549       IL1       WT female   2 astrocyte        IL1_A
-SRX6420532  GSM3933550       IL1       WT female   2 microglia        IL1_M
-SRX6420533  GSM3933551      IL10       KO female   2 astrocyte       IL10_A
-SRX6420534  GSM3933552      IL10       KO female   2 microglia       IL10_M
-SRX6420535  GSM3933553      IL11       WT female  16 astrocyte       IL11_A
-SRX6420536  GSM3933554      IL11       WT female  16 microglia       IL11_M</code></pre>
-</div>
-</div>
-<p>This experiment includes 56 samples of astrocytes or microglia cells obtained from 28 female mice that were either 2- or 16 months of age.</p>
-<p>The animals are either wildtype (<code>WT</code>) or homozygous knockouts (<code>KO</code>) for the <a href="https://www.uniprot.org/uniprotkb/Q99NH8/entry">Trem2 gene</a>.</p>
-</section>
-<section id="nugent-et-als-original-count-data" class="level2">
-<h2 class="anchored" data-anchor-id="nugent-et-als-original-count-data">Nugent et al’s original count data</h2>
-<p>First, we retrieve the authors’ count matrix from <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE158152">NCBI GEO</a>, available as a Supplementary tab-delimited text file.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">geo_url <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">paste0</span>(<span class="st" style="color: #20794D;">"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE134031&amp;"</span>,</span>
-<span id="cb8-2">                  <span class="st" style="color: #20794D;">"format=file&amp;file=GSE134031%5FDST120%2Etab%2Egz"</span>)</span>
-<span id="cb8-3">raw_counts <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">read.delim</span>(<span class="fu" style="color: #4758AB;">textConnection</span>(<span class="fu" style="color: #4758AB;">readLines</span>(<span class="fu" style="color: #4758AB;">gzcon</span>(<span class="fu" style="color: #4758AB;">url</span>(geo_url)))))</span>
-<span id="cb8-4"><span class="fu" style="color: #4758AB;">head</span>(<span class="fu" style="color: #4758AB;">colnames</span>(raw_counts), <span class="dv" style="color: #AD0000;">10</span>)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] "mgi_symbol"              "gene_biotype"           
- [3] "ensembl_gene_id_version" "IL1_A"                  
- [5] "IL1_M"                   "IL10_A"                 
- [7] "IL10_M"                  "IL11_A"                 
- [9] "IL11_M"                  "IL12_A"                 </code></pre>
-</div>
-</div>
-<p>The <code>raw_counts</code> data.frame contains information about the detected genes ( <code>mgi_symbol</code>, <code>ensembl_gene_id_version</code>) and the samples are identified by a shorthand of their GEO title (e.g.&nbsp;<code>IL1_M</code>, <code>IL1_A</code>).</p>
-<p>We use the raw counts to populate a new <code>DGEList</code> object and perform Library Size Normalization with the <code>TMM</code> approach.</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">count_data <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as.matrix</span>(raw_counts[, <span class="fu" style="color: #4758AB;">grep</span>(<span class="st" style="color: #20794D;">"^IL"</span>, <span class="fu" style="color: #4758AB;">colnames</span>(raw_counts))])</span>
-<span id="cb10-2"><span class="fu" style="color: #4758AB;">row.names</span>(count_data) <span class="ot" style="color: #003B4F;">&lt;-</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>ensembl_gene_id_version</span>
-<span id="cb10-3"><span class="fu" style="color: #4758AB;">colnames</span>(count_data) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">row.names</span>(sample_anno)[</span>
-<span id="cb10-4">  <span class="fu" style="color: #4758AB;">match</span>(<span class="fu" style="color: #4758AB;">colnames</span>(count_data), sample_anno<span class="sc" style="color: #5E5E5E;">$</span>sample_title)</span>
-<span id="cb10-5">]</span>
-<span id="cb10-6"></span>
-<span id="cb10-7">gene_data <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(</span>
-<span id="cb10-8">  <span class="at" style="color: #657422;">gene_id =</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>ensembl_gene_id_version,</span>
-<span id="cb10-9">  <span class="at" style="color: #657422;">gene_name =</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>mgi_symbol,</span>
-<span id="cb10-10">  <span class="at" style="color: #657422;">row.names =</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>ensembl_gene_id_version</span>
-<span id="cb10-11">)</span>
-<span id="cb10-12"></span>
-<span id="cb10-13">col_data <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(</span>
-<span id="cb10-14">  sample_anno[<span class="fu" style="color: #4758AB;">colnames</span>(count_data),</span>
-<span id="cb10-15">              <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"sample_title"</span>, <span class="st" style="color: #20794D;">"animal_id"</span>,  <span class="st" style="color: #20794D;">"age"</span>, <span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">"cell_type"</span>)],</span>
-<span id="cb10-16">  <span class="at" style="color: #657422;">workflow =</span> <span class="st" style="color: #20794D;">"geo"</span></span>
-<span id="cb10-17">)</span>
-<span id="cb10-18"></span>
-<span id="cb10-19">dge <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">DGEList</span>(</span>
-<span id="cb10-20">  <span class="at" style="color: #657422;">counts =</span> <span class="fu" style="color: #4758AB;">as.matrix</span>(count_data), </span>
-<span id="cb10-21">  <span class="at" style="color: #657422;">samples =</span> col_data[<span class="fu" style="color: #4758AB;">colnames</span>(count_data), ], </span>
-<span id="cb10-22">  <span class="at" style="color: #657422;">genes =</span> gene_data[<span class="fu" style="color: #4758AB;">row.names</span>(count_data), ]</span>
-<span id="cb10-23">)</span>
-<span id="cb10-24"></span>
-<span id="cb10-25">dge <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">calcNormFactors</span>(dge, <span class="at" style="color: #657422;">method =</span> <span class="st" style="color: #20794D;">"TMM"</span>)</span></code></pre></div>
-</details>
-</div>
-<p>This is a large dataset, containing e.g.&nbsp;samples from two different cell types (microglia and astrocytes) and two different age groups (2 and 16 months).</p>
-<p>Here, we will restrict the analysis to microglia samples collected from older animals.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1">dge <span class="ot" style="color: #003B4F;">&lt;-</span> dge[, dge<span class="sc" style="color: #5E5E5E;">$</span>samples<span class="sc" style="color: #5E5E5E;">$</span>cell_type <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">"microglia"</span> <span class="sc" style="color: #5E5E5E;">&amp;</span> dge<span class="sc" style="color: #5E5E5E;">$</span>samples<span class="sc" style="color: #5E5E5E;">$</span>age <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">"16"</span>]</span></code></pre></div>
-</div>
-<p>Let’s identify which genes are significantly differentially expressed between the two genotypes!</p>
-<section id="linear-modeling-with-limmavoom" class="level3">
-<h3 class="anchored" data-anchor-id="linear-modeling-with-limmavoom">Linear modeling with limma/voom</h3>
-<p>First, we use the <code>edgeR::filterByExpr()</code> function to identify genes with sufficiently large counts to be examined for differential expression.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">design <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">model.matrix</span>(<span class="sc" style="color: #5E5E5E;">~</span> genotype, <span class="at" style="color: #657422;">data =</span> dge<span class="sc" style="color: #5E5E5E;">$</span>samples)</span>
-<span id="cb12-2"><span class="fu" style="color: #4758AB;">colnames</span>(design) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sub</span>(<span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">""</span>, <span class="fu" style="color: #4758AB;">colnames</span>(design))</span>
-<span id="cb12-3">keep <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">filterByExpr</span>(dge, <span class="at" style="color: #657422;">design =</span> design)</span></code></pre></div>
-</div>
-<p>Next, we fit a linear model to the data using the <a href="https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29">limma/voom</a> approach. The model only includes the <code>genotype</code> (with <code>WT</code> as the reference level) as a fixed effect.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">voomLmFit</span>(</span>
-<span id="cb13-2">  dge[keep, <span class="fu" style="color: #4758AB;">row.names</span>(design)], </span>
-<span id="cb13-3">  <span class="at" style="color: #657422;">design =</span> design,</span>
-<span id="cb13-4">  <span class="at" style="color: #657422;">sample.weights =</span> <span class="cn" style="color: #8f5902;">TRUE</span>, </span>
-<span id="cb13-5">  <span class="at" style="color: #657422;">plot =</span> <span class="cn" style="color: #8f5902;">FALSE</span></span>
-<span id="cb13-6">)</span>
-<span id="cb13-7">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">eBayes</span>(fit, <span class="at" style="color: #657422;">robust=</span><span class="cn" style="color: #8f5902;">TRUE</span>)</span></code></pre></div>
-</div>
-<p>The following table displays the number of differentially up- and down-regulated genes after applying a false-discovery (<code>adj.P.Val</code>) threshold of 5%. We detect significant differences between <code>KO</code> and <code>WT</code> animals in a small number of genes</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><span class="fu" style="color: #4758AB;">summary</span>(<span class="fu" style="color: #4758AB;">decideTests</span>(fit)[, <span class="st" style="color: #20794D;">"KO"</span>])</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         KO
-Down     10
-NotSig 6343
-Up        2</code></pre>
-</div>
-</div>
-<p>The top 10 genes with the smallest p-values include well known markers of microglia activation:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;">topTreat</span>(fit, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>)[, <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_name"</span>, <span class="st" style="color: #20794D;">"logFC"</span>, <span class="st" style="color: #20794D;">"P.Value"</span>, <span class="st" style="color: #20794D;">"adj.P.Val"</span>)]</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                      gene_name      logFC      P.Value    adj.P.Val
-ENSMUSG00000015568.16       Lpl -3.1524285 2.088121e-17 1.327001e-13
-ENSMUSG00000023992.14     Trem2 -2.0556690 3.260855e-15 1.036137e-11
-ENSMUSG00000079293.11    Clec7a -1.5285199 9.357950e-12 1.982326e-08
-ENSMUSG00000029304.14      Spp1 -4.6265897 4.968572e-10 7.893819e-07
-ENSMUSG00000003418.11   St8sia6 -1.6639344 7.279411e-09 8.240295e-06
-ENSMUSG00000002602.16       Axl -1.2096969 7.779979e-09 8.240295e-06
-ENSMUSG00000068129.5       Cst7 -2.0966828 9.881687e-08 8.971160e-05
-ENSMUSG00000008845.9      Cd163  0.8165263 1.513307e-06 1.202133e-03
-ENSMUSG00000039109.16     F13a1  0.8081490 1.735344e-06 1.225345e-03
-ENSMUSG00000000682.7       Cd52 -0.7939756 4.846100e-06 3.079696e-03</code></pre>
-</div>
-</div>
-<p>Next we repeat <em>the same analysis</em> with the output of the nf-core/rnaseq workflow.</p>
-</section>
-</section>
-<section id="nf-corernaseq-results" class="level2">
-<h2 class="anchored" data-anchor-id="nf-corernaseq-results">nf-core/rnaseq results</h2>
-<p>We start with the raw counts contained in the <a href="salmon.merged.gene_counts.rds">salmon.merged.gene_counts.rds</a> file generated by the nf-core/rnaseq workflow.</p>
-<p>We TMM-normalize the data, as before. (This step converts the <code>SummarizedExperiment</code> into a `DGEList object as well.)</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1">count_file <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">file.path</span>(work_dir, <span class="st" style="color: #20794D;">"salmon.merged.gene_counts.rds"</span>)</span>
-<span id="cb18-2">se <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">readRDS</span>(count_file)</span>
-<span id="cb18-3"><span class="fu" style="color: #4758AB;">stopifnot</span>(<span class="fu" style="color: #4758AB;">all</span>(<span class="fu" style="color: #4758AB;">colnames</span>(se) <span class="sc" style="color: #5E5E5E;">%in%</span> <span class="fu" style="color: #4758AB;">row.names</span>(sample_anno)))</span>
-<span id="cb18-4">dge_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">calcNormFactors</span>(se, <span class="at" style="color: #657422;">method =</span> <span class="st" style="color: #20794D;">"TMM"</span>)</span></code></pre></div>
-</div>
-<p>Next, we add the sample metadata and fit the same linear model as before.</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1">dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(</span>
-<span id="cb19-2">  dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples,</span>
-<span id="cb19-3">  sample_anno[<span class="fu" style="color: #4758AB;">colnames</span>(dge_nfcore),</span>
-<span id="cb19-4">              <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"sample_title"</span>, <span class="st" style="color: #20794D;">"animal_id"</span>, <span class="st" style="color: #20794D;">"age"</span>, <span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">"cell_type"</span>)],</span>
-<span id="cb19-5">  <span class="at" style="color: #657422;">workflow =</span> <span class="st" style="color: #20794D;">"nfcore"</span></span>
-<span id="cb19-6">)</span>
-<span id="cb19-7"><span class="fu" style="color: #4758AB;">stopifnot</span>(<span class="fu" style="color: #4758AB;">all</span>(<span class="fu" style="color: #4758AB;">colnames</span>(dge) <span class="sc" style="color: #5E5E5E;">%in%</span> <span class="fu" style="color: #4758AB;">colnames</span>(dge_nfcore)))</span>
-<span id="cb19-8">dge_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> dge_nfcore[, <span class="fu" style="color: #4758AB;">colnames</span>(dge)]</span>
-<span id="cb19-9"></span>
-<span id="cb19-10">design <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">model.matrix</span>(<span class="sc" style="color: #5E5E5E;">~</span> genotype, <span class="at" style="color: #657422;">data =</span> dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples)</span>
-<span id="cb19-11"><span class="fu" style="color: #4758AB;">colnames</span>(design) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sub</span>(<span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">""</span>, <span class="fu" style="color: #4758AB;">colnames</span>(design))</span>
-<span id="cb19-12">keep <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">filterByExpr</span>(dge_nfcore, <span class="at" style="color: #657422;">design =</span> design)</span>
-<span id="cb19-13">fit_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">voomLmFit</span>(</span>
-<span id="cb19-14">  dge_nfcore[keep, <span class="fu" style="color: #4758AB;">row.names</span>(design)], </span>
-<span id="cb19-15">  <span class="at" style="color: #657422;">design =</span> design,</span>
-<span id="cb19-16">  <span class="at" style="color: #657422;">sample.weights =</span> <span class="cn" style="color: #8f5902;">TRUE</span>, </span>
-<span id="cb19-17">  <span class="at" style="color: #657422;">plot =</span> <span class="cn" style="color: #8f5902;">FALSE</span></span>
-<span id="cb19-18">)</span></code></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>First sample weights (min/max) 0.3858285/1.6444242</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Final sample weights (min/max) 0.3854635/1.6427464</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1">fit_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">eBayes</span>(fit_nfcore, <span class="at" style="color: #657422;">robust=</span><span class="cn" style="color: #8f5902;">TRUE</span>)</span></code></pre></div>
-</details>
-</div>
-<p>As with the original count data from NCBI GEO, we detect small number of differentially expressed genes (FDR &lt; 5%).</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><span class="fu" style="color: #4758AB;">summary</span>(<span class="fu" style="color: #4758AB;">decideTests</span>(fit_nfcore)[, <span class="st" style="color: #20794D;">"KO"</span>])</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>         KO
-Down     10
-NotSig 7824
-Up        2</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1">cpms <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">local</span>({</span>
-<span id="cb25-2">  geo <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cpm</span>(dge, <span class="at" style="color: #657422;">normalized.lib.sizes =</span> <span class="cn" style="color: #8f5902;">TRUE</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-3">    <span class="fu" style="color: #4758AB;">as.data.frame</span>() <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-4">    <span class="fu" style="color: #4758AB;">cbind</span>(dge<span class="sc" style="color: #5E5E5E;">$</span>genes) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-5">    <span class="fu" style="color: #4758AB;">pivot_longer</span>(<span class="at" style="color: #657422;">cols =</span> <span class="fu" style="color: #4758AB;">starts_with</span>(<span class="st" style="color: #20794D;">"SRX"</span>), </span>
-<span id="cb25-6">                 <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">"sample_name"</span>,</span>
-<span id="cb25-7">                 <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">"cpm"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-8">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">left_join</span>(</span>
-<span id="cb25-9">      tibble<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">rownames_to_column</span>(dge<span class="sc" style="color: #5E5E5E;">$</span>samples, <span class="st" style="color: #20794D;">"sample_name"</span>),</span>
-<span id="cb25-10">      <span class="at" style="color: #657422;">by =</span> <span class="st" style="color: #20794D;">"sample_name"</span></span>
-<span id="cb25-11">    ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-12">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"Nugent et al"</span>)</span>
-<span id="cb25-13">  </span>
-<span id="cb25-14">  nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cpm</span>(dge_nfcore, <span class="at" style="color: #657422;">normalized.lib.sizes =</span> <span class="cn" style="color: #8f5902;">TRUE</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-15">    <span class="fu" style="color: #4758AB;">as.data.frame</span>() <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-16">    <span class="fu" style="color: #4758AB;">cbind</span>(dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>genes) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-17">    <span class="fu" style="color: #4758AB;">pivot_longer</span>(<span class="at" style="color: #657422;">cols =</span> <span class="fu" style="color: #4758AB;">starts_with</span>(<span class="st" style="color: #20794D;">"SRX"</span>), </span>
-<span id="cb25-18">                 <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">"sample_name"</span>,</span>
-<span id="cb25-19">                 <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">"cpm"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-20">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">left_join</span>(</span>
-<span id="cb25-21">      tibble<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">rownames_to_column</span>(dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples, <span class="st" style="color: #20794D;">"sample_name"</span>),</span>
-<span id="cb25-22">      <span class="at" style="color: #657422;">by =</span> <span class="st" style="color: #20794D;">"sample_name"</span></span>
-<span id="cb25-23">    ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-24">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"nf-core"</span>)</span>
-<span id="cb25-25">  </span>
-<span id="cb25-26">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">bind_rows</span>(</span>
-<span id="cb25-27">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">select</span>(geo, <span class="fu" style="color: #4758AB;">any_of</span>(<span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">colnames</span>(geo), <span class="fu" style="color: #4758AB;">colnames</span>(nfcore)))),</span>
-<span id="cb25-28">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">select</span>(nfcore, <span class="fu" style="color: #4758AB;">any_of</span>(<span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">colnames</span>(geo), <span class="fu" style="color: #4758AB;">colnames</span>(nfcore))))</span>
-<span id="cb25-29">  )</span>
-<span id="cb25-30">})</span>
-<span id="cb25-31"></span>
-<span id="cb25-32">tt <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbind</span>(</span>
-<span id="cb25-33">  <span class="fu" style="color: #4758AB;">topTreat</span>(fit, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>, <span class="at" style="color: #657422;">number =</span> <span class="cn" style="color: #8f5902;">Inf</span>)[</span>
-<span id="cb25-34">    , <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"gene_name"</span>, <span class="st" style="color: #20794D;">"logFC"</span>, <span class="st" style="color: #20794D;">"P.Value"</span>, <span class="st" style="color: #20794D;">"adj.P.Val"</span>)] <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-35">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"geo"</span>),</span>
-<span id="cb25-36">   <span class="fu" style="color: #4758AB;">topTreat</span>(fit_nfcore, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>, <span class="at" style="color: #657422;">number =</span> <span class="cn" style="color: #8f5902;">Inf</span>)[</span>
-<span id="cb25-37">     , <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"gene_name"</span>, <span class="st" style="color: #20794D;">"logFC"</span>, <span class="st" style="color: #20794D;">"P.Value"</span>, <span class="st" style="color: #20794D;">"adj.P.Val"</span>)] <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-38">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"nfcore"</span>)</span>
-<span id="cb25-39">) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-40">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">adj.P.Val =</span> <span class="fu" style="color: #4758AB;">signif</span>(adj.P.Val, <span class="dv" style="color: #AD0000;">2</span>)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-41">  tidyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">pivot_wider</span>(</span>
-<span id="cb25-42">    <span class="at" style="color: #657422;">id_cols =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"gene_name"</span>), </span>
-<span id="cb25-43">    <span class="at" style="color: #657422;">names_from =</span> <span class="st" style="color: #20794D;">"dataset"</span>, </span>
-<span id="cb25-44">    <span class="at" style="color: #657422;">values_from =</span> <span class="st" style="color: #20794D;">"adj.P.Val"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-45">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">arrange</span>(nfcore) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-46">  <span class="fu" style="color: #4758AB;">as.data.frame</span>() <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb25-47">  tibble<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">column_to_rownames</span>(<span class="st" style="color: #20794D;">"gene_id"</span>)</span></code></pre></div>
-</details>
-</div>
-<section id="normalized-expression" class="level3">
-<h3 class="anchored" data-anchor-id="normalized-expression">Normalized expression</h3>
-<p>First, we examine the correlation between the normalized log-transformed gene expression estimates returned from the two workflows. We focus on those genes that passed the <code>filterByExpr</code> thresholds above, e.g.&nbsp;those genes deemed sufficiently highly expressed to be assessed for differential expression.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1">common_genes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">row.names</span>(fit), <span class="fu" style="color: #4758AB;">row.names</span>(fit_nfcore))</span>
-<span id="cb26-2">sum_stats <span class="ot" style="color: #003B4F;">&lt;-</span> cpms <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb26-3">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">filter</span>(gene_id <span class="sc" style="color: #5E5E5E;">%in%</span> common_genes) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb26-4">  tidyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">pivot_wider</span>(</span>
-<span id="cb26-5">    <span class="at" style="color: #657422;">id_cols =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"sample_name"</span>),</span>
-<span id="cb26-6">    <span class="at" style="color: #657422;">values_from =</span> <span class="st" style="color: #20794D;">"cpm"</span>,</span>
-<span id="cb26-7">    <span class="at" style="color: #657422;">names_from =</span> <span class="st" style="color: #20794D;">"dataset"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb26-8">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">group_by</span>(gene_id) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb26-9">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">summarise</span>(</span>
-<span id="cb26-10">    <span class="at" style="color: #657422;">r =</span> <span class="fu" style="color: #4758AB;">cor</span>(<span class="fu" style="color: #4758AB;">log1p</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">Nugent et al</span><span class="st" style="color: #20794D;">`</span>), <span class="fu" style="color: #4758AB;">log1p</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">nf-core</span><span class="st" style="color: #20794D;">`</span>)),</span>
-<span id="cb26-11">    <span class="at" style="color: #657422;">mean_nugent =</span> <span class="fu" style="color: #4758AB;">mean</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">Nugent et al</span><span class="st" style="color: #20794D;">`</span>),</span>
-<span id="cb26-12">    <span class="at" style="color: #657422;">mean_nfcore =</span> <span class="fu" style="color: #4758AB;">mean</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">nf-core</span><span class="st" style="color: #20794D;">`</span>))</span>
-<span id="cb26-13"></span>
-<span id="cb26-14">p <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="at" style="color: #657422;">data =</span> sum_stats, <span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> r)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb26-15">  <span class="fu" style="color: #4758AB;">geom_histogram</span>(<span class="at" style="color: #657422;">bins =</span> <span class="dv" style="color: #AD0000;">50</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb26-16">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">limits =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="fl" style="color: #AD0000;">1.02</span>), <span class="at" style="color: #657422;">breaks =</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">by =</span> <span class="fl" style="color: #AD0000;">0.2</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb26-17">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x =</span> <span class="st" style="color: #20794D;">"Pearson correlation coefficient (R)"</span>, </span>
-<span id="cb26-18">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Number of genes"</span>,</span>
-<span id="cb26-19">       <span class="at" style="color: #657422;">title =</span> <span class="st" style="color: #20794D;">"Correlation between normalized log2 counts"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb26-20">  <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
-<span id="cb26-21"><span class="fu" style="color: #4758AB;">print</span>(p)</span></code></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 35 rows containing non-finite values (`stat_bin()`).</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 2 rows containing missing values (`geom_bar()`).</code></pre>
-</div>
-<div class="cell-output-display">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="528"></p>
-</div>
-</div>
-<p>The correlation between normalized log2 expression estimates is reasonably high, e.g.&nbsp;80% of all genes showing a Pearson correlation coefficient &gt; 0.82.</p>
-<p>The relatively low correlation might reflect the low RNA input of this experiment, e.g.&nbsp;only 6314 of the genes genes were detected with &gt; 10 UMI-corrected normalized counts per million reads.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1">p <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="at" style="color: #657422;">data =</span> sum_stats, <span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mean_nugent <span class="sc" style="color: #5E5E5E;">+</span> <span class="dv" style="color: #AD0000;">1</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb29-2">  <span class="fu" style="color: #4758AB;">geom_histogram</span>(<span class="at" style="color: #657422;">bins =</span> <span class="dv" style="color: #AD0000;">50</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb29-3">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">trans =</span> scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">log10_trans</span>(),</span>
-<span id="cb29-4">                     <span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">comma_format</span>()) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb29-5">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x =</span> <span class="st" style="color: #20794D;">"Mean normalized counts per million"</span>, </span>
-<span id="cb29-6">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Number of genes"</span>,</span>
-<span id="cb29-7">       <span class="at" style="color: #657422;">title =</span> <span class="st" style="color: #20794D;">"Average expression"</span>,</span>
-<span id="cb29-8">       <span class="at" style="color: #657422;">subtitle =</span> <span class="st" style="color: #20794D;">"Nugent et al"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb29-9">  <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
-<span id="cb29-10"><span class="fu" style="color: #4758AB;">print</span>(p)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Next, we will examine the results of the <em>differential</em> expression analysis.</p>
-</section>
-<section id="differential-expression-results" class="level3">
-<h3 class="anchored" data-anchor-id="differential-expression-results">Differential expression results</h3>
-<p>Analyses based on either preprocessing pipeline yield similar numbers of differentially expressed genes.</p>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1">common_genes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">row.names</span>(fit), <span class="fu" style="color: #4758AB;">row.names</span>(fit_nfcore))</span>
-<span id="cb30-2">results <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cbind</span>(</span>
-<span id="cb30-3">  <span class="fu" style="color: #4758AB;">decideTests</span>(fit)[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
-<span id="cb30-4">  <span class="fu" style="color: #4758AB;">decideTests</span>(fit_nfcore)[common_genes, <span class="st" style="color: #20794D;">"KO"</span>]</span>
-<span id="cb30-5">)</span>
-<span id="cb30-6"><span class="fu" style="color: #4758AB;">colnames</span>(results) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"Nugent et al"</span>, <span class="st" style="color: #20794D;">"nf-core"</span>)</span>
-<span id="cb30-7"><span class="fu" style="color: #4758AB;">class</span>(results) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="st" style="color: #20794D;">"TestResults"</span></span>
-<span id="cb30-8"><span class="fu" style="color: #4758AB;">summary</span>(results)</span></code></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>   Nugent et al nf-core
--1           10       9
-0          6302    6303
-1             2       2</code></pre>
-</div>
-</div>
-<p>But are these <em>the same genes</em> in both sets of results?</p>
-<p>We can visualize the overlap between the sets of significant genes in a Venn diagram (FDR &lt; 5%). The majority of differentially expressed genes is detected with both quantitation approaches (for both up- and down-regulated genes.)</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1">limma<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">vennDiagram</span>(results, <span class="at" style="color: #657422;">include =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"up"</span>, <span class="st" style="color: #20794D;">"down"</span>),</span>
-<span id="cb32-2">                   <span class="at" style="color: #657422;">counts.col=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"red"</span>, <span class="st" style="color: #20794D;">"blue"</span>), <span class="at" style="color: #657422;">mar =</span> <span class="fu" style="color: #4758AB;">rep</span>(<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">4</span>))</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="528"></p>
-</div>
-</div>
-<p>For example, the following plots show the normalized expression of the most significantly differentially expressed genes (known markers of active microglia).</p>
-<div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><span class="cf" style="color: #003B4F;">for</span> (gene <span class="cf" style="color: #003B4F;">in</span> <span class="fu" style="color: #4758AB;">topTreat</span>(fit, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>, <span class="at" style="color: #657422;">number =</span> <span class="dv" style="color: #AD0000;">6</span>)[[<span class="st" style="color: #20794D;">"gene_id"</span>]]) {</span>
-<span id="cb33-2"> p <span class="ot" style="color: #003B4F;">&lt;-</span> cpms <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb33-3">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">filter</span>(gene_id <span class="sc" style="color: #5E5E5E;">==</span> gene) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb33-4">    <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> genotype, <span class="at" style="color: #657422;">y =</span> cpm)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb33-5">    <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">position =</span> <span class="fu" style="color: #4758AB;">position_jitter</span>(<span class="at" style="color: #657422;">width =</span> <span class="fl" style="color: #AD0000;">0.05</span>), <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.8</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb33-6">    <span class="fu" style="color: #4758AB;">facet_grid</span>(dataset <span class="sc" style="color: #5E5E5E;">~</span> ., <span class="at" style="color: #657422;">scales =</span> <span class="st" style="color: #20794D;">"free"</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb33-7">    <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">title =</span> dge<span class="sc" style="color: #5E5E5E;">$</span>genes[gene, <span class="st" style="color: #20794D;">"gene_name"</span>],</span>
-<span id="cb33-8">         <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Normalized expression (CPM)"</span>,</span>
-<span id="cb33-9">         <span class="at" style="color: #657422;">x =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
-<span id="cb33-10">         <span class="at" style="color: #657422;">subtitle =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"FDR nf-core: %s</span><span class="sc" style="color: #5E5E5E;">\n</span><span class="st" style="color: #20794D;">FDR GEO: %s"</span>,</span>
-<span id="cb33-11">                       tt[gene, <span class="st" style="color: #20794D;">"nfcore"</span>],</span>
-<span id="cb33-12">                       tt[gene, <span class="st" style="color: #20794D;">"geo"</span>]</span>
-<span id="cb33-13">                       )</span>
-<span id="cb33-14">         ) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb33-15">   <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
-<span id="cb33-16"> <span class="fu" style="color: #4758AB;">print</span>(p)</span>
-<span id="cb33-17">}</span></code></pre></div>
-</details>
-<div class="cell quarto-layout-panel">
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="288"></p>
-</div>
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-2.png" class="img-fluid" width="288"></p>
-</div>
-</div>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-3.png" class="img-fluid" width="288"></p>
-</div>
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-4.png" class="img-fluid" width="288"></p>
-</div>
-</div>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-5.png" class="img-fluid" width="288"></p>
-</div>
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-6.png" class="img-fluid" width="288"></p>
-</div>
-</div>
-</div>
-</div>
-<p>Applying a hard FDR threshold can inflate the number of apparent differences, e.g.&nbsp;when a gene is close to the significance threshold (see below).</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1">p_cor <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cor</span>(</span>
-<span id="cb34-2">  fit<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
-<span id="cb34-3">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>])</span></code></pre></div>
-</div>
-<p>The log2 fold estimates for the <code>Hom</code> vs <code>WT</code> comparison are well correlated across the two analysis workflows (Pearson correlation coefficient R = 0.88 ).</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><span class="fu" style="color: #4758AB;">smoothScatter</span>(</span>
-<span id="cb35-2">  fit<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
-<span id="cb35-3">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>],</span>
-<span id="cb35-4">  <span class="at" style="color: #657422;">ylab =</span> <span class="st" style="color: #20794D;">"nf-core (log2FC)"</span>,</span>
-<span id="cb35-5">  <span class="at" style="color: #657422;">xlab =</span> <span class="st" style="color: #20794D;">"Nugent et al (log2FC)"</span>,</span>
-<span id="cb35-6">  <span class="at" style="color: #657422;">main =</span> <span class="st" style="color: #20794D;">"Homozygous APP vs WT (effect size)"</span></span>
-<span id="cb35-7">)</span>
-<span id="cb35-8"><span class="fu" style="color: #4758AB;">text</span>(<span class="at" style="color: #657422;">x =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">y =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">4</span>, <span class="at" style="color: #657422;">labels =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"R = %s"</span>, <span class="fu" style="color: #4758AB;">signif</span>(p_cor, <span class="dv" style="color: #AD0000;">2</span>)))</span>
-<span id="cb35-9"><span class="fu" style="color: #4758AB;">abline</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
-<span id="cb35-10"><span class="fu" style="color: #4758AB;">abline</span>(<span class="at" style="color: #657422;">h =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">v =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">lty =</span> <span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="432"></p>
-</div>
-</div>
-<p>as are the t-statistics across all examined genes:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1">p_cor <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cor</span>(</span>
-<span id="cb36-2">  fit<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
-<span id="cb36-3">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>])</span>
-<span id="cb36-4"><span class="fu" style="color: #4758AB;">smoothScatter</span>(</span>
-<span id="cb36-5">  fit<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
-<span id="cb36-6">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>],</span>
-<span id="cb36-7">  <span class="at" style="color: #657422;">ylab =</span> <span class="st" style="color: #20794D;">"nf-core (t-statistic)"</span>,</span>
-<span id="cb36-8">  <span class="at" style="color: #657422;">xlab =</span> <span class="st" style="color: #20794D;">"Nugent et al (t-statistic)"</span>,</span>
-<span id="cb36-9">  <span class="at" style="color: #657422;">main =</span> <span class="st" style="color: #20794D;">"Homozygous APP vs WT (t-statistic)"</span>)</span>
-<span id="cb36-10"><span class="fu" style="color: #4758AB;">text</span>(<span class="at" style="color: #657422;">x =</span> <span class="dv" style="color: #AD0000;">3</span>, <span class="at" style="color: #657422;">y =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">15</span>, <span class="at" style="color: #657422;">labels =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"R = %s"</span>, <span class="fu" style="color: #4758AB;">signif</span>(p_cor, <span class="dv" style="color: #AD0000;">2</span>)))</span>
-<span id="cb36-11"><span class="fu" style="color: #4758AB;">abline</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
-<span id="cb36-12"><span class="fu" style="color: #4758AB;">abline</span>(<span class="at" style="color: #657422;">h =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">v =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">lty =</span> <span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="432"></p>
-</div>
-</div>
-<div class="callout-note callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Because this comparison yields only a small number of bona-fide differentially expressed genes, we don’t expect to see a high correlation between the log2 fold changes or the t-statistics between the two analyses: most of the values are very close to zero.</p>
-</div>
-</div>
-<section id="discordant-significance-calls" class="level4">
-<h4 class="anchored" data-anchor-id="discordant-significance-calls">Discordant significance calls</h4>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><span class="co" style="color: #5E5E5E;"># genes detected in Nugent et al, but not significant with nf-core</span></span>
-<span id="cb37-2">genes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">row.names</span>(results)[<span class="fu" style="color: #4758AB;">which</span>(<span class="fu" style="color: #4758AB;">abs</span>(results[, <span class="dv" style="color: #AD0000;">1</span>]) <span class="sc" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">&amp;</span> results[, <span class="dv" style="color: #AD0000;">2</span>] <span class="sc" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">0</span>)]</span></code></pre></div>
-</div>
-<p>At FDR &lt; 5% 2 genes were reported as significantly differentially expressed with the original Nugent et al count matrix but <em>not</em> with the output of the nf-core/rnaseq workflow.</p>
-<p>As side-by-side comparison of the FDR (<code>adj.P.Val</code>) for these genes confirms that the one of them (<em>Cd52</em>) displays significance close to the 5% threshold in the nf-core/rnaseq output as well. The second gene (<em>Slamf8</em>) also displays the same trend in both datasets, but is detected at lower levels (e.g.&nbsp;lower normalized CPMs) in the nf-core/rnaseq output.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><span class="fu" style="color: #4758AB;">print</span>(tt[genes, ])</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                     gene_name    geo nfcore
-ENSMUSG00000000682.7      Cd52 0.0031  0.089
-ENSMUSG00000053318.7    Slamf8 0.0190  0.270</code></pre>
-</div>
-</div>
-</section>
-<section id="examples" class="level4">
-<h4 class="anchored" data-anchor-id="examples">Examples</h4>
-<p>Finally, we plot the normalized gene expression estimates for the 2 discordant genes.</p>
-<div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><span class="cf" style="color: #003B4F;">for</span> (gene <span class="cf" style="color: #003B4F;">in</span> genes) {</span>
-<span id="cb40-2"> p <span class="ot" style="color: #003B4F;">&lt;-</span> cpms <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb40-3">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">filter</span>(gene_id <span class="sc" style="color: #5E5E5E;">==</span> gene) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
-<span id="cb40-4">    <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> genotype, <span class="at" style="color: #657422;">y =</span> cpm)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb40-5">    <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">position =</span> <span class="fu" style="color: #4758AB;">position_jitter</span>(<span class="at" style="color: #657422;">width =</span> <span class="fl" style="color: #AD0000;">0.05</span>), <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.8</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb40-6">    <span class="fu" style="color: #4758AB;">facet_grid</span>(dataset <span class="sc" style="color: #5E5E5E;">~</span> ., <span class="at" style="color: #657422;">scales =</span> <span class="st" style="color: #20794D;">"free"</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
-<span id="cb40-7">    <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">title =</span> dge<span class="sc" style="color: #5E5E5E;">$</span>genes[gene, <span class="st" style="color: #20794D;">"gene_name"</span>],</span>
-<span id="cb40-8">         <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Normalized expression (CPM)"</span>,</span>
-<span id="cb40-9">         <span class="at" style="color: #657422;">x =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
-<span id="cb40-10">         <span class="at" style="color: #657422;">subtitle =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"FDR nf-core: %s</span><span class="sc" style="color: #5E5E5E;">\n</span><span class="st" style="color: #20794D;">FDR GEO: %s"</span>,</span>
-<span id="cb40-11">                       tt[gene, <span class="st" style="color: #20794D;">"nfcore"</span>],</span>
-<span id="cb40-12">                       tt[gene, <span class="st" style="color: #20794D;">"geo"</span>]</span>
-<span id="cb40-13">                       )</span>
-<span id="cb40-14">         ) <span class="sc" style="color: #5E5E5E;">+</span></span>
-<span id="cb40-15">   <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
-<span id="cb40-16"> <span class="fu" style="color: #4758AB;">print</span>(p)</span>
-<span id="cb40-17">}</span></code></pre></div>
-</details>
-<div class="cell quarto-layout-panel">
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="288"></p>
-</div>
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-27-2.png" class="img-fluid" width="288"></p>
-</div>
-</div>
-</div>
-</div>
-</section>
-</section>
-</section>
-<section id="conclusions" class="level2">
-<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
-<ul>
-<li>Differential expression analyses of raw counts obtained with the <code>nc-core/rnaseq</code> workflow yields results that are highly concordant with those obtained with the raw counts the authors deposited in NCBI GEO.</li>
-<li>With appropriate parameters the <code>nf-core/rnaseq</code> workflow can be applied to QuantSeq FWD 3’tag RNA-seq data that includes unique molecular identifiers.</li>
-</ul>
-</section>
-<section id="reproducibility" class="level2">
-<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
-<details>
-<summary>
-SessionInfo
-</summary>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>─ Session info ───────────────────────────────────────────────────────────────
- setting  value
- version  R version 4.2.2 (2022-10-31)
- os       macOS Big Sur ... 10.16
- system   x86_64, darwin17.0
- ui       X11
- language (EN)
- collate  en_US.UTF-8
- ctype    en_US.UTF-8
- tz       America/Los_Angeles
- date     2023-01-16
- pandoc   2.19.2 @ /Applications/RStudio.app/Contents/MacOS/quarto/bin/tools/ (via rmarkdown)
-
-─ Packages ───────────────────────────────────────────────────────────────────
- package              * version  date (UTC) lib source
- AnnotationDbi        * 1.60.0   2022-11-01 [1] Bioconductor
- askpass                1.1      2019-01-13 [1] CRAN (R 4.2.0)
- assertthat             0.2.1    2019-03-21 [1] CRAN (R 4.2.0)
- Biobase              * 2.58.0   2022-11-01 [1] Bioconductor
- BiocGenerics         * 0.44.0   2022-11-01 [1] Bioconductor
- Biostrings             2.66.0   2022-11-01 [1] Bioconductor
- bit                    4.0.5    2022-11-15 [1] CRAN (R 4.2.0)
- bit64                  4.0.5    2020-08-30 [1] CRAN (R 4.2.0)
- bitops                 1.0-7    2021-04-24 [1] CRAN (R 4.2.0)
- blob                   1.2.3    2022-04-10 [1] CRAN (R 4.2.0)
- cachem                 1.0.6    2021-08-19 [1] CRAN (R 4.2.0)
- cli                    3.5.0    2022-12-20 [1] CRAN (R 4.2.0)
- colorspace             2.0-3    2022-02-21 [1] CRAN (R 4.2.0)
- crayon                 1.5.2    2022-09-29 [1] CRAN (R 4.2.0)
- credentials            1.3.2    2021-11-29 [1] CRAN (R 4.2.0)
- DBI                    1.1.3    2022-06-18 [1] CRAN (R 4.2.0)
- DelayedArray           0.24.0   2022-11-01 [1] Bioconductor
- digest                 0.6.31   2022-12-11 [1] CRAN (R 4.2.0)
- dplyr                * 1.0.10   2022-09-01 [1] CRAN (R 4.2.0)
- edgeR                * 3.40.1   2022-12-14 [1] Bioconductor
- ellipsis               0.3.2    2021-04-29 [1] CRAN (R 4.2.0)
- evaluate               0.19     2022-12-13 [1] CRAN (R 4.2.0)
- fansi                  1.0.3    2022-03-24 [1] CRAN (R 4.2.0)
- farver                 2.1.1    2022-07-06 [1] CRAN (R 4.2.0)
- fastmap                1.1.0    2021-01-25 [1] CRAN (R 4.2.0)
- generics               0.1.3    2022-07-05 [1] CRAN (R 4.2.0)
- GenomeInfoDb         * 1.34.4   2022-12-01 [1] Bioconductor
- GenomeInfoDbData       1.2.9    2022-12-12 [1] Bioconductor
- GenomicRanges        * 1.50.2   2022-12-16 [1] Bioconductor
- ggplot2              * 3.4.0    2022-11-04 [1] CRAN (R 4.2.0)
- glue                   1.6.2    2022-02-24 [1] CRAN (R 4.2.0)
- gtable                 0.3.1    2022-09-01 [1] CRAN (R 4.2.0)
- here                 * 1.0.1    2020-12-13 [1] CRAN (R 4.2.0)
- htmltools              0.5.4    2022-12-07 [1] CRAN (R 4.2.0)
- htmlwidgets            1.5.4    2021-09-08 [1] CRAN (R 4.2.2)
- httr                   1.4.4    2022-08-17 [1] CRAN (R 4.2.0)
- IRanges              * 2.32.0   2022-11-01 [1] Bioconductor
- jsonlite               1.8.4    2022-12-06 [1] CRAN (R 4.2.0)
- KEGGREST               1.38.0   2022-11-01 [1] Bioconductor
- KernSmooth             2.23-20  2021-05-03 [2] CRAN (R 4.2.2)
- knitr                  1.41     2022-11-18 [1] CRAN (R 4.2.0)
- labeling               0.4.2    2020-10-20 [1] CRAN (R 4.2.0)
- lattice                0.20-45  2021-09-22 [2] CRAN (R 4.2.2)
- lifecycle              1.0.3    2022-10-07 [1] CRAN (R 4.2.0)
- limma                * 3.54.0   2022-11-01 [1] Bioconductor
- locfit                 1.5-9.6  2022-07-11 [1] CRAN (R 4.2.0)
- magrittr               2.0.3    2022-03-30 [1] CRAN (R 4.2.0)
- Matrix                 1.5-3    2022-11-11 [1] CRAN (R 4.2.0)
- MatrixGenerics       * 1.10.0   2022-11-01 [1] Bioconductor
- matrixStats          * 0.63.0   2022-11-18 [1] CRAN (R 4.2.0)
- memoise                2.0.1    2021-11-26 [1] CRAN (R 4.2.0)
- munsell                0.5.0    2018-06-12 [1] CRAN (R 4.2.0)
- openssl                2.0.5    2022-12-06 [1] CRAN (R 4.2.0)
- org.Mm.eg.db         * 3.16.0   2022-12-29 [1] Bioconductor
- pillar                 1.8.1    2022-08-19 [1] CRAN (R 4.2.0)
- pkgconfig              2.0.3    2019-09-22 [1] CRAN (R 4.2.0)
- png                    0.1-8    2022-11-29 [1] CRAN (R 4.2.0)
- purrr                  1.0.0    2022-12-20 [1] CRAN (R 4.2.0)
- R6                     2.5.1    2021-08-19 [1] CRAN (R 4.2.0)
- Rcpp                   1.0.9    2022-07-08 [1] CRAN (R 4.2.0)
- RCurl                  1.98-1.9 2022-10-03 [1] CRAN (R 4.2.0)
- rlang                  1.0.6    2022-09-24 [1] CRAN (R 4.2.0)
- rmarkdown              2.19     2022-12-15 [1] CRAN (R 4.2.0)
- rprojroot              2.0.3    2022-04-02 [1] CRAN (R 4.2.0)
- RSQLite                2.2.19   2022-11-24 [1] CRAN (R 4.2.0)
- rstudioapi             0.14     2022-08-22 [1] CRAN (R 4.2.0)
- S4Vectors            * 0.36.1   2022-12-05 [1] Bioconductor
- scales                 1.2.1    2022-08-20 [1] CRAN (R 4.2.0)
- sessioninfo            1.2.2    2021-12-06 [1] CRAN (R 4.2.0)
- statmod                1.4.37   2022-08-12 [1] CRAN (R 4.2.0)
- stringi                1.7.8    2022-07-11 [1] CRAN (R 4.2.0)
- stringr                1.5.0    2022-12-02 [1] CRAN (R 4.2.0)
- SummarizedExperiment * 1.28.0   2022-11-01 [1] Bioconductor
- sys                    3.4.1    2022-10-18 [1] CRAN (R 4.2.0)
- tibble               * 3.1.8    2022-07-22 [1] CRAN (R 4.2.0)
- tidyr                * 1.2.1    2022-09-08 [1] CRAN (R 4.2.0)
- tidyselect             1.2.0    2022-10-10 [1] CRAN (R 4.2.0)
- utf8                   1.2.2    2021-07-24 [1] CRAN (R 4.2.0)
- vctrs                  0.5.1    2022-11-16 [1] CRAN (R 4.2.0)
- withr                  2.5.0    2022-03-03 [1] CRAN (R 4.2.0)
- xfun                   0.35     2022-11-16 [1] CRAN (R 4.2.0)
- XVector                0.38.0   2022-11-01 [1] Bioconductor
- yaml                   2.3.6    2022-10-18 [1] CRAN (R 4.2.0)
- zlibbioc               1.44.0   2022-11-01 [1] Bioconductor
-
- [1] /Users/sandmann/Library/R/x86_64/4.2/library
- [2] /Library/Frameworks/R.framework/Versions/4.2/Resources/library
-
-──────────────────────────────────────────────────────────────────────────────</code></pre>
-</div>
-</div>
-</details>
-
-
-<!-- -->
-
-</section>
-
-
-<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Full disclosure: I am a co-author of this publication.↩︎</p></li>
-</ol>
-</section></div> ]]></description>
-  <category>R</category>
-  <category>nextflow</category>
-  <category>NGS</category>
-  <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index.html</guid>
-  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
-</item>
-<item>
   <title>QuantSeq RNAseq analysis (3): Validating published results (no UMIs)</title>
   <dc:creator>Thomas Sandmann</dc:creator>
   <link>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/index.html</link>
@@ -1554,6 +834,726 @@ SessionInfo
   <category>nextflow</category>
   <category>NGS</category>
   <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/index.html</guid>
+  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>QuantSeq RNAseq analysis (4): Validating published results (with UMIs)</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>This is the fourth of four posts documenting my progress toward processing and analyzing <a href="https://www.lexogen.com/quantseq-3mrna-sequencing/">QuantSeq FWD 3’ tag RNAseq</a> data with the <a href="https://nf-co.re/rnaseq">nf-core/rnaseq</a> workflow.</p>
+<ol type="1">
+<li><a href="../nextflow-core-quantseq-1-settings/index.html">Configuring &amp; executing the nf-core/rnaseq workflow</a></li>
+<li><a href="../nextflow-core-quantseq-2-output/index.html">Exploring the workflow outputs</a></li>
+<li><a href="../nextflow-core-quantseq-3-xia/index.html">Validating the workflow by reproducing results published by Xia et al (no UMIs)</a></li>
+<li><strong>Validating the workflow by reproducing results published by Nugent et al (including UMIs)</strong></li>
+</ol>
+<p>Many thanks to <a href="https://github.com/drpatelh">Harshil Patel</a>, <a href="https://github.com/adomingues/">António Miguel de Jesus Domingues</a> and <a href="https://github.com/matthiasZepper/">Matthias Zepper</a> for their generous guidance &amp; input via <a href="nfcore.slack.com">nf-core slack</a>. (Any mistakes are mine.)</p>
+</div>
+</div>
+</div>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<ul>
+<li>This analysis compares the performance of the <a href="https://nf-co.re/rnaseq">nf-core/rnaseq workflow</a> for QuantSeq FWD 3’ tag RNAseq data with unique molecular identifiers (UMIs).</li>
+<li>The differential expression analysis results are highly concordant with those obtained in the original publication.</li>
+<li>With the appropriate settings, the <a href="https://nf-co.re/rnaseq">nf-core/rnaseq workflow</a> is a valid data processing pipeline for this data type.</li>
+</ul>
+<p>The <a href="../nextflow-core-quantseq-1-settings/index.html">first post in this series</a> walked through the preprocesssing of QuantSeq FWD data published in a preprint by <a href="https://pubmed.ncbi.nlm.nih.gov/31902528/">Nugent et al, 2020</a>, who used the <a href="https://www.lexogen.com/quantseq-3mrna-sequencing/">QuantSeq FWD</a> library preparation protocol and added unique molecular identifiers (UMIs). The UMIs were used to identify and remove PCR duplicates during the data preprocessing steps.</p>
+<p>Here, we use Bioconductor/R packages to reproduce the downstream results. We perform the same analysis twice with either</p>
+<ol type="1">
+<li>the original counts matrix published by the authors <sup>1</sup></li>
+<li>the output of the nf-core/rnaseq workflow</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">library</span>(dplyr)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;">library</span>(edgeR)</span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;">library</span>(ggplot2)</span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;">library</span>(here)</span>
+<span id="cb1-5"><span class="fu" style="color: #4758AB;">library</span>(org.Mm.eg.db)</span>
+<span id="cb1-6"><span class="fu" style="color: #4758AB;">library</span>(SummarizedExperiment)</span>
+<span id="cb1-7"><span class="fu" style="color: #4758AB;">library</span>(tibble)</span>
+<span id="cb1-8"><span class="fu" style="color: #4758AB;">library</span>(tidyr)</span></code></pre></div>
+</div>
+<div class="cell">
+
+</div>
+</section>
+<section id="sample-annotations" class="level2">
+<h2 class="anchored" data-anchor-id="sample-annotations">Sample annotations</h2>
+<p>We start by retrieving the sample annotation table, listing e.g.&nbsp;the <code>sex</code>, and <code>genotype</code> for each mouse, and the <code>batch</code> for each collected sample.</p>
+<p>This information is available in the <a href="https://www.ncbi.nlm.nih.gov/Traces/study/?query_key=4&amp;WebEnv=MCID_63c1d2b51518446806822e1d&amp;o=acc_s%3Aa#">SRA Run Explorer</a>. (I saved it in the <a href="sample_metadata.csv">sample_metadata.csv CSV file</a> if you want to follow along&gt;.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">sample_sheet <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">file.path</span>(work_dir, <span class="st" style="color: #20794D;">"sample_metadata.csv"</span>)</span>
+<span id="cb2-2">sample_anno <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">read.csv</span>(sample_sheet, <span class="at" style="color: #657422;">row.names =</span> <span class="st" style="color: #20794D;">"Experiment"</span>)</span>
+<span id="cb2-3"><span class="fu" style="color: #4758AB;">head</span>(sample_anno[, <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"Run"</span>, <span class="st" style="color: #20794D;">"Animal.ID"</span>, <span class="st" style="color: #20794D;">"Age"</span>, <span class="st" style="color: #20794D;">"age_unit"</span>, <span class="st" style="color: #20794D;">"Cell_type"</span>,</span>
+<span id="cb2-4">                     <span class="st" style="color: #20794D;">"sex"</span>, <span class="st" style="color: #20794D;">"Genotype"</span>, <span class="st" style="color: #20794D;">"Sample.Name"</span>)])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                  Run Animal.ID Age age_unit Cell_type    sex  Genotype
+SRX6420531 SRR9659551       IL1   2   months astrocyte female TREM2 +/+
+SRX6420532 SRR9659552       IL1   2   months microglia female TREM2 +/+
+SRX6420533 SRR9659553      IL10   2   months astrocyte female TREM2 -/-
+SRX6420534 SRR9659554      IL10   2   months microglia female TREM2 -/-
+SRX6420535 SRR9659555      IL11  16   months astrocyte female TREM2 +/+
+SRX6420536 SRR9659556      IL11  16   months microglia female TREM2 +/+
+           Sample.Name
+SRX6420531  GSM3933549
+SRX6420532  GSM3933550
+SRX6420533  GSM3933551
+SRX6420534  GSM3933552
+SRX6420535  GSM3933553
+SRX6420536  GSM3933554</code></pre>
+</div>
+</div>
+<p>Because our SRA metadata doesn’t include the GEO sample title, I saved the identifier mappings in the <a href="GEO_sample_ids.csv">GEO_sample_ids.csv CSV file</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1">geo_ids <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">read.csv</span>(<span class="fu" style="color: #4758AB;">file.path</span>(work_dir, <span class="st" style="color: #20794D;">"GEO_sample_ids.csv"</span>))</span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;">head</span>(geo_ids)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  sample_name sample_id
+1  GSM3933549     IL1_A
+2  GSM3933550     IL1_M
+3  GSM3933551    IL10_A
+4  GSM3933552    IL10_M
+5  GSM3933553    IL11_A
+6  GSM3933554    IL11_M</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;">colnames</span>(sample_anno)<span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">tolower</span>(<span class="fu" style="color: #4758AB;">colnames</span>(sample_anno))</span>
+<span id="cb6-2"><span class="fu" style="color: #4758AB;">colnames</span>(sample_anno) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sub</span>(<span class="st" style="color: #20794D;">"."</span>, <span class="st" style="color: #20794D;">"_"</span>, <span class="fu" style="color: #4758AB;">colnames</span>(sample_anno), </span>
+<span id="cb6-3">                             <span class="at" style="color: #657422;">fixed =</span> <span class="cn" style="color: #8f5902;">TRUE</span>) </span>
+<span id="cb6-4">sample_anno <span class="ot" style="color: #003B4F;">&lt;-</span> sample_anno[, <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"sample_name"</span>, <span class="st" style="color: #20794D;">"animal_id"</span>, <span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">"sex"</span>,</span>
+<span id="cb6-5">                               <span class="st" style="color: #20794D;">"age"</span>, <span class="st" style="color: #20794D;">"cell_type"</span>)]</span>
+<span id="cb6-6">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">factor</span>(sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype, </span>
+<span id="cb6-7">                               <span class="at" style="color: #657422;">levels =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"TREM2 +/+"</span>, <span class="st" style="color: #20794D;">"TREM2 -/-"</span>))</span>
+<span id="cb6-8">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype <span class="ot" style="color: #003B4F;">&lt;-</span> dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">recode_factor</span>(</span>
+<span id="cb6-9">  sample_anno<span class="sc" style="color: #5E5E5E;">$</span>genotype,<span class="st" style="color: #20794D;">"TREM2 +/+"</span> <span class="ot" style="color: #003B4F;">=</span> <span class="st" style="color: #20794D;">"WT"</span>, <span class="st" style="color: #20794D;">"TREM2 -/-"</span> <span class="ot" style="color: #003B4F;">=</span> <span class="st" style="color: #20794D;">"KO"</span>)</span>
+<span id="cb6-10">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>age <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">factor</span>(sample_anno<span class="sc" style="color: #5E5E5E;">$</span>age)</span>
+<span id="cb6-11">sample_anno<span class="sc" style="color: #5E5E5E;">$</span>sample_title <span class="ot" style="color: #003B4F;">&lt;-</span> geo_ids[</span>
+<span id="cb6-12">  <span class="fu" style="color: #4758AB;">match</span>(sample_anno<span class="sc" style="color: #5E5E5E;">$</span>sample_name, geo_ids<span class="sc" style="color: #5E5E5E;">$</span>sample_name), <span class="st" style="color: #20794D;">"sample_id"</span>]</span>
+<span id="cb6-13"><span class="fu" style="color: #4758AB;">head</span>(sample_anno)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           sample_name animal_id genotype    sex age cell_type sample_title
+SRX6420531  GSM3933549       IL1       WT female   2 astrocyte        IL1_A
+SRX6420532  GSM3933550       IL1       WT female   2 microglia        IL1_M
+SRX6420533  GSM3933551      IL10       KO female   2 astrocyte       IL10_A
+SRX6420534  GSM3933552      IL10       KO female   2 microglia       IL10_M
+SRX6420535  GSM3933553      IL11       WT female  16 astrocyte       IL11_A
+SRX6420536  GSM3933554      IL11       WT female  16 microglia       IL11_M</code></pre>
+</div>
+</div>
+<p>This experiment includes 56 samples of astrocytes or microglia cells obtained from 28 female mice that were either 2- or 16 months of age.</p>
+<p>The animals are either wildtype (<code>WT</code>) or homozygous knockouts (<code>KO</code>) for the <a href="https://www.uniprot.org/uniprotkb/Q99NH8/entry">Trem2 gene</a>.</p>
+</section>
+<section id="nugent-et-als-original-count-data" class="level2">
+<h2 class="anchored" data-anchor-id="nugent-et-als-original-count-data">Nugent et al’s original count data</h2>
+<p>First, we retrieve the authors’ count matrix from <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE158152">NCBI GEO</a>, available as a Supplementary tab-delimited text file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">geo_url <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">paste0</span>(<span class="st" style="color: #20794D;">"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE134031&amp;"</span>,</span>
+<span id="cb8-2">                  <span class="st" style="color: #20794D;">"format=file&amp;file=GSE134031%5FDST120%2Etab%2Egz"</span>)</span>
+<span id="cb8-3">raw_counts <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">read.delim</span>(<span class="fu" style="color: #4758AB;">textConnection</span>(<span class="fu" style="color: #4758AB;">readLines</span>(<span class="fu" style="color: #4758AB;">gzcon</span>(<span class="fu" style="color: #4758AB;">url</span>(geo_url)))))</span>
+<span id="cb8-4"><span class="fu" style="color: #4758AB;">head</span>(<span class="fu" style="color: #4758AB;">colnames</span>(raw_counts), <span class="dv" style="color: #AD0000;">10</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "mgi_symbol"              "gene_biotype"           
+ [3] "ensembl_gene_id_version" "IL1_A"                  
+ [5] "IL1_M"                   "IL10_A"                 
+ [7] "IL10_M"                  "IL11_A"                 
+ [9] "IL11_M"                  "IL12_A"                 </code></pre>
+</div>
+</div>
+<p>The <code>raw_counts</code> data.frame contains information about the detected genes ( <code>mgi_symbol</code>, <code>ensembl_gene_id_version</code>) and the samples are identified by a shorthand of their GEO title (e.g.&nbsp;<code>IL1_M</code>, <code>IL1_A</code>).</p>
+<p>We use the raw counts to populate a new <code>DGEList</code> object and perform Library Size Normalization with the <code>TMM</code> approach.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">count_data <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">as.matrix</span>(raw_counts[, <span class="fu" style="color: #4758AB;">grep</span>(<span class="st" style="color: #20794D;">"^IL"</span>, <span class="fu" style="color: #4758AB;">colnames</span>(raw_counts))])</span>
+<span id="cb10-2"><span class="fu" style="color: #4758AB;">row.names</span>(count_data) <span class="ot" style="color: #003B4F;">&lt;-</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>ensembl_gene_id_version</span>
+<span id="cb10-3"><span class="fu" style="color: #4758AB;">colnames</span>(count_data) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">row.names</span>(sample_anno)[</span>
+<span id="cb10-4">  <span class="fu" style="color: #4758AB;">match</span>(<span class="fu" style="color: #4758AB;">colnames</span>(count_data), sample_anno<span class="sc" style="color: #5E5E5E;">$</span>sample_title)</span>
+<span id="cb10-5">]</span>
+<span id="cb10-6"></span>
+<span id="cb10-7">gene_data <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(</span>
+<span id="cb10-8">  <span class="at" style="color: #657422;">gene_id =</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>ensembl_gene_id_version,</span>
+<span id="cb10-9">  <span class="at" style="color: #657422;">gene_name =</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>mgi_symbol,</span>
+<span id="cb10-10">  <span class="at" style="color: #657422;">row.names =</span> raw_counts<span class="sc" style="color: #5E5E5E;">$</span>ensembl_gene_id_version</span>
+<span id="cb10-11">)</span>
+<span id="cb10-12"></span>
+<span id="cb10-13">col_data <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(</span>
+<span id="cb10-14">  sample_anno[<span class="fu" style="color: #4758AB;">colnames</span>(count_data),</span>
+<span id="cb10-15">              <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"sample_title"</span>, <span class="st" style="color: #20794D;">"animal_id"</span>,  <span class="st" style="color: #20794D;">"age"</span>, <span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">"cell_type"</span>)],</span>
+<span id="cb10-16">  <span class="at" style="color: #657422;">workflow =</span> <span class="st" style="color: #20794D;">"geo"</span></span>
+<span id="cb10-17">)</span>
+<span id="cb10-18"></span>
+<span id="cb10-19">dge <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">DGEList</span>(</span>
+<span id="cb10-20">  <span class="at" style="color: #657422;">counts =</span> <span class="fu" style="color: #4758AB;">as.matrix</span>(count_data), </span>
+<span id="cb10-21">  <span class="at" style="color: #657422;">samples =</span> col_data[<span class="fu" style="color: #4758AB;">colnames</span>(count_data), ], </span>
+<span id="cb10-22">  <span class="at" style="color: #657422;">genes =</span> gene_data[<span class="fu" style="color: #4758AB;">row.names</span>(count_data), ]</span>
+<span id="cb10-23">)</span>
+<span id="cb10-24"></span>
+<span id="cb10-25">dge <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">calcNormFactors</span>(dge, <span class="at" style="color: #657422;">method =</span> <span class="st" style="color: #20794D;">"TMM"</span>)</span></code></pre></div>
+</details>
+</div>
+<p>This is a large dataset, containing e.g.&nbsp;samples from two different cell types (microglia and astrocytes) and two different age groups (2 and 16 months).</p>
+<p>Here, we will restrict the analysis to microglia samples collected from older animals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1">dge <span class="ot" style="color: #003B4F;">&lt;-</span> dge[, dge<span class="sc" style="color: #5E5E5E;">$</span>samples<span class="sc" style="color: #5E5E5E;">$</span>cell_type <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">"microglia"</span> <span class="sc" style="color: #5E5E5E;">&amp;</span> dge<span class="sc" style="color: #5E5E5E;">$</span>samples<span class="sc" style="color: #5E5E5E;">$</span>age <span class="sc" style="color: #5E5E5E;">==</span> <span class="st" style="color: #20794D;">"16"</span>]</span></code></pre></div>
+</div>
+<p>Let’s identify which genes are significantly differentially expressed between the two genotypes!</p>
+<section id="linear-modeling-with-limmavoom" class="level3">
+<h3 class="anchored" data-anchor-id="linear-modeling-with-limmavoom">Linear modeling with limma/voom</h3>
+<p>First, we use the <code>edgeR::filterByExpr()</code> function to identify genes with sufficiently large counts to be examined for differential expression.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">design <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">model.matrix</span>(<span class="sc" style="color: #5E5E5E;">~</span> genotype, <span class="at" style="color: #657422;">data =</span> dge<span class="sc" style="color: #5E5E5E;">$</span>samples)</span>
+<span id="cb12-2"><span class="fu" style="color: #4758AB;">colnames</span>(design) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sub</span>(<span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">""</span>, <span class="fu" style="color: #4758AB;">colnames</span>(design))</span>
+<span id="cb12-3">keep <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">filterByExpr</span>(dge, <span class="at" style="color: #657422;">design =</span> design)</span></code></pre></div>
+</div>
+<p>Next, we fit a linear model to the data using the <a href="https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29">limma/voom</a> approach. The model only includes the <code>genotype</code> (with <code>WT</code> as the reference level) as a fixed effect.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">voomLmFit</span>(</span>
+<span id="cb13-2">  dge[keep, <span class="fu" style="color: #4758AB;">row.names</span>(design)], </span>
+<span id="cb13-3">  <span class="at" style="color: #657422;">design =</span> design,</span>
+<span id="cb13-4">  <span class="at" style="color: #657422;">sample.weights =</span> <span class="cn" style="color: #8f5902;">TRUE</span>, </span>
+<span id="cb13-5">  <span class="at" style="color: #657422;">plot =</span> <span class="cn" style="color: #8f5902;">FALSE</span></span>
+<span id="cb13-6">)</span>
+<span id="cb13-7">fit <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">eBayes</span>(fit, <span class="at" style="color: #657422;">robust=</span><span class="cn" style="color: #8f5902;">TRUE</span>)</span></code></pre></div>
+</div>
+<p>The following table displays the number of differentially up- and down-regulated genes after applying a false-discovery (<code>adj.P.Val</code>) threshold of 5%. We detect significant differences between <code>KO</code> and <code>WT</code> animals in a small number of genes</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><span class="fu" style="color: #4758AB;">summary</span>(<span class="fu" style="color: #4758AB;">decideTests</span>(fit)[, <span class="st" style="color: #20794D;">"KO"</span>])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         KO
+Down     10
+NotSig 6343
+Up        2</code></pre>
+</div>
+</div>
+<p>The top 10 genes with the smallest p-values include well known markers of microglia activation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><span class="fu" style="color: #4758AB;">topTreat</span>(fit, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>)[, <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_name"</span>, <span class="st" style="color: #20794D;">"logFC"</span>, <span class="st" style="color: #20794D;">"P.Value"</span>, <span class="st" style="color: #20794D;">"adj.P.Val"</span>)]</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                      gene_name      logFC      P.Value    adj.P.Val
+ENSMUSG00000015568.16       Lpl -3.1524285 2.088121e-17 1.327001e-13
+ENSMUSG00000023992.14     Trem2 -2.0556690 3.260855e-15 1.036137e-11
+ENSMUSG00000079293.11    Clec7a -1.5285199 9.357950e-12 1.982326e-08
+ENSMUSG00000029304.14      Spp1 -4.6265897 4.968572e-10 7.893819e-07
+ENSMUSG00000003418.11   St8sia6 -1.6639344 7.279411e-09 8.240295e-06
+ENSMUSG00000002602.16       Axl -1.2096969 7.779979e-09 8.240295e-06
+ENSMUSG00000068129.5       Cst7 -2.0966828 9.881687e-08 8.971160e-05
+ENSMUSG00000008845.9      Cd163  0.8165263 1.513307e-06 1.202133e-03
+ENSMUSG00000039109.16     F13a1  0.8081490 1.735344e-06 1.225345e-03
+ENSMUSG00000000682.7       Cd52 -0.7939756 4.846100e-06 3.079696e-03</code></pre>
+</div>
+</div>
+<p>Next we repeat <em>the same analysis</em> with the output of the nf-core/rnaseq workflow.</p>
+</section>
+</section>
+<section id="nf-corernaseq-results" class="level2">
+<h2 class="anchored" data-anchor-id="nf-corernaseq-results">nf-core/rnaseq results</h2>
+<p>We start with the raw counts contained in the <a href="salmon.merged.gene_counts.rds">salmon.merged.gene_counts.rds</a> file generated by the nf-core/rnaseq workflow.</p>
+<p>We TMM-normalize the data, as before. (This step converts the <code>SummarizedExperiment</code> into a `DGEList object as well.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1">count_file <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">file.path</span>(work_dir, <span class="st" style="color: #20794D;">"salmon.merged.gene_counts.rds"</span>)</span>
+<span id="cb18-2">se <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">readRDS</span>(count_file)</span>
+<span id="cb18-3"><span class="fu" style="color: #4758AB;">stopifnot</span>(<span class="fu" style="color: #4758AB;">all</span>(<span class="fu" style="color: #4758AB;">colnames</span>(se) <span class="sc" style="color: #5E5E5E;">%in%</span> <span class="fu" style="color: #4758AB;">row.names</span>(sample_anno)))</span>
+<span id="cb18-4">dge_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">calcNormFactors</span>(se, <span class="at" style="color: #657422;">method =</span> <span class="st" style="color: #20794D;">"TMM"</span>)</span></code></pre></div>
+</div>
+<p>Next, we add the sample metadata and fit the same linear model as before.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1">dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">data.frame</span>(</span>
+<span id="cb19-2">  dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples,</span>
+<span id="cb19-3">  sample_anno[<span class="fu" style="color: #4758AB;">colnames</span>(dge_nfcore),</span>
+<span id="cb19-4">              <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"sample_title"</span>, <span class="st" style="color: #20794D;">"animal_id"</span>, <span class="st" style="color: #20794D;">"age"</span>, <span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">"cell_type"</span>)],</span>
+<span id="cb19-5">  <span class="at" style="color: #657422;">workflow =</span> <span class="st" style="color: #20794D;">"nfcore"</span></span>
+<span id="cb19-6">)</span>
+<span id="cb19-7"><span class="fu" style="color: #4758AB;">stopifnot</span>(<span class="fu" style="color: #4758AB;">all</span>(<span class="fu" style="color: #4758AB;">colnames</span>(dge) <span class="sc" style="color: #5E5E5E;">%in%</span> <span class="fu" style="color: #4758AB;">colnames</span>(dge_nfcore)))</span>
+<span id="cb19-8">dge_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> dge_nfcore[, <span class="fu" style="color: #4758AB;">colnames</span>(dge)]</span>
+<span id="cb19-9"></span>
+<span id="cb19-10">design <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">model.matrix</span>(<span class="sc" style="color: #5E5E5E;">~</span> genotype, <span class="at" style="color: #657422;">data =</span> dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples)</span>
+<span id="cb19-11"><span class="fu" style="color: #4758AB;">colnames</span>(design) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">sub</span>(<span class="st" style="color: #20794D;">"genotype"</span>, <span class="st" style="color: #20794D;">""</span>, <span class="fu" style="color: #4758AB;">colnames</span>(design))</span>
+<span id="cb19-12">keep <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">filterByExpr</span>(dge_nfcore, <span class="at" style="color: #657422;">design =</span> design)</span>
+<span id="cb19-13">fit_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">voomLmFit</span>(</span>
+<span id="cb19-14">  dge_nfcore[keep, <span class="fu" style="color: #4758AB;">row.names</span>(design)], </span>
+<span id="cb19-15">  <span class="at" style="color: #657422;">design =</span> design,</span>
+<span id="cb19-16">  <span class="at" style="color: #657422;">sample.weights =</span> <span class="cn" style="color: #8f5902;">TRUE</span>, </span>
+<span id="cb19-17">  <span class="at" style="color: #657422;">plot =</span> <span class="cn" style="color: #8f5902;">FALSE</span></span>
+<span id="cb19-18">)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>First sample weights (min/max) 0.3858285/1.6444242</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Final sample weights (min/max) 0.3854635/1.6427464</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1">fit_nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">eBayes</span>(fit_nfcore, <span class="at" style="color: #657422;">robust=</span><span class="cn" style="color: #8f5902;">TRUE</span>)</span></code></pre></div>
+</details>
+</div>
+<p>As with the original count data from NCBI GEO, we detect small number of differentially expressed genes (FDR &lt; 5%).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><span class="fu" style="color: #4758AB;">summary</span>(<span class="fu" style="color: #4758AB;">decideTests</span>(fit_nfcore)[, <span class="st" style="color: #20794D;">"KO"</span>])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         KO
+Down     10
+NotSig 7824
+Up        2</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1">cpms <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">local</span>({</span>
+<span id="cb25-2">  geo <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cpm</span>(dge, <span class="at" style="color: #657422;">normalized.lib.sizes =</span> <span class="cn" style="color: #8f5902;">TRUE</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-3">    <span class="fu" style="color: #4758AB;">as.data.frame</span>() <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-4">    <span class="fu" style="color: #4758AB;">cbind</span>(dge<span class="sc" style="color: #5E5E5E;">$</span>genes) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-5">    <span class="fu" style="color: #4758AB;">pivot_longer</span>(<span class="at" style="color: #657422;">cols =</span> <span class="fu" style="color: #4758AB;">starts_with</span>(<span class="st" style="color: #20794D;">"SRX"</span>), </span>
+<span id="cb25-6">                 <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">"sample_name"</span>,</span>
+<span id="cb25-7">                 <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">"cpm"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-8">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">left_join</span>(</span>
+<span id="cb25-9">      tibble<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">rownames_to_column</span>(dge<span class="sc" style="color: #5E5E5E;">$</span>samples, <span class="st" style="color: #20794D;">"sample_name"</span>),</span>
+<span id="cb25-10">      <span class="at" style="color: #657422;">by =</span> <span class="st" style="color: #20794D;">"sample_name"</span></span>
+<span id="cb25-11">    ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-12">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"Nugent et al"</span>)</span>
+<span id="cb25-13">  </span>
+<span id="cb25-14">  nfcore <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cpm</span>(dge_nfcore, <span class="at" style="color: #657422;">normalized.lib.sizes =</span> <span class="cn" style="color: #8f5902;">TRUE</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-15">    <span class="fu" style="color: #4758AB;">as.data.frame</span>() <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-16">    <span class="fu" style="color: #4758AB;">cbind</span>(dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>genes) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-17">    <span class="fu" style="color: #4758AB;">pivot_longer</span>(<span class="at" style="color: #657422;">cols =</span> <span class="fu" style="color: #4758AB;">starts_with</span>(<span class="st" style="color: #20794D;">"SRX"</span>), </span>
+<span id="cb25-18">                 <span class="at" style="color: #657422;">names_to =</span> <span class="st" style="color: #20794D;">"sample_name"</span>,</span>
+<span id="cb25-19">                 <span class="at" style="color: #657422;">values_to =</span> <span class="st" style="color: #20794D;">"cpm"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-20">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">left_join</span>(</span>
+<span id="cb25-21">      tibble<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">rownames_to_column</span>(dge_nfcore<span class="sc" style="color: #5E5E5E;">$</span>samples, <span class="st" style="color: #20794D;">"sample_name"</span>),</span>
+<span id="cb25-22">      <span class="at" style="color: #657422;">by =</span> <span class="st" style="color: #20794D;">"sample_name"</span></span>
+<span id="cb25-23">    ) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-24">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"nf-core"</span>)</span>
+<span id="cb25-25">  </span>
+<span id="cb25-26">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">bind_rows</span>(</span>
+<span id="cb25-27">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">select</span>(geo, <span class="fu" style="color: #4758AB;">any_of</span>(<span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">colnames</span>(geo), <span class="fu" style="color: #4758AB;">colnames</span>(nfcore)))),</span>
+<span id="cb25-28">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">select</span>(nfcore, <span class="fu" style="color: #4758AB;">any_of</span>(<span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">colnames</span>(geo), <span class="fu" style="color: #4758AB;">colnames</span>(nfcore))))</span>
+<span id="cb25-29">  )</span>
+<span id="cb25-30">})</span>
+<span id="cb25-31"></span>
+<span id="cb25-32">tt <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">rbind</span>(</span>
+<span id="cb25-33">  <span class="fu" style="color: #4758AB;">topTreat</span>(fit, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>, <span class="at" style="color: #657422;">number =</span> <span class="cn" style="color: #8f5902;">Inf</span>)[</span>
+<span id="cb25-34">    , <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"gene_name"</span>, <span class="st" style="color: #20794D;">"logFC"</span>, <span class="st" style="color: #20794D;">"P.Value"</span>, <span class="st" style="color: #20794D;">"adj.P.Val"</span>)] <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-35">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"geo"</span>),</span>
+<span id="cb25-36">   <span class="fu" style="color: #4758AB;">topTreat</span>(fit_nfcore, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>, <span class="at" style="color: #657422;">number =</span> <span class="cn" style="color: #8f5902;">Inf</span>)[</span>
+<span id="cb25-37">     , <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"gene_name"</span>, <span class="st" style="color: #20794D;">"logFC"</span>, <span class="st" style="color: #20794D;">"P.Value"</span>, <span class="st" style="color: #20794D;">"adj.P.Val"</span>)] <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-38">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">dataset =</span> <span class="st" style="color: #20794D;">"nfcore"</span>)</span>
+<span id="cb25-39">) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-40">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">mutate</span>(<span class="at" style="color: #657422;">adj.P.Val =</span> <span class="fu" style="color: #4758AB;">signif</span>(adj.P.Val, <span class="dv" style="color: #AD0000;">2</span>)) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-41">  tidyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">pivot_wider</span>(</span>
+<span id="cb25-42">    <span class="at" style="color: #657422;">id_cols =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"gene_name"</span>), </span>
+<span id="cb25-43">    <span class="at" style="color: #657422;">names_from =</span> <span class="st" style="color: #20794D;">"dataset"</span>, </span>
+<span id="cb25-44">    <span class="at" style="color: #657422;">values_from =</span> <span class="st" style="color: #20794D;">"adj.P.Val"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-45">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">arrange</span>(nfcore) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-46">  <span class="fu" style="color: #4758AB;">as.data.frame</span>() <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb25-47">  tibble<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">column_to_rownames</span>(<span class="st" style="color: #20794D;">"gene_id"</span>)</span></code></pre></div>
+</details>
+</div>
+<section id="normalized-expression" class="level3">
+<h3 class="anchored" data-anchor-id="normalized-expression">Normalized expression</h3>
+<p>First, we examine the correlation between the normalized log-transformed gene expression estimates returned from the two workflows. We focus on those genes that passed the <code>filterByExpr</code> thresholds above, e.g.&nbsp;those genes deemed sufficiently highly expressed to be assessed for differential expression.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1">common_genes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">row.names</span>(fit), <span class="fu" style="color: #4758AB;">row.names</span>(fit_nfcore))</span>
+<span id="cb26-2">sum_stats <span class="ot" style="color: #003B4F;">&lt;-</span> cpms <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb26-3">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">filter</span>(gene_id <span class="sc" style="color: #5E5E5E;">%in%</span> common_genes) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb26-4">  tidyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">pivot_wider</span>(</span>
+<span id="cb26-5">    <span class="at" style="color: #657422;">id_cols =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"gene_id"</span>, <span class="st" style="color: #20794D;">"sample_name"</span>),</span>
+<span id="cb26-6">    <span class="at" style="color: #657422;">values_from =</span> <span class="st" style="color: #20794D;">"cpm"</span>,</span>
+<span id="cb26-7">    <span class="at" style="color: #657422;">names_from =</span> <span class="st" style="color: #20794D;">"dataset"</span>) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb26-8">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">group_by</span>(gene_id) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb26-9">  dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">summarise</span>(</span>
+<span id="cb26-10">    <span class="at" style="color: #657422;">r =</span> <span class="fu" style="color: #4758AB;">cor</span>(<span class="fu" style="color: #4758AB;">log1p</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">Nugent et al</span><span class="st" style="color: #20794D;">`</span>), <span class="fu" style="color: #4758AB;">log1p</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">nf-core</span><span class="st" style="color: #20794D;">`</span>)),</span>
+<span id="cb26-11">    <span class="at" style="color: #657422;">mean_nugent =</span> <span class="fu" style="color: #4758AB;">mean</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">Nugent et al</span><span class="st" style="color: #20794D;">`</span>),</span>
+<span id="cb26-12">    <span class="at" style="color: #657422;">mean_nfcore =</span> <span class="fu" style="color: #4758AB;">mean</span>(<span class="st" style="color: #20794D;">`</span><span class="at" style="color: #657422;">nf-core</span><span class="st" style="color: #20794D;">`</span>))</span>
+<span id="cb26-13"></span>
+<span id="cb26-14">p <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="at" style="color: #657422;">data =</span> sum_stats, <span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> r)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb26-15">  <span class="fu" style="color: #4758AB;">geom_histogram</span>(<span class="at" style="color: #657422;">bins =</span> <span class="dv" style="color: #AD0000;">50</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb26-16">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">limits =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="fl" style="color: #AD0000;">1.02</span>), <span class="at" style="color: #657422;">breaks =</span> <span class="fu" style="color: #4758AB;">seq</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">by =</span> <span class="fl" style="color: #AD0000;">0.2</span>)) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb26-17">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x =</span> <span class="st" style="color: #20794D;">"Pearson correlation coefficient (R)"</span>, </span>
+<span id="cb26-18">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Number of genes"</span>,</span>
+<span id="cb26-19">       <span class="at" style="color: #657422;">title =</span> <span class="st" style="color: #20794D;">"Correlation between normalized log2 counts"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb26-20">  <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
+<span id="cb26-21"><span class="fu" style="color: #4758AB;">print</span>(p)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 35 rows containing non-finite values (`stat_bin()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 2 rows containing missing values (`geom_bar()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="528"></p>
+</div>
+</div>
+<p>The correlation between normalized log2 expression estimates is reasonably high, e.g.&nbsp;80% of all genes showing a Pearson correlation coefficient &gt; 0.82.</p>
+<p>The relatively low correlation might reflect the low RNA input of this experiment, e.g.&nbsp;only 6314 of the genes genes were detected with &gt; 10 UMI-corrected normalized counts per million reads.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1">p <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="at" style="color: #657422;">data =</span> sum_stats, <span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> mean_nugent <span class="sc" style="color: #5E5E5E;">+</span> <span class="dv" style="color: #AD0000;">1</span>)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb29-2">  <span class="fu" style="color: #4758AB;">geom_histogram</span>(<span class="at" style="color: #657422;">bins =</span> <span class="dv" style="color: #AD0000;">50</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb29-3">  <span class="fu" style="color: #4758AB;">scale_x_continuous</span>(<span class="at" style="color: #657422;">trans =</span> scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">log10_trans</span>(),</span>
+<span id="cb29-4">                     <span class="at" style="color: #657422;">labels =</span> scales<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">comma_format</span>()) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb29-5">  <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">x =</span> <span class="st" style="color: #20794D;">"Mean normalized counts per million"</span>, </span>
+<span id="cb29-6">       <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Number of genes"</span>,</span>
+<span id="cb29-7">       <span class="at" style="color: #657422;">title =</span> <span class="st" style="color: #20794D;">"Average expression"</span>,</span>
+<span id="cb29-8">       <span class="at" style="color: #657422;">subtitle =</span> <span class="st" style="color: #20794D;">"Nugent et al"</span>) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb29-9">  <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
+<span id="cb29-10"><span class="fu" style="color: #4758AB;">print</span>(p)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Next, we will examine the results of the <em>differential</em> expression analysis.</p>
+</section>
+<section id="differential-expression-results" class="level3">
+<h3 class="anchored" data-anchor-id="differential-expression-results">Differential expression results</h3>
+<p>Analyses based on either preprocessing pipeline yield similar numbers of differentially expressed genes.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1">common_genes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">intersect</span>(<span class="fu" style="color: #4758AB;">row.names</span>(fit), <span class="fu" style="color: #4758AB;">row.names</span>(fit_nfcore))</span>
+<span id="cb30-2">results <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cbind</span>(</span>
+<span id="cb30-3">  <span class="fu" style="color: #4758AB;">decideTests</span>(fit)[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
+<span id="cb30-4">  <span class="fu" style="color: #4758AB;">decideTests</span>(fit_nfcore)[common_genes, <span class="st" style="color: #20794D;">"KO"</span>]</span>
+<span id="cb30-5">)</span>
+<span id="cb30-6"><span class="fu" style="color: #4758AB;">colnames</span>(results) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"Nugent et al"</span>, <span class="st" style="color: #20794D;">"nf-core"</span>)</span>
+<span id="cb30-7"><span class="fu" style="color: #4758AB;">class</span>(results) <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="st" style="color: #20794D;">"TestResults"</span></span>
+<span id="cb30-8"><span class="fu" style="color: #4758AB;">summary</span>(results)</span></code></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Nugent et al nf-core
+-1           10       9
+0          6302    6303
+1             2       2</code></pre>
+</div>
+</div>
+<p>But are these <em>the same genes</em> in both sets of results?</p>
+<p>We can visualize the overlap between the sets of significant genes in a Venn diagram (FDR &lt; 5%). The majority of differentially expressed genes is detected with both quantitation approaches (for both up- and down-regulated genes.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1">limma<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">vennDiagram</span>(results, <span class="at" style="color: #657422;">include =</span> <span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"up"</span>, <span class="st" style="color: #20794D;">"down"</span>),</span>
+<span id="cb32-2">                   <span class="at" style="color: #657422;">counts.col=</span><span class="fu" style="color: #4758AB;">c</span>(<span class="st" style="color: #20794D;">"red"</span>, <span class="st" style="color: #20794D;">"blue"</span>), <span class="at" style="color: #657422;">mar =</span> <span class="fu" style="color: #4758AB;">rep</span>(<span class="dv" style="color: #AD0000;">0</span>,<span class="dv" style="color: #AD0000;">4</span>))</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="528"></p>
+</div>
+</div>
+<p>For example, the following plots show the normalized expression of the most significantly differentially expressed genes (known markers of active microglia).</p>
+<div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><span class="cf" style="color: #003B4F;">for</span> (gene <span class="cf" style="color: #003B4F;">in</span> <span class="fu" style="color: #4758AB;">topTreat</span>(fit, <span class="at" style="color: #657422;">coef =</span> <span class="st" style="color: #20794D;">"KO"</span>, <span class="at" style="color: #657422;">number =</span> <span class="dv" style="color: #AD0000;">6</span>)[[<span class="st" style="color: #20794D;">"gene_id"</span>]]) {</span>
+<span id="cb33-2"> p <span class="ot" style="color: #003B4F;">&lt;-</span> cpms <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb33-3">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">filter</span>(gene_id <span class="sc" style="color: #5E5E5E;">==</span> gene) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb33-4">    <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> genotype, <span class="at" style="color: #657422;">y =</span> cpm)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb33-5">    <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">position =</span> <span class="fu" style="color: #4758AB;">position_jitter</span>(<span class="at" style="color: #657422;">width =</span> <span class="fl" style="color: #AD0000;">0.05</span>), <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.8</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb33-6">    <span class="fu" style="color: #4758AB;">facet_grid</span>(dataset <span class="sc" style="color: #5E5E5E;">~</span> ., <span class="at" style="color: #657422;">scales =</span> <span class="st" style="color: #20794D;">"free"</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb33-7">    <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">title =</span> dge<span class="sc" style="color: #5E5E5E;">$</span>genes[gene, <span class="st" style="color: #20794D;">"gene_name"</span>],</span>
+<span id="cb33-8">         <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Normalized expression (CPM)"</span>,</span>
+<span id="cb33-9">         <span class="at" style="color: #657422;">x =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
+<span id="cb33-10">         <span class="at" style="color: #657422;">subtitle =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"FDR nf-core: %s</span><span class="sc" style="color: #5E5E5E;">\n</span><span class="st" style="color: #20794D;">FDR GEO: %s"</span>,</span>
+<span id="cb33-11">                       tt[gene, <span class="st" style="color: #20794D;">"nfcore"</span>],</span>
+<span id="cb33-12">                       tt[gene, <span class="st" style="color: #20794D;">"geo"</span>]</span>
+<span id="cb33-13">                       )</span>
+<span id="cb33-14">         ) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb33-15">   <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
+<span id="cb33-16"> <span class="fu" style="color: #4758AB;">print</span>(p)</span>
+<span id="cb33-17">}</span></code></pre></div>
+</details>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="288"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-2.png" class="img-fluid" width="288"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-3.png" class="img-fluid" width="288"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-4.png" class="img-fluid" width="288"></p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-5.png" class="img-fluid" width="288"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-21-6.png" class="img-fluid" width="288"></p>
+</div>
+</div>
+</div>
+</div>
+<p>Applying a hard FDR threshold can inflate the number of apparent differences, e.g.&nbsp;when a gene is close to the significance threshold (see below).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1">p_cor <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cor</span>(</span>
+<span id="cb34-2">  fit<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
+<span id="cb34-3">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>])</span></code></pre></div>
+</div>
+<p>The log2 fold estimates for the <code>Hom</code> vs <code>WT</code> comparison are well correlated across the two analysis workflows (Pearson correlation coefficient R = 0.88 ).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><span class="fu" style="color: #4758AB;">smoothScatter</span>(</span>
+<span id="cb35-2">  fit<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
+<span id="cb35-3">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>coefficients[common_genes, <span class="st" style="color: #20794D;">"KO"</span>],</span>
+<span id="cb35-4">  <span class="at" style="color: #657422;">ylab =</span> <span class="st" style="color: #20794D;">"nf-core (log2FC)"</span>,</span>
+<span id="cb35-5">  <span class="at" style="color: #657422;">xlab =</span> <span class="st" style="color: #20794D;">"Nugent et al (log2FC)"</span>,</span>
+<span id="cb35-6">  <span class="at" style="color: #657422;">main =</span> <span class="st" style="color: #20794D;">"Homozygous APP vs WT (effect size)"</span></span>
+<span id="cb35-7">)</span>
+<span id="cb35-8"><span class="fu" style="color: #4758AB;">text</span>(<span class="at" style="color: #657422;">x =</span> <span class="dv" style="color: #AD0000;">1</span>, <span class="at" style="color: #657422;">y =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">4</span>, <span class="at" style="color: #657422;">labels =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"R = %s"</span>, <span class="fu" style="color: #4758AB;">signif</span>(p_cor, <span class="dv" style="color: #AD0000;">2</span>)))</span>
+<span id="cb35-9"><span class="fu" style="color: #4758AB;">abline</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb35-10"><span class="fu" style="color: #4758AB;">abline</span>(<span class="at" style="color: #657422;">h =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">v =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">lty =</span> <span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="432"></p>
+</div>
+</div>
+<p>as are the t-statistics across all examined genes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1">p_cor <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">cor</span>(</span>
+<span id="cb36-2">  fit<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
+<span id="cb36-3">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>])</span>
+<span id="cb36-4"><span class="fu" style="color: #4758AB;">smoothScatter</span>(</span>
+<span id="cb36-5">  fit<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>], </span>
+<span id="cb36-6">  fit_nfcore<span class="sc" style="color: #5E5E5E;">$</span>t[common_genes, <span class="st" style="color: #20794D;">"KO"</span>],</span>
+<span id="cb36-7">  <span class="at" style="color: #657422;">ylab =</span> <span class="st" style="color: #20794D;">"nf-core (t-statistic)"</span>,</span>
+<span id="cb36-8">  <span class="at" style="color: #657422;">xlab =</span> <span class="st" style="color: #20794D;">"Nugent et al (t-statistic)"</span>,</span>
+<span id="cb36-9">  <span class="at" style="color: #657422;">main =</span> <span class="st" style="color: #20794D;">"Homozygous APP vs WT (t-statistic)"</span>)</span>
+<span id="cb36-10"><span class="fu" style="color: #4758AB;">text</span>(<span class="at" style="color: #657422;">x =</span> <span class="dv" style="color: #AD0000;">3</span>, <span class="at" style="color: #657422;">y =</span> <span class="sc" style="color: #5E5E5E;">-</span><span class="dv" style="color: #AD0000;">15</span>, <span class="at" style="color: #657422;">labels =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"R = %s"</span>, <span class="fu" style="color: #4758AB;">signif</span>(p_cor, <span class="dv" style="color: #AD0000;">2</span>)))</span>
+<span id="cb36-11"><span class="fu" style="color: #4758AB;">abline</span>(<span class="dv" style="color: #AD0000;">0</span>, <span class="dv" style="color: #AD0000;">1</span>)</span>
+<span id="cb36-12"><span class="fu" style="color: #4758AB;">abline</span>(<span class="at" style="color: #657422;">h =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">v =</span> <span class="dv" style="color: #AD0000;">0</span>, <span class="at" style="color: #657422;">lty =</span> <span class="dv" style="color: #AD0000;">2</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="432"></p>
+</div>
+</div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Because this comparison yields only a small number of bona-fide differentially expressed genes, we don’t expect to see a high correlation between the log2 fold changes or the t-statistics between the two analyses: most of the values are very close to zero.</p>
+</div>
+</div>
+<section id="discordant-significance-calls" class="level4">
+<h4 class="anchored" data-anchor-id="discordant-significance-calls">Discordant significance calls</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><span class="co" style="color: #5E5E5E;"># genes detected in Nugent et al, but not significant with nf-core</span></span>
+<span id="cb37-2">genes <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">row.names</span>(results)[<span class="fu" style="color: #4758AB;">which</span>(<span class="fu" style="color: #4758AB;">abs</span>(results[, <span class="dv" style="color: #AD0000;">1</span>]) <span class="sc" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">1</span> <span class="sc" style="color: #5E5E5E;">&amp;</span> results[, <span class="dv" style="color: #AD0000;">2</span>] <span class="sc" style="color: #5E5E5E;">==</span> <span class="dv" style="color: #AD0000;">0</span>)]</span></code></pre></div>
+</div>
+<p>At FDR &lt; 5% 2 genes were reported as significantly differentially expressed with the original Nugent et al count matrix but <em>not</em> with the output of the nf-core/rnaseq workflow.</p>
+<p>As side-by-side comparison of the FDR (<code>adj.P.Val</code>) for these genes confirms that the one of them (<em>Cd52</em>) displays significance close to the 5% threshold in the nf-core/rnaseq output as well. The second gene (<em>Slamf8</em>) also displays the same trend in both datasets, but is detected at lower levels (e.g.&nbsp;lower normalized CPMs) in the nf-core/rnaseq output.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><span class="fu" style="color: #4758AB;">print</span>(tt[genes, ])</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     gene_name    geo nfcore
+ENSMUSG00000000682.7      Cd52 0.0031  0.089
+ENSMUSG00000053318.7    Slamf8 0.0190  0.270</code></pre>
+</div>
+</div>
+</section>
+<section id="examples" class="level4">
+<h4 class="anchored" data-anchor-id="examples">Examples</h4>
+<p>Finally, we plot the normalized gene expression estimates for the 2 discordant genes.</p>
+<div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><span class="cf" style="color: #003B4F;">for</span> (gene <span class="cf" style="color: #003B4F;">in</span> genes) {</span>
+<span id="cb40-2"> p <span class="ot" style="color: #003B4F;">&lt;-</span> cpms <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb40-3">    dplyr<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">filter</span>(gene_id <span class="sc" style="color: #5E5E5E;">==</span> gene) <span class="sc" style="color: #5E5E5E;">%&gt;%</span></span>
+<span id="cb40-4">    <span class="fu" style="color: #4758AB;">ggplot</span>(<span class="fu" style="color: #4758AB;">aes</span>(<span class="at" style="color: #657422;">x =</span> genotype, <span class="at" style="color: #657422;">y =</span> cpm)) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb40-5">    <span class="fu" style="color: #4758AB;">geom_point</span>(<span class="at" style="color: #657422;">position =</span> <span class="fu" style="color: #4758AB;">position_jitter</span>(<span class="at" style="color: #657422;">width =</span> <span class="fl" style="color: #AD0000;">0.05</span>), <span class="at" style="color: #657422;">alpha =</span> <span class="fl" style="color: #AD0000;">0.8</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb40-6">    <span class="fu" style="color: #4758AB;">facet_grid</span>(dataset <span class="sc" style="color: #5E5E5E;">~</span> ., <span class="at" style="color: #657422;">scales =</span> <span class="st" style="color: #20794D;">"free"</span>) <span class="sc" style="color: #5E5E5E;">+</span> </span>
+<span id="cb40-7">    <span class="fu" style="color: #4758AB;">labs</span>(<span class="at" style="color: #657422;">title =</span> dge<span class="sc" style="color: #5E5E5E;">$</span>genes[gene, <span class="st" style="color: #20794D;">"gene_name"</span>],</span>
+<span id="cb40-8">         <span class="at" style="color: #657422;">y =</span> <span class="st" style="color: #20794D;">"Normalized expression (CPM)"</span>,</span>
+<span id="cb40-9">         <span class="at" style="color: #657422;">x =</span> <span class="fu" style="color: #4758AB;">element_blank</span>(),</span>
+<span id="cb40-10">         <span class="at" style="color: #657422;">subtitle =</span> <span class="fu" style="color: #4758AB;">sprintf</span>(<span class="st" style="color: #20794D;">"FDR nf-core: %s</span><span class="sc" style="color: #5E5E5E;">\n</span><span class="st" style="color: #20794D;">FDR GEO: %s"</span>,</span>
+<span id="cb40-11">                       tt[gene, <span class="st" style="color: #20794D;">"nfcore"</span>],</span>
+<span id="cb40-12">                       tt[gene, <span class="st" style="color: #20794D;">"geo"</span>]</span>
+<span id="cb40-13">                       )</span>
+<span id="cb40-14">         ) <span class="sc" style="color: #5E5E5E;">+</span></span>
+<span id="cb40-15">   <span class="fu" style="color: #4758AB;">theme_linedraw</span>(<span class="dv" style="color: #AD0000;">14</span>)</span>
+<span id="cb40-16"> <span class="fu" style="color: #4758AB;">print</span>(p)</span>
+<span id="cb40-17">}</span></code></pre></div>
+</details>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="288"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index_files/figure-html/unnamed-chunk-27-2.png" class="img-fluid" width="288"></p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<ul>
+<li>Differential expression analyses of raw counts obtained with the <code>nc-core/rnaseq</code> workflow yields results that are highly concordant with those obtained with the raw counts the authors deposited in NCBI GEO.</li>
+<li>With appropriate parameters the <code>nf-core/rnaseq</code> workflow can be applied to QuantSeq FWD 3’tag RNA-seq data that includes unique molecular identifiers.</li>
+</ul>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
+<details>
+<summary>
+SessionInfo
+</summary>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.2 (2022-10-31)
+ os       macOS Big Sur ... 10.16
+ system   x86_64, darwin17.0
+ ui       X11
+ language (EN)
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       America/Los_Angeles
+ date     2023-01-16
+ pandoc   2.19.2 @ /Applications/RStudio.app/Contents/MacOS/quarto/bin/tools/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package              * version  date (UTC) lib source
+ AnnotationDbi        * 1.60.0   2022-11-01 [1] Bioconductor
+ askpass                1.1      2019-01-13 [1] CRAN (R 4.2.0)
+ assertthat             0.2.1    2019-03-21 [1] CRAN (R 4.2.0)
+ Biobase              * 2.58.0   2022-11-01 [1] Bioconductor
+ BiocGenerics         * 0.44.0   2022-11-01 [1] Bioconductor
+ Biostrings             2.66.0   2022-11-01 [1] Bioconductor
+ bit                    4.0.5    2022-11-15 [1] CRAN (R 4.2.0)
+ bit64                  4.0.5    2020-08-30 [1] CRAN (R 4.2.0)
+ bitops                 1.0-7    2021-04-24 [1] CRAN (R 4.2.0)
+ blob                   1.2.3    2022-04-10 [1] CRAN (R 4.2.0)
+ cachem                 1.0.6    2021-08-19 [1] CRAN (R 4.2.0)
+ cli                    3.5.0    2022-12-20 [1] CRAN (R 4.2.0)
+ colorspace             2.0-3    2022-02-21 [1] CRAN (R 4.2.0)
+ crayon                 1.5.2    2022-09-29 [1] CRAN (R 4.2.0)
+ credentials            1.3.2    2021-11-29 [1] CRAN (R 4.2.0)
+ DBI                    1.1.3    2022-06-18 [1] CRAN (R 4.2.0)
+ DelayedArray           0.24.0   2022-11-01 [1] Bioconductor
+ digest                 0.6.31   2022-12-11 [1] CRAN (R 4.2.0)
+ dplyr                * 1.0.10   2022-09-01 [1] CRAN (R 4.2.0)
+ edgeR                * 3.40.1   2022-12-14 [1] Bioconductor
+ ellipsis               0.3.2    2021-04-29 [1] CRAN (R 4.2.0)
+ evaluate               0.19     2022-12-13 [1] CRAN (R 4.2.0)
+ fansi                  1.0.3    2022-03-24 [1] CRAN (R 4.2.0)
+ farver                 2.1.1    2022-07-06 [1] CRAN (R 4.2.0)
+ fastmap                1.1.0    2021-01-25 [1] CRAN (R 4.2.0)
+ generics               0.1.3    2022-07-05 [1] CRAN (R 4.2.0)
+ GenomeInfoDb         * 1.34.4   2022-12-01 [1] Bioconductor
+ GenomeInfoDbData       1.2.9    2022-12-12 [1] Bioconductor
+ GenomicRanges        * 1.50.2   2022-12-16 [1] Bioconductor
+ ggplot2              * 3.4.0    2022-11-04 [1] CRAN (R 4.2.0)
+ glue                   1.6.2    2022-02-24 [1] CRAN (R 4.2.0)
+ gtable                 0.3.1    2022-09-01 [1] CRAN (R 4.2.0)
+ here                 * 1.0.1    2020-12-13 [1] CRAN (R 4.2.0)
+ htmltools              0.5.4    2022-12-07 [1] CRAN (R 4.2.0)
+ htmlwidgets            1.5.4    2021-09-08 [1] CRAN (R 4.2.2)
+ httr                   1.4.4    2022-08-17 [1] CRAN (R 4.2.0)
+ IRanges              * 2.32.0   2022-11-01 [1] Bioconductor
+ jsonlite               1.8.4    2022-12-06 [1] CRAN (R 4.2.0)
+ KEGGREST               1.38.0   2022-11-01 [1] Bioconductor
+ KernSmooth             2.23-20  2021-05-03 [2] CRAN (R 4.2.2)
+ knitr                  1.41     2022-11-18 [1] CRAN (R 4.2.0)
+ labeling               0.4.2    2020-10-20 [1] CRAN (R 4.2.0)
+ lattice                0.20-45  2021-09-22 [2] CRAN (R 4.2.2)
+ lifecycle              1.0.3    2022-10-07 [1] CRAN (R 4.2.0)
+ limma                * 3.54.0   2022-11-01 [1] Bioconductor
+ locfit                 1.5-9.6  2022-07-11 [1] CRAN (R 4.2.0)
+ magrittr               2.0.3    2022-03-30 [1] CRAN (R 4.2.0)
+ Matrix                 1.5-3    2022-11-11 [1] CRAN (R 4.2.0)
+ MatrixGenerics       * 1.10.0   2022-11-01 [1] Bioconductor
+ matrixStats          * 0.63.0   2022-11-18 [1] CRAN (R 4.2.0)
+ memoise                2.0.1    2021-11-26 [1] CRAN (R 4.2.0)
+ munsell                0.5.0    2018-06-12 [1] CRAN (R 4.2.0)
+ openssl                2.0.5    2022-12-06 [1] CRAN (R 4.2.0)
+ org.Mm.eg.db         * 3.16.0   2022-12-29 [1] Bioconductor
+ pillar                 1.8.1    2022-08-19 [1] CRAN (R 4.2.0)
+ pkgconfig              2.0.3    2019-09-22 [1] CRAN (R 4.2.0)
+ png                    0.1-8    2022-11-29 [1] CRAN (R 4.2.0)
+ purrr                  1.0.0    2022-12-20 [1] CRAN (R 4.2.0)
+ R6                     2.5.1    2021-08-19 [1] CRAN (R 4.2.0)
+ Rcpp                   1.0.9    2022-07-08 [1] CRAN (R 4.2.0)
+ RCurl                  1.98-1.9 2022-10-03 [1] CRAN (R 4.2.0)
+ rlang                  1.0.6    2022-09-24 [1] CRAN (R 4.2.0)
+ rmarkdown              2.19     2022-12-15 [1] CRAN (R 4.2.0)
+ rprojroot              2.0.3    2022-04-02 [1] CRAN (R 4.2.0)
+ RSQLite                2.2.19   2022-11-24 [1] CRAN (R 4.2.0)
+ rstudioapi             0.14     2022-08-22 [1] CRAN (R 4.2.0)
+ S4Vectors            * 0.36.1   2022-12-05 [1] Bioconductor
+ scales                 1.2.1    2022-08-20 [1] CRAN (R 4.2.0)
+ sessioninfo            1.2.2    2021-12-06 [1] CRAN (R 4.2.0)
+ statmod                1.4.37   2022-08-12 [1] CRAN (R 4.2.0)
+ stringi                1.7.8    2022-07-11 [1] CRAN (R 4.2.0)
+ stringr                1.5.0    2022-12-02 [1] CRAN (R 4.2.0)
+ SummarizedExperiment * 1.28.0   2022-11-01 [1] Bioconductor
+ sys                    3.4.1    2022-10-18 [1] CRAN (R 4.2.0)
+ tibble               * 3.1.8    2022-07-22 [1] CRAN (R 4.2.0)
+ tidyr                * 1.2.1    2022-09-08 [1] CRAN (R 4.2.0)
+ tidyselect             1.2.0    2022-10-10 [1] CRAN (R 4.2.0)
+ utf8                   1.2.2    2021-07-24 [1] CRAN (R 4.2.0)
+ vctrs                  0.5.1    2022-11-16 [1] CRAN (R 4.2.0)
+ withr                  2.5.0    2022-03-03 [1] CRAN (R 4.2.0)
+ xfun                   0.35     2022-11-16 [1] CRAN (R 4.2.0)
+ XVector                0.38.0   2022-11-01 [1] Bioconductor
+ yaml                   2.3.6    2022-10-18 [1] CRAN (R 4.2.0)
+ zlibbioc               1.44.0   2022-11-01 [1] Bioconductor
+
+ [1] /Users/sandmann/Library/R/x86_64/4.2/library
+ [2] /Library/Frameworks/R.framework/Versions/4.2/Resources/library
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</details>
+
+
+<!-- -->
+
+</section>
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Full disclosure: I am a co-author of this publication.↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>R</category>
+  <category>nextflow</category>
+  <category>NGS</category>
+  <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index.html</guid>
   <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>

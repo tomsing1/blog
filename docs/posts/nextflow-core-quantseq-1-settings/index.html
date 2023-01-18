@@ -559,7 +559,7 @@ homozygous knockouts (<code>KO</code>) for the <a href="https://www.uniprot.org/
 <ul>
 <li><code>--with_umi</code></li>
 <li><code>--umitools_extract_method "regex"</code>: The type of pattern to detect, either <code>string</code> (default) or <code>regex</code></li>
-<li><code>--umitools_bc_pattern "^(?P&lt;umi_1&gt;.{6})(?P&lt;discard_1&gt;.{4}).*"</code>: A regular expression that instructes <code>UMI-tools</code> to extract the first 6 bases from the 5’ end of each read (the UMI) and to discard the following 4 bases. (Lexogen adds an invariant <code>TATA</code> sequence motif to each UMI.)</li>
+<li><code>--umitools_bc_pattern "^(?P&lt;umi_1&gt;.{6})(?P&lt;discard_1&gt;.{4}).*"</code>: A regular expression that instructs <code>UMI-tools</code> to extract the first 6 bases (the UMI) from the 5’ end of the read <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> and to discard the following 4 bases. (Lexogen adds an invariant <code>TATA</code> sequence motif to each UMI.)</li>
 <li><code>--umitools_grouping_method "unique"</code>: The method used to group similar UMIs, e.g.&nbsp;to correct sequencing errors. The default method is <code>directional</code>, but it is computationally expensive. Here, we use the simpler <code>unique</code> method, suppressing grouping / error correction entirely.</li>
 </ul>
 <div class="callout-note callout callout-style-default callout-captioned">
@@ -598,7 +598,7 @@ Note
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"skip_stringtie"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
 <span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gencode"</span><span class="fu">:</span> <span class="kw">true</span></span>
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We store the JSON string in a file called <code>nf_params.json</code>, and then pass it to the <code>nextflow run</code> command <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>:</p>
+<p>We store the JSON string in a file called <code>nf_params.json</code>, and then pass it to the <code>nextflow run</code> command:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nextflow <span class="ex">run</span> <span class="dt">\</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>      nf-core/rnaseq <span class="dt">\</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">-r</span> 3.10.1 <span class="dt">\</span></span>
@@ -623,7 +623,7 @@ Note
 <li id="fn1"><p>The <code>strandedness</code> column in the sample sheet CSV file must contain one of <code>forward</code>, <code>reverse</code>, <code>unstranded</code> or <code>auto</code>. The latter will prompt the <code>nf-core/rnaseq</code> workflow to subsample reads and map them to the transcriptome with <a href="https://combine-lab.github.io/salmon/">salmon</a> to determine the likely orientation of the reads. Because this adds additional steps to the workflow execution, it is recommended that you specify the <code>strandedness</code> of your library explicitly whenever possible.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>The <code>-resume</code> argument allows you to resume previous executions of the same workflow. Nextflow will reuse any existing outputs and generate only those that are missing.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Nextflow can interact with different storage backends. For example, you could provide URLs of remote files (e.g.&nbsp;with the <code>ftp://</code> prefix) or in cloud storage (e.g.&nbsp;with the <code>s3://</code> or <code>gs://</code> prefix) and they will automatically be downloaded and <em>staged</em> when you start the run.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>The <code>-resume</code> argument allows you to resume previous executions of the same workflow. Nextflow will reuse any existing outputs and generate only those that are missing.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Typically, QuantSeq libraries are single-end (not paired-end) and the UMI is therefore found in the R1 read.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1275,73 +1275,76 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb11-463"><a href="#cb11-463" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`--umitools_extract_method "regex"`</span>: The type of pattern to detect, either</span>
 <span id="cb11-464"><a href="#cb11-464" aria-hidden="true" tabindex="-1"></a>  <span class="in">`string`</span> (default) or <span class="in">`regex`</span></span>
 <span id="cb11-465"><a href="#cb11-465" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`--umitools_bc_pattern "^(?P&lt;umi_1&gt;.{6})(?P&lt;discard_1&gt;.{4}).*"`</span>: A regular</span>
-<span id="cb11-466"><a href="#cb11-466" aria-hidden="true" tabindex="-1"></a>  expression that instructes <span class="in">`UMI-tools`</span> to extract the first 6 bases from the</span>
-<span id="cb11-467"><a href="#cb11-467" aria-hidden="true" tabindex="-1"></a>  5' end of each read (the UMI) and to discard the following 4 bases. (Lexogen </span>
-<span id="cb11-468"><a href="#cb11-468" aria-hidden="true" tabindex="-1"></a>  adds an invariant <span class="in">`TATA`</span> sequence motif to each UMI.)</span>
+<span id="cb11-466"><a href="#cb11-466" aria-hidden="true" tabindex="-1"></a>  expression that instructs <span class="in">`UMI-tools`</span> to extract the first 6 bases (the UMI) </span>
+<span id="cb11-467"><a href="#cb11-467" aria-hidden="true" tabindex="-1"></a>  from the 5' end of the read <span class="ot">[^4]</span> and to discard the following 4 bases. </span>
+<span id="cb11-468"><a href="#cb11-468" aria-hidden="true" tabindex="-1"></a>  (Lexogen adds an invariant <span class="in">`TATA`</span> sequence motif to each UMI.)</span>
 <span id="cb11-469"><a href="#cb11-469" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`--umitools_grouping_method "unique"`</span>: The method used to group similar UMIs,</span>
 <span id="cb11-470"><a href="#cb11-470" aria-hidden="true" tabindex="-1"></a>  e.g. to correct sequencing errors. The default method is <span class="in">`directional`</span>, but it</span>
 <span id="cb11-471"><a href="#cb11-471" aria-hidden="true" tabindex="-1"></a>  is computationally expensive. Here, we use the simpler <span class="in">`unique`</span> method, </span>
 <span id="cb11-472"><a href="#cb11-472" aria-hidden="true" tabindex="-1"></a>  suppressing grouping / error correction entirely.</span>
 <span id="cb11-473"><a href="#cb11-473" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-474"><a href="#cb11-474" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb11-475"><a href="#cb11-475" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-476"><a href="#cb11-476" aria-hidden="true" tabindex="-1"></a>These arguments shown above are suitable for UMIs offered by Lexogen for the </span>
-<span id="cb11-477"><a href="#cb11-477" aria-hidden="true" tabindex="-1"></a>QuantSeq protocol. If you use custom UMIs, please consult the </span>
-<span id="cb11-478"><a href="#cb11-478" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">nf-core/rnaseq documentation for full details and additional options</span><span class="co">](https://nf-co.re/rnaseq/3.10.1/parameters#umi-options)</span></span>
-<span id="cb11-479"><a href="#cb11-479" aria-hidden="true" tabindex="-1"></a>for details on additional parameters you can set.</span>
-<span id="cb11-480"><a href="#cb11-480" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-481"><a href="#cb11-481" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb11-482"><a href="#cb11-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-474"><a href="#cb11-474" aria-hidden="true" tabindex="-1"></a><span class="ot">[^4]: </span>Typically, QuantSeq libraries are single-end (not paired-end) and the</span>
+<span id="cb11-475"><a href="#cb11-475" aria-hidden="true" tabindex="-1"></a>UMI is therefore found in the R1 read.</span>
+<span id="cb11-476"><a href="#cb11-476" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-477"><a href="#cb11-477" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb11-478"><a href="#cb11-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-479"><a href="#cb11-479" aria-hidden="true" tabindex="-1"></a>These arguments shown above are suitable for UMIs offered by Lexogen for the </span>
+<span id="cb11-480"><a href="#cb11-480" aria-hidden="true" tabindex="-1"></a>QuantSeq protocol. If you use custom UMIs, please consult the </span>
+<span id="cb11-481"><a href="#cb11-481" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">nf-core/rnaseq documentation for full details and additional options</span><span class="co">](https://nf-co.re/rnaseq/3.10.1/parameters#umi-options)</span></span>
+<span id="cb11-482"><a href="#cb11-482" aria-hidden="true" tabindex="-1"></a>for details on additional parameters you can set.</span>
 <span id="cb11-483"><a href="#cb11-483" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-484"><a href="#cb11-484" aria-hidden="true" tabindex="-1"></a><span class="fu">### Starting the workflow</span></span>
+<span id="cb11-484"><a href="#cb11-484" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb11-485"><a href="#cb11-485" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-486"><a href="#cb11-486" aria-hidden="true" tabindex="-1"></a>Next, we add the UMI-related parameters to the JSON file we used above, so we</span>
-<span id="cb11-487"><a href="#cb11-487" aria-hidden="true" tabindex="-1"></a>can pass them to <span class="in">`nextflow run`</span> via the <span class="in">`-params-file`</span> argument. Because Nugent</span>
-<span id="cb11-488"><a href="#cb11-488" aria-hidden="true" tabindex="-1"></a>et al used the same reference (Gencode M17), we can reuse the same reference we</span>
-<span id="cb11-489"><a href="#cb11-489" aria-hidden="true" tabindex="-1"></a>generated for Xia et al's dataset. (Here, we assume the precomputed references</span>
-<span id="cb11-490"><a href="#cb11-490" aria-hidden="true" tabindex="-1"></a>are in the <span class="in">`genome`</span> folder to our current working directory. If you chose to</span>
-<span id="cb11-491"><a href="#cb11-491" aria-hidden="true" tabindex="-1"></a>store them elsewhere, please provide absolute paths in the JSON file instead.)</span>
-<span id="cb11-492"><a href="#cb11-492" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-493"><a href="#cb11-493" aria-hidden="true" tabindex="-1"></a><span class="in">```json</span></span>
-<span id="cb11-494"><a href="#cb11-494" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb11-495"><a href="#cb11-495" aria-hidden="true" tabindex="-1"></a>    <span class="st">"save_reference"</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span></span>
-<span id="cb11-496"><a href="#cb11-496" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fasta"</span><span class="op">:</span> <span class="st">"genome/GRCm38.primary_assembly.genome.fa"</span><span class="op">,</span></span>
-<span id="cb11-497"><a href="#cb11-497" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gtf"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.gtf"</span><span class="op">,</span></span>
-<span id="cb11-498"><a href="#cb11-498" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gene_bed"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.bed"</span><span class="op">,</span></span>
-<span id="cb11-499"><a href="#cb11-499" aria-hidden="true" tabindex="-1"></a>    <span class="st">"transcript_fasta"</span><span class="op">:</span> <span class="st">"genome/genome.transcripts.fa"</span><span class="op">,</span></span>
-<span id="cb11-500"><a href="#cb11-500" aria-hidden="true" tabindex="-1"></a>    <span class="st">"star_index"</span><span class="op">:</span> <span class="st">"genome/index/star"</span><span class="op">,</span></span>
-<span id="cb11-501"><a href="#cb11-501" aria-hidden="true" tabindex="-1"></a>    <span class="st">"salmon_index"</span><span class="op">:</span> <span class="st">"genome/index/salmon"</span><span class="op">,</span></span>
-<span id="cb11-502"><a href="#cb11-502" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rsem_index"</span><span class="op">:</span> <span class="st">"genome/rsem"</span><span class="op">,</span></span>
-<span id="cb11-503"><a href="#cb11-503" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_star_align_args"</span><span class="op">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="op">,</span></span>
-<span id="cb11-504"><a href="#cb11-504" aria-hidden="true" tabindex="-1"></a>    <span class="st">"with_umi"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-505"><a href="#cb11-505" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_extract_method"</span><span class="op">:</span> <span class="st">"regex"</span><span class="op">,</span></span>
-<span id="cb11-506"><a href="#cb11-506" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_grouping_method"</span><span class="op">:</span> <span class="st">"unique"</span><span class="op">,</span></span>
-<span id="cb11-507"><a href="#cb11-507" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_bc_pattern"</span><span class="op">:</span> <span class="st">"^(?P&lt;umi_1&gt;.{6})(?P&lt;discard_1&gt;.{4}).*"</span><span class="op">,</span></span>
-<span id="cb11-508"><a href="#cb11-508" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_salmon_quant_args"</span><span class="op">:</span> <span class="st">"--noLengthCorrection"</span><span class="op">,</span></span>
-<span id="cb11-509"><a href="#cb11-509" aria-hidden="true" tabindex="-1"></a>    <span class="st">"skip_stringtie"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-510"><a href="#cb11-510" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gencode"</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb11-511"><a href="#cb11-511" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-512"><a href="#cb11-512" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb11-513"><a href="#cb11-513" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-514"><a href="#cb11-514" aria-hidden="true" tabindex="-1"></a>We store the JSON string in a file called <span class="in">`nf_params.json`</span>, and then pass it to</span>
-<span id="cb11-515"><a href="#cb11-515" aria-hidden="true" tabindex="-1"></a>the <span class="in">`nextflow run`</span> command <span class="ot">[^2]</span>:</span>
+<span id="cb11-486"><a href="#cb11-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-487"><a href="#cb11-487" aria-hidden="true" tabindex="-1"></a><span class="fu">### Starting the workflow</span></span>
+<span id="cb11-488"><a href="#cb11-488" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-489"><a href="#cb11-489" aria-hidden="true" tabindex="-1"></a>Next, we add the UMI-related parameters to the JSON file we used above, so we</span>
+<span id="cb11-490"><a href="#cb11-490" aria-hidden="true" tabindex="-1"></a>can pass them to <span class="in">`nextflow run`</span> via the <span class="in">`-params-file`</span> argument. Because Nugent</span>
+<span id="cb11-491"><a href="#cb11-491" aria-hidden="true" tabindex="-1"></a>et al used the same reference (Gencode M17), we can reuse the same reference we</span>
+<span id="cb11-492"><a href="#cb11-492" aria-hidden="true" tabindex="-1"></a>generated for Xia et al's dataset. (Here, we assume the precomputed references</span>
+<span id="cb11-493"><a href="#cb11-493" aria-hidden="true" tabindex="-1"></a>are in the <span class="in">`genome`</span> folder to our current working directory. If you chose to</span>
+<span id="cb11-494"><a href="#cb11-494" aria-hidden="true" tabindex="-1"></a>store them elsewhere, please provide absolute paths in the JSON file instead.)</span>
+<span id="cb11-495"><a href="#cb11-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-496"><a href="#cb11-496" aria-hidden="true" tabindex="-1"></a><span class="in">```json</span></span>
+<span id="cb11-497"><a href="#cb11-497" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb11-498"><a href="#cb11-498" aria-hidden="true" tabindex="-1"></a>    <span class="st">"save_reference"</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb11-499"><a href="#cb11-499" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fasta"</span><span class="op">:</span> <span class="st">"genome/GRCm38.primary_assembly.genome.fa"</span><span class="op">,</span></span>
+<span id="cb11-500"><a href="#cb11-500" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gtf"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.gtf"</span><span class="op">,</span></span>
+<span id="cb11-501"><a href="#cb11-501" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gene_bed"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.bed"</span><span class="op">,</span></span>
+<span id="cb11-502"><a href="#cb11-502" aria-hidden="true" tabindex="-1"></a>    <span class="st">"transcript_fasta"</span><span class="op">:</span> <span class="st">"genome/genome.transcripts.fa"</span><span class="op">,</span></span>
+<span id="cb11-503"><a href="#cb11-503" aria-hidden="true" tabindex="-1"></a>    <span class="st">"star_index"</span><span class="op">:</span> <span class="st">"genome/index/star"</span><span class="op">,</span></span>
+<span id="cb11-504"><a href="#cb11-504" aria-hidden="true" tabindex="-1"></a>    <span class="st">"salmon_index"</span><span class="op">:</span> <span class="st">"genome/index/salmon"</span><span class="op">,</span></span>
+<span id="cb11-505"><a href="#cb11-505" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rsem_index"</span><span class="op">:</span> <span class="st">"genome/rsem"</span><span class="op">,</span></span>
+<span id="cb11-506"><a href="#cb11-506" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_star_align_args"</span><span class="op">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="op">,</span></span>
+<span id="cb11-507"><a href="#cb11-507" aria-hidden="true" tabindex="-1"></a>    <span class="st">"with_umi"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb11-508"><a href="#cb11-508" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_extract_method"</span><span class="op">:</span> <span class="st">"regex"</span><span class="op">,</span></span>
+<span id="cb11-509"><a href="#cb11-509" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_grouping_method"</span><span class="op">:</span> <span class="st">"unique"</span><span class="op">,</span></span>
+<span id="cb11-510"><a href="#cb11-510" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_bc_pattern"</span><span class="op">:</span> <span class="st">"^(?P&lt;umi_1&gt;.{6})(?P&lt;discard_1&gt;.{4}).*"</span><span class="op">,</span></span>
+<span id="cb11-511"><a href="#cb11-511" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_salmon_quant_args"</span><span class="op">:</span> <span class="st">"--noLengthCorrection"</span><span class="op">,</span></span>
+<span id="cb11-512"><a href="#cb11-512" aria-hidden="true" tabindex="-1"></a>    <span class="st">"skip_stringtie"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb11-513"><a href="#cb11-513" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gencode"</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb11-514"><a href="#cb11-514" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-515"><a href="#cb11-515" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb11-516"><a href="#cb11-516" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-517"><a href="#cb11-517" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb11-518"><a href="#cb11-518" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nextflow <span class="ex">run</span> <span class="dt">\</span></span>
-<span id="cb11-519"><a href="#cb11-519" aria-hidden="true" tabindex="-1"></a>      nf-core/rnaseq <span class="dt">\</span></span>
-<span id="cb11-520"><a href="#cb11-520" aria-hidden="true" tabindex="-1"></a>      <span class="at">-r</span> 3.10.1 <span class="dt">\</span></span>
-<span id="cb11-521"><a href="#cb11-521" aria-hidden="true" tabindex="-1"></a>      <span class="at">-profile</span> docker <span class="dt">\</span></span>
-<span id="cb11-522"><a href="#cb11-522" aria-hidden="true" tabindex="-1"></a>      <span class="at">-params-file</span> nf_params.json <span class="dt">\</span></span>
-<span id="cb11-523"><a href="#cb11-523" aria-hidden="true" tabindex="-1"></a>      <span class="at">-resume</span> <span class="dt">\</span></span>
-<span id="cb11-524"><a href="#cb11-524" aria-hidden="true" tabindex="-1"></a>      <span class="at">--input</span> raw_data/samplesheet/samplesheet.csv <span class="dt">\</span></span>
-<span id="cb11-525"><a href="#cb11-525" aria-hidden="true" tabindex="-1"></a>      <span class="at">--outdir</span> SRP213880</span>
-<span id="cb11-526"><a href="#cb11-526" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb11-527"><a href="#cb11-527" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-528"><a href="#cb11-528" aria-hidden="true" tabindex="-1"></a>Upon successful completion, the workflow's output is available in the </span>
-<span id="cb11-529"><a href="#cb11-529" aria-hidden="true" tabindex="-1"></a><span class="in">`SRP213880`</span> directory. </span>
+<span id="cb11-517"><a href="#cb11-517" aria-hidden="true" tabindex="-1"></a>We store the JSON string in a file called <span class="in">`nf_params.json`</span>, and then pass it to</span>
+<span id="cb11-518"><a href="#cb11-518" aria-hidden="true" tabindex="-1"></a>the <span class="in">`nextflow run`</span> command:</span>
+<span id="cb11-519"><a href="#cb11-519" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-520"><a href="#cb11-520" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb11-521"><a href="#cb11-521" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;</span> nextflow <span class="ex">run</span> <span class="dt">\</span></span>
+<span id="cb11-522"><a href="#cb11-522" aria-hidden="true" tabindex="-1"></a>      nf-core/rnaseq <span class="dt">\</span></span>
+<span id="cb11-523"><a href="#cb11-523" aria-hidden="true" tabindex="-1"></a>      <span class="at">-r</span> 3.10.1 <span class="dt">\</span></span>
+<span id="cb11-524"><a href="#cb11-524" aria-hidden="true" tabindex="-1"></a>      <span class="at">-profile</span> docker <span class="dt">\</span></span>
+<span id="cb11-525"><a href="#cb11-525" aria-hidden="true" tabindex="-1"></a>      <span class="at">-params-file</span> nf_params.json <span class="dt">\</span></span>
+<span id="cb11-526"><a href="#cb11-526" aria-hidden="true" tabindex="-1"></a>      <span class="at">-resume</span> <span class="dt">\</span></span>
+<span id="cb11-527"><a href="#cb11-527" aria-hidden="true" tabindex="-1"></a>      <span class="at">--input</span> raw_data/samplesheet/samplesheet.csv <span class="dt">\</span></span>
+<span id="cb11-528"><a href="#cb11-528" aria-hidden="true" tabindex="-1"></a>      <span class="at">--outdir</span> SRP213880</span>
+<span id="cb11-529"><a href="#cb11-529" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb11-530"><a href="#cb11-530" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-531"><a href="#cb11-531" aria-hidden="true" tabindex="-1"></a>Next, we will take a closer look at the available results in </span>
-<span id="cb11-532"><a href="#cb11-532" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the second post in this series</span><span class="co">](../nextflow-core-quantseq-2-output/index.html)</span>].</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-531"><a href="#cb11-531" aria-hidden="true" tabindex="-1"></a>Upon successful completion, the workflow's output is available in the </span>
+<span id="cb11-532"><a href="#cb11-532" aria-hidden="true" tabindex="-1"></a><span class="in">`SRP213880`</span> directory. </span>
+<span id="cb11-533"><a href="#cb11-533" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-534"><a href="#cb11-534" aria-hidden="true" tabindex="-1"></a>Next, we will take a closer look at the available results in </span>
+<span id="cb11-535"><a href="#cb11-535" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the second post in this series</span><span class="co">](../nextflow-core-quantseq-2-output/index.html)</span>].</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

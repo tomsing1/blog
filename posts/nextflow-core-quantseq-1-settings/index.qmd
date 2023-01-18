@@ -463,13 +463,16 @@ provided.
 - `--umitools_extract_method "regex"`: The type of pattern to detect, either
   `string` (default) or `regex`
 - `--umitools_bc_pattern "^(?P<umi_1>.{6})(?P<discard_1>.{4}).*"`: A regular
-  expression that instructes `UMI-tools` to extract the first 6 bases from the
-  5' end of each read (the UMI) and to discard the following 4 bases. (Lexogen 
-  adds an invariant `TATA` sequence motif to each UMI.)
+  expression that instructs `UMI-tools` to extract the first 6 bases (the UMI) 
+  from the 5' end of the read [^4] and to discard the following 4 bases. 
+  (Lexogen adds an invariant `TATA` sequence motif to each UMI.)
 - `--umitools_grouping_method "unique"`: The method used to group similar UMIs,
   e.g. to correct sequencing errors. The default method is `directional`, but it
   is computationally expensive. Here, we use the simpler `unique` method, 
   suppressing grouping / error correction entirely.
+
+[^4]: Typically, QuantSeq libraries are single-end (not paired-end) and the
+UMI is therefore found in the R1 read.
 
 ::: {.callout-note}
 
@@ -512,7 +515,7 @@ store them elsewhere, please provide absolute paths in the JSON file instead.)
 ```
 
 We store the JSON string in a file called `nf_params.json`, and then pass it to
-the `nextflow run` command [^2]:
+the `nextflow run` command:
 
 ```bash
 > nextflow run \

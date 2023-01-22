@@ -3,6 +3,7 @@ title: "Welcome To My Blog"
 author: "Thomas Sandmann"
 date: "2022-11-12"
 categories: [news]
+comments: false
 ---
 
 Welcome to my blog. 
@@ -12,5 +13,5 @@ Welcome to my blog.
 This is Thomas Sandmann's personal blog, created with 
 [Quarto](https://quarto.org/docs/websites/website-blog.html).
 I am planning to share e.g. "Things I learned today" (TIL) 
-and other pieces of news around Computational Biolgy and Data
+and other pieces of news around Computational Biology and Data
 Science.

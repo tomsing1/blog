@@ -11,7 +11,485 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.2.280</generator>
-<lastBuildDate>Mon, 16 Jan 2023 08:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 21 Jan 2023 08:00:00 GMT</lastBuildDate>
+<item>
+  <title>Distributing R packages with a drat repository hosted on AWS S3</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/drat/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="cell">
+
+</div>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<p>Today I learned how to</p>
+<ul>
+<li>Build an R package into source and binary bundles for distribution.</li>
+<li>Create a local drat repository.</li>
+<li>Add an R package to the repository and install it from there.</li>
+<li>Host the repository remotely in an AWS S3 bucket.</li>
+</ul>
+<p>Many thanks to <a href="https://dirk.eddelbuettel.com/">Dirk Eddelbuettel</a> for creating and documenting the <a href="https://cran.r-project.org/package=drat">drat R package</a>! (As always, any mistakes are my own.)</p>
+<section id="motivation" class="level3">
+<h3 class="anchored" data-anchor-id="motivation">Motivation</h3>
+<p>There are multiple ways for developers to share R packages publicly, e.g.</p>
+<ul>
+<li>Submit them to the <a href="https://cran.r-project.org/">The Comprehensive R Archive Network (CRAN)</a>,</li>
+<li>Contribute them to the <a href="https://www.bioconductor.org/">Bioconductor</a> project,</li>
+<li>Publish them via <a href="https://ropensci.org/r-universe/">rOpenSci’s R-universe</a></li>
+</ul>
+<p>User can then install these packages via the familiar <code>install.packages()</code> command.</p>
+<p>Alternatively, authors can share their code through version control systems like <a href="https://github.com/">github</a> or <a href="https://about.gitlab.com/">gitlab</a>, and users can install them with third-party tools e.g. <a href="https://cran.r-project.org/package=remotes">the remotes R package</a>.</p>
+<p>But <strong>how can you make an R package available privately</strong>, e.g.&nbsp;for use within an organization?</p>
+<p>In this tutorial, I demonstrate how to set up your own package repository with <a href="https://dirk.eddelbuettel.com/">Dirk Eddelbuettel’s</a> <a href="https://cran.r-project.org/package=drat">drat R package</a>, add a package, make R aware of the new repo - and host it remotely on AWS S3.</p>
+</section>
+<section id="why-drat" class="level3">
+<h3 class="anchored" data-anchor-id="why-drat">Why drat?</h3>
+<p>Dirk Eddelbuettel <a href="https://eddelbuettel.github.io/drat/vignettes/dratfaq/">highlights two main advantages:</a></p>
+<ul>
+<li>A package installed from a drat repository will be supported by <code>install.packages()</code> and <code>update.packages()</code>, so the user has easy methods for keeping up-to-date.</li>
+<li>The package author has better control over the package version users install, because they actively push specific releases into the repository.</li>
+</ul>
+<p><a href="https://eddelbuettel.github.io/drat/vignettes/dratfaq/">Please see Dirk’s Drat FAQ’s</a> for additional points, e.g.&nbsp;<a href="https://eddelbuettel.github.io/drat/vignettes/dratfaq/#why-could-install_github-be-wrong">‘Why could install_github be wrong?’</a></p>
+</section>
+<section id="prequisites" class="level3">
+<h3 class="anchored" data-anchor-id="prequisites">Prequisites</h3>
+<p>Hadley Wickham and Jenny Bryan have documented how to author, document and build R packages in their freely-available <a href="https://r-pkgs.org/">R Packages book</a>. In this walkthrough I am using Mac OS X (v13.1), but you can find instructions to set up Windows or Linux build environments in their <a href="https://r-pkgs.org/setup.html#setup-tools">R build toolchain</a> chapter.</p>
+</section>
+<section id="bundling-an-r-packages-source-code-for-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="bundling-an-r-packages-source-code-for-distribution">Bundling an R package’s source code for distribution</h3>
+<p>First, we need an R package that’s ready for distribution. Here, I am using the <code>toy</code> R package <a href="https://github.com/tomsing1/toy">that you can retrieve from github</a>, either via <code>git clone https://github.com/tomsing1/toy</code> or by downloading its source code as a <a href="https://github.com/tomsing1/toy/archive/refs/heads/main.zip">zip file</a>. (Feel free to follow along with another R package instead - as long as you have the <a href="https://r-pkgs.org/structure.html#sec-source-package">source package</a>, the following steps apply.)</p>
+<p>Next, we <a href="https://r-pkgs.org/structure.html#sec-bundled-package">bundle the package</a> into a single compressed file with the <code>.tar.gz</code> file extension. Let’s download the <code>.zip</code> file linked above into the <code>~/Downloads</code> folder and use the <code>R CMD build</code> command to create a <em>source bundle</em> <sup>1</sup>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="bu" style="color: null;">cd</span> ~/Downloads</span>
+<span id="cb1-2"><span class="ex" style="color: null;">curl</span> <span class="at" style="color: #657422;">-s</span> <span class="at" style="color: #657422;">-L</span> <span class="at" style="color: #657422;">-O</span> https://github.com/tomsing1/toy/archive/refs/heads/main.zip</span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;">unzip</span> <span class="at" style="color: #657422;">-o</span> <span class="at" style="color: #657422;">-q</span> main.zip</span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;">rm</span> main.zip</span>
+<span id="cb1-5"><span class="ex" style="color: null;">R</span> CMD build <span class="at" style="color: #657422;">--force</span> toy-main</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* checking for file ‘toy-main/DESCRIPTION’ ... OK
+* preparing ‘toy’:
+* checking DESCRIPTION meta-information ... OK
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+Omitted ‘LazyData’ from DESCRIPTION
+* building ‘toy_0.1.0.tar.gz’</code></pre>
+</div>
+</div>
+<p>We now have the <code>toy_0.1.0.tar.gz</code> file, ready to be inserted into a new (or existing) drat repository.</p>
+</section>
+<section id="creating-a-local-drat-repository" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-local-drat-repository">Creating a local drat repository</h3>
+<p>To create a new repository, we start by installing the <a href="https://cran.r-project.org/package=drat">drat R package</a> itself (if it’s not available on your system already) with the following R commands:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="cf" style="color: #003B4F;">if</span> (<span class="sc" style="color: #5E5E5E;">!</span><span class="fu" style="color: #4758AB;">requireNamespace</span>(<span class="st" style="color: #20794D;">"drat"</span>, <span class="at" style="color: #657422;">quietly =</span> <span class="cn" style="color: #8f5902;">TRUE</span>)) {</span>
+<span id="cb3-2">  <span class="fu" style="color: #4758AB;">install.packages</span>(<span class="st" style="color: #20794D;">"drat"</span>)</span>
+<span id="cb3-3">}</span>
+<span id="cb3-4"><span class="fu" style="color: #4758AB;">library</span>(drat)</span></code></pre></div>
+</div>
+<p>You can specify the path of your drat repository either by setting the <code>dratRepo</code> option <sup>2</sup>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;">options</span>(<span class="at" style="color: #657422;">dratRepo =</span> <span class="st" style="color: #20794D;">"~/drat-tutorial"</span>)</span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;">getOption</span>(<span class="st" style="color: #20794D;">"dratRepo"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "~/drat-tutorial"</code></pre>
+</div>
+</div>
+<p>or by providing it as an argument to the <code>drat::insertPackage()</code> function (see below).</p>
+<p>Let’s create a new drat repository in our home directory <sup>3</sup>, and populate it with a minimal <code>index.html</code> file (to avoid <code>HTTP 404 Not Found</code> errors later).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;">dir.create</span>(<span class="st" style="color: #20794D;">"~/drat-tutorial"</span>, <span class="at" style="color: #657422;">showWarnings =</span> <span class="cn" style="color: #8f5902;">FALSE</span>)</span>
+<span id="cb6-2"><span class="fu" style="color: #4758AB;">writeLines</span>(</span>
+<span id="cb6-3">  <span class="at" style="color: #657422;">text =</span> <span class="st" style="color: #20794D;">"&lt;!doctype html&gt;&lt;title&gt;My awesome drat repository!&lt;/title&gt;"</span>,</span>
+<span id="cb6-4">  <span class="at" style="color: #657422;">con =</span> <span class="st" style="color: #20794D;">"~/drat-tutorial/index.html"</span></span>
+<span id="cb6-5">)</span></code></pre></div>
+</div>
+<p>Now we are ready to insert the <code>toy</code> package bundle into the repository with drat’s <code>insertPackage()</code> command <sup>4</sup>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1">drat<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">insertPackage</span>(<span class="at" style="color: #657422;">file =</span> <span class="st" style="color: #20794D;">"~/Downloads/toy_0.1.0.tar.gz"</span>,</span>
+<span id="cb7-2">                    <span class="at" style="color: #657422;">repodir =</span> <span class="st" style="color: #20794D;">"~/drat-tutorial"</span>)</span></code></pre></div>
+</div>
+<p>Now, the <code>~/drat-tutorial</code> folder contains the following files:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/drat/repository_source.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">drat repository</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="accessing-the-local-drat-repository" class="level3">
+<h3 class="anchored" data-anchor-id="accessing-the-local-drat-repository">Accessing the local drat repository</h3>
+<p>When you prompt your R installation to install or update R packages, it searches repositories specified in the <code>repos</code> option. On my system, only the default repository is set in a fresh R session <sup>5</sup>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><span class="fu" style="color: #4758AB;">getOption</span>(<span class="st" style="color: #20794D;">"repos"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                         CRAN 
+"https://cloud.r-project.org" </code></pre>
+</div>
+</div>
+<p>If I try to install our example <code>toy</code> R package, I don’t succeed:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;">install.packages</span>(<span class="st" style="color: #20794D;">"toy"</span>, <span class="at" style="color: #657422;">type =</span> <span class="st" style="color: #20794D;">"source"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
+(as 'lib' is unspecified)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'toy' is not available for this version of R
+
+A version of this package for your version of R might be available elsewhere,
+see the ideas at
+https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Installing-packages</code></pre>
+</div>
+</div>
+<p>because R is not aware of our new repository, yet.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Installing from source
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>At this point, we must add the <code>type="source"</code> argument, because we have only added the <em>source</em> bundle to the repository. We will add a compiled version in a moment - read on!</p>
+</div>
+</div>
+<p>To test our local repository, we add its path to the list of known repositories.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">drat<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">addRepo</span>(<span class="st" style="color: #20794D;">"LocalRepo"</span>, <span class="st" style="color: #20794D;">"file://Users/sandmann/drat-tutorial"</span>)</span>
+<span id="cb13-2"><span class="fu" style="color: #4758AB;">getOption</span>(<span class="st" style="color: #20794D;">"repos"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                 CRAN                             LocalRepo 
+        "https://cloud.r-project.org" "file://Users/sandmann/drat-tutorial" </code></pre>
+</div>
+</div>
+<div class="callout-important callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Specifying file:// paths
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>By default, drat’s <code>addRepo()</code> command assumes that repositories are hosted on <a href="https://pages.github.com/">github-pages</a>. Because we want to access a repo via the filesystem (either locally or on a network drive), we need to explicitly add the <code>file:/</code> prefix - and use the absolute file path (e.g.&nbsp;returned by <code>path.expand("~/drat-tutorial")</code>) to specify its location.</p>
+<p>In this case, concatenating <code>file:/</code> with <code>/Users/sandmann/drat-tutorial</code> produces the final <code>file://Users/sandmann/drat-tutorial</code> location (note the double forward slashes).</p>
+</div>
+</div>
+<p>Now, we can install it with the usual <code>install.packages()</code> command <sup>6</sup>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><span class="fu" style="color: #4758AB;">install.packages</span>(<span class="st" style="color: #20794D;">"toy"</span>, <span class="at" style="color: #657422;">type =</span> <span class="st" style="color: #20794D;">"source"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
+(as 'lib' is unspecified)</code></pre>
+</div>
+</div>
+<p>Great! We have successfully installed our <code>toy</code> R package from our brand new repository. Now it is time to make it available to other users as well.</p>
+</section>
+<section id="building-binary-packages" class="level3">
+<h3 class="anchored" data-anchor-id="building-binary-packages">Building binary packages</h3>
+<p>Windows and Mac users who install packages from <a href="https://cran.r-project.org/">CRAN</a> or any user installing files from the <a href="https://packagemanager.rstudio.com/client/#/">Posit Public Package Manager (PPPM)</a> will usually receive <a href="https://r-pkgs.org/Structure.html#sec-structure-binary">a binary package</a>. CRAN accepts package bundles and creates the platform-specific binary file for distribution. To offer the same service to users of our drat repository, we need to compile the binary package ourselves.</p>
+<p>Here, I create the Mac OS binary package from the bundle we obtained above by executing the following command on my Mac OS operating system:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><span class="bu" style="color: null;">cd</span> ~/Downloads</span>
+<span id="cb17-2"><span class="ex" style="color: null;">R</span> CMD INSTALL <span class="at" style="color: #657422;">--build</span> toy_0.1.0.tar.gz</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>* installing to library ‘/Users/sandmann/Library/R/x86_64/4.2/library’
+* installing *source* package ‘toy’ ...
+** using staged installation
+** R
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* creating tarball
+packaged installation of ‘toy’ as ‘toy_0.1.0.tgz’
+* DONE (toy)</code></pre>
+</div>
+</div>
+<p>This command will first install the package into my default R library, and then create the binary <code>toy_0.1.0.tgz</code> file.</p>
+<p>Next, we add it to our local drat repository (note the <code>.tgz</code> file suffix).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1">drat<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">insertPackage</span>(<span class="at" style="color: #657422;">file =</span> <span class="st" style="color: #20794D;">"~/Downloads/toy_0.1.0.tgz"</span>,</span>
+<span id="cb19-2">                    <span class="at" style="color: #657422;">repodir =</span> <span class="st" style="color: #20794D;">"~/drat-tutorial"</span>)</span></code></pre></div>
+</div>
+<p>Now, the <code>~/drat-tutorial</code> folder contains a new subdirectory (<code>bin</code>) with the binary files for Mac OS X:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/drat/repository_binary.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">drat repository</figcaption><p></p>
+</figure>
+</div>
+<p>At long last, now we can omit the <code>type="source"</code> argument from calls to <code>install.packages()</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><span class="fu" style="color: #4758AB;">install.packages</span>(<span class="st" style="color: #20794D;">"toy"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
+(as 'lib' is unspecified)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+The downloaded binary packages are in
+    /var/folders/wc/9tswmr4s74s0x90wqh2007300000gp/T//Rtmpg6tHJA/downloaded_packages</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="hosting-your-drat-repository-on-aws-s3" class="level2">
+<h2 class="anchored" data-anchor-id="hosting-your-drat-repository-on-aws-s3">Hosting your drat repository on AWS S3</h2>
+<p>drat repositories can be hosted in any location</p>
+<ol type="1">
+<li>that you can write files to and</li>
+<li>that can serve files via http</li>
+</ol>
+<p>But unless you placed your drat repository into a network drive that is accessible by multiple users, it is currently only useful to yourself.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Sharing repository over a local network
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>If you chose a network drive as the location of your drat repository, then other user can benefit from it right - as long as they can read from the shared directory. As before, the absolute path must be prefixed with the <code>file:/</code> prefix. For example, a repository that is available on <em>the user’s</em> systems at <code>/nfs/groups/groupABC/R/drat</code> would be added to the list of R repositories via <code>drat::addRepo("workgroup", "file://nfs/groups/groupABC/R/drat")</code>.</p>
+</div>
+</div>
+</div>
+<p>The <a href="https://eddelbuettel.github.io/drat/vignettes/dratforusers/#case-1-using-github">drat documentation</a> illustrates how you can use <a href="https://git-scm.com/">git</a> and <a href="https://pages.github.com/">github pages</a> to make your repository <em>publicly</em> available.</p>
+<p>Here, we are interested in hosting a repository <em>privately</em> instead, e.g.&nbsp;in a location that is only accessible from within our own organization:</p>
+<ul>
+<li>If you already have access to a private server that serves files to your users (e.g.&nbsp;via HTTP), then you can simply copy your repository there.</li>
+<li>If your organization uses Amazon Web Services (AWS), you can also use an <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html">S3 bucket to host your repository</a> and take advantage of the access controls set by your organization.</li>
+</ul>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Public repositories in S3 buckets
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Although this use case focuses on hosting private repositories, you can of course also make repositories in S3 buckets publicly available. Alas, data storage in S3 buckets incurs cost, while other options (e.g.&nbsp;github-pages, CRAN, Bioconductor, etc) are free, so this might not be your preferred option.</p>
+</div>
+</div>
+</div>
+<p>We will assume that you have write access to an S3 bucket that is configured to serve static files via HTTP. (For a brief outline of the necessary steps, please <a href="(#creating-and-configuring-an-s3-bucket-to-host-static-files)">see the appendix</a> ). Here, I am using a bucket called <code>drat-tutorial</code> - but you should create / access your own bucket to follow along.</p>
+<div class="callout-warning callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>AWS S3 buckets can be configured to either be visible publicly, or access can be restricted to specific IP addresses, security groups or other AWS resources. Please make sure you have configured your bucket in a way that suits your needs.</p>
+<p>S3 buckets do <em>not</em> support the <a href="https://en.wikipedia.org/wiki/HTTPS">HTTPS protocol</a>. If you require an encrypted file transfer, you might need a <a href="https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-https-requests-s3/">different solution</a>.</p>
+</div>
+</div>
+<p>To share our repository, we must first copy its folder to the S3 bucket, either via the AWS Console or (more conveniently) with the <a href="https://aws.amazon.com/cli/">aws command line interface</a><sup>7</sup>. (If you are adventurous, you can also mount an S3 bucket as a <em>filey</em> system with <a href="https://github.com/kahing/goofys">goofys</a>).</p>
+<p>Assuming you have set <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html">the necessary AWS credentials</a>, the following <code>aws s3 sync</code> command copies our repository to the <code>repo</code> folder within <code>drat-tutorial</code> bucket that I created in the <code>us-west-1</code> AWS region.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><span class="ex" style="color: null;">aws</span> s3 sync ~/drat-tutorial s3://drat-tutorial/repo</span></code></pre></div>
+</div>
+<p>We can use the <code>aws s3 ls</code> command to confirm the upload:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><span class="ex" style="color: null;">aws</span> s3 ls s3://drat-tutorial/repo/</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                           PRE bin/
+                           PRE src/
+2023-01-21 20:28:30         58 index.html</code></pre>
+</div>
+</div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Whenever we make changes to our local repository, e.g.&nbsp;after adding new packages or package versions, we have to rerun the <code>aws s3 sync</code> command to copy the new files to the S3 bucket.</p>
+</div>
+</div>
+<p>Now that the files are in place, we can add our remote repository to the the list of R repositories in our R session. First, we remove the <code>LocalRepo</code> repository that we had added earlier, which points to the folder on our local filesystem.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><span class="fu" style="color: #4758AB;">options</span>(<span class="at" style="color: #657422;">repos =</span> <span class="fu" style="color: #4758AB;">getOption</span>(<span class="st" style="color: #20794D;">"repos"</span>)[</span>
+<span id="cb26-2">  <span class="fu" style="color: #4758AB;">setdiff</span>(<span class="fu" style="color: #4758AB;">names</span>(<span class="fu" style="color: #4758AB;">getOption</span>(<span class="st" style="color: #20794D;">"repos"</span>)), <span class="st" style="color: #20794D;">"LocalRepo"</span>)</span>
+<span id="cb26-3">])</span></code></pre></div>
+</div>
+<p>The we add the remote repository instead, by pointing to the URL of the S3 bucket <sup>8</sup>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1">drat<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">addRepo</span>(<span class="st" style="color: #20794D;">"S3repo"</span>, <span class="st" style="color: #20794D;">"http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/"</span>)</span>
+<span id="cb27-2"><span class="fu" style="color: #4758AB;">getOption</span>(<span class="st" style="color: #20794D;">"repos"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                                   CRAN 
+                          "https://cloud.r-project.org" 
+                                                 S3repo 
+"http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/" </code></pre>
+</div>
+</div>
+<p>Let’s try to install the <code>toy</code> package from our S3 drat repository:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><span class="fu" style="color: #4758AB;">install.packages</span>(<span class="st" style="color: #20794D;">"toy"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
+(as 'lib' is unspecified)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+The downloaded binary packages are in
+    /var/folders/wc/9tswmr4s74s0x90wqh2007300000gp/T//Rtmpg6tHJA/downloaded_packages</code></pre>
+</div>
+</div>
+<p>Success! R has successfully connected to the remote repository and installed the (binary) R package.</p>
+</section>
+<section id="conclusions" class="level2">
+<h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
+<ul>
+<li>The <code>drat</code> R package makes it extremely simple to create a CRAN-like repository.</li>
+<li>The static files can be served via HTTP, making it straightforward to host the repository e.g.&nbsp;in an AWS S3 bucket with a restrictive access policy.</li>
+</ul>
+</section>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">Appendix</h2>
+<section id="creating-and-configuring-an-s3-bucket-to-host-static-files" class="level3">
+<h3 class="anchored" data-anchor-id="creating-and-configuring-an-s3-bucket-to-host-static-files">Creating and configuring an S3 bucket to host static files</h3>
+<p>The following steps briefly outline how to create and configure an S3 bucket to act as a static web server via the AWS web interface (e.g.&nbsp;the AWS Console). For more details, please read the <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html">AWS S3 documentation</a> and / or consult your local AWS expert.</p>
+<div class="callout-warning callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Storing files on AWS S3 is not free. In this tutorial, we only upload a limited number of small files, but please don’t forget to purge them from your AWS account afterward.</p>
+</div>
+</div>
+<ol type="1">
+<li>Create a new bucket (skip if you already have one)</li>
+</ol>
+<ul>
+<li><p>Make sure you create the bucket in the <code>region</code> that works best for your organization (e.g.&nbsp;<code>us-west-1</code> if you want to host your files in California).</p></li>
+<li><p>You do <em>not</em> need to enable <code>public access</code>, stick to the defaults for your organization.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/drat/create_bucket.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Create an S3 bucket</figcaption><p></p>
+</figure>
+</div></li>
+</ul>
+<ol start="2" type="1">
+<li><p>Next, navigate to your bucket’s properties,</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/drat/bucket_properties.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Bucket properties</figcaption><p></p>
+</figure>
+</div>
+<p>scroll all the way to the bottom of the page and <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html#step2-create-bucket-config-as-website">enable Static website hosting</a>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/drat/static_hosting.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Enable static hosting</figcaption><p></p>
+</figure>
+</div>
+<p>(Typically) specify <code>index.html</code> as the <code>Index document</code>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/drat/index_document.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Define the index document</figcaption><p></p>
+</figure>
+</div></li>
+<li><p>Under the <code>Permissions</code> tab, add a bucket policy that makes your content available <em>within</em> your organization</p>
+<div class="callout-warning callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>These settings determine who can access your files. Proceed with caution to <a href="https://www.trendmicro.com/vinfo/pl/security/news/virtualization-and-cloud/data-on-123-million-us-households-exposed-due-to-misconfigured-aws-s3-bucket">avoid inadvertently exposing your data to the world!</a></p>
+</div>
+</div>
+<p>For example, the following policy grants read access to all files in the <code>s3://drat-tutorial/</code> bucket to requests originating (only) from the <code>192.0.2.0</code> IP address. (Your own configuration will be different, of course.)</p>
+<div class="sourceCode" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb32-1"><span class="fu" style="color: #4758AB;">{</span></span>
+<span id="cb32-2">  <span class="dt" style="color: #AD0000;">"Version"</span><span class="fu" style="color: #4758AB;">:</span> <span class="st" style="color: #20794D;">"2012-10-17"</span><span class="fu" style="color: #4758AB;">,</span></span>
+<span id="cb32-3">  <span class="dt" style="color: #AD0000;">"Statement"</span><span class="fu" style="color: #4758AB;">:</span> <span class="ot" style="color: #003B4F;">[</span></span>
+<span id="cb32-4">    <span class="fu" style="color: #4758AB;">{</span></span>
+<span id="cb32-5">      <span class="dt" style="color: #AD0000;">"Sid"</span><span class="fu" style="color: #4758AB;">:</span> <span class="st" style="color: #20794D;">"PublicReadGetObject"</span><span class="fu" style="color: #4758AB;">,</span></span>
+<span id="cb32-6">      <span class="dt" style="color: #AD0000;">"Effect"</span><span class="fu" style="color: #4758AB;">:</span> <span class="st" style="color: #20794D;">"Allow"</span><span class="fu" style="color: #4758AB;">,</span></span>
+<span id="cb32-7">      <span class="dt" style="color: #AD0000;">"Principal"</span><span class="fu" style="color: #4758AB;">:</span> <span class="st" style="color: #20794D;">"*"</span><span class="fu" style="color: #4758AB;">,</span></span>
+<span id="cb32-8">      <span class="dt" style="color: #AD0000;">"Action"</span><span class="fu" style="color: #4758AB;">:</span> <span class="ot" style="color: #003B4F;">[</span></span>
+<span id="cb32-9">        <span class="st" style="color: #20794D;">"s3:GetObject"</span></span>
+<span id="cb32-10">      <span class="ot" style="color: #003B4F;">]</span><span class="fu" style="color: #4758AB;">,</span></span>
+<span id="cb32-11">      <span class="dt" style="color: #AD0000;">"Resource"</span><span class="fu" style="color: #4758AB;">:</span> <span class="ot" style="color: #003B4F;">[</span></span>
+<span id="cb32-12">        <span class="st" style="color: #20794D;">"arn:aws:s3:::drat-tutorial/*"</span></span>
+<span id="cb32-13">      <span class="ot" style="color: #003B4F;">]</span><span class="fu" style="color: #4758AB;">,</span></span>
+<span id="cb32-14">      <span class="dt" style="color: #AD0000;">"Condition"</span><span class="fu" style="color: #4758AB;">:</span> <span class="fu" style="color: #4758AB;">{</span></span>
+<span id="cb32-15">        <span class="dt" style="color: #AD0000;">"IpAddress"</span><span class="fu" style="color: #4758AB;">:</span> <span class="fu" style="color: #4758AB;">{</span></span>
+<span id="cb32-16">          <span class="dt" style="color: #AD0000;">"aws:SourceIp"</span><span class="fu" style="color: #4758AB;">:</span> <span class="st" style="color: #20794D;">"192.0.2.0/32"</span></span>
+<span id="cb32-17">        <span class="fu" style="color: #4758AB;">}</span></span>
+<span id="cb32-18">      <span class="fu" style="color: #4758AB;">}</span></span>
+<span id="cb32-19">    <span class="fu" style="color: #4758AB;">}</span></span>
+<span id="cb32-20">  <span class="ot" style="color: #003B4F;">]</span></span>
+<span id="cb32-21"><span class="fu" style="color: #4758AB;">}</span></span></code></pre></div></li>
+</ol>
+
+
+<!-- -->
+
+</section>
+</section>
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/drat/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Alternatively, you can also create the bundle from within R using the <a href="https://devtools.r-lib.org/reference/build.html">devtools::build()</a> command.↩︎</p></li>
+<li id="fn2"><p>You might want to add this option to your <a href="https://rstats.wtf/r-startup.html#rprofile">.Rprofile</a> file.↩︎</p></li>
+<li id="fn3"><p>Of course, you can place it anywhere you like, including e.g. network drives, as long as you can write to the directory. If you are using Windows, please remember to use backward instead of forward slashes in your paths.↩︎</p></li>
+<li id="fn4"><p>In this tutorial, I use the <code>::</code> notation to highlight which package a function originates from. Because we attached the package with the <code>library(drat)</code> command before, the <code>drat::</code> prefix could be omitted.↩︎</p></li>
+<li id="fn5"><p>In this tutorial, I use the <code>::</code> notation to highlight in which package functions originate from. Because we attached the package with the <code>library(drat)</code> command before, the <code>drat::</code> prefix could be omitted.↩︎</p></li>
+<li id="fn6"><p>If you use Bioconductor, the <code>BiocManager::repositories()</code> specifies additional repositories that host its annotation and software packages.↩︎</p></li>
+<li id="fn7"><p><a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">Installation instructions</a>.↩︎</p></li>
+<li id="fn8"><p>You can look up the URL for your bucket in the AWS S3 console: <img src="https://tomsing1.github.io/blog/posts/drat/s3_url.png" class="img-fluid" alt="S3 URL">↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>R</category>
+  <category>AWS</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/drat/index.html</guid>
+  <pubDate>Sat, 21 Jan 2023 08:00:00 GMT</pubDate>
+  <media:content url="https://tomsing1.github.io/blog/posts/drat/repository_source.png" medium="image" type="image/png" height="127" width="144"/>
+</item>
 <item>
   <title>QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -5455,7 +5933,7 @@ output = json</code></pre>
 
 <p>Welcome to my blog.</p>
 <p><img src="https://tomsing1.github.io/blog/posts/welcome/https:/quarto.org/quarto.png" class="img-fluid"></p>
-<p>This is Thomas Sandmann’s personal blog, created with <a href="https://quarto.org/docs/websites/website-blog.html">Quarto</a>. I am planning to share e.g.&nbsp;“Things I learned today” (TIL) and other pieces of news around Computational Biolgy and Data Science.</p>
+<p>This is Thomas Sandmann’s personal blog, created with <a href="https://quarto.org/docs/websites/website-blog.html">Quarto</a>. I am planning to share e.g.&nbsp;“Things I learned today” (TIL) and other pieces of news around Computational Biology and Data Science.</p>
 
 
 

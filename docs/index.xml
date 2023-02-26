@@ -11,7 +11,220 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.2.280</generator>
-<lastBuildDate>Sat, 21 Jan 2023 08:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 25 Feb 2023 08:00:00 GMT</lastBuildDate>
+<item>
+  <title>Simultaneously inserting records into two tables with Postgres CTEs</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/postgres-returning/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<p>Today I learned how to</p>
+<ul>
+<li>Use Common Table Expressions (CTEs) to simultaneously insert data into two Postgres tables and</li>
+<li>Use the <code>RETURNING</code> SQL command to retrieve automatically created fields inside the same statement.</li>
+</ul>
+<p>Gene expression data hosted at the <a href="https://www.ncbi.nlm.nih.gov/sra">NCBI’s Short Read Archive (SRA)</a> or at the <a href="https://www.ebi.ac.uk/ena/browser/">European Nucleotide Archive (ENA)</a> are a great resource. Both repositories represent information for different entities that make up a project, e.g.&nbsp;<code>study</code>, <code>sample</code>, <code>experiment</code>, <code>run</code> and <code>analysis</code> information.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/postgres-returning/https:/ena-docs.readthedocs.io/en/latest/_images/metadata_model_sample.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Relationships between entities (source: <a href="https://ena-docs.readthedocs.io/en/latest/submit/samples.html">ENA</a>)</figcaption><p></p>
+</figure>
+</div>
+<p>For example, <a href="https://www.ebi.ac.uk/ena/browser/view/PRJNA818657">ENA project PRJNA818657</a> is an RNA-seq study with data for 25 samples. For each sample, a single sequencing library (= <code>experiment</code>) was prepared and sequenced in <em>two</em> separate runs.</p>
+<p>In other words, e.g.&nbsp; <a href="https://www.ebi.ac.uk/ena/browser/view/SAMN26870486">sample SAMN26870486</a> produced <a href="https://www.ebi.ac.uk/ena/browser/view/SRX14564817">experiment SRX14564817</a>, which was then analyzed in <a href="https://www.ebi.ac.uk/ena/browser/view/SRR18430942">run SRR18430942</a> and <a href="https://www.ebi.ac.uk/ena/browser/view/SRR18430943">run SRR18430943</a>.</p>
+<p>One way to capture this information in a relational database is to set up three tables - one for each entity - and then use ENA’s unique sample-, experiment- and run-identifiers as <a href="https://en.wikipedia.org/wiki/Natural_key">natural primary keys</a>.</p>
+<p>But what if I don’t <em>have</em> suitable natural keys, or simply prefer to use <a href="https://en.wikipedia.org/wiki/Surrogate_key">surrogate keys</a>?</p>
+<p>Today, I learned how to</p>
+<ol type="1">
+<li><code>INSERT</code> a new record into a Postgres database,</li>
+<li>automatically generate a primary key,</li>
+<li>return the key and</li>
+<li>include it in a subsequent <code>INSERT</code> statement</li>
+</ol>
+<section id="prerequisites" class="level3">
+<h3 class="anchored" data-anchor-id="prerequisites">Prerequisites</h3>
+<p>I am using a Postgres database called <code>test</code>, running on the local host and connect to it with the <a href="https://dbi.r-dbi.org/">DBI R package</a>, via the <a href="https://cran.r-project.org/web/packages/RPostgres/index.html">RPostgres::Postgres() driver</a>.</p>
+<p>Then I pass the returned <code>PqConnection</code> object to the following SQL code cells in this Quarto document.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;">library</span>(DBI)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;">library</span>(RPostgres)</span>
+<span id="cb1-3"></span>
+<span id="cb1-4">con <span class="ot" style="color: #003B4F;">&lt;-</span> DBI<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">dbConnect</span>(</span>
+<span id="cb1-5">  RPostgres<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">Postgres</span>(), </span>
+<span id="cb1-6">  <span class="at" style="color: #657422;">dbname =</span> <span class="st" style="color: #20794D;">"test"</span>, </span>
+<span id="cb1-7">  <span class="at" style="color: #657422;">host =</span> <span class="st" style="color: #20794D;">"localhost"</span>)</span></code></pre></div>
+</div>
+</section>
+<section id="creating-experiment-and-run-tables" class="level3">
+<h3 class="anchored" data-anchor-id="creating-experiment-and-run-tables">Creating <code>experiment</code> and <code>run</code> tables</h3>
+<p>Initially, the database is empty, so let’s create two tables:</p>
+<ul>
+<li><code>experiment</code>: sample-level information</li>
+<li><code>run</code>: run-level information</li>
+</ul>
+<p>Each table will include</p>
+<ol type="1">
+<li>An auto-generated primary key (<code>experiment_id</code> and <code>run_id</code>, respectively)</li>
+<li>A field to record the record’s ENA accession</li>
+<li>A time-stamp</li>
+</ol>
+<p>and the <code>run</code> table will reference its parent <code>experiment</code> via the <code>experiment_id</code> foreign key.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb2-1"><span class="kw" style="color: #003B4F;">CREATE</span> <span class="kw" style="color: #003B4F;">TABLE</span> <span class="cf" style="color: #003B4F;">IF</span> <span class="kw" style="color: #003B4F;">NOT</span> <span class="kw" style="color: #003B4F;">EXISTS</span> experiment (</span>
+<span id="cb2-2">  experiment_id SERIAL <span class="kw" style="color: #003B4F;">PRIMARY</span> <span class="kw" style="color: #003B4F;">KEY</span>,</span>
+<span id="cb2-3">  accession text <span class="kw" style="color: #003B4F;">UNIQUE</span>,</span>
+<span id="cb2-4">  <span class="dt" style="color: #AD0000;">timestamp</span> <span class="dt" style="color: #AD0000;">timestamp</span> <span class="kw" style="color: #003B4F;">default</span> <span class="fu" style="color: #4758AB;">current_timestamp</span> <span class="kw" style="color: #003B4F;">not</span> <span class="kw" style="color: #003B4F;">null</span></span>
+<span id="cb2-5">)</span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb3-1"><span class="kw" style="color: #003B4F;">CREATE</span> <span class="kw" style="color: #003B4F;">TABLE</span> <span class="cf" style="color: #003B4F;">IF</span> <span class="kw" style="color: #003B4F;">NOT</span> <span class="kw" style="color: #003B4F;">EXISTS</span> run (</span>
+<span id="cb3-2">    run_id SERIAL <span class="kw" style="color: #003B4F;">PRIMARY</span> <span class="kw" style="color: #003B4F;">KEY</span>,</span>
+<span id="cb3-3">    accession text <span class="kw" style="color: #003B4F;">UNIQUE</span>,</span>
+<span id="cb3-4">    <span class="dt" style="color: #AD0000;">timestamp</span> <span class="dt" style="color: #AD0000;">timestamp</span> <span class="kw" style="color: #003B4F;">default</span> <span class="fu" style="color: #4758AB;">current_timestamp</span> <span class="kw" style="color: #003B4F;">not</span> <span class="kw" style="color: #003B4F;">null</span>,</span>
+<span id="cb3-5">    experiment_id <span class="dt" style="color: #AD0000;">integer</span>,</span>
+<span id="cb3-6">    <span class="kw" style="color: #003B4F;">FOREIGN</span> <span class="kw" style="color: #003B4F;">KEY</span>(experiment_id) <span class="kw" style="color: #003B4F;">REFERENCES</span> experiment(experiment_id)</span>
+<span id="cb3-7">)</span></code></pre></div>
+</div>
+</section>
+<section id="simultaneously-nserting-records-into-both-tables" class="level3">
+<h3 class="anchored" data-anchor-id="simultaneously-nserting-records-into-both-tables">Simultaneously nserting records into both tables</h3>
+<p>Next, we use a single SQL statement to insert both the experiment <em>and</em> its related runs:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><span class="kw" style="color: #003B4F;">WITH</span></span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;">exp</span> <span class="kw" style="color: #003B4F;">AS</span> (</span>
+<span id="cb4-3">  <span class="kw" style="color: #003B4F;">INSERT</span> <span class="kw" style="color: #003B4F;">INTO</span> experiment (accession) </span>
+<span id="cb4-4">  <span class="kw" style="color: #003B4F;">VALUES</span> (<span class="st" style="color: #20794D;">'SRX14564817'</span>) </span>
+<span id="cb4-5">  <span class="kw" style="color: #003B4F;">RETURNING</span> experiment_id</span>
+<span id="cb4-6">),</span>
+<span id="cb4-7"><span class="kw" style="color: #003B4F;">data</span>(accession) <span class="kw" style="color: #003B4F;">AS</span> (</span>
+<span id="cb4-8">  <span class="kw" style="color: #003B4F;">VALUES</span></span>
+<span id="cb4-9">  (<span class="st" style="color: #20794D;">'SRR18430942'</span>),</span>
+<span id="cb4-10">  (<span class="st" style="color: #20794D;">'SRR18430943'</span>)</span>
+<span id="cb4-11">)</span>
+<span id="cb4-12"><span class="kw" style="color: #003B4F;">INSERT</span> <span class="kw" style="color: #003B4F;">INTO</span> run (experiment_id, accession)</span>
+<span id="cb4-13"><span class="kw" style="color: #003B4F;">SELECT</span> e.experiment_id, d.accession</span>
+<span id="cb4-14"><span class="kw" style="color: #003B4F;">FROM</span> <span class="fu" style="color: #4758AB;">exp</span> e, <span class="kw" style="color: #003B4F;">data</span> d</span></code></pre></div>
+</div>
+<p>We verify that the experiment has been accessioned into the <code>experiment</code> table, and the same identifier has then be inserted into the <code>run</code> table as well</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb5-1"><span class="kw" style="color: #003B4F;">SELECT</span> e.experiment_id, e.accession <span class="kw" style="color: #003B4F;">AS</span> experiment_accession, </span>
+<span id="cb5-2">       r.run_id, r.accession <span class="kw" style="color: #003B4F;">AS</span> run_accession</span>
+<span id="cb5-3"><span class="kw" style="color: #003B4F;">FROM</span> experiment e</span>
+<span id="cb5-4"><span class="kw" style="color: #003B4F;">INNER</span> <span class="kw" style="color: #003B4F;">JOIN</span> run r <span class="kw" style="color: #003B4F;">ON</span> e.experiment_id <span class="op" style="color: #5E5E5E;">=</span> r.experiment_id</span></code></pre></div>
+<div class="knitsql-table">
+<table class="table table-sm table-striped">
+<caption>2 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">experiment_id</th>
+<th style="text-align: left;">experiment_accession</th>
+<th style="text-align: right;">run_id</th>
+<th style="text-align: left;">run_accession</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">SRX14564817</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">SRR18430942</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">SRX14564817</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">SRR18430943</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Let’s examine the individual parts of this query:</p>
+<ul>
+<li><p>The <a href="https://www.postgresql.org/docs/current/queries-with.html">WITH</a> command creates a <a href="https://en.wikipedia.org/wiki/Hierarchical_and_recursive_queries_in_SQL#Common_table_expression">Common Table Expression (CTE)</a>, e.g.&nbsp;</p>
+<blockquote class="blockquote">
+<p>a temporary named result set, derived from a simple query and defined within the execution scope of a SELECT, INSERT, UPDATE, or DELETE statement.</p>
+</blockquote>
+<p>In this example, the <code>exp</code> temporary result is generated by the first <code>INSERT</code> statement, which updates the <code>experiment</code> table. It returns the automatically generated <code>experiment_id</code> via the <code>RETURNING</code> command. Let’s add another accession to the <code>experiment</code> table and examine the returned <code>exp</code> table:</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb6-1">  <span class="kw" style="color: #003B4F;">WITH</span></span>
+<span id="cb6-2">  <span class="fu" style="color: #4758AB;">exp</span> <span class="kw" style="color: #003B4F;">AS</span> (</span>
+<span id="cb6-3">    <span class="kw" style="color: #003B4F;">INSERT</span> <span class="kw" style="color: #003B4F;">INTO</span> experiment (accession) </span>
+<span id="cb6-4">    <span class="kw" style="color: #003B4F;">VALUES</span> (<span class="st" style="color: #20794D;">'another accession'</span>) </span>
+<span id="cb6-5">    <span class="kw" style="color: #003B4F;">RETURNING</span> experiment_id</span>
+<span id="cb6-6">  )</span>
+<span id="cb6-7">  <span class="kw" style="color: #003B4F;">SELECT</span> <span class="op" style="color: #5E5E5E;">*</span> <span class="kw" style="color: #003B4F;">FROM</span> <span class="fu" style="color: #4758AB;">exp</span></span></code></pre></div>
+<div class="knitsql-table">
+<table class="table table-sm table-striped">
+<caption>1 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">experiment_id</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>As expected, the <code>experiment_id</code> has been incremented for the next experiment.</p>
+<ul>
+<li>Next, we provide the two run accessions by passing them as <code>VALUES</code> to the <code>data</code> table.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb7-1">  <span class="kw" style="color: #003B4F;">WITH</span></span>
+<span id="cb7-2">  <span class="kw" style="color: #003B4F;">data</span>(accession) <span class="kw" style="color: #003B4F;">AS</span> (</span>
+<span id="cb7-3">    <span class="kw" style="color: #003B4F;">VALUES</span></span>
+<span id="cb7-4">    (<span class="st" style="color: #20794D;">'SRR18430942'</span>),</span>
+<span id="cb7-5">    (<span class="st" style="color: #20794D;">'SRR18430943'</span>)</span>
+<span id="cb7-6">  )</span>
+<span id="cb7-7">  <span class="kw" style="color: #003B4F;">SELECT</span> <span class="op" style="color: #5E5E5E;">*</span> <span class="kw" style="color: #003B4F;">FROM</span> <span class="kw" style="color: #003B4F;">data</span></span></code></pre></div>
+<div class="knitsql-table">
+<table class="table table-sm table-striped">
+<caption>2 records</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;">accession</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">SRR18430942</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SRR18430943</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li>Finally, the second <code>INSERT</code> statement adds the two runs to the <code>run</code> table, by retrieving the temporary values from both the <code>exp</code> and <code>data</code> result sets.</li>
+</ul>
+<p>Because the CTE is a single SQL statement, it runs within a single transaction, e.g.&nbsp;it is committed only at the successful completion of the <em>whole</em> statement.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/postgres-returning/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
+  <category>SQL</category>
+  <category>postgres</category>
+  <guid>https://tomsing1.github.io/blog/posts/postgres-returning/index.html</guid>
+  <pubDate>Sat, 25 Feb 2023 08:00:00 GMT</pubDate>
+  <media:content url="https://ena-docs.readthedocs.io/en/latest/submit/samples.html" medium="image"/>
+</item>
 <item>
   <title>Distributing R packages with a drat repository hosted on AWS S3</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -5921,27 +6134,6 @@ output = json</code></pre>
   <category>conda</category>
   <guid>https://tomsing1.github.io/blog/posts/pyroe-installation/index.html</guid>
   <pubDate>Sat, 12 Nov 2022 08:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Welcome To My Blog</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/welcome/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Welcome to my blog.</p>
-<p><img src="https://tomsing1.github.io/blog/posts/welcome/https:/quarto.org/quarto.png" class="img-fluid"></p>
-<p>This is Thomas Sandmann’s personal blog, created with <a href="https://quarto.org/docs/websites/website-blog.html">Quarto</a>. I am planning to share e.g.&nbsp;“Things I learned today” (TIL) and other pieces of news around Computational Biology and Data Science.</p>
-
-
-
-<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/welcome/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
-  <category>news</category>
-  <guid>https://tomsing1.github.io/blog/posts/welcome/index.html</guid>
-  <pubDate>Sat, 12 Nov 2022 08:00:00 GMT</pubDate>
-  <media:content url="https://quarto.org/quarto.png" medium="image" type="image/png"/>
 </item>
 </channel>
 </rss>

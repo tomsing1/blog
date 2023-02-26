@@ -1,0 +1,208 @@
+---
+title: "Simultaneously inserting records into two tables with Postgres CTEs"
+author: "Thomas Sandmann"
+date: "2023-02-25"
+freeze: true
+categories: [SQL, postgres]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: inline
+---
+
+## tl;dr
+
+Today I learned how to 
+ 
+- Use Common Table Expressions (CTEs) to simultaneously insert data into two
+  Postgres tables and
+- Use the `RETURNING` SQL command to retrieve automatically created fields
+  inside the same statement.
+
+Gene expression data hosted at the 
+[NCBI's Short Read Archive (SRA)](https://www.ncbi.nlm.nih.gov/sra)
+or at the
+[European Nucleotide Archive (ENA)](https://www.ebi.ac.uk/ena/browser/)
+are a great resource. Both repositories represent information for different
+entities that make up a project, e.g. `study`, `sample`, `experiment`, `run`
+and `analysis` information.
+
+![Relationships between entities (source: [ENA](https://ena-docs.readthedocs.io/en/latest/submit/samples.html))](https://ena-docs.readthedocs.io/en/latest/_images/metadata_model_sample.png)
+
+For example, 
+[ENA project PRJNA818657](https://www.ebi.ac.uk/ena/browser/view/PRJNA818657)
+is an RNA-seq study with data for 25 samples. For each sample, a single
+sequencing library (= `experiment`) was prepared and sequenced in _two_
+separate runs.
+
+In other words, e.g. 
+[sample SAMN26870486](https://www.ebi.ac.uk/ena/browser/view/SAMN26870486)
+produced 
+[experiment SRX14564817](https://www.ebi.ac.uk/ena/browser/view/SRX14564817),
+which was then analyzed in
+[run SRR18430942](https://www.ebi.ac.uk/ena/browser/view/SRR18430942) 
+and 
+[run SRR18430943](https://www.ebi.ac.uk/ena/browser/view/SRR18430943).
+
+One way to capture this information in a relational database is to set up
+three tables - one for each entity - and then use ENA's unique sample-,
+experiment- and run-identifiers as 
+[natural primary keys](https://en.wikipedia.org/wiki/Natural_key).
+
+But what if I don't _have_ suitable natural keys, or simply prefer to use
+[surrogate keys](https://en.wikipedia.org/wiki/Surrogate_key)? 
+
+Today, I learned how to 
+
+1. `INSERT` a new record into a Postgres database,
+2. automatically generate a primary key,
+3. return the key and
+4. include it in a subsequent `INSERT` statement
+
+### Prerequisites
+
+I am using a Postgres database called `test`, running on the local host and
+connect to it with the 
+[DBI R package](https://dbi.r-dbi.org/), 
+via the 
+[RPostgres::Postgres() driver](https://cran.r-project.org/web/packages/RPostgres/index.html).
+
+Then I pass the returned `PqConnection` object to the following SQL code cells
+in this Quarto document.
+
+```{r}
+library(DBI)
+library(RPostgres)
+
+con <- DBI::dbConnect(
+  RPostgres::Postgres(), 
+  dbname = "test", 
+  host = "localhost")
+```
+
+### Creating `experiment` and `run` tables
+
+Initially, the database is empty, so let's create two tables:
+
+- `experiment`: sample-level information
+- `run`: run-level information
+
+Each table will include
+
+1. An auto-generated primary key (`experiment_id` and `run_id`, respectively)
+2. A field to record the record's ENA accession
+3. A time-stamp
+
+and the `run` table will reference its parent `experiment` via the 
+`experiment_id` foreign key.
+
+```{r include=FALSE}
+DBI::dbGetQuery(con, "DROP TABLE experiment CASCADE;")
+DBI::dbGetQuery(con, "DROP TABLE run CASCADE;")
+```
+
+```{sql connection=con}
+CREATE TABLE IF NOT EXISTS experiment (
+  experiment_id SERIAL PRIMARY KEY,
+  accession text UNIQUE,
+  timestamp timestamp default current_timestamp not null
+)
+```
+
+```{sql connection=con}
+CREATE TABLE IF NOT EXISTS run (
+    run_id SERIAL PRIMARY KEY,
+    accession text UNIQUE,
+    timestamp timestamp default current_timestamp not null,
+    experiment_id integer,
+    FOREIGN KEY(experiment_id) REFERENCES experiment(experiment_id)
+)
+```
+
+### Simultaneously nserting records into both tables
+
+Next, we use a single SQL statement to insert both the experiment _and_ its
+related runs:
+
+```{sql connection=con}
+WITH
+exp AS (
+  INSERT INTO experiment (accession) 
+  VALUES ('SRX14564817') 
+  RETURNING experiment_id
+),
+data(accession) AS (
+  VALUES
+  ('SRR18430942'),
+  ('SRR18430943')
+)
+INSERT INTO run (experiment_id, accession)
+SELECT e.experiment_id, d.accession
+FROM exp e, data d
+```
+
+We verify that the experiment has been accessioned into the `experiment` table,
+and the same identifier has then be inserted into the `run` table as well
+
+```{sql connection=con}
+SELECT e.experiment_id, e.accession AS experiment_accession, 
+       r.run_id, r.accession AS run_accession
+FROM experiment e
+INNER JOIN run r ON e.experiment_id = r.experiment_id
+```
+
+Let's examine the individual parts of this query:
+
+- The
+  [WITH](https://www.postgresql.org/docs/current/queries-with.html) 
+  command creates a 
+  [Common Table Expression (CTE)](https://en.wikipedia.org/wiki/Hierarchical_and_recursive_queries_in_SQL#Common_table_expression),
+  e.g. 
+  
+  > a temporary named result set, derived from a simple query and defined within
+  the execution scope of a SELECT, INSERT, UPDATE, or DELETE statement.
+  
+  In this example, the `exp` temporary result is generated by the first `INSERT`
+  statement, which updates the `experiment` table. It returns the automatically
+  generated `experiment_id` via the `RETURNING` command. Let's add another
+  accession to the `experiment` table and examine the returned `exp` table:
+  
+```{sql connection=con}
+  WITH
+  exp AS (
+    INSERT INTO experiment (accession) 
+    VALUES ('another accession') 
+    RETURNING experiment_id
+  )
+  SELECT * FROM exp
+```
+  As expected, the `experiment_id` has been incremented for the next experiment.
+
+- Next, we provide the two run accessions by passing them as `VALUES` to the
+  `data` table.
+  
+```{sql connection=con}
+  WITH
+  data(accession) AS (
+    VALUES
+    ('SRR18430942'),
+    ('SRR18430943')
+  )
+  SELECT * FROM data
+```
+
+- Finally, the second `INSERT` statement adds the two runs to the `run` table,
+  by retrieving the temporary values from both the `exp` and `data` result sets.
+  
+Because the CTE is a single SQL statement, it runs within a single transaction,
+e.g. it is committed only at the successful completion of the _whole_ statement.
+

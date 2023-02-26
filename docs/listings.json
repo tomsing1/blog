@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/postgres-returning/index.html",
       "/posts/drat/index.html",
       "/posts/nextflow-core-quantseq-1-settings/index.html",
       "/posts/nextflow-core-quantseq-2-output/index.html",

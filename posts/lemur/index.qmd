@@ -1,0 +1,419 @@
+---
+title: "Lemur: analyzing multi-condition single-cell data"
+author: "Thomas Sandmann"
+date: "2023-03-11"
+freeze: true
+categories: [TIL, R, scRNAseq]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+---
+
+This week, Constantin Ahlmann-Eltze and Wolfgang Huber published a
+[preprint](https://www.biorxiv.org/content/10.1101/2023.03.06.531268v1)
+describing `LEMUR`, a new approach to analyzing single-cell experiments that
+include samples from multiple conditions, e.g. drug treatments, disease-status,
+etc.
+
+To date, analyses often involve multiple steps, e.g.
+
+1. Defining clusters of cells, e.g. cell types or states
+2. Differential expression analysis _within_ each cell type
+
+In contrast, `LEMUR` considers the continuous latent space the individual cells
+occupy, incorporating the design of the experiment, and then performs
+differential expression analysis in this embedding space.
+
+An R package implementing `LEMUR` is available from
+[github](https://github.com/const-ae/lemur)
+and includes an example dataset [^1].
+
+## Ellwanger et al: Microglia exposed to anti-Trem2 or control antibodies
+
+Here, I am exploring `LEMUR` by examining scRNA-seq data published by 
+[Ellwanger et al, 2021](https://pubmed.ncbi.nlm.nih.gov/33446504/),
+who injected 
+[5XFAD mice](https://www.jax.org/strain/008730),
+a model for familial Alzheimer's Disease with either a Trem2 agonist (`hT2AB`)
+or a negative control antibody (`hIgG1`). 48 hours later, the authors isolated
+CD45-positive [^2] cells from the cortex and performed single-cell RNA-seq
+analysis using the 10X Genomics platform.
+
+I will only examine a small subset of the full dataset here.
+
+### Retrieving the data
+
+Ellwanger et al made both raw and processed data available via the NCBI GEO
+and SRA repositories under 
+[GEO accession GSE156183](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE156183).
+
+They also included ample metadata for each cell, making this a great dataset
+for re-analysis.
+
+```{r}
+temp_dir <- "~/tmp/ellwanger"
+# temp_dir <- file.path(tempdir(), "ellwanger")
+dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
+```
+
+Let's start by retrieving the
+
+1. [processed counts (500 Mb)](https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE156183&format=file&file=GSE156183%5FRAW%2Emtx%2Egz)
+2. [cell metadata (13 Mb)](https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE156183&format=file&file=GSE156183%5FCell%5Fmetadata%2Etsv%2Egz)
+
+files from GEO and store them in a temporary directory:
+
+```{r}
+options(timeout = 360)
+url_root <- paste0("https://www.ncbi.nlm.nih.gov/geo/download/?acc=",
+                   "GSE156183&format=file&file=GSE156183%5F")
+
+raw_counts <- file.path(temp_dir, "counts.mtx.gz")
+download.file(
+  paste0(url_root, "RAW%2Emtx%2Egz"), 
+  destfile = raw_counts)
+
+cell_metadata <- file.path(temp_dir, "cell_metadata.tsv.gz")
+download.file(
+  paste0(url_root, "Cell%5Fmetadata%2Etsv%2Egz"), 
+  destfile = cell_metadata)
+```
+
+```{r}
+library(dplyr)
+library(Matrix)
+library(org.Mm.eg.db)
+library(readr)
+library(scater)
+library(SingleCellExperiment)
+```
+
+```{r}
+#| include: false
+sce_cache_does_not_exist <- !file.exists(
+  here::here("posts", "lemur", "sce.rds"))
+```
+
+```{r}
+#| eval: !expr sce_cache_does_not_exist
+m <- Matrix::readMM(raw_counts)
+cell_anno <- readr::read_tsv(cell_metadata, show_col_types = FALSE)
+stopifnot(nrow(cell_anno) == ncol(m))
+```
+
+The count matrix contains data for `r nrow(m)` features (= genes) and 
+`r ncol(m)` cells, each accompanied by metadata.
+
+::: {.callout-warning, collapse=true}
+
+Unfortunately, the `GSE156183_Feature_metadata.tsv.gz` feature (= gene) 
+annotation file the authors deposited with GEO _actually_ contains _cell_ 
+annotations. But luckily, they also deposited counts matrices in TSV format -
+including the ENSEMBL gene identifier - for each sample.
+
+Here, we download the TAR archive, extract and read the gene identifiers for 
+one of the samples.
+
+```{r}
+#| eval: !expr sce_cache_does_not_exist
+selected_sample <- "GSM4726219_RAW-R47H-male-IgG-rep2.tsv.gz"
+tar_archive <- file.path(temp_dir, "RAW.tar")
+download.file(
+  "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE156183&format=file",
+  destfile = tar_archive)
+utils::untar(tar_archive, files = "selected_sample", 
+             exdir = tempdir())
+gene_ids <- readr::read_tsv(file.path(tempdir(), selected_sample), 
+                            col_select = any_of("feature_id"),
+                            show_col_types = FALSE) %>%
+  dplyr::pull(feature_id)
+stopifnot(length(gene_ids) == nrow(m))
+row.names(m) <- gene_ids
+```
+
+:::
+
+### Creating a SingleCellExperiment object
+
+```{r}
+#| eval: !expr sce_cache_does_not_exist
+m <- m[, which(cell_anno$genotype == "TREM2_CV-5XFAD")]
+cell_anno <- cell_anno[which(cell_anno$genotype == "TREM2_CV-5XFAD"), ]
+stopifnot(ncol(m) == nrow(cell_anno))
+```
+
+```{r}
+#| eval: !expr sce_cache_does_not_exist
+col_data <- cell_anno %>%
+  dplyr::select(cell_id, celltype, sample, sex, genotype, treatment, 
+                starts_with("QC.")
+  ) %>%
+  as.data.frame() %>%
+  tibble::column_to_rownames("cell_id")
+colnames(m) <- row.names(col_data)
+
+row_data <- data.frame(
+  symbol = AnnotationDbi::mapIds(org.Mm.eg.db, keys = gene_ids,
+                                 column = "SYMBOL", keytype = "ENSEMBL"),
+  row.names = gene_ids
+)
+
+umap <- cell_anno %>%
+  dplyr::select(ends_with("CD45pos")
+  ) %>%
+  as.matrix()
+row.names(umap) <- colnames(m)
+colnames(umap) <- paste("UMAP", seq.int(ncol(umap)))
+
+sce <- SingleCellExperiment(
+  assays = list(counts = m),
+  rowData = row_data,
+  colData = col_data,
+  reducedDims = list(UMAP = umap)
+)
+sce <- sce[, !is.na(sce$celltype)]
+sce <- logNormCounts(sce)
+rm(list = c("m", "cell_anno", "gene_ids", "row_data", "col_data"))
+```
+
+```{r}
+#| eval: !expr sce_cache_does_not_exist
+#| include: false
+saveRDS(sce, file = here::here("posts", "lemur", "sce.rds"))
+```
+
+```{r}
+#| eval: !expr !sce_cache_does_not_exist
+sce <- readRDS(here::here("posts", "lemur", "sce.rds"))
+```
+
+Here, I will focus only on the Trem2 wildtype animals to examine the treatment
+effects across male and female animals, representing `r ncol(sce)` cells:
+
+```{r}
+with(colData(sce), table(treatment, sex))
+```
+
+across `r length(unique(sce$sample))` samples from both male and female samples:
+
+```{r}
+colData(sce) %>%
+  as.data.frame() %>%
+  dplyr::select(sample, sex, treatment) %>%
+  dplyr::distinct() %>%
+  tibble::remove_rownames()
+```
+
+At this point, we can reproduce 
+[Figure 3E](https://www.pnas.org/doi/10.1073/pnas.2017742118#fig03)
+from the original paper, using the UMAP coordinates and cell type labels
+provided by the authors:
+
+```{r}
+#| fig-width: 7
+#| fig-height: 7
+colors <- c("Microglia" = "darkgrey",
+            "T cells" = "skyblue",
+            "Macrophages" = "firebrick",
+            "MO:T" = "darkgreen",
+            "Dendritic cells" = "green",
+            "Monocytes" = "orange",
+            "B cells" = "navy",
+            "Neutrophils" = "darkblue",
+            "HCS" = "grey", 
+            "Fibroblasts" = "yellow")
+sce$celltype_coarse <- dplyr::case_when(
+    grepl(x = sce$celltype, pattern = "Microglia") ~ "Microglia",
+    TRUE ~ sce$celltype
+  )
+sce$treatment <- factor(sce$treatment, levels = c("IgG", "hT2AB"))
+suppressMessages({
+  scater::plotReducedDim(sce, "UMAP", colour_by = "celltype_coarse") +
+  scale_color_manual(values = colors, name = "Cell type")
+})
+```
+
+All cell types are represented across the two treatments:
+
+```{r}
+#| fig-width: 19
+#| fig-height: 7
+suppressMessages({
+  scater::plotReducedDim(sce, "UMAP", colour_by = "celltype_coarse") +
+  scale_color_manual(values = colors, name = "Cell type") + 
+    facet_wrap(~ sce$treatment)
+})
+```
+
+## Differential expression analysis
+
+```{r}
+# we focus only on microglia
+sce <- sce[, sce$celltype_coarse == "Microglia"]
+sce$mg_type <- factor(sub("Microglia.", "", sce$celltype, fixed = TRUE))
+```
+
+Now I am ready to explore the `lemur` R package to ask: "which genes show
+evidence for a treatment effect in one or more microglial neighborhoods (after
+accounting for sex-effects on gene expression)?"
+
+Following the instructions on its
+[github repository](https://github.com/const-ae/lemur)
+I first install the latest version of the 
+[glmGamPoi](https://github.com/const-ae/glmGamPoi) 
+package, and then the `lemur` package itself from their github repositories.
+
+To harmonize results across batches (in this case: samples), we will use
+harmony, and need to install it from its github repository as well.
+
+```{r}
+#| eval: false
+remotes::install_github("const-ae/glmGamPoi")
+remotes::install_github("const-ae/lemur")
+remotes::install_github("immunogenomics/harmony")
+```
+
+```{r}
+library(lemur)
+n_cells <- 2000L
+```
+
+To speed up my exploration of the `LEMUR` workflow, I subset the experiment
+to `r n_cells` random microglial cells:
+
+```{r}
+set.seed(123L)
+selected_cells <- sample(seq.int(ncol(sce)), n_cells)
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 7
+suppressMessages({
+  scater::plotReducedDim(
+    sce[, selected_cells], "UMAP", colour_by = "mg_type") +
+    labs(title = sprintf("Subsampled to %s microglia", length(selected_cells)))
+})
+```
+
+```{r}
+fit <- lemur(sce[, selected_cells], design = ~ sex + treatment, 
+             n_embedding = 15, verbose = FALSE)
+fit <- align_harmony(fit, stretching = FALSE)
+fit
+```
+
+The `lemur_fit` object returned by `lemur()` contains the `embedding`,
+the latent space in which the differential expression analysis is performed.
+
+```{r}
+#| fig-width: 7
+#| fig-height: 7
+dim(fit$embedding)  # 15 dimensions, as specified above
+# plot dim 1 vs dim 2
+suppressMessages({
+  scater::plotReducedDim(
+    fit, "embedding", colour_by = "mg_type", shape_by = "treatment") +
+    labs(
+      title = "Embedding after accounting for treatment & sex",
+      subtitle = sprintf("Subsampled to %s microglia", length(selected_cells)))
+})
+```
+
+```{r}
+# run UMAP on the embedding
+umap <- uwot::umap(t(fit$embedding))
+colnames(umap) <- c("UMAP 1", "UMAP 2")
+reducedDim(fit, "UMAP") <- umap
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 7
+suppressMessages({
+  scater::plotReducedDim(
+    fit, "UMAP", colour_by = "mg_type", shape_by = "treatment") +
+    labs(
+      title = "Embedding after accounting for treatment & sex (UMAP)",
+      subtitle = sprintf("Subsampled to %s microglia", length(selected_cells)))
+})
+```
+
+
+```{r}
+fit <- test_de(fit, 
+               contrast = cond(treatment = "hT2AB") - cond(treatment = "IgG"))
+neighborhoods <- find_de_neighborhoods(
+  fit, 
+  counts = counts(sce)[, selected_cells],
+  group_by = vars(sex, treatment),
+  include_complement = FALSE) %>%
+  dplyr::as_tibble() %>%
+  dplyr::arrange(pval) %>%
+  dplyr::left_join(
+    tibble::rownames_to_column(as.data.frame(rowData(fit)), "gene_id"), 
+    by = c(name = "gene_id")) %>%
+  dplyr::select(symbol, everything())
+```
+
+```{r}
+head(neighborhoods)
+```
+
+```{r}
+# volcano plot
+neighborhoods %>%
+  ggplot(aes(x = lfc, y = -log10(pval))) +
+    geom_point(aes(color  = adj_pval < 0.1)) +
+    labs(title = "Vulcano plot of the neighborhoods")
+```
+
+```{r}
+#| fig-width: 7
+#| fig-height: 7
+sel_gene <- "ENSMUSG00000061808"
+
+neighborhood_coordinates <- neighborhoods %>%
+  dplyr::filter(name == sel_gene) %>%
+  dplyr::mutate(cell_id = purrr:::map(indices, \(idx) colnames(fit)[idx])) %>%
+  tidyr::unnest(c(indices, cell_id)) %>%
+  dplyr::left_join(as_tibble(umap, rownames = "cell_id"), by = "cell_id") %>%
+  dplyr::select(name, cell_id, `UMAP 1`, `UMAP 2`)
+
+as_tibble(umap) %>%
+  mutate(expr = assay(fit, "DE")[sel_gene, ]) %>%
+  ggplot(aes(x = `UMAP 1`, y = `UMAP 2`)) +
+    geom_point(aes(color = expr)) +
+    scale_color_gradient2() +
+    geom_density2d(data = neighborhood_coordinates, breaks = 0.1, 
+                   contour_var = "ndensity", color = "black") +
+    labs(title = "Differential expression with neighborhood boundary",
+         subtitle = rowData(sce)[sel_gene, "symbol"]) + 
+  theme_bw() + 
+  theme(panel.grid = element_blank())
+```
+
+<details>
+<summary>
+Reproducibility
+</summary>
+
+```{r sessioninfo}
+#| echo: false
+sessioninfo::session_info()
+```
+
+</details>
+
+[^1]: scRNA-seq ata from glioblastoma slices cultured _in vitro_ with either 
+[pamobinostat](https://en.wikipedia.org/wiki/Panobinostat)
+or a vehicle control, characterized in a terrific paper by
+[Zhao et al, 2021](https://genomemedicine.biomedcentral.com/articles/10.1186/s13073-021-00894-y)
+[^2]: CD45 is a cell surface antigen that is expressed on most hematopoietic 
+lineage cells, including microglia.

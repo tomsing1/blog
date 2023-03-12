@@ -47,6 +47,7 @@ and includes an example dataset [^1].
 library(dplyr)
 library(Matrix)
 library(org.Mm.eg.db)
+library(patchwork)
 library(purrr)
 library(readr)
 library(scater)
@@ -130,8 +131,7 @@ tar_archive <- file.path(temp_dir, "RAW.tar")
 download.file(
   "https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE156183&format=file",
   destfile = tar_archive)
-utils::untar(tar_archive, files = "selected_sample", 
-             exdir = tempdir())
+utils::untar(tar_archive, files = selected_sample, exdir = tempdir())
 gene_ids <- readr::read_tsv(file.path(tempdir(), selected_sample), 
                             col_select = any_of("feature_id"),
                             show_col_types = FALSE) %>%
@@ -175,6 +175,14 @@ sce <- SingleCellExperiment(
 )
 sce <- sce[, !is.na(sce$celltype)]
 sce <- logNormCounts(sce)
+sce$celltype_coarse <- dplyr::case_when(
+    grepl(x = sce$celltype, pattern = "Microglia") ~ "Microglia",
+    TRUE ~ sce$celltype
+  )
+sce$treatment <- factor(sce$treatment, levels = c("IgG", "hT2AB"))
+sce$mg_type <- factor(sub("Microglia.", "", sce$celltype, fixed = TRUE))
+sce <- sce[!is.na(rowData(sce)$symbol), ]
+
 rm(list = c("m", "cell_anno", "gene_ids", "row_data", "col_data"))
 ```
 
@@ -187,12 +195,15 @@ if (sce_cache_does_not_exist) {
 }
 ```
 
-Here, I will focus only on the Trem2 wildtype animals to examine the treatment
-effects across male and female animals, representing `r ncol(sce)` cells:
+Here, I will focus only on the difference between TREM2 wildtype and 
+TREM2 knock-out animals treated with the `IgG` control antibody. Only female
+knock-out animals were included in the study, so we exclude the male animals
+from the other strain as well.
 
 ```{r}
-sce <- sce[, which(sce$genotype == "TREM2_CV-5XFAD")]
-with(colData(sce), table(treatment, sex))
+sce <- sce[, which(sce$genotype %in% c("TREM2_CV-5XFAD", "Trem2_KO-5XFAD"))]
+sce <- sce[, which(sce$sex == "female" & sce$treatment == "IgG")]
+with(colData(sce), table(genotype, treatment))
 ```
 
 across `r length(unique(sce$sample))` samples from both male and female samples:
@@ -200,7 +211,7 @@ across `r length(unique(sce$sample))` samples from both male and female samples:
 ```{r}
 colData(sce) %>%
   as.data.frame() %>%
-  dplyr::select(sample, sex, treatment) %>%
+  dplyr::select(sample, treatment, genotype) %>%
   dplyr::distinct() %>%
   tibble::remove_rownames()
 ```
@@ -224,16 +235,11 @@ colors <- c("Microglia" = "darkgrey",
             "Neutrophils" = "darkblue",
             "HCS" = "grey", 
             "Fibroblasts" = "yellow")
-sce$celltype_coarse <- dplyr::case_when(
-    grepl(x = sce$celltype, pattern = "Microglia") ~ "Microglia",
-    TRUE ~ sce$celltype
-  )
-sce$treatment <- factor(sce$treatment, levels = c("IgG", "hT2AB"))
 scater::plotReducedDim(sce, "UMAP", colour_by = "celltype_coarse") +
   scale_color_manual(values = colors, name = "Cell type")
 ```
 
-All cell types are represented across the two treatments:
+All cell types are represented in animals from both genotypes:
 
 ```{r}
 #| fig-width: 10
@@ -241,7 +247,7 @@ All cell types are represented across the two treatments:
 #| message: false
 scater::plotReducedDim(sce, "UMAP", colour_by = "celltype_coarse") +
   scale_color_manual(values = colors, name = "Cell type") + 
-  facet_wrap(~ sce$treatment)
+  facet_wrap(~ sce$genotype)
 ```
 
 ## Differential expression analysis
@@ -260,7 +266,6 @@ captured in this experiment but are not of interest to the question at hand.
 
 ```{r}
 sce <- sce[, sce$celltype_coarse == "Microglia"]
-sce$mg_type <- factor(sub("Microglia.", "", sce$celltype, fixed = TRUE))
 ```
 
 Following the instructions from the
@@ -282,19 +287,27 @@ remotes::install_github("immunogenomics/harmony")
 ```{r}
 #| message: false
 library(lemur)
-n_cells <- 2000L
+n_cells <- 1000L
 ```
 
 To speed up my exploration of the `LEMUR` workflow, I subset the experiment
-to `r n_cells` random cells from the `r ncol(sce)` available microglia:
+to `r n_cells` random cells from each of the two genotypes.
 
 ```{r}
-set.seed(123L)
-selected_cells <- sample(seq.int(ncol(sce)), n_cells)
+set.seed(1L)
+genotypes <- unique(sce$genotype)
+selected_cells <- as.vector(sapply(genotypes, \(g) {
+  sample(which(sce$genotype == g), n_cells)
+}))
 ```
 
-As expected, I still have a good representation of the microglial states
-described in the paper:
+As expected, most microglial states described in the paper are represented in 
+both genotypes, albeit some of the states are more frequently observed in
+one than the other:
+
+```{r}
+table(sce$celltype[selected_cells], sce$genotype[selected_cells])
+```
 
 ```{r}
 #| fig-width: 7
@@ -302,14 +315,15 @@ described in the paper:
 #| message: false
 scater::plotReducedDim(
   sce[, selected_cells], "UMAP", colour_by = "mg_type") +
-  labs(title = sprintf("Subsampled to %s microglia", length(selected_cells)))
+  labs(title = sprintf("Subsampled to %s microglia", length(selected_cells))) +
+  facet_wrap(~ sce$genotype[selected_cells])
 ```
 
 ```{r}
 #| message: false
 #| warning: false
-fit <- lemur(sce[, selected_cells], design = ~ sex + treatment, 
-             n_embedding = 15, verbose = FALSE)
+fit <- lemur(sce[, selected_cells], design = ~ genotype,
+             n_ambient = 25, n_embedding = 15, verbose = FALSE)
 fit <- align_harmony(fit, stretching = FALSE)
 fit
 ```
@@ -325,9 +339,9 @@ dim(fit$embedding)  # 15 dimensions, as specified above
 
 # plot dim 1 vs dim 2
 scater::plotReducedDim(
-  fit, "embedding", colour_by = "mg_type", shape_by = "treatment") +
+  fit, "embedding", colour_by = "mg_type", shape_by = "genotype") +
   labs(
-    title = "Embedding after accounting for treatment & sex",
+    title = "Embedding after accounting for genotype",
     subtitle = sprintf("Subsampled to %s microglia", length(selected_cells)))
 ```
 
@@ -343,10 +357,11 @@ reducedDim(fit, "UMAP") <- umap
 #| fig-height: 5
 #| message: false
 scater::plotReducedDim(
-  fit, "UMAP", colour_by = "mg_type", shape_by = "treatment") +
+  fit, "UMAP", colour_by = "mg_type", shape_by = "genotype") +
   labs(
-    title = "Embedding after accounting for treatment & sex (UMAP)",
-    subtitle = sprintf("Subsampled to %s microglia", length(selected_cells)))
+    title = "Embedding after accounting for genotype (UMAP)",
+    subtitle = sprintf("Subsampled to %s microglia", length(selected_cells))) +
+  facet_wrap(~ colData(fit)$genotype)
 ```
 
 Next, the `test_de` function performs a differential expression analysis for
@@ -355,17 +370,19 @@ an original cell was mapped to.
 
 The `find_de_neighborhoods` function accepts the original counts and will
 estimate the log2 fold change for each neighborhood, based on aggregating the
-counts to pseudobulk measures across the cells in the neighborhood.
+counts to pseudobulk measures across the cells in each neighborhood.
 
 ```{r}
 #| message: false
 #| warning: false
-fit <- test_de(fit, 
-               contrast = cond(treatment = "hT2AB") - cond(treatment = "IgG"))
+fit <- test_de(
+  fit, 
+  contrast = cond(genotype = "Trem2_KO-5XFAD") - 
+    cond(genotype = "TREM2_CV-5XFAD"))
 neighborhoods <- find_de_neighborhoods(
   fit, 
   counts = counts(sce)[, selected_cells],
-  group_by = vars(sex, treatment),
+  group_by = vars(sample, genotype),
   include_complement = FALSE) %>%
   dplyr::as_tibble() %>%
   dplyr::arrange(pval) %>%
@@ -397,7 +414,7 @@ neighborhoods %>%
 ```{r}
 #| fig-width: 7
 #| fig-height: 5
-sel_gene <- "ENSMUSG00000061808"
+sel_gene <- row.names(sce)[which(rowData(sce)$symbol == "Lpl")]
 
 neighborhood_coordinates <- neighborhoods %>%
   dplyr::filter(name == sel_gene) %>%
@@ -406,16 +423,63 @@ neighborhood_coordinates <- neighborhoods %>%
   dplyr::left_join(as_tibble(umap, rownames = "cell_id"), by = "cell_id") %>%
   dplyr::select(name, cell_id, `UMAP 1`, `UMAP 2`)
 
-as_tibble(umap) %>%
+p1 <- as_tibble(umap) %>%
   mutate(expr = assay(fit, "DE")[sel_gene, ]) %>%
   ggplot(aes(x = `UMAP 1`, y = `UMAP 2`)) +
-    geom_point(aes(color = expr)) +
-    scale_color_gradient2() +
-    geom_density2d(data = neighborhood_coordinates, breaks = 0.1, 
-                   contour_var = "ndensity", color = "black") +
-    labs(title = "Differential expression with neighborhood boundary",
-         subtitle = rowData(sce)[sel_gene, "symbol"]) + 
+  scale_color_gradient2() +
+  geom_point(aes(color = expr)) +
+  geom_density2d(data = neighborhood_coordinates, breaks = 0.1, 
+                 contour_var = "ndensity", color = "black") +
+  labs(title = rowData(sce)[sel_gene, "symbol"]) + 
   theme_bw() + 
+  theme(panel.grid = element_blank())
+
+p2 <- as_tibble(umap) %>%
+  dplyr::bind_cols(as.data.frame(colData(fit))) %>%
+  ggplot(aes(x = `UMAP 1`, y = `UMAP 2`)) +
+  geom_point(aes(color = mg_type)) +
+  geom_density2d(data = neighborhood_coordinates, breaks = 0.1, 
+                 contour_var = "ndensity", color = "black") +
+  labs(title = "Microglia states") + 
+  theme_bw() + 
+  theme(panel.grid = element_blank())
+
+p1 + p2
+```
+
+```{r}
+within_neighborhood <- neighborhoods %>%
+  dplyr::filter(name == sel_gene) %>% 
+  dplyr::pull(indices)
+
+colData(fit)$neighborhood <- ifelse(
+  seq.int(ncol(fit)) %in% within_neighborhood[[1]], "DE", "not DE")
+
+data.frame(
+  colData(fit)
+) %>%
+  ggplot(aes(x = neighborhood)) + 
+  geom_bar(stat = "count") +
+  facet_wrap(~ mg_type) +
+  labs(title = rowData(sce)[sel_gene, "symbol"], 
+       x = element_blank(),
+       y = "Cells per neighborhood") +
+  theme_linedraw(14) + 
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+data.frame(
+  expr = assay(fit, "DE")[sel_gene, ],
+  colData(fit)
+) %>%
+  ggplot(aes(x = mg_type, y = expr)) + 
+  geom_boxplot() + 
+  geom_hline(yintercept = 0, linetype = "dashed") + 
+  labs(title = rowData(sce)[sel_gene, "symbol"],
+       y = "Genotype effect (log2 FC)", 
+       x = element_blank()) +
+  theme_linedraw(14) + 
   theme(panel.grid = element_blank())
 ```
 

@@ -82,7 +82,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-02-26T04:41:16.096Z</lastmod>
+    <lastmod>2023-03-12T20:46:28.133Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/about.html</loc>
@@ -91,5 +91,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/postgres-returning/index.html</loc>
     <lastmod>2023-02-26T04:41:15.455Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/lemur/index.html</loc>
+    <lastmod>2023-03-12T20:46:27.502Z</lastmod>
   </url>
 </urlset>

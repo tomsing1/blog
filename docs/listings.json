@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/duckdb/index.html",
       "/posts/lemur/index.html",
       "/posts/postgres-returning/index.html",
       "/posts/drat/index.html",

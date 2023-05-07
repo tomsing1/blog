@@ -38,7 +38,10 @@ rm -f penguins.duckdb free_trips.parquet
 
 ## tl;dr
 
-Today I learned how to access and query parquet files with [duckdb](https://duckdb.org/).
+Today I learned how to access and query CSV and parquet files with 
+[duckdb](https://duckdb.org/), using either the `duckdb` command line 
+interface or the eponymous
+[R package](https://cran.r-project.org/package=duckdb)
 
 ### Motivation
 
@@ -50,8 +53,16 @@ file systems or remote sources.
 [Apache Parquet](https://parquet.apache.org/) is
 > an open source, column-oriented data file format designed for efficient data storage and retrieval.
 
-Here, I am learning how to use `duckdb` to query a remote parquet file stored
-on AWS S3 (without retrieving the full dataset).
+Here, I am highlighting how to use `duckdb` to query remote parquet
+files without the need for retrieving the full dataset first. And 
+that's just one of the many functionalities offered by `duckdb`, truly
+a swiss army knife in the data science toolkit!
+
+<p align="center">
+<a title="D-M Commons, CC BY-SA 3.0 &lt;https://creativecommons.org/licenses/by-sa/3.0&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Wenger_EvoGrip_S17.JPG"><img width="300" alt="Wenger EvoGrip S17" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Wenger_EvoGrip_S17.JPG/512px-Wenger_EvoGrip_S17.JPG"></a>
+<br>
+<a href="https://commons.wikimedia.org/wiki/File:Wenger_EvoGrip_S17.JPG">D-M Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>, via Wikimedia Commons
+</p>
 
 ### Prequisites
 
@@ -234,8 +245,11 @@ provides similar functionality.)
 if (!requireNamespace("duckdb", quietly = TRUE)) {
   install.packages("duckdb")
 }
-library("duckdb")
-library("DBI")
+suppressPackageStartupMessages(library("duckdb"))
+suppressPackageStartupMessages(library("DBI"))
+```
+
+```{r}
 con <- dbConnect(duckdb::duckdb(), dbdir = ":memory:")
 dbExecute(conn = con, "INSTALL httpfs")
 ```
@@ -262,8 +276,8 @@ and
 [dplyr](https://cran.r-project.org/package=dplyr)
 
 ```{r}
-library(dbplyr)
-library(dplyr)
+suppressPackageStartupMessages(library(dbplyr))
+suppressPackageStartupMessages(library(dplyr))
 
 tbl(con, PARQUET_FILE1) |>
   group_by(payment_type) |>

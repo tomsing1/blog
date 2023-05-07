@@ -11,7 +11,289 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.2.280</generator>
-<lastBuildDate>Sun, 12 Mar 2023 08:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 06 May 2023 07:00:00 GMT</lastBuildDate>
+<item>
+  <title>Querying parquet files with duckdb</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/duckdb/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="cell">
+
+</div>
+<div class="cell">
+
+</div>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<p>Today I learned how to access and query CSV and parquet files with <a href="https://duckdb.org/">duckdb</a>, using either the <code>duckdb</code> command line interface or the eponymous <a href="https://cran.r-project.org/package=duckdb">R package</a></p>
+<section id="motivation" class="level3">
+<h3 class="anchored" data-anchor-id="motivation">Motivation</h3>
+<p><a href="https://duckdb.org/">duckdb</a> is a relational (table-oriented) database management system (RDMS) contained in a single executable. It excels at processing tabular datasets, e.g.&nbsp;from CSV or Parquet files, from local file systems or remote sources.</p>
+<p><a href="https://parquet.apache.org/">Apache Parquet</a> is &gt; an open source, column-oriented data file format designed for efficient data storage and retrieval.</p>
+<p>Here, I am highlighting how to use <code>duckdb</code> to query remote parquet files without the need for retrieving the full dataset first. And that’s just one of the many functionalities offered by <code>duckdb</code>, truly a swiss army knife in the data science toolkit!</p>
+<p align="center">
+<a title="D-M Commons, CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0>, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Wenger_EvoGrip_S17.JPG"><img width="300" alt="Wenger EvoGrip S17" src="https://tomsing1.github.io/blog/posts/duckdb/https:/upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Wenger_EvoGrip_S17.JPG/512px-Wenger_EvoGrip_S17.JPG"></a> <br> <a href="https://commons.wikimedia.org/wiki/File:Wenger_EvoGrip_S17.JPG">D-M Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>, via Wikimedia Commons
+</p>
+</section>
+<section id="prequisites" class="level3">
+<h3 class="anchored" data-anchor-id="prequisites">Prequisites</h3>
+<p>I installed the duckdb executable on my Mac OS system with homebrew:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;">brew</span> install duckdb</span>
+<span id="cb1-2"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">--version</span></span></code></pre></div>
+</section>
+<section id="getting-started" class="level3">
+<h3 class="anchored" data-anchor-id="getting-started">Getting started</h3>
+<p>By default, <code>duckdb</code> will create database in memory. Like other RMDS, it supports a <a href="https://duckdb.org/docs/sql/introduction">core set of SQL statements</a> and expressions. In addition, <a href="https://duckdb.org/docs/extensions/overview">extensions</a> provide additional functionality, e.g. <a href="https://duckdb.org/docs/extensions/postgres_scanner">connecting to Postgres databases</a> or <a href="https://duckdb.org/docs/extensions/json">supporting JSON data</a>.</p>
+<p>Commands can either be entered interactively, provided via the <code>-c</code> argument or in a text file. To access remote files, we first need to install the <a href="https://duckdb.org/docs/extensions/httpfs">httpsfs` extension</a> that allows reading remote/writing remote files <sup>1</sup>.</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"INSTALL httpfs"</span></span></code></pre></div>
+<p>To get started, we read a small dataset from a CSV file hosted publicly on a webserver. For brevity, we store this URL in the environmental variable <code>REMOTE_FILE</code>:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="va" style="color: #111111;">REMOTE_FILE</span><span class="op" style="color: #5E5E5E;">=</span>https://raw.githubusercontent.com/mwaskom/seaborn-data/master/penguins.csv</span></code></pre></div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"SELECT species, island, sex, bill_length_mm, bill_depth_mm </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb4-2"><span class="st" style="color: #20794D;">           FROM '</span><span class="va" style="color: #111111;">$REMOTE_FILE</span><span class="st" style="color: #20794D;">' LIMIT 5;"</span> </span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>┌─────────┬───────────┬─────────┬────────────────┬───────────────┐
+│ species │  island   │   sex   │ bill_length_mm │ bill_depth_mm │
+│ varchar │  varchar  │ varchar │     double     │    double     │
+├─────────┼───────────┼─────────┼────────────────┼───────────────┤
+│ Adelie  │ Torgersen │ MALE    │           39.1 │          18.7 │
+│ Adelie  │ Torgersen │ FEMALE  │           39.5 │          17.4 │
+│ Adelie  │ Torgersen │ FEMALE  │           40.3 │          18.0 │
+│ Adelie  │ Torgersen │         │                │               │
+│ Adelie  │ Torgersen │ FEMALE  │           36.7 │          19.3 │
+└─────────┴───────────┴─────────┴────────────────┴───────────────┘</code></pre>
+</div>
+</div>
+<p>By default, <code>duckdb</code> will use a temporary, in-memory database. To open or create a persistent database, simply include a path as a command line argument, e.g.&nbsp;<code>duckdb path/to/my_database.duckdb</code></p>
+<p>For example, the following command will download the remote CSV file and import it into a duckdb database and store it in the <code>penguins.duckdb</code> file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="ex" style="color: null;">duckdb</span> <span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb6-2">  <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"CREATE TABLE penguins AS SELECT * FROM '</span><span class="va" style="color: #111111;">${REMOTE_FILE}</span><span class="st" style="color: #20794D;">';"</span> <span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb6-3">  penguins.duckdb </span></code></pre></div>
+</div>
+<p>Now, we can query the local file with <code>duckdb</code> or explore it interactive with the <a href="https://duckdb.org/docs/guides/data_viewers/tad">tad viewer</a> <sup>2</sup></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><span class="ex" style="color: null;">duckdb</span> <span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb7-2">  <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"SELECT * from penguins WHERE sex = 'MALE' LIMIT 5;"</span> <span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb7-3">  penguins.duckdb</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>┌─────────┬───────────┬────────────────┬───────────────┬───────────────────┬─────────────┬─────────┐
+│ species │  island   │ bill_length_mm │ bill_depth_mm │ flipper_length_mm │ body_mass_g │   sex   │
+│ varchar │  varchar  │     double     │    double     │       int64       │    int64    │ varchar │
+├─────────┼───────────┼────────────────┼───────────────┼───────────────────┼─────────────┼─────────┤
+│ Adelie  │ Torgersen │           39.1 │          18.7 │               181 │        3750 │ MALE    │
+│ Adelie  │ Torgersen │           39.3 │          20.6 │               190 │        3650 │ MALE    │
+│ Adelie  │ Torgersen │           39.2 │          19.6 │               195 │        4675 │ MALE    │
+│ Adelie  │ Torgersen │           38.6 │          21.2 │               191 │        3800 │ MALE    │
+│ Adelie  │ Torgersen │           34.6 │          21.1 │               198 │        4400 │ MALE    │
+└─────────┴───────────┴────────────────┴───────────────┴───────────────────┴─────────────┴─────────┘</code></pre>
+</div>
+</div>
+</section>
+<section id="querying-remote-parquet-files" class="level3">
+<h3 class="anchored" data-anchor-id="querying-remote-parquet-files">Querying remote parquet files</h3>
+<p>The <a href="https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page">NYC Taxi &amp; Limousine Commission</a> has collected data on public NYC taxi and for-hire vehicle (Uber, Lyft) trips, going all the way back to 2009. The data is shared in the form of parquet files, and one parquet file is created for each month of data.</p>
+<p>Here, I will use the Yellow Taxi Trip records from January and February 2023 as examples. Let’s store the URLs pointing to the respective parquet files in environmental variables.</p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="va" style="color: #111111;">PARQUET_FILE1</span><span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet"</span></span>
+<span id="cb9-2"><span class="va" style="color: #111111;">PARQUET_FILE2</span><span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">"https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-02.parquet"</span></span></code></pre></div>
+<div class="cell">
+
+</div>
+<p>Each parquet file stores a single table of data. To get an overview of the available information, we ask <code>duckdb</code> to DESCRIBE it:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"DESCRIBE SELECT * FROM '</span><span class="va" style="color: #111111;">$PARQUET_FILE1</span><span class="st" style="color: #20794D;">'"</span><span class="kw" style="color: #003B4F;">;</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>┌───────────────────────┬─────────────┬─────────┬─────────┬─────────┬─────────┐
+│      column_name      │ column_type │  null   │   key   │ default │  extra  │
+│        varchar        │   varchar   │ varchar │ varchar │ varchar │ varchar │
+├───────────────────────┼─────────────┼─────────┼─────────┼─────────┼─────────┤
+│ VendorID              │ BIGINT      │ YES     │         │         │         │
+│ tpep_pickup_datetime  │ TIMESTAMP   │ YES     │         │         │         │
+│ tpep_dropoff_datetime │ TIMESTAMP   │ YES     │         │         │         │
+│ passenger_count       │ DOUBLE      │ YES     │         │         │         │
+│ trip_distance         │ DOUBLE      │ YES     │         │         │         │
+│ RatecodeID            │ DOUBLE      │ YES     │         │         │         │
+│ store_and_fwd_flag    │ VARCHAR     │ YES     │         │         │         │
+│ PULocationID          │ BIGINT      │ YES     │         │         │         │
+│ DOLocationID          │ BIGINT      │ YES     │         │         │         │
+│ payment_type          │ BIGINT      │ YES     │         │         │         │
+│ fare_amount           │ DOUBLE      │ YES     │         │         │         │
+│ extra                 │ DOUBLE      │ YES     │         │         │         │
+│ mta_tax               │ DOUBLE      │ YES     │         │         │         │
+│ tip_amount            │ DOUBLE      │ YES     │         │         │         │
+│ tolls_amount          │ DOUBLE      │ YES     │         │         │         │
+│ improvement_surcharge │ DOUBLE      │ YES     │         │         │         │
+│ total_amount          │ DOUBLE      │ YES     │         │         │         │
+│ congestion_surcharge  │ DOUBLE      │ YES     │         │         │         │
+│ airport_fee           │ DOUBLE      │ YES     │         │         │         │
+├───────────────────────┴─────────────┴─────────┴─────────┴─────────┴─────────┤
+│ 19 rows                                                           6 columns │
+└─────────────────────────────────────────────────────────────────────────────┘</code></pre>
+</div>
+</div>
+<p>A detailed description of the columns and their values is available in the <a href="https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf">metadata dictionary</a>. For example, the <code>payment_type</code> field contains “A numeric code signifying how the passenger paid for the trip.” with the following encoding:</p>
+<ul>
+<li>1: Credit card</li>
+<li>2: Cash</li>
+<li>3: No charge</li>
+<li>4: Dispute</li>
+<li>5: Unknown</li>
+<li>6: Voided trip</li>
+</ul>
+<p>In January, more than three million trips were recorded, but a query to return the total number of records executes almost instantaneously - because we don’t need to download the (very large) file first:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"SELECT count(*) FROM '</span><span class="va" style="color: #111111;">$PARQUET_FILE1</span><span class="st" style="color: #20794D;">'"</span><span class="kw" style="color: #003B4F;">;</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>┌──────────────┐
+│ count_star() │
+│    int64     │
+├──────────────┤
+│      3066766 │
+└──────────────┘</code></pre>
+</div>
+</div>
+<p>The vast majority of trips was paid for by credit card (payment type 1), and a small subset of trips was performed free of charge (payment type 3).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"SELECT payment_type, count(payment_type) </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb14-2"><span class="st" style="color: #20794D;">           FROM '</span><span class="va" style="color: #111111;">$PARQUET_FILE1</span><span class="st" style="color: #20794D;">' </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb14-3"><span class="st" style="color: #20794D;">           GROUP BY payment_type LIMIT 5"</span><span class="kw" style="color: #003B4F;">;</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>┌──────────────┬─────────────────────┐
+│ payment_type │ count(payment_type) │
+│    int64     │        int64        │
+├──────────────┼─────────────────────┤
+│            0 │               71743 │
+│            1 │             2411462 │
+│            2 │              532241 │
+│            3 │               18023 │
+│            4 │               33297 │
+└──────────────┴─────────────────────┘</code></pre>
+</div>
+</div>
+<p>We can also query across multiple parquet files, e.g.&nbsp;retrieving the total number of trips for both January and February 2023:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"SELECT count(*) FROM </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb16-2"><span class="st" style="color: #20794D;">           read_parquet(['</span><span class="va" style="color: #111111;">$PARQUET_FILE1</span><span class="st" style="color: #20794D;">', '</span><span class="va" style="color: #111111;">$PARQUET_FILE2</span><span class="st" style="color: #20794D;">'])"</span><span class="kw" style="color: #003B4F;">;</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>┌──────────────┐
+│ count_star() │
+│    int64     │
+├──────────────┤
+│      5980721 │
+└──────────────┘</code></pre>
+</div>
+</div>
+<p>We can also copy the output of a query into a new, local parquet file. For example, the following query will copy records for 100 trips that were performed free of charge into a new <code>free_trips.parquet</code> parquet file in the current working directory:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb18-2">  <span class="st" style="color: #20794D;">"COPY (SELECT * FROM '</span><span class="va" style="color: #111111;">$PARQUET_FILE1</span><span class="st" style="color: #20794D;">' </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb18-3"><span class="st" style="color: #20794D;">         WHERE payment_type = 3 LIMIT 100) TO 'free_trips.parquet' </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb18-4"><span class="st" style="color: #20794D;">  (FORMAT 'parquet');"</span></span></code></pre></div>
+</div>
+<p>We can now query the local parquet file to drill deeper into this data slice:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><span class="ex" style="color: null;">duckdb</span> <span class="at" style="color: #657422;">-c</span> <span class="st" style="color: #20794D;">"SELECT payment_type, count(payment_type) </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb19-2"><span class="st" style="color: #20794D;">           FROM 'free_trips.parquet' </span><span class="dt" style="color: #AD0000;">\</span></span>
+<span id="cb19-3"><span class="st" style="color: #20794D;">           GROUP BY payment_type"</span><span class="kw" style="color: #003B4F;">;</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>┌──────────────┬─────────────────────┐
+│ payment_type │ count(payment_type) │
+│    int64     │        int64        │
+├──────────────┼─────────────────────┤
+│            3 │                 100 │
+└──────────────┴─────────────────────┘</code></pre>
+</div>
+</div>
+</section>
+<section id="apis" class="level3">
+<h3 class="anchored" data-anchor-id="apis">APIs</h3>
+<p>In addition to using the <code>duckdb</code> command line interface (CLI), you can also use a library for your favorite programming language. For example, the <a href="https://cran.r-project.org/package=duckdb">duckdb R package</a> provides a <a href="https://duckdb.org/docs/api/r">DBI interface</a> that enables queries from within an R session. (The <a href="https://duckdb.org/docs/api/python/overview">duckdb python module</a> provides similar functionality.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><span class="cf" style="color: #003B4F;">if</span> (<span class="sc" style="color: #5E5E5E;">!</span><span class="fu" style="color: #4758AB;">requireNamespace</span>(<span class="st" style="color: #20794D;">"duckdb"</span>, <span class="at" style="color: #657422;">quietly =</span> <span class="cn" style="color: #8f5902;">TRUE</span>)) {</span>
+<span id="cb21-2">  <span class="fu" style="color: #4758AB;">install.packages</span>(<span class="st" style="color: #20794D;">"duckdb"</span>)</span>
+<span id="cb21-3">}</span>
+<span id="cb21-4"><span class="fu" style="color: #4758AB;">suppressPackageStartupMessages</span>(<span class="fu" style="color: #4758AB;">library</span>(<span class="st" style="color: #20794D;">"duckdb"</span>))</span>
+<span id="cb21-5"><span class="fu" style="color: #4758AB;">suppressPackageStartupMessages</span>(<span class="fu" style="color: #4758AB;">library</span>(<span class="st" style="color: #20794D;">"DBI"</span>))</span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1">con <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="fu" style="color: #4758AB;">dbConnect</span>(duckdb<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">duckdb</span>(), <span class="at" style="color: #657422;">dbdir =</span> <span class="st" style="color: #20794D;">":memory:"</span>)</span>
+<span id="cb22-2"><span class="fu" style="color: #4758AB;">dbExecute</span>(<span class="at" style="color: #657422;">conn =</span> con, <span class="st" style="color: #20794D;">"INSTALL httpfs"</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>For example, we can use an in-memory duckdb instance to query the one (or more) of the remote parquet files we examined above:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1">PARQUET_FILE1 <span class="ot" style="color: #003B4F;">=</span> <span class="fu" style="color: #4758AB;">paste0</span>(<span class="st" style="color: #20794D;">"https://d37ci6vzurychx.cloudfront.net/"</span>,</span>
+<span id="cb24-2">                       <span class="st" style="color: #20794D;">"trip-data/yellow_tripdata_2023-01.parquet"</span>)</span></code></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1">sql <span class="ot" style="color: #003B4F;">&lt;-</span> <span class="st" style="color: #20794D;">"SELECT payment_type, count(payment_type) \</span></span>
+<span id="cb25-2"><span class="st" style="color: #20794D;">        FROM read_parquet([?]) \</span></span>
+<span id="cb25-3"><span class="st" style="color: #20794D;">        GROUP BY payment_type LIMIT 5"</span>;</span>
+<span id="cb25-4"><span class="fu" style="color: #4758AB;">dbGetQuery</span>(con, sql, <span class="fu" style="color: #4758AB;">list</span>(PARQUET_FILE1))</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  payment_type count(payment_type)
+1            0               71743
+2            1             2411462
+3            2              532241
+4            3               18023
+5            4               33297</code></pre>
+</div>
+</div>
+<p>Alternatively, we can also access data (including CSV and parquet files) using <a href="https://cran.r-project.org/package=dbplyr">dbplyr</a> and <a href="https://cran.r-project.org/package=dplyr">dplyr</a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><span class="fu" style="color: #4758AB;">suppressPackageStartupMessages</span>(<span class="fu" style="color: #4758AB;">library</span>(dbplyr))</span>
+<span id="cb27-2"><span class="fu" style="color: #4758AB;">suppressPackageStartupMessages</span>(<span class="fu" style="color: #4758AB;">library</span>(dplyr))</span>
+<span id="cb27-3"></span>
+<span id="cb27-4"><span class="fu" style="color: #4758AB;">tbl</span>(con, PARQUET_FILE1) <span class="sc" style="color: #5E5E5E;">|&gt;</span></span>
+<span id="cb27-5">  <span class="fu" style="color: #4758AB;">group_by</span>(payment_type) <span class="sc" style="color: #5E5E5E;">|&gt;</span></span>
+<span id="cb27-6">  <span class="fu" style="color: #4758AB;">count</span>() <span class="sc" style="color: #5E5E5E;">|&gt;</span></span>
+<span id="cb27-7">  <span class="fu" style="color: #4758AB;">collect</span>()</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 2
+# Groups:   payment_type [5]
+  payment_type       n
+         &lt;dbl&gt;   &lt;dbl&gt;
+1            0   71743
+2            1 2411462
+3            2  532241
+4            3   18023
+5            4   33297</code></pre>
+</div>
+</div>
+<p>Don’t forget to disconnect from your duckdb database at the end of your R session!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><span class="fu" style="color: #4758AB;">dbDisconnect</span>(con, <span class="at" style="color: #657422;">shutdown=</span><span class="cn" style="color: #8f5902;">TRUE</span>)</span></code></pre></div>
+</div>
+<div class="cell">
+
+</div>
+
+
+<!-- -->
+
+</section>
+</section>
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/duckdb/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Additional options to parse / import CSV files is available in duckdb’s <a href="https://duckdb.org/docs/data/csv/overview.html#parameters">documentation</a>↩︎</p></li>
+<li id="fn2"><p>The <a href="https://www.tadviewer.com/">tad viewer</a> is a free tool to view CSV, Parquet, and SQLite and DuckDb database files↩︎</p></li>
+</ol>
+</section></div> ]]></description>
+  <category>SQL</category>
+  <category>AWS</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/duckdb/index.html</guid>
+  <pubDate>Sat, 06 May 2023 07:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Lemur: analyzing multi-condition single-cell data</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -6681,101 +6963,6 @@ Sadick, Jessica S., Michael R. O’Dea, Philip Hasel, Taitea Dykstra, Arline Fau
   <guid>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</guid>
   <pubDate>Sun, 13 Nov 2022 08:00:00 GMT</pubDate>
   <media:content url="https://tomsing1.github.io/blog/posts/fujita_2022/fujita_fig1ab.jpg" medium="image" type="image/jpeg"/>
-</item>
-<item>
-  <title>Refreshing &amp; exporting temporary AWS credentials</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/aws-export-credentials/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>To increase security when interacting with AWS services, the <a href="https://aws.amazon.com/iam/identity-center/">AWS IAM Identity Center</a> (formerly known as AWS SSO) generates temporary credentials for different AWS roles.</p>
-<p>Today I learned how to configure and refresh these credentials in the command line, as well how to export them either as environmental variables or write them to the <code>credentials</code> file where tools that do not interact with AWS SSO natively can access them.</p>
-<section id="configuring-an-aws-sso-profile" class="level3">
-<h3 class="anchored" data-anchor-id="configuring-an-aws-sso-profile">Configuring an AWS SSO profile</h3>
-<p>First, we need to <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html">configure a named profile</a> for use with AWS SSO. The following <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI version 2</a> command will interactively walk you through the necessary steps:</p>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;">aws</span> configure sso</span></code></pre></div>
-<p>The information you provide will be written to the <code>config</code> file, located in the <code>~/.aws</code> directory on Mac OS. Here is an example:</p>
-<pre><code>[profile my-dev-profile]
-sso_start_url = https://my-sso-portal.awsapps.com/start
-sso_region = us-east-1
-sso_account_id = 123456789011
-sso_role_name = readOnly
-region = us-west-2
-output = json</code></pre>
-</section>
-<section id="logging-into-the-aws-sso-profile" class="level3">
-<h3 class="anchored" data-anchor-id="logging-into-the-aws-sso-profile">Logging into the AWS SSO profile</h3>
-<p>Now we can log into AWS SSO and request temporary credentials:</p>
-<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;">aws</span> sso login <span class="at" style="color: #657422;">--profile</span> my-dev-profile</span></code></pre></div>
-<p>This command will try to open a web browser for you and prompt you to confirm the login. Alternatively, you can copy &amp; paste the displayed URL and manually enter the confirmation code output by the command.</p>
-<p>If the login was successful, you can now adopt the <code>my-dev-profile</code> when using the AWS CLI, e.g.</p>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;">aws</span> s3 ls <span class="at" style="color: #657422;">--profile</span> my-dev-profile</span></code></pre></div>
-<p>The AWS SSO endpoint recognizes many environmental variables that you can use to specify defaults, e.g.</p>
-<ul>
-<li><code>AWS_PROFILE</code>: The profile to use (e.g.&nbsp;my-dev-profile)</li>
-<li><code>AWS_SHARED_CREDENTIALS_FILE</code>: the location of the shared credentials files (default on Mac OS: ~/.aws/.credentials)</li>
-<li><code>AWS_CONFIG_FILE</code>: the location of the AWS CLI configuration file (default on Mac OS: ~/.aws.config)</li>
-</ul>
-</section>
-<section id="accessing-temporary-credentials" class="level3">
-<h3 class="anchored" data-anchor-id="accessing-temporary-credentials">Accessing temporary credentials</h3>
-<p>The AWS CLI and many of the AWS SKDs will automatically detect and use SSO credentials. But other tools might not (yet) be compatible with this authentication route. Instead, they might</p>
-<ul>
-<li>read credentials for a profile from the <code>credentials</code> file</li>
-<li>rely on environmental variables, e.g.&nbsp;<code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code></li>
-</ul>
-<p>To expose the temporary credentials, Ben Kehoe has made the <a href="https://github.com/benkehoe/aws-export-credentials">aws-export-credentials</a> tool available.</p>
-</section>
-<section id="installing-aws-export-credentials" class="level3">
-<h3 class="anchored" data-anchor-id="installing-aws-export-credentials">Installing aws-export-credentials</h3>
-<p>The recommended way to install <code>aws-export-credentials</code> is via <a href="https://pypa.github.io/pipx/">pipx</a> because it will automatically make it available in your PATH.</p>
-<ol type="1">
-<li>If you don’t have <code>pipx</code> available on your system, <a href="https://pypa.github.io/pipx/#install-pipx">install it first</a>.</li>
-<li>Next, install aws-export-credentials by executing the following steps in your shell:</li>
-</ol>
-<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;">pipx</span> ensurepath  <span class="co" style="color: #5E5E5E;"># in case you haven't run this before</span></span>
-<span id="cb5-2"><span class="ex" style="color: null;">pipx</span> install aws-export-credentials</span>
-<span id="cb5-3"><span class="ex" style="color: null;">aws-export-credentials</span> <span class="at" style="color: #657422;">--version</span>  <span class="co" style="color: #5E5E5E;"># verify the installation</span></span></code></pre></div>
-</section>
-<section id="updating-the-credentials-file" class="level3">
-<h3 class="anchored" data-anchor-id="updating-the-credentials-file">Updating the credentials file</h3>
-<p>At the beginning of your workday - or whenever needed - run the following set of commands. (Replace the SSO profile with the one you want to adopt.)</p>
-<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="va" style="color: #111111;">PROFILE</span><span class="op" style="color: #5E5E5E;">=</span><span class="st" style="color: #20794D;">"my-dev-profile"</span></span>
-<span id="cb6-2"></span>
-<span id="cb6-3"><span class="co" style="color: #5E5E5E;"># retrieve new credentials from AWS</span></span>
-<span id="cb6-4"><span class="ex" style="color: null;">aws</span> sso login <span class="at" style="color: #657422;">--profile</span> <span class="st" style="color: #20794D;">"</span><span class="va" style="color: #111111;">${PROFILE}</span><span class="st" style="color: #20794D;">"</span></span>
-<span id="cb6-5"></span>
-<span id="cb6-6"><span class="co" style="color: #5E5E5E;"># write the temporary credentials to the ~/.aws/credentials file</span></span>
-<span id="cb6-7"><span class="ex" style="color: null;">aws-export-credentials</span> <span class="dt" style="color: #AD0000;">\</span></span>
-<span id="cb6-8">  <span class="at" style="color: #657422;">--profile</span> <span class="st" style="color: #20794D;">"</span><span class="va" style="color: #111111;">${PROFILE}</span><span class="st" style="color: #20794D;">"</span> <span class="dt" style="color: #AD0000;">\</span></span>
-<span id="cb6-9">  <span class="at" style="color: #657422;">--credentials-file-profile</span> <span class="st" style="color: #20794D;">"</span><span class="va" style="color: #111111;">${PROFILE}</span><span class="st" style="color: #20794D;">"</span></span></code></pre></div>
-<p>This will refresh the credentials (via <code>aws sso login</code>) and then write them to the <code>my-dev-profile</code> profiles in the <code>~/.aws/.credentials</code> file. Now we can access them e.g.&nbsp;in the <a href="https://cloud.r-project.org/web/packages/aws.s3/index.html">aws.s3</a> R package:</p>
-<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;">library</span>(aws.s3)</span>
-<span id="cb7-2"><span class="fu" style="color: #4758AB;">library</span>(aws.signature)</span>
-<span id="cb7-3">aws.signature<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">use_credentials</span>(<span class="at" style="color: #657422;">profile =</span> <span class="st" style="color: #20794D;">"my-dev-profile"</span>)</span>
-<span id="cb7-4">aws.s3<span class="sc" style="color: #5E5E5E;">::</span><span class="fu" style="color: #4758AB;">bucketlist</span>()</span></code></pre></div>
-</section>
-<section id="exposing-environmental-variables" class="level3">
-<h3 class="anchored" data-anchor-id="exposing-environmental-variables">Exposing environmental variables</h3>
-<p>Some tools <em>only</em> recognize environmental variables. Luckily, <code>aws-export-credentials</code> can automate this process, too:</p>
-<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="bu" style="color: null;">export</span> <span class="va" style="color: #111111;">$(</span><span class="ex" style="color: null;">aws-export-credentials</span> <span class="at" style="color: #657422;">--profile</span> my-dev-profile <span class="at" style="color: #657422;">--env-export</span><span class="va" style="color: #111111;">)</span></span></code></pre></div>
-<p>will export <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> variables in your shell session.</p>
-</section>
-<section id="sourcing-credentials-with-an-external-process" class="level3">
-<h3 class="anchored" data-anchor-id="sourcing-credentials-with-an-external-process">Sourcing credentials with an external process</h3>
-<p>Finally, you can also include a command that looks up credentials as a <code>credential_process</code> in your config file. (<a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html">More information here</a>) But that’s not a use case I have explored, yet.</p>
-
-
-</section>
-
-<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/aws-export-credentials/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
-  <category>TIL</category>
-  <category>AWS</category>
-  <guid>https://tomsing1.github.io/blog/posts/aws-export-credentials/index.html</guid>
-  <pubDate>Sun, 13 Nov 2022 08:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

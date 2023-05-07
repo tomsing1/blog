@@ -1,0 +1,286 @@
+---
+title: "Querying parquet files with duckdb"
+author: "Thomas Sandmann"
+date: "2023-05-06"
+freeze: true
+categories: [SQL, AWS, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| echo: false
+#| results: hide
+#| cache: false
+Sys.setenv(
+  REMOTE_FILE = paste0("https://raw.githubusercontent.com/mwaskom/",
+                       "seaborn-data/master/penguins.csv")
+)
+```
+
+```{bash}
+#| echo: false
+#| results: hide
+#| cache: false
+rm -f penguins.duckdb free_trips.parquet
+```
+
+## tl;dr
+
+Today I learned how to access and query parquet files with [duckdb](https://duckdb.org/).
+
+### Motivation
+
+[duckdb](https://duckdb.org/) is a relational (table-oriented) database 
+management system (RDMS) contained in a single executable. It excels at
+processing tabular datasets, e.g. from CSV or Parquet files, from local
+file systems or remote sources.
+
+[Apache Parquet](https://parquet.apache.org/) is
+> an open source, column-oriented data file format designed for efficient data storage and retrieval.
+
+Here, I am learning how to use `duckdb` to query a remote parquet file stored
+on AWS S3 (without retrieving the full dataset).
+
+### Prequisites
+
+I installed the duckdb executable on my Mac OS system with homebrew:
+
+```bash
+brew install duckdb
+duckdb --version
+```
+
+### Getting started
+
+By default, `duckdb` will create database in memory. Like other RMDS, it
+supports a 
+[core set of SQL statements](https://duckdb.org/docs/sql/introduction)
+and expressions. In addition, 
+[extensions](https://duckdb.org/docs/extensions/overview) provide additional
+functionality, e.g.
+[connecting to Postgres databases](https://duckdb.org/docs/extensions/postgres_scanner)
+or
+[supporting JSON data](https://duckdb.org/docs/extensions/json).
+
+Commands can either be entered interactively, provided via the `-c` argument
+or in a text file. To access remote files, we first need to  install the 
+[httpsfs` extension](https://duckdb.org/docs/extensions/httpfs)
+that allows reading remote/writing remote files [^1].
+
+```bash
+duckdb -c "INSTALL httpfs"
+```
+
+To get started, we read a small dataset from a CSV file hosted publicly on a
+webserver. For brevity, we store this URL in the environmental variable
+`REMOTE_FILE`:
+
+```bash
+REMOTE_FILE=https://raw.githubusercontent.com/mwaskom/seaborn-data/master/penguins.csv
+```
+
+[^1]: Additional options to parse / import CSV files is available in duckdb's [documentation](https://duckdb.org/docs/data/csv/overview.html#parameters)
+
+```{bash select}
+duckdb -c "SELECT species, island, sex, bill_length_mm, bill_depth_mm \
+           FROM '$REMOTE_FILE' LIMIT 5;" 
+```
+
+By default, `duckdb` will use a temporary, in-memory database. 
+To open or create a persistent database, simply include a path as a command
+line argument, e.g. `duckdb path/to/my_database.duckdb`
+
+For example, the following command will download the remote CSV file and 
+import it into a duckdb database and store it in the `penguins.duckdb` file.
+
+```{bash import}
+duckdb \
+  -c "CREATE TABLE penguins AS SELECT * FROM '${REMOTE_FILE}';" \
+  penguins.duckdb 
+```
+
+Now, we can query the local file with `duckdb` or explore it interactive with
+the
+[tad viewer](https://duckdb.org/docs/guides/data_viewers/tad) [^2]
+
+```{bash}
+duckdb \
+  -c "SELECT * from penguins WHERE sex = 'MALE' LIMIT 5;" \
+  penguins.duckdb
+```
+
+[^2]: The [tad viewer](https://www.tadviewer.com/) is a free tool to view 
+CSV, Parquet, and SQLite and DuckDb database files
+
+### Querying remote parquet files
+
+The 
+[NYC Taxi & Limousine Commission](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+has collected data on public NYC taxi and for-hire vehicle (Uber, Lyft)
+trips, going all the way back to 2009. The data is shared in the form
+of parquet files, and one parquet file is created for each month of 
+data.
+
+Here, I will use the Yellow Taxi Trip records from January and February
+2023 as examples. Let's store the URLs pointing to the respective
+parquet files in environmental variables.
+
+```bash
+PARQUET_FILE1="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet"
+PARQUET_FILE2="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-02.parquet"
+```
+
+```{r}
+#| echo: false
+#| results: hide
+#| cache: false
+Sys.setenv(PARQUET_FILE1="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-01.parquet")
+Sys.setenv(PARQUET_FILE2="https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2023-02.parquet")
+
+```
+
+Each parquet file stores a single table of data. To get an overview of
+the available information, we ask `duckdb` to DESCRIBE it:
+
+```{bash}
+duckdb -c "DESCRIBE SELECT * FROM '$PARQUET_FILE1'";
+```
+
+A detailed description of the columns and their values is available
+in the 
+[metadata dictionary](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf). For example, the `payment_type`
+field contains "A numeric code signifying how the passenger paid for the trip." with the following encoding:
+
+- 1: Credit card
+- 2: Cash
+- 3: No charge
+- 4: Dispute
+- 5: Unknown
+- 6: Voided trip
+
+In January, more than three million trips were recorded, but a
+query to return the total number of records executes almost 
+instantaneously - because we don't need to download the (very large)
+file first:
+
+```{bash}
+duckdb -c "SELECT count(*) FROM '$PARQUET_FILE1'";
+```
+
+The vast majority of trips was paid for by credit card (payment type 1),
+and a small subset of trips was performed free of charge 
+(payment type 3).
+
+```{bash}
+duckdb -c "SELECT payment_type, count(payment_type) \
+           FROM '$PARQUET_FILE1' \
+           GROUP BY payment_type LIMIT 5";
+```
+
+We can also query across multiple parquet files, e.g. retrieving the total number of trips for both January and February 2023:
+
+```{bash}
+duckdb -c "SELECT count(*) FROM \
+           read_parquet(['$PARQUET_FILE1', '$PARQUET_FILE2'])";
+```
+
+We can also copy the output of a query into a new, local parquet file.
+For example, the following query will copy records for 100 trips that
+were performed free of charge into a new `free_trips.parquet` parquet
+file in the current working directory:
+
+```{bash}
+duckdb -c \
+  "COPY (SELECT * FROM '$PARQUET_FILE1' \
+         WHERE payment_type = 3 LIMIT 100) TO 'free_trips.parquet' \
+  (FORMAT 'parquet');"
+```
+
+We can now query the local parquet file to drill deeper into this
+data slice:
+
+```{bash}
+duckdb -c "SELECT payment_type, count(payment_type) \
+           FROM 'free_trips.parquet' \
+           GROUP BY payment_type";
+```
+
+### APIs
+
+In addition to using the `duckdb` command line interface (CLI), you can
+also use a library for your favorite programming language. For example,
+the
+[duckdb R package](https://cran.r-project.org/package=duckdb)
+provides a 
+[DBI interface](https://duckdb.org/docs/api/r) 
+that enables queries from within an R session.
+(The 
+[duckdb python module](https://duckdb.org/docs/api/python/overview)
+provides similar functionality.)
+
+```{r}
+if (!requireNamespace("duckdb", quietly = TRUE)) {
+  install.packages("duckdb")
+}
+library("duckdb")
+library("DBI")
+con <- dbConnect(duckdb::duckdb(), dbdir = ":memory:")
+dbExecute(conn = con, "INSTALL httpfs")
+```
+
+For example, we can use an in-memory duckdb instance to query the
+one (or more) of the remote parquet files we examined above:
+
+```{r}
+PARQUET_FILE1 = paste0("https://d37ci6vzurychx.cloudfront.net/",
+                       "trip-data/yellow_tripdata_2023-01.parquet")
+```
+
+```{r}
+sql <- "SELECT payment_type, count(payment_type) \
+        FROM read_parquet([?]) \
+        GROUP BY payment_type LIMIT 5";
+dbGetQuery(con, sql, list(PARQUET_FILE1))
+```
+
+Alternatively, we can also access data (including CSV and parquet files)
+using 
+[dbplyr](https://cran.r-project.org/package=dbplyr) 
+and
+[dplyr](https://cran.r-project.org/package=dplyr)
+
+```{r}
+library(dbplyr)
+library(dplyr)
+
+tbl(con, PARQUET_FILE1) |>
+  group_by(payment_type) |>
+  count() |>
+  collect()
+```
+
+Don't forget to disconnect from your duckdb database at the end of your
+R session!
+
+```{r}
+dbDisconnect(con, shutdown=TRUE)
+```
+
+```{bash cleanup}
+#| echo: false
+#| results: hide
+#| cache: false
+rm -f penguins.duckdb  free_trips.parquet
+```

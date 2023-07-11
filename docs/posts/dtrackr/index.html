@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Sandmann">
+<meta name="dcterms.date" content="2023-06-26">
+
+<title>Thomas Sandmann’s blog - Documenting data wrangling with the dtrackr R package</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-XNBDW4FYSC"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-XNBDW4FYSC', { 'anonymize_ip': true});
+</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Thomas Sandmann’s blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/tomsing1" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann" rel="" target=""><i class="bi bi-mastodon" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Documenting data wrangling with the dtrackr R package</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">tidyverse</div>
+                <div class="quarto-category">TIL</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Thomas Sandmann </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 26, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">tl;dr</a></li>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
+  <li><a href="#retrieving-metadata-from-the-cancer-genome-atlas" id="toc-retrieving-metadata-from-the-cancer-genome-atlas" class="nav-link" data-scroll-target="#retrieving-metadata-from-the-cancer-genome-atlas">Retrieving metadata from The Cancer Genome Atlas</a></li>
+  <li><a href="#default-options" id="toc-default-options" class="nav-link" data-scroll-target="#default-options">Default options</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<p>Today I learned about Robert Challen’s <a href="https://cran.r-project.org/package=dtrackr">dtrackr</a> R package. It extends functionality from the <a href="https://www.tidyverse.org/">tidyverse</a> to track and visualize the data wrangling operations that have been applied to a dataset.</p>
+</section>
+<section id="motivation" class="level2">
+<h2 class="anchored" data-anchor-id="motivation">Motivation</h2>
+<p>Publications involving cohorts of human subjects often include flow charts describing which participants were screened, included in a specific study arm or excluded from analysis. In fact, reporting guidelines such as <a href="https://www.equator-network.org/reporting-guidelines/consort/">CONSORT</a>, <a href="https://www.equator-network.org/reporting-guidelines/strobe/">STROBE</a> or <a href="https://www.equator-network.org/reporting-guidelines/stard/">STARD</a> include visualizations that communcate how the participants flowed through the study.</p>
+<p>If a dataset is processed with tidyverse functions, e.g.&nbsp;from the <a href="https://dplyr.tidyverse.org/">dplyr</a> or <a href="https://tidyr.tidyverse.org/">tidyr</a> R packages, methods from the <code>dtrackr</code> package add metadata to each step - and automatically generate a flow chart.</p>
+</section>
+<section id="installation" class="level2">
+<h2 class="anchored" data-anchor-id="installation">Installation</h2>
+<p>The <code>dtrackr</code> package is available from <a href="https://cran.r-project.org/package=dtrackr">CRAN</a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"dtrackr"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"dtrackr"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(<span class="st">"dplyr"</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(<span class="st">"dtrackr"</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"glue"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"GenomicDataCommons"</span>, </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">include.only =</span> <span class="fu">c</span>(<span class="st">"cases"</span>, <span class="st">"results"</span>, <span class="st">"ids"</span>, <span class="st">"gdc_clinical"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>It contains several very useful vignettes, including an example of <a href="https://terminological.github.io/dtrackr/articles/consort-example.html">processing clinical trial according to CONSORT guidelines</a>.</p>
+</section>
+<section id="retrieving-metadata-from-the-cancer-genome-atlas" class="level2">
+<h2 class="anchored" data-anchor-id="retrieving-metadata-from-the-cancer-genome-atlas">Retrieving metadata from The Cancer Genome Atlas</h2>
+<p>The <a href="https://bioconductor.org/packages/release/bioc/html/GenomicDataCommons.html">GenomicDataCommons Bioconductor Package</a> provides an interface to search and retrieve data and <em>metadata</em> from <a href="https://gdc.cancer.gov/about-gdc">the NIH Genomic Data Commons (GDC)</a>, including information from <a href="https://www.cancer.gov/ccg/research/genome-sequencing/tcga">The Cancer Genome Atlas (TCGA)</a> an international collaboration that collected molecular and clinical data on tens of thousands of human tumor samples.</p>
+<p>Here, we retrieve metadata on the subjects and samples available as part of TCGA, and then use <code>dtrackr</code> to select a (hypothetical) subset of samples for analysis.</p>
+<p>We start by retrieving data on 500 cases</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>case_ids <span class="ot">=</span> <span class="fu">cases</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">results</span>(<span class="at">size=</span>500L) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ids</span>()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>clindat <span class="ot">=</span> <span class="fu">gdc_clinical</span>(case_ids)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(clindat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "demographic" "diagnoses"   "exposures"   "main"       </code></pre>
+</div>
+</div>
+<p>and obtain four data.frames: demographic, diagnoses, exposures and main with complementary pieces of metadata for each participant. Of note, the <code>diagnoses</code> data.frame can contain multiple rows for the same <code>case_id</code>, e.g. when both primary tumor and a metastasis samples were collected from the same patient.</p>
+<p>Next, we will wrangle it into shape and track our process with <code>dtrackr</code>.</p>
+</section>
+<section id="default-options" class="level2">
+<h2 class="anchored" data-anchor-id="default-options">Default options</h2>
+<p>First, we set a few default options:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>old <span class="ot">=</span> <span class="fu">options</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtrackr.strata_glue=</span><span class="st">"{tolower(.value)}"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtrackr.strata_sep=</span><span class="st">", "</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtrackr.default_message =</span> <span class="st">"{.count} records"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="at">dtrackr.default_headline =</span> <span class="st">"{paste(.strata, ' ')}"</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>clindat<span class="sc">$</span>demographic <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comment</span>(<span class="st">"Demographic"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">track</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(clindat<span class="sc">$</span>main, case_id, disease_type),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"case_id"</span>, </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">.headline =</span> <span class="st">"Added disease type"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.messages =</span> <span class="fu">c</span>(<span class="st">"{.count.lhs} records from Demographic table"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"joined with {.count.rhs} records from Main table:"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"{.count.out} in linked set"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">include_any</span>(</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    disease_type <span class="sc">==</span> <span class="st">"Adenomas and Adenocarcinomas"</span> <span class="sc">~</span> <span class="st">"{.included} Adenomas/ Adenocarcinomas"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    disease_type <span class="sc">==</span> <span class="st">"Ductal and Lobular Neoplasms"</span> <span class="sc">~</span> <span class="st">"{.included} Ductal and Lobular Neoplasms "</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>     disease_type <span class="sc">==</span> <span class="st">"Gliomas"</span> <span class="sc">~</span> <span class="st">"{.included} Gliomas"</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">.headline =</span> <span class="st">"Included disease types"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exclude_all</span>(</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    age_at_index<span class="sc">&lt;</span><span class="dv">35</span> <span class="sc">~</span> <span class="st">"{.excluded} subjects under 35"</span>,</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    age_at_index<span class="sc">&gt;</span><span class="dv">75</span> <span class="sc">~</span> <span class="st">"{.excluded} subjects over 75"</span>,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    race<span class="sc">!=</span><span class="st">"white"</span> <span class="sc">~</span> <span class="st">"{.excluded} non-white subjects"</span>,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">.headline =</span> <span class="st">"Exclusions:"</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(disease_type, <span class="at">.messages=</span><span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count_subgroup</span>(ethnicity) <span class="sc">%&gt;%</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">status</span>(</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">percent_male =</span> <span class="fu">sprintf</span>(<span class="st">"%1.2f%%"</span>, <span class="fu">mean</span>(gender<span class="sc">==</span><span class="st">"male"</span>) <span class="sc">*</span> <span class="dv">100</span>),</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">.messages =</span> <span class="fu">c</span>(<span class="st">"male: {percent_male}"</span>)                    </span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>(<span class="at">.messages =</span> <span class="st">"{.count} in final data set"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">flowchart</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<!--?xml version="1.0" encoding="UTF-8" standalone="no"?-->
+
+<!-- Generated by graphviz version 2.40.1 (20161225.0304)
+ -->
+<!-- Title: %0 Pages: 1 -->
+<svg width="363.018pt" height="288.000pt" viewbox="0 0 363.018 288.000" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(0.862 0.862) rotate(0) translate(4 330.000)">
+<title>%0</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-330 417.366,-330 417.366,4 -4,4"></polygon>
+<!-- 8&#45;&gt;11 -->
+<g id="edge3" class="edge">
+<title>8:s-&gt;11</title>
+<path fill="none" stroke="#000000" d="M68.3536,-48C68.3536,-48 68.3536,-15 68.3536,-15 68.3536,-15 167.5159,-15 167.5159,-15"></path>
+<polygon fill="#000000" stroke="#000000" points="167.5159,-16.7501 172.5159,-15 167.5158,-13.2501 167.5159,-16.7501"></polygon>
+</g>
+<!-- 9&#45;&gt;11 -->
+<g id="edge2" class="edge">
+<title>9:s-&gt;11</title>
+<path fill="none" stroke="#000000" d="M214.3536,-48C214.3536,-48 214.3536,-35.3407 214.3536,-35.3407"></path>
+<polygon fill="#000000" stroke="#000000" points="216.1037,-35.3407 214.3536,-30.3407 212.6037,-35.3407 216.1037,-35.3407"></polygon>
+</g>
+<!-- 10&#45;&gt;11 -->
+<g id="edge1" class="edge">
+<title>10:s-&gt;11</title>
+<path fill="none" stroke="#000000" d="M352.3536,-48C352.3536,-48 352.3536,-15 352.3536,-15 352.3536,-15 261.1326,-15 261.1326,-15"></path>
+<polygon fill="#000000" stroke="#000000" points="261.1327,-13.2501 256.1326,-15 261.1326,-16.7501 261.1327,-13.2501"></polygon>
+</g>
+<!-- 5&#45;&gt;8 -->
+<g id="edge6" class="edge">
+<title>5:s-&gt;8</title>
+<path fill="none" stroke="#000000" d="M68.3536,-96C68.3536,-96 68.3536,-83.3407 68.3536,-83.3407"></path>
+<polygon fill="#000000" stroke="#000000" points="70.1037,-83.3407 68.3536,-78.3407 66.6037,-83.3407 70.1037,-83.3407"></polygon>
+</g>
+<!-- 6&#45;&gt;9 -->
+<g id="edge5" class="edge">
+<title>6:s-&gt;9</title>
+<path fill="none" stroke="#000000" d="M214.3536,-96C214.3536,-96 214.3536,-83.3407 214.3536,-83.3407"></path>
+<polygon fill="#000000" stroke="#000000" points="216.1037,-83.3407 214.3536,-78.3407 212.6037,-83.3407 216.1037,-83.3407"></polygon>
+</g>
+<!-- 7&#45;&gt;10 -->
+<g id="edge4" class="edge">
+<title>7:s-&gt;10</title>
+<path fill="none" stroke="#000000" d="M352.3536,-96C352.3536,-96 352.3536,-83.3407 352.3536,-83.3407"></path>
+<polygon fill="#000000" stroke="#000000" points="354.1037,-83.3407 352.3536,-78.3407 350.6037,-83.3407 354.1037,-83.3407"></polygon>
+</g>
+<!-- 3&#45;&gt;5 -->
+<g id="edge9" class="edge">
+<title>3:s-&gt;5</title>
+<path fill="none" stroke="#000000" d="M147.4496,-160C147.4496,-160 147.4496,-119 147.4496,-119 147.4496,-119 141.7824,-119 141.7824,-119"></path>
+<polygon fill="#000000" stroke="#000000" points="141.7824,-117.2501 136.7824,-119 141.7823,-120.7501 141.7824,-117.2501"></polygon>
+</g>
+<!-- 3&#45;&gt;6 -->
+<g id="edge8" class="edge">
+<title>3:s-&gt;6</title>
+<path fill="none" stroke="#000000" d="M214.3536,-160C214.3536,-160 214.3536,-147.3744 214.3536,-147.3744"></path>
+<polygon fill="#000000" stroke="#000000" points="216.1037,-147.3743 214.3536,-142.3744 212.6037,-147.3744 216.1037,-147.3743"></polygon>
+</g>
+<!-- 3&#45;&gt;7 -->
+<g id="edge7" class="edge">
+<title>3:s-&gt;7</title>
+<path fill="none" stroke="#000000" d="M281.2576,-160C281.2576,-160 281.2576,-119 281.2576,-119 281.2576,-119 286.1432,-119 286.1432,-119"></path>
+<polygon fill="#000000" stroke="#000000" points="286.1432,-120.7501 291.1432,-119 286.1432,-117.2501 286.1432,-120.7501"></polygon>
+</g>
+<!-- 3&#45;&gt;4 -->
+<g id="edge10" class="edge">
+<title>3:e-&gt;4</title>
+<path fill="none" stroke="#000000" d="M285.3536,-187C285.3536,-187 293.2901,-187 293.2901,-187"></path>
+<polygon fill="#000000" stroke="#000000" points="293.2902,-188.7501 298.2901,-187 293.2901,-185.2501 293.2902,-188.7501"></polygon>
+</g>
+<!-- 2&#45;&gt;3 -->
+<g id="edge11" class="edge">
+<title>2:s-&gt;3</title>
+<path fill="none" stroke="#000000" d="M214.3536,-232C214.3536,-232 214.3536,-219.2148 214.3536,-219.2148"></path>
+<polygon fill="#000000" stroke="#000000" points="216.1037,-219.2148 214.3536,-214.2148 212.6037,-219.2148 216.1037,-219.2148"></polygon>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge12" class="edge">
+<title>1:s-&gt;2</title>
+<path fill="none" stroke="#000000" d="M214.3536,-296C214.3536,-296 214.3536,-283.3744 214.3536,-283.3744"></path>
+<polygon fill="#000000" stroke="#000000" points="216.1037,-283.3743 214.3536,-278.3744 212.6037,-283.3744 216.1037,-283.3743"></polygon>
+</g>
+<!-- 11 -->
+<g id="node1" class="node">
+<title>11</title>
+<polygon fill="#ffffff" stroke="#000000" points="256.2144,-30 172.4928,-30 172.4928,0 256.2144,0 256.2144,-30"></polygon>
+<text text-anchor="start" x="179.6736" y="-16.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000"> &nbsp;</text>
+<text text-anchor="start" x="179.6736" y="-8.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">242 in final data set</text>
+</g>
+<!-- 8 -->
+<g id="node2" class="node">
+<title>8</title>
+<polygon fill="#ffffff" stroke="#000000" points="136.5611,-78 .1461,-78 .1461,-48 136.5611,-48 136.5611,-78"></polygon>
+<text text-anchor="start" x="7" y="-64.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">adenomas and adenocarcinomas &nbsp;</text>
+<text text-anchor="start" x="7" y="-56.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">male: 64.71%</text>
+</g>
+<!-- 9 -->
+<g id="node3" class="node">
+<title>9</title>
+<polygon fill="#ffffff" stroke="#000000" points="275.8289,-78 152.8783,-78 152.8783,-48 275.8289,-48 275.8289,-78"></polygon>
+<text text-anchor="start" x="160.1164" y="-64.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">ductal and lobular neoplasms &nbsp;</text>
+<text text-anchor="start" x="160.1164" y="-56.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">male: 1.31%</text>
+</g>
+<!-- 10 -->
+<g id="node4" class="node">
+<title>10</title>
+<polygon fill="#ffffff" stroke="#000000" points="383.7561,-78 320.9511,-78 320.9511,-48 383.7561,-48 383.7561,-78"></polygon>
+<text text-anchor="start" x="327.9024" y="-64.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">gliomas &nbsp;</text>
+<text text-anchor="start" x="327.9024" y="-56.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">male: 47.37%</text>
+</g>
+<!-- 5 -->
+<g id="node5" class="node">
+<title>5</title>
+<polygon fill="#ffffff" stroke="#000000" points="136.5611,-142 .1461,-142 .1461,-96 136.5611,-96 136.5611,-142"></polygon>
+<text text-anchor="start" x="7" y="-128.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">adenomas and adenocarcinomas &nbsp;</text>
+<text text-anchor="start" x="7" y="-120.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">hispanic or latino: 1 items</text>
+<text text-anchor="start" x="7" y="-112.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">not hispanic or latino: 45 items</text>
+<text text-anchor="start" x="7" y="-104.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">Unknown: 5 items</text>
+</g>
+<!-- 6 -->
+<g id="node6" class="node">
+<title>6</title>
+<polygon fill="#ffffff" stroke="#000000" points="277.8265,-142 150.8807,-142 150.8807,-96 277.8265,-96 277.8265,-142"></polygon>
+<text text-anchor="start" x="158.1176" y="-128.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">ductal and lobular neoplasms &nbsp;</text>
+<text text-anchor="start" x="158.1176" y="-120.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">hispanic or latino: 11 items</text>
+<text text-anchor="start" x="158.1176" y="-112.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">not hispanic or latino: 125 items</text>
+<text text-anchor="start" x="158.1176" y="-104.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">not reported: 17 items</text>
+</g>
+<!-- 7 -->
+<g id="node7" class="node">
+<title>7</title>
+<polygon fill="#ffffff" stroke="#000000" points="413.3784,-142 291.3288,-142 291.3288,-96 413.3784,-96 413.3784,-142"></polygon>
+<text text-anchor="start" x="298.3412" y="-128.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">gliomas &nbsp;</text>
+<text text-anchor="start" x="298.3412" y="-120.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">hispanic or latino: 2 items</text>
+<text text-anchor="start" x="298.3412" y="-112.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">not hispanic or latino: 32 items</text>
+<text text-anchor="start" x="298.3412" y="-104.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">Unknown: 4 items</text>
+</g>
+<!-- 3 -->
+<g id="node8" class="node">
+<title>3</title>
+<polygon fill="#ffffff" stroke="#000000" points="284.9977,-214 143.7095,-214 143.7095,-160 284.9977,-160 284.9977,-214"></polygon>
+<text text-anchor="start" x="150.7816" y="-200.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">Included disease types</text>
+<text text-anchor="start" x="150.7816" y="-192.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">inclusions:</text>
+<text text-anchor="start" x="150.7816" y="-184.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">111 Adenomas/ Adenocarcinomas</text>
+<text text-anchor="start" x="150.7816" y="-176.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">292 Ductal and Lobular Neoplasms </text>
+<text text-anchor="start" x="150.7816" y="-168.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">41 Gliomas</text>
+</g>
+<!-- 4 -->
+<g id="node9" class="node">
+<title>4</title>
+<polygon fill="#cccccc" stroke="#000000" points="394.1546,-210 298.5526,-210 298.5526,-164 394.1546,-164 394.1546,-210"></polygon>
+<text text-anchor="start" x="305.4532" y="-196.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">Exclusions:</text>
+<text text-anchor="start" x="305.4532" y="-188.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">8 subjects under 35</text>
+<text text-anchor="start" x="305.4532" y="-180.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">27 subjects over 75</text>
+<text text-anchor="start" x="305.4532" y="-172.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">178 non-white subjects</text>
+</g>
+<!-- 2 -->
+<g id="node10" class="node">
+<title>2</title>
+<polygon fill="#ffffff" stroke="#000000" points="292.1553,-278 136.5519,-278 136.5519,-232 292.1553,-232 292.1553,-278"></polygon>
+<text text-anchor="start" x="143.4528" y="-264.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000">Added disease type</text>
+<text text-anchor="start" x="143.4528" y="-256.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">500 records from Demographic table</text>
+<text text-anchor="start" x="143.4528" y="-248.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">joined with 500 records from Main table:</text>
+<text text-anchor="start" x="143.4528" y="-240.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">500 in linked set</text>
+</g>
+<!-- 1 -->
+<g id="node11" class="node">
+<title>1</title>
+<polygon fill="#ffffff" stroke="#000000" points="244.9152,-326 183.792,-326 183.792,-296 244.9152,-296 244.9152,-326"></polygon>
+<text text-anchor="start" x="190.5736" y="-312.8" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="8.00" fill="#000000"> &nbsp;</text>
+<text text-anchor="start" x="190.5736" y="-304.8" font-family="Helvetica,sans-Serif" font-size="8.00" fill="#000000">Demographic</text>
+</g>
+</g>
+</svg>
+
+</div>
+</div>
+<p>Finally, we restore the default options:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(old)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="Session Information">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Session Information
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.3.0 (2023-04-21)
+ os       macOS Ventura 13.4
+ system   x86_64, darwin20
+ ui       X11
+ language (EN)
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       America/Los_Angeles
+ date     2023-06-26
+ pandoc   2.19.2 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ package            * version   date (UTC) lib source
+ BiocGenerics         0.46.0    2023-04-25 [1] Bioconductor
+ bitops               1.0-7     2021-04-24 [1] CRAN (R 4.3.0)
+ cli                  3.6.1     2023-03-23 [1] CRAN (R 4.3.0)
+ crayon               1.5.2     2022-09-29 [1] CRAN (R 4.3.0)
+ curl                 5.0.1     2023-06-07 [1] CRAN (R 4.3.0)
+ digest               0.6.32    2023-06-26 [1] CRAN (R 4.3.0)
+ dplyr              * 1.1.2     2023-04-20 [1] CRAN (R 4.3.0)
+ dtrackr            * 0.4.0     2023-03-24 [1] CRAN (R 4.3.0)
+ evaluate             0.21      2023-05-05 [1] CRAN (R 4.3.0)
+ fansi                1.0.4     2023-01-22 [1] CRAN (R 4.3.0)
+ fastmap              1.1.1     2023-02-24 [1] CRAN (R 4.3.0)
+ generics             0.1.3     2022-07-05 [1] CRAN (R 4.3.0)
+ GenomeInfoDb         1.36.1    2023-06-21 [1] Bioconductor
+ GenomeInfoDbData     1.2.10    2023-04-30 [1] Bioconductor
+ GenomicDataCommons * 1.24.2    2023-05-25 [1] Bioconductor
+ GenomicRanges        1.52.0    2023-04-25 [1] Bioconductor
+ glue               * 1.6.2     2022-02-24 [1] CRAN (R 4.3.0)
+ hms                  1.1.3     2023-03-21 [1] CRAN (R 4.3.0)
+ htmltools            0.5.5     2023-03-23 [1] CRAN (R 4.3.0)
+ htmlwidgets          1.6.2     2023-03-17 [1] CRAN (R 4.3.0)
+ httr                 1.4.6     2023-05-08 [1] CRAN (R 4.3.0)
+ IRanges              2.34.1    2023-06-22 [1] Bioconductor
+ jsonlite             1.8.5     2023-06-05 [1] CRAN (R 4.3.0)
+ knitr                1.43      2023-05-25 [1] CRAN (R 4.3.0)
+ lifecycle            1.0.3     2022-10-07 [1] CRAN (R 4.3.0)
+ magrittr             2.0.3     2022-03-30 [1] CRAN (R 4.3.0)
+ pillar               1.9.0     2023-03-22 [1] CRAN (R 4.3.0)
+ pkgconfig            2.0.3     2019-09-22 [1] CRAN (R 4.3.0)
+ purrr                1.0.1     2023-01-10 [1] CRAN (R 4.3.0)
+ R6                   2.5.1     2021-08-19 [1] CRAN (R 4.3.0)
+ rappdirs             0.3.3     2021-01-31 [1] CRAN (R 4.3.0)
+ Rcpp                 1.0.10    2023-01-22 [1] CRAN (R 4.3.0)
+ RCurl                1.98-1.12 2023-03-27 [1] CRAN (R 4.3.0)
+ readr                2.1.4     2023-02-10 [1] CRAN (R 4.3.0)
+ rlang                1.1.1     2023-04-28 [1] CRAN (R 4.3.0)
+ rmarkdown            2.22      2023-06-01 [1] CRAN (R 4.3.0)
+ rstudioapi           0.14      2022-08-22 [1] CRAN (R 4.3.0)
+ S4Vectors            0.38.1    2023-05-11 [1] Bioconductor
+ sessioninfo          1.2.2     2021-12-06 [1] CRAN (R 4.3.0)
+ stringi              1.7.12    2023-01-11 [1] CRAN (R 4.3.0)
+ stringr              1.5.0     2022-12-02 [1] CRAN (R 4.3.0)
+ tibble               3.2.1     2023-03-20 [1] CRAN (R 4.3.0)
+ tidyr                1.3.0     2023-01-24 [1] CRAN (R 4.3.0)
+ tidyselect           1.2.0     2022-10-10 [1] CRAN (R 4.3.0)
+ tzdb                 0.4.0     2023-05-12 [1] CRAN (R 4.3.0)
+ utf8                 1.2.3     2023-01-31 [1] CRAN (R 4.3.0)
+ V8                   4.3.0     2023-04-08 [1] CRAN (R 4.3.0)
+ vctrs                0.6.3     2023-06-14 [1] CRAN (R 4.3.0)
+ withr                2.5.0     2022-03-03 [1] CRAN (R 4.3.0)
+ xfun                 0.39      2023-04-20 [1] CRAN (R 4.3.0)
+ xml2                 1.3.4     2023-04-27 [1] CRAN (R 4.3.0)
+ XVector              0.40.0    2023-04-25 [1] Bioconductor
+ yaml                 2.3.7     2023-01-23 [1] CRAN (R 4.3.0)
+ zlibbioc             1.46.0    2023-04-25 [1] Bioconductor
+
+ [1] /Users/sandmann/Library/R/x86_64/4.3/library
+ [2] /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/library
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<!-- -->
+
+</section>
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb9" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Documenting data wrangling with the dtrackr R package"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-06-26"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [R, tidyverse, TIL]</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## tl;dr</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>Today I learned about Robert Challen's</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">dtrackr</span><span class="co">](https://cran.r-project.org/package=dtrackr)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>R package. It extends functionality from the</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">tidyverse</span><span class="co">](https://www.tidyverse.org/)</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>to track and visualize the data wrangling operations that have</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>been applied to a dataset.</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## Motivation</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>Publications involving cohorts of human subjects often include flow charts</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>describing which participants were screened, included in a specific study arm</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>or excluded from analysis. In fact, reporting guidelines such as</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">CONSORT</span><span class="co">](https://www.equator-network.org/reporting-guidelines/consort/)</span>,</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">STROBE</span><span class="co">](https://www.equator-network.org/reporting-guidelines/strobe/)</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>or </span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">STARD</span><span class="co">](https://www.equator-network.org/reporting-guidelines/stard/)</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>include visualizations that communcate how the participants flowed through the</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>study.</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>If a dataset is processed with tidyverse functions, e.g. from the </span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">dplyr</span><span class="co">](https://dplyr.tidyverse.org/)</span></span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>or</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">tidyr</span><span class="co">](https://tidyr.tidyverse.org/)</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>R packages, methods from the <span class="in">`dtrackr`</span> package add metadata to each step - </span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>and automatically generate a flow chart.</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="fu">## Installation</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>The <span class="in">`dtrackr`</span> package is available from </span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">CRAN</span><span class="co">](https://cran.r-project.org/package=dtrackr)</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"dtrackr"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"dtrackr"</span>)</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(<span class="st">"dplyr"</span>))</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(<span class="st">"dtrackr"</span>))</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"glue"</span>)</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"GenomicDataCommons"</span>, </span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">include.only =</span> <span class="fu">c</span>(<span class="st">"cases"</span>, <span class="st">"results"</span>, <span class="st">"ids"</span>, <span class="st">"gdc_clinical"</span>))</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>It contains several very useful vignettes, including an example of</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">processing clinical trial according to CONSORT guidelines</span><span class="co">](https://terminological.github.io/dtrackr/articles/consort-example.html)</span>.</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a><span class="fu">## Retrieving metadata from The Cancer Genome Atlas</span></span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>The</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">GenomicDataCommons Bioconductor Package</span><span class="co">](https://bioconductor.org/packages/release/bioc/html/GenomicDataCommons.html)</span></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>provides an interface to search and retrieve data and _metadata_ from </span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the NIH Genomic Data Commons (GDC)</span><span class="co">](https://gdc.cancer.gov/about-gdc)</span>,</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>including information from </span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">The Cancer Genome Atlas (TCGA)</span><span class="co">](https://www.cancer.gov/ccg/research/genome-sequencing/tcga)</span></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>an international collaboration that collected molecular and clinical data on</span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>tens of thousands of human tumor samples.</span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>Here, we retrieve metadata on the subjects and samples available as part of </span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>TCGA, and then use <span class="in">`dtrackr`</span> to select a (hypothetical) subset of samples for</span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>analysis.</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>We start by retrieving data on 500 cases</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>case_ids <span class="ot">=</span> <span class="fu">cases</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">results</span>(<span class="at">size=</span>500L) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ids</span>()</span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>clindat <span class="ot">=</span> <span class="fu">gdc_clinical</span>(case_ids)</span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(clindat)</span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>and obtain four data.frames:</span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a><span class="in">`r glue_collapse(names(clindat), sep=", ",last=" and ")`</span></span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a>with complementary pieces of metadata for each participant. Of note, the</span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a><span class="in">`diagnoses`</span> data.frame can contain multiple rows for the same <span class="in">`case_id`</span>, e.g.</span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a>when both primary tumor and a metastasis samples were collected from the same</span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a>patient.</span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a>Next, we will wrangle it into shape and track our process with <span class="in">`dtrackr`</span>.</span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a><span class="fu">## Default options</span></span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a>First, we set a few default options:</span>
+<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a>old <span class="ot">=</span> <span class="fu">options</span>(</span>
+<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtrackr.strata_glue=</span><span class="st">"{tolower(.value)}"</span>,</span>
+<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtrackr.strata_sep=</span><span class="st">", "</span>,</span>
+<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtrackr.default_message =</span> <span class="st">"{.count} records"</span>,</span>
+<span id="cb9-118"><a href="#cb9-118" aria-hidden="true" tabindex="-1"></a><span class="at">dtrackr.default_headline =</span> <span class="st">"{paste(.strata, ' ')}"</span></span>
+<span id="cb9-119"><a href="#cb9-119" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-120"><a href="#cb9-120" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb9-121"><a href="#cb9-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-124"><a href="#cb9-124" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb9-125"><a href="#cb9-125" aria-hidden="true" tabindex="-1"></a>clindat<span class="sc">$</span>demographic <span class="sc">%&gt;%</span></span>
+<span id="cb9-126"><a href="#cb9-126" aria-hidden="true" tabindex="-1"></a>  <span class="fu">comment</span>(<span class="st">"Demographic"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-127"><a href="#cb9-127" aria-hidden="true" tabindex="-1"></a>  <span class="fu">track</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb9-128"><a href="#cb9-128" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
+<span id="cb9-129"><a href="#cb9-129" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(clindat<span class="sc">$</span>main, case_id, disease_type),</span>
+<span id="cb9-130"><a href="#cb9-130" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"case_id"</span>, </span>
+<span id="cb9-131"><a href="#cb9-131" aria-hidden="true" tabindex="-1"></a>    <span class="at">.headline =</span> <span class="st">"Added disease type"</span>,</span>
+<span id="cb9-132"><a href="#cb9-132" aria-hidden="true" tabindex="-1"></a>    <span class="at">.messages =</span> <span class="fu">c</span>(<span class="st">"{.count.lhs} records from Demographic table"</span>,</span>
+<span id="cb9-133"><a href="#cb9-133" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"joined with {.count.rhs} records from Main table:"</span>,</span>
+<span id="cb9-134"><a href="#cb9-134" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"{.count.out} in linked set"</span>)</span>
+<span id="cb9-135"><a href="#cb9-135" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-136"><a href="#cb9-136" aria-hidden="true" tabindex="-1"></a>  <span class="fu">include_any</span>(</span>
+<span id="cb9-137"><a href="#cb9-137" aria-hidden="true" tabindex="-1"></a>    disease_type <span class="sc">==</span> <span class="st">"Adenomas and Adenocarcinomas"</span> <span class="sc">~</span> <span class="st">"{.included} Adenomas/ Adenocarcinomas"</span>,</span>
+<span id="cb9-138"><a href="#cb9-138" aria-hidden="true" tabindex="-1"></a>    disease_type <span class="sc">==</span> <span class="st">"Ductal and Lobular Neoplasms"</span> <span class="sc">~</span> <span class="st">"{.included} Ductal and Lobular Neoplasms "</span>,</span>
+<span id="cb9-139"><a href="#cb9-139" aria-hidden="true" tabindex="-1"></a>     disease_type <span class="sc">==</span> <span class="st">"Gliomas"</span> <span class="sc">~</span> <span class="st">"{.included} Gliomas"</span>,</span>
+<span id="cb9-140"><a href="#cb9-140" aria-hidden="true" tabindex="-1"></a>    <span class="at">.headline =</span> <span class="st">"Included disease types"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-141"><a href="#cb9-141" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exclude_all</span>(</span>
+<span id="cb9-142"><a href="#cb9-142" aria-hidden="true" tabindex="-1"></a>    age_at_index<span class="sc">&lt;</span><span class="dv">35</span> <span class="sc">~</span> <span class="st">"{.excluded} subjects under 35"</span>,</span>
+<span id="cb9-143"><a href="#cb9-143" aria-hidden="true" tabindex="-1"></a>    age_at_index<span class="sc">&gt;</span><span class="dv">75</span> <span class="sc">~</span> <span class="st">"{.excluded} subjects over 75"</span>,</span>
+<span id="cb9-144"><a href="#cb9-144" aria-hidden="true" tabindex="-1"></a>    race<span class="sc">!=</span><span class="st">"white"</span> <span class="sc">~</span> <span class="st">"{.excluded} non-white subjects"</span>,</span>
+<span id="cb9-145"><a href="#cb9-145" aria-hidden="true" tabindex="-1"></a>    <span class="at">.headline =</span> <span class="st">"Exclusions:"</span></span>
+<span id="cb9-146"><a href="#cb9-146" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-147"><a href="#cb9-147" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(disease_type, <span class="at">.messages=</span><span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-148"><a href="#cb9-148" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count_subgroup</span>(ethnicity) <span class="sc">%&gt;%</span></span>
+<span id="cb9-149"><a href="#cb9-149" aria-hidden="true" tabindex="-1"></a>  <span class="fu">status</span>(</span>
+<span id="cb9-150"><a href="#cb9-150" aria-hidden="true" tabindex="-1"></a>    <span class="at">percent_male =</span> <span class="fu">sprintf</span>(<span class="st">"%1.2f%%"</span>, <span class="fu">mean</span>(gender<span class="sc">==</span><span class="st">"male"</span>) <span class="sc">*</span> <span class="dv">100</span>),</span>
+<span id="cb9-151"><a href="#cb9-151" aria-hidden="true" tabindex="-1"></a>    <span class="at">.messages =</span> <span class="fu">c</span>(<span class="st">"male: {percent_male}"</span>)                    </span>
+<span id="cb9-152"><a href="#cb9-152" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb9-153"><a href="#cb9-153" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>(<span class="at">.messages =</span> <span class="st">"{.count} in final data set"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb9-154"><a href="#cb9-154" aria-hidden="true" tabindex="-1"></a>  <span class="fu">flowchart</span>()</span>
+<span id="cb9-155"><a href="#cb9-155" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb9-156"><a href="#cb9-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-157"><a href="#cb9-157" aria-hidden="true" tabindex="-1"></a>Finally, we restore the default options:</span>
+<span id="cb9-158"><a href="#cb9-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-161"><a href="#cb9-161" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb9-162"><a href="#cb9-162" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(old)</span>
+<span id="cb9-163"><a href="#cb9-163" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb9-164"><a href="#cb9-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-165"><a href="#cb9-165" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducibility</span></span>
+<span id="cb9-166"><a href="#cb9-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-167"><a href="#cb9-167" aria-hidden="true" tabindex="-1"></a>::: {.callout-note title="Session Information" collapse=true}</span>
+<span id="cb9-168"><a href="#cb9-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-171"><a href="#cb9-171" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb9-172"><a href="#cb9-172" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb9-173"><a href="#cb9-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb9-174"><a href="#cb9-174" aria-hidden="true" tabindex="-1"></a>:::</span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

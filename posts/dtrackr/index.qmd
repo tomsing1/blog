@@ -1,0 +1,162 @@
+---
+title: "Documenting data wrangling with the dtrackr R package"
+author: "Thomas Sandmann"
+date: "2023-06-26"
+freeze: true
+categories: [R, tidyverse, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+Today I learned about Robert Challen's
+[dtrackr](https://cran.r-project.org/package=dtrackr)
+R package. It extends functionality from the
+[tidyverse](https://www.tidyverse.org/)
+to track and visualize the data wrangling operations that have
+been applied to a dataset.
+
+## Motivation
+
+Publications involving cohorts of human subjects often include flow charts
+describing which participants were screened, included in a specific study arm
+or excluded from analysis. In fact, reporting guidelines such as
+[CONSORT](https://www.equator-network.org/reporting-guidelines/consort/),
+[STROBE](https://www.equator-network.org/reporting-guidelines/strobe/)
+or 
+[STARD](https://www.equator-network.org/reporting-guidelines/stard/)
+include visualizations that communcate how the participants flowed through the
+study.
+
+If a dataset is processed with tidyverse functions, e.g. from the 
+[dplyr](https://dplyr.tidyverse.org/)
+or
+[tidyr](https://tidyr.tidyverse.org/)
+R packages, methods from the `dtrackr` package add metadata to each step - 
+and automatically generate a flow chart.
+
+## Installation
+
+The `dtrackr` package is available from 
+[CRAN](https://cran.r-project.org/package=dtrackr)
+
+```{r}
+if (!requireNamespace("dtrackr", quietly = TRUE)) {
+  install.packages("dtrackr")
+}
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("dtrackr"))
+library("glue")
+library("GenomicDataCommons", 
+        include.only = c("cases", "results", "ids", "gdc_clinical"))
+```
+
+It contains several very useful vignettes, including an example of
+[processing clinical trial according to CONSORT guidelines](https://terminological.github.io/dtrackr/articles/consort-example.html).
+
+## Retrieving metadata from The Cancer Genome Atlas
+
+The
+[GenomicDataCommons Bioconductor Package](https://bioconductor.org/packages/release/bioc/html/GenomicDataCommons.html)
+provides an interface to search and retrieve data and _metadata_ from 
+[the NIH Genomic Data Commons (GDC)](https://gdc.cancer.gov/about-gdc),
+including information from 
+[The Cancer Genome Atlas (TCGA)](https://www.cancer.gov/ccg/research/genome-sequencing/tcga)
+an international collaboration that collected molecular and clinical data on
+tens of thousands of human tumor samples.
+
+Here, we retrieve metadata on the subjects and samples available as part of 
+TCGA, and then use `dtrackr` to select a (hypothetical) subset of samples for
+analysis.
+
+We start by retrieving data on 500 cases
+
+```{r}
+case_ids = cases() %>% 
+  results(size=500L) %>% 
+  ids()
+clindat = gdc_clinical(case_ids)
+names(clindat)
+```
+
+and obtain four data.frames:
+`r glue_collapse(names(clindat), sep=", ",last=" and ")`.
+Each table contains complementary pieces of metadata for each participant. 
+(Of note, the `diagnoses` data.frame can contain multiple rows for the same
+`case_id`, e.g. when both primary tumor and a metastasis samples were collected
+from the same patient.
+
+Next, we will wrangle it into shape and track our process with `dtrackr`.
+
+## Default options
+
+First, we set a few default options:
+
+```{r}
+old = options(
+  dtrackr.strata_glue="{tolower(.value)}",
+  dtrackr.strata_sep=", ",
+  dtrackr.default_message = "{.count} records",
+dtrackr.default_headline = "{paste(.strata, ' ')}"
+)
+```
+
+```{r}
+clindat$demographic %>%
+  comment("Demographic") %>%
+  track() %>% 
+  inner_join(
+    dplyr::select(clindat$main, case_id, disease_type),
+    by = "case_id", 
+    .headline = "Added disease type",
+    .messages = c("{.count.lhs} records from Demographic table",
+                  "joined with {.count.rhs} records from Main table:",
+                  "{.count.out} in linked set")
+  ) %>%
+  include_any(
+    disease_type == "Adenomas and Adenocarcinomas" ~ "{.included} Adenomas/ Adenocarcinomas",
+    disease_type == "Ductal and Lobular Neoplasms" ~ "{.included} Ductal and Lobular Neoplasms ",
+     disease_type == "Gliomas" ~ "{.included} Gliomas",
+    .headline = "Included disease types") %>%
+  exclude_all(
+    age_at_index<35 ~ "{.excluded} subjects under 35",
+    age_at_index>75 ~ "{.excluded} subjects over 75",
+    race!="white" ~ "{.excluded} non-white subjects",
+    .headline = "Exclusions:"
+  ) %>%
+  group_by(disease_type, .messages="") %>%
+  count_subgroup(ethnicity) %>%
+  status(
+    percent_male = sprintf("%1.2f%%", mean(gender=="male") * 100),
+    .messages = c("male: {percent_male}")                    
+  ) %>%
+  ungroup(.messages = "{.count} in final data set") %>%
+  flowchart()
+```
+
+Finally, we restore the default options:
+
+```{r}
+options(old)
+```
+
+## Reproducibility
+
+::: {.callout-note title="Session Information" collapse=true}
+
+```{r}
+sessioninfo::session_info()
+```
+:::

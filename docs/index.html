@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.3.361">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -17,7 +17,7 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
 </style>
@@ -58,7 +58,8 @@ ul.task-list li input[type="checkbox"] {
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 <script>
@@ -100,6 +101,7 @@ gtag('js', new Date());
 gtag('config', 'G-XNBDW4FYSC', { 'anonymize_ip': true});
 </script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="alternate" type="application/rss+xml" title="Thomas Sandmann's blog" href="index.xml"></head>
@@ -115,37 +117,39 @@ gtag('config', 'G-XNBDW4FYSC', { 'anonymize_ip': true});
     <span class="navbar-title">Thomas Sandmann’s blog</span>
     </a>
   </div>
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html">
+    <a class="nav-link" href="./about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/tomsing1"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/tomsing1" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"><i class="bi bi-linkedin" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/" rel="" target=""><i class="bi bi-linkedin" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://genomic.social/@thomas_sandmann"><i class="bi bi-mastodon" role="img">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann" rel="" target=""><i class="bi bi-mastodon" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="./index.xml"><i class="bi bi-rss" role="img">
+    <a class="nav-link" href="./index.xml" rel="" target=""><i class="bi bi-rss" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
+            <div class="quarto-navbar-tools">
+</div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
@@ -172,7 +176,7 @@ gtag('config', 'G-XNBDW4FYSC', { 'anonymize_ip': true});
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(23)</span></div><div class="category" data-category="AWS">AWS <span class="quarto-category-count">(3)</span></div><div class="category" data-category="Literature">Literature <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NGS">NGS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(11)</span></div><div class="category" data-category="SQL">SQL <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TIL">TIL <span class="quarto-category-count">(16)</span></div><div class="category" data-category="conda">conda <span class="quarto-category-count">(1)</span></div><div class="category" data-category="conference">conference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="databases">databases <span class="quarto-category-count">(1)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nextflow">nextflow <span class="quarto-category-count">(5)</span></div><div class="category" data-category="postgres">postgres <span class="quarto-category-count">(2)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(1)</span></div><div class="category" data-category="quarto">quarto <span class="quarto-category-count">(1)</span></div><div class="category" data-category="scRNAseq">scRNAseq <span class="quarto-category-count">(1)</span></div><div class="category" data-category="visualization">visualization <span class="quarto-category-count">(2)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(24)</span></div><div class="category" data-category="AWS">AWS <span class="quarto-category-count">(3)</span></div><div class="category" data-category="Literature">Literature <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NGS">NGS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(12)</span></div><div class="category" data-category="SQL">SQL <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TIL">TIL <span class="quarto-category-count">(17)</span></div><div class="category" data-category="conda">conda <span class="quarto-category-count">(1)</span></div><div class="category" data-category="conference">conference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="databases">databases <span class="quarto-category-count">(1)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nextflow">nextflow <span class="quarto-category-count">(5)</span></div><div class="category" data-category="postgres">postgres <span class="quarto-category-count">(2)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(1)</span></div><div class="category" data-category="quarto">quarto <span class="quarto-category-count">(1)</span></div><div class="category" data-category="scRNAseq">scRNAseq <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tidyverse">tidyverse <span class="quarto-category-count">(1)</span></div><div class="category" data-category="visualization">visualization <span class="quarto-category-count">(2)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -204,328 +208,342 @@ Reading Time
 </tr>
 </thead>
 <tbody class="list">
-<tr data-index="0" data-categories="SQL,AWS,TIL" data-listing-date-sort="1683356400000" data-listing-file-modified-sort="1683419943001" data-listing-reading-time-sort="5.06" data-listing-title-sort="Querying parquet files with duckdb" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-May 6, 2023
+<tr data-index="0" data-categories="R,tidyverse,TIL" data-listing-date-sort="1687762800000" data-listing-file-modified-sort="1687827936984" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Documenting data wrangling with the dtrackr R package" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jun 26, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/duckdb/index.html" class="title">Querying parquet files with duckdb</a>
+<td>
+<a href="./posts/dtrackr/index.html" class="title listing-title">Documenting data wrangling with the dtrackr R package</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-5 min
-</td>
-</tr>
-<tr data-index="1" data-categories="TIL,R,scRNAseq" data-listing-date-sort="1678608000000" data-listing-file-modified-sort="1678654168651" data-listing-reading-time-sort="13.795" data-listing-title-sort="Lemur: analyzing multi-condition single-cell data" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Mar 12, 2023
-</td>
-<td class="listing-title">
-<a href="./posts/lemur/index.html" class="title">Lemur: analyzing multi-condition single-cell data</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-13 min
+<td>
+<span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-
-<tr data-index="2" data-categories="SQL,postgres" data-listing-date-sort="1677312000000" data-listing-file-modified-sort="1677386461207" data-listing-reading-time-sort="3.64" data-listing-title-sort="Simultaneously inserting records into two tables with Postgres CTEs" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Feb 25, 2023
+<tr data-index="1" data-categories="SQL,AWS,TIL" data-listing-date-sort="1683356400000" data-listing-file-modified-sort="1683419943001" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Querying parquet files with duckdb" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">May 6, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/postgres-returning/index.html" class="title">Simultaneously inserting records into two tables with Postgres CTEs</a>
+<td>
+<a href="./posts/duckdb/index.html" class="title listing-title">Querying parquet files with duckdb</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-3 min
-</td>
-</tr>
-<tr data-index="3" data-categories="R,AWS,TIL" data-listing-date-sort="1674288000000" data-listing-file-modified-sort="1674415649250" data-listing-reading-time-sort="11.505" data-listing-title-sort="Distributing R packages with a drat repository hosted on AWS S3" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Jan 21, 2023
-</td>
-<td class="listing-title">
-<a href="./posts/drat/index.html" class="title">Distributing R packages with a drat repository hosted on AWS S3</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-11 min
+<td>
+<span class="listing-reading-time">6 min</span>
 </td>
 </tr>
-<tr data-index="4" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649258" data-listing-reading-time-sort="12.98" data-listing-title-sort="QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Jan 16, 2023
+<tr data-index="2" data-categories="TIL,R,scRNAseq" data-listing-date-sort="1678608000000" data-listing-file-modified-sort="1678654168651" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="Lemur: analyzing multi-condition single-cell data" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Mar 12, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/nextflow-core-quantseq-1-settings/index.html" class="title">QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow</a>
+<td>
+<a href="./posts/lemur/index.html" class="title listing-title">Lemur: analyzing multi-condition single-cell data</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-12 min
-</td>
-</tr>
-<tr data-index="5" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649265" data-listing-reading-time-sort="3.145" data-listing-title-sort="QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Jan 16, 2023
-</td>
-<td class="listing-title">
-<a href="./posts/nextflow-core-quantseq-2-output/index.html" class="title">QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-3 min
-</td>
-</tr>
-<tr data-index="6" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649266" data-listing-reading-time-sort="13.98" data-listing-title-sort="QuantSeq RNAseq analysis (3): Validating published results (no UMIs)" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Jan 16, 2023
-</td>
-<td class="listing-title">
-<a href="./posts/nextflow-core-quantseq-3-xia/index.html" class="title">QuantSeq RNAseq analysis (3): Validating published results (no UMIs)</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-13 min
-</td>
-</tr>
-<tr data-index="7" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649298" data-listing-reading-time-sort="12.845" data-listing-title-sort="QuantSeq RNAseq analysis (4): Validating published results (with UMIs)" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Jan 16, 2023
-</td>
-<td class="listing-title">
-<a href="./posts/nextflow-core-quantseq-4-nugent/index.html" class="title">QuantSeq RNAseq analysis (4): Validating published results (with UMIs)</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-12 min
-</td>
-</tr>
-<tr data-index="8" data-categories="TIL,R,databases" data-listing-date-sort="1672646400000" data-listing-file-modified-sort="1674415649254" data-listing-reading-time-sort="12.195" data-listing-title-sort="SQL and noSQL approaches to creating &amp; querying databases (using R)" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Jan 2, 2023
-</td>
-<td class="listing-title">
-<a href="./posts/geneset-sqlite-db/index.html" class="title">SQL and noSQL approaches to creating &amp; querying databases (using R)</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-12 min
+<td>
+<span class="listing-reading-time">14 min</span>
 </td>
 </tr>
 
-<tr data-index="9" data-categories="TIL,R,visualization" data-listing-date-sort="1672128000000" data-listing-file-modified-sort="1674415649257" data-listing-reading-time-sort="26.19" data-listing-title-sort="Interactive GSEA results: visualizations with reactable &amp; plotly" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Dec 27, 2022
+<tr data-index="3" data-categories="SQL,postgres" data-listing-date-sort="1677312000000" data-listing-file-modified-sort="1677386461207" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Simultaneously inserting records into two tables with Postgres CTEs" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Feb 25, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/interactive-gene-set-results/index.html" class="title">Interactive GSEA results: visualizations with reactable &amp; plotly</a>
+<td>
+<a href="./posts/postgres-returning/index.html" class="title listing-title">Simultaneously inserting records into two tables with Postgres CTEs</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-26 min
-</td>
-</tr>
-<tr data-index="10" data-categories="TIL,R,visualization" data-listing-date-sort="1671868800000" data-listing-file-modified-sort="1671917114188" data-listing-reading-time-sort="7.735" data-listing-title-sort="UpSet plots: comparing differential expression across contrasts" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Dec 24, 2022
-</td>
-<td class="listing-title">
-<a href="./posts/upset_plots/index.html" class="title">UpSet plots: comparing differential expression across contrasts</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-7 min
+<td>
+<span class="listing-reading-time">4 min</span>
 </td>
 </tr>
-<tr data-index="11" data-categories="TIL,R,quarto" data-listing-date-sort="1671696000000" data-listing-file-modified-sort="1671769760462" data-listing-reading-time-sort="1.91" data-listing-title-sort="Figure size, layout &amp; tabsets with Quarto" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Dec 22, 2022
+<tr data-index="4" data-categories="R,AWS,TIL" data-listing-date-sort="1674288000000" data-listing-file-modified-sort="1674415649250" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-title-sort="Distributing R packages with a drat repository hosted on AWS S3" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jan 21, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/quarto-figure-size-and-layout/index.html" class="title">Figure size, layout &amp; tabsets with Quarto</a>
+<td>
+<a href="./posts/drat/index.html" class="title listing-title">Distributing R packages with a drat repository hosted on AWS S3</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-1 min
-</td>
-</tr>
-<tr data-index="12" data-categories="TIL,R,postgres" data-listing-date-sort="1670832000000" data-listing-file-modified-sort="1670888843039" data-listing-reading-time-sort="10.765" data-listing-title-sort="Full text search in Postgres - the R way" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Dec 12, 2022
-</td>
-<td class="listing-title">
-<a href="./posts/postgres-full-text-search/index.html" class="title">Full text search in Postgres - the R way</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-10 min
+<td>
+<span class="listing-reading-time">12 min</span>
 </td>
 </tr>
-<tr data-index="13" data-categories="TIL,R" data-listing-date-sort="1670745600000" data-listing-file-modified-sort="1670800813855" data-listing-reading-time-sort="1.04" data-listing-title-sort="Updating R the easy way: using rig command line tool" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Dec 11, 2022
+<tr data-index="5" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649258" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jan 16, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/r-update-with-rig/index.html" class="title">Updating R the easy way: using rig command line tool</a>
+<td>
+<a href="./posts/nextflow-core-quantseq-1-settings/index.html" class="title listing-title">QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-1 min
-</td>
-</tr>
-<tr data-index="14" data-categories="TIL,conference" data-listing-date-sort="1670659200000" data-listing-file-modified-sort="1670713572701" data-listing-reading-time-sort="0.81" data-listing-title-sort="2022 normconf: lightning talks" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Dec 10, 2022
-</td>
-<td class="listing-title">
-<a href="./posts/conda-speedup/index.html" class="title">2022 normconf: lightning talks</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-0 min
+<td>
+<span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-<tr data-index="15" data-categories="TIL,R" data-listing-date-sort="1670486400000" data-listing-file-modified-sort="1670517886160" data-listing-reading-time-sort="0.495" data-listing-title-sort="The rlist R package" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Dec 8, 2022
+<tr data-index="6" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649265" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jan 16, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/rslist-r-package/index.html" class="title">The rlist R package</a>
+<td>
+<a href="./posts/nextflow-core-quantseq-2-output/index.html" class="title listing-title">QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-0 min
-</td>
-</tr>
-<tr data-index="16" data-categories="TIL" data-listing-date-sort="1668672000000" data-listing-file-modified-sort="1668750011684" data-listing-reading-time-sort="0.83" data-listing-title-sort="Creating custom badges for your README" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Nov 17, 2022
-</td>
-<td class="listing-title">
-<a href="./posts/custom-badges/index.html" class="title">Creating custom badges for your README</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-0 min
+<td>
+<span class="listing-reading-time">4 min</span>
 </td>
 </tr>
-<tr data-index="17" data-categories="TIL,nextflow" data-listing-date-sort="1668499200000" data-listing-file-modified-sort="1668648451075" data-listing-reading-time-sort="7.285" data-listing-title-sort="Learning nextflow: blasting multiple sequences" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Nov 15, 2022
+<tr data-index="7" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649266" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="QuantSeq RNAseq analysis (3): Validating published results (no UMIs)" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jan 16, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/nextflow-blast-tutorial/index.html" class="title">Learning nextflow: blasting multiple sequences</a>
+<td>
+<a href="./posts/nextflow-core-quantseq-3-xia/index.html" class="title listing-title">QuantSeq RNAseq analysis (3): Validating published results (no UMIs)</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-7 min
-</td>
-</tr>
-<tr data-index="18" data-categories="TIL,python" data-listing-date-sort="1668412800000" data-listing-file-modified-sort="1668484011121" data-listing-reading-time-sort="0.24" data-listing-title-sort="Python type hints" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Nov 14, 2022
-</td>
-<td class="listing-title">
-<a href="./posts/python-hints/index.html" class="title">Python type hints</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-0 min
+<td>
+<span class="listing-reading-time">14 min</span>
 </td>
 </tr>
-<tr data-index="19" data-categories="Literature" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1668391721889" data-listing-reading-time-sort="2.035" data-listing-title-sort="Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Nov 13, 2022
+<tr data-index="8" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1674415649298" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (4): Validating published results (with UMIs)" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jan 16, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/fujita_2022/index.html" class="title">Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex</a>
+<td>
+<a href="./posts/nextflow-core-quantseq-4-nugent/index.html" class="title listing-title">QuantSeq RNAseq analysis (4): Validating published results (with UMIs)</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-2 min
-</td>
-</tr>
-<tr data-index="20" data-categories="TIL,AWS" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1668377272349" data-listing-reading-time-sort="2.615" data-listing-title-sort="Refreshing &amp; exporting temporary AWS credentials" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Nov 13, 2022
-</td>
-<td class="listing-title">
-<a href="./posts/aws-export-credentials/index.html" class="title">Refreshing &amp; exporting temporary AWS credentials</a>
-</td>
-<td class="listing-author">
-Thomas Sandmann
-</td>
-<td class="listing-reading-time">
-2 min
+<td>
+<span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-<tr data-index="21" data-categories="TIL,conda" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1668309607637" data-listing-reading-time-sort="0.54" data-listing-title-sort="Installing pyroe with conda" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Nov 12, 2022
+<tr data-index="9" data-categories="TIL,R,databases" data-listing-date-sort="1672646400000" data-listing-file-modified-sort="1674415649254" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="SQL and noSQL approaches to creating &amp; querying databases (using R)" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jan 2, 2023</span>
 </td>
-<td class="listing-title">
-<a href="./posts/pyroe-installation/index.html" class="title">Installing pyroe with conda</a>
+<td>
+<a href="./posts/geneset-sqlite-db/index.html" class="title listing-title">SQL and noSQL approaches to creating &amp; querying databases (using R)</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-0 min
+<td>
+<span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-<tr data-index="22" data-categories="news" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1674415649344" data-listing-reading-time-sort="0.165" data-listing-title-sort="Welcome To My Blog" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Nov 12, 2022
+
+<tr data-index="10" data-categories="TIL,R,visualization" data-listing-date-sort="1672128000000" data-listing-file-modified-sort="1674415649257" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-title-sort="Interactive GSEA results: visualizations with reactable &amp; plotly" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Dec 27, 2022</span>
 </td>
-<td class="listing-title">
-<a href="./posts/welcome/index.html" class="title">Welcome To My Blog</a>
+<td>
+<a href="./posts/interactive-gene-set-results/index.html" class="title listing-title">Interactive GSEA results: visualizations with reactable &amp; plotly</a>
 </td>
-<td class="listing-author">
-Thomas Sandmann
+<td>
+<span class="listing-author">Thomas Sandmann</span>
 </td>
-<td class="listing-reading-time">
-0 min
+<td>
+<span class="listing-reading-time">27 min</span>
+</td>
+</tr>
+<tr data-index="11" data-categories="TIL,R,visualization" data-listing-date-sort="1671868800000" data-listing-file-modified-sort="1671917114188" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="UpSet plots: comparing differential expression across contrasts" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Dec 24, 2022</span>
+</td>
+<td>
+<a href="./posts/upset_plots/index.html" class="title listing-title">UpSet plots: comparing differential expression across contrasts</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">8 min</span>
+</td>
+</tr>
+<tr data-index="12" data-categories="TIL,R,quarto" data-listing-date-sort="1671696000000" data-listing-file-modified-sort="1671769760462" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Figure size, layout &amp; tabsets with Quarto" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Dec 22, 2022</span>
+</td>
+<td>
+<a href="./posts/quarto-figure-size-and-layout/index.html" class="title listing-title">Figure size, layout &amp; tabsets with Quarto</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">2 min</span>
+</td>
+</tr>
+<tr data-index="13" data-categories="TIL,R,postgres" data-listing-date-sort="1670832000000" data-listing-file-modified-sort="1670888843039" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-title-sort="Full text search in Postgres - the R way" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Dec 12, 2022</span>
+</td>
+<td>
+<a href="./posts/postgres-full-text-search/index.html" class="title listing-title">Full text search in Postgres - the R way</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">11 min</span>
+</td>
+</tr>
+<tr data-index="14" data-categories="TIL,R" data-listing-date-sort="1670745600000" data-listing-file-modified-sort="1670800813855" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Updating R the easy way: using rig command line tool" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Dec 11, 2022</span>
+</td>
+<td>
+<a href="./posts/r-update-with-rig/index.html" class="title listing-title">Updating R the easy way: using rig command line tool</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">2 min</span>
+</td>
+</tr>
+<tr data-index="15" data-categories="TIL,conference" data-listing-date-sort="1670659200000" data-listing-file-modified-sort="1670713572701" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="2022 normconf: lightning talks" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Dec 10, 2022</span>
+</td>
+<td>
+<a href="./posts/conda-speedup/index.html" class="title listing-title">2022 normconf: lightning talks</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">1 min</span>
+</td>
+</tr>
+<tr data-index="16" data-categories="TIL,R" data-listing-date-sort="1670486400000" data-listing-file-modified-sort="1670517886160" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="The rlist R package" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Dec 8, 2022</span>
+</td>
+<td>
+<a href="./posts/rslist-r-package/index.html" class="title listing-title">The rlist R package</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">1 min</span>
+</td>
+</tr>
+<tr data-index="17" data-categories="TIL" data-listing-date-sort="1668672000000" data-listing-file-modified-sort="1668750011684" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Creating custom badges for your README" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Nov 17, 2022</span>
+</td>
+<td>
+<a href="./posts/custom-badges/index.html" class="title listing-title">Creating custom badges for your README</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">1 min</span>
+</td>
+</tr>
+<tr data-index="18" data-categories="TIL,nextflow" data-listing-date-sort="1668499200000" data-listing-file-modified-sort="1668648451075" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="Learning nextflow: blasting multiple sequences" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Nov 15, 2022</span>
+</td>
+<td>
+<a href="./posts/nextflow-blast-tutorial/index.html" class="title listing-title">Learning nextflow: blasting multiple sequences</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">8 min</span>
+</td>
+</tr>
+<tr data-index="19" data-categories="TIL,python" data-listing-date-sort="1668412800000" data-listing-file-modified-sort="1668484011121" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Python type hints" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Nov 14, 2022</span>
+</td>
+<td>
+<a href="./posts/python-hints/index.html" class="title listing-title">Python type hints</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">1 min</span>
+</td>
+</tr>
+<tr data-index="20" data-categories="Literature" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1668391721889" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Nov 13, 2022</span>
+</td>
+<td>
+<a href="./posts/fujita_2022/index.html" class="title listing-title">Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">3 min</span>
+</td>
+</tr>
+<tr data-index="21" data-categories="TIL,AWS" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1668377272349" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Refreshing &amp; exporting temporary AWS credentials" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Nov 13, 2022</span>
+</td>
+<td>
+<a href="./posts/aws-export-credentials/index.html" class="title listing-title">Refreshing &amp; exporting temporary AWS credentials</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">3 min</span>
+</td>
+</tr>
+<tr data-index="22" data-categories="TIL,conda" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1668309607637" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Installing pyroe with conda" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Nov 12, 2022</span>
+</td>
+<td>
+<a href="./posts/pyroe-installation/index.html" class="title listing-title">Installing pyroe with conda</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">1 min</span>
+</td>
+</tr>
+<tr data-index="23" data-categories="news" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1674415649344" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Welcome To My Blog" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Nov 12, 2022</span>
+</td>
+<td>
+<a href="./posts/welcome/index.html" class="title listing-title">Welcome To My Blog</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">1 min</span>
 </td>
 </tr>
 </tbody>
@@ -562,9 +580,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -629,6 +661,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {

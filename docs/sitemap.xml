@@ -82,7 +82,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-05-07T00:42:13.028Z</lastmod>
+    <lastmod>2023-06-27T01:05:38.080Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/about.html</loc>
@@ -99,5 +99,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/duckdb/index.html</loc>
     <lastmod>2023-05-07T00:42:12.251Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/dtrackr/index.html</loc>
+    <lastmod>2023-06-27T01:05:37.168Z</lastmod>
   </url>
 </urlset>

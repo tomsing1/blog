@@ -1,0 +1,35 @@
+---
+title: "Grav - a lightweight content management system"
+author: "Thomas Sandmann"
+date: "2023-07-21"
+freeze: true
+categories: [TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+Today I learned about
+[Grav](https://getgrav.org/),
+a lightweight content-management system,
+from [danwwilson](https://fosstodon.org/@Danwwilson/110748191305268643).
+Grav is based on flat files, e.g. it does not require a database, and 
+automatically renders pages written in markdown. 
+
+The optional 
+[admin plugin](https://github.com/getgrav/grav-plugin-admin)
+includes user management, 2-factor authentication and more.
+
+Definitely something I will keep in mind, e.g. to distribute analysis results
+within an organization.
+

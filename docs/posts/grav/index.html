@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Thomas Sandmann">
-<meta name="dcterms.date" content="2022-11-13">
+<meta name="dcterms.date" content="2023-07-21">
 
-<title>Thomas Sandmann’s blog - Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex</title>
+<title>Thomas Sandmann’s blog - Grav - a lightweight content management system</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -22,26 +22,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
 }
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -84,7 +99,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -116,7 +131,7 @@ div.csl-indent {
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://genomic.social/(thomas_sandmann?)" rel="" target=""><i class="bi bi-mastodon" role="img">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann" rel="" target=""><i class="bi bi-mastodon" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -136,9 +151,9 @@ div.csl-indent {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex</h1>
+      <div class="quarto-title-block"><div><h1 class="title">Grav - a lightweight content management system</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
                                 <div class="quarto-categories">
-                <div class="quarto-category">Literature</div>
+                <div class="quarto-category">TIL</div>
               </div>
                   </div>
   </div>
@@ -156,7 +171,7 @@ div.csl-indent {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 13, 2022</p>
+        <p class="date">July 21, 2023</p>
       </div>
     </div>
     
@@ -167,51 +182,24 @@ div.csl-indent {
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
-<p>Today I read the preprint <strong>Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex</strong> by Masahi Fujita and co-authors, published on <a href="https://doi.org/10.1101/2022.11.07.515446">biorXiv</a> <span class="citation" data-cites="fujita">(<a href="#ref-fujita" role="doc-biblioref">Fujita et al., n.d.</a>)</span>. The authors generated the largest brain single-nuclei RNA-seq dataset to date (that I am aware of), collecting data on dorsolateral prefrontal cortex (DLPFC) samples of 424 individuals from the <a href="https://dss.niagads.org/cohorts/religious-orders-study-memory-and-aging-project-rosmap/">ROS/MAP</a> cohort.</p>
-<div id="fig1">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="fujita_fig1ab.jpg" class="img-fluid figure-img"></p>
-<figcaption class="figure-caption"><strong>Fujita et al, Figure 1A/B</strong>: (A) Schema of the study. (B) UMAP visualization of 1,509,626 nuclei from 424 donors. Each of the seven major cell types is labeled with a different color.”</figcaption>
-</figure>
-</div>
-</div>
-<p>This large sample size enabled them to assess the effect of genetic variation (e.g.&nbsp;single-nucleotide variants) on gene expression - one cell type at a time. The authors created pseudo-bulk gene expression profiles for each patient for 7 cell types and 81 cell subtypes.</p>
-<p>Because neurons are highly abundant in the DLPFC, the largest number of nuclei originated from neurons, and the statistical power to detect eQTLs was lower in rarer cell types (e.g.&nbsp;microglia). This highlights the potential of enrichment methods, e.g.&nbsp;by fluorescent activate nuclei sorting (FANS) approached. (See e.g. <span class="citation" data-cites="kamath2022">(<a href="#ref-kamath2022" role="doc-biblioref">Kamath et al. 2022</a>)</span>, who specifically enriched dopaminergic neurons or <span class="citation" data-cites="sadick2022">(<a href="#ref-sadick2022" role="doc-biblioref">Sadick et al. 2022</a>)</span>, who enriched astrocytes and oligodendrocytes.)</p>
-<p>Fujita et al were able to identify ~ 10,000 eGenes<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>, about half of which were shared across cell types. For example, they identified a novel eQTL (rs128648) for the <em>APOE</em> gene specifically in microglia.</p>
-<p>Having identified novel eQTL relationships <em>in vivo</em>, the authors then used bulk RNA-seq measurements from a panel of induced pluripotent stem cells that had been differentiated either into neurons (iNeurons) or astrocytes (iAstrocytes) to test whether they could also observe the variants’ effects <em>in vitro.</em></p>
-<p>Despite a relatively small sample size, a subset of eQTLs were replicated. But the the authors also point out unexpected discrepancies in the <em>MAPT</em> locus where they observed variant effects in the <em>opposite</em> direction from what they had observed by snRNA-seq.</p>
-<p>Gene expression was significantly heritable in most cell types (except for those from which only small numbers of nuclei had been sampled). This allowed the authors to use their snRNA-seq dataset to impute cell type specific gene expression for large GWAS studies, e.g.&nbsp;for Alzheimer’s Disease, ALS, Parkinson’s Disease, and schizophrenia. This TWAS analysis detected e.g.&nbsp;48 novel loci associated with AD in microglia, 22 of which had not been implicated previously.</p>
-<p>In summary, this work by Fujita et al is an impressive achievement, demonstrating that single-cell/single-nuclei approaches have now become sufficiently scalable to power human genetics analyses.</p>
-<p>The authors have already made the raw data for their study available on the <a href="https://adknowledgeportal.synapse.org/">AD Knowledge Portal</a>. Thank you for sharing your data!</p>
+<p>Today I learned about <a href="https://getgrav.org/">Grav</a>, a lightweight content-management system, from <a href="https://fosstodon.org/@Danwwilson/110748191305268643">danwwilson</a>. Grav is based on flat files, e.g.&nbsp;it does not require a database, and automatically renders pages written in markdown.</p>
+<p>The optional <a href="https://github.com/getgrav/grav-plugin-admin">admin plugin</a> includes user management, 2-factor authentication and more.</p>
+<p>Definitely something I will keep in mind, e.g.&nbsp;to distribute analysis results within an organization.</p>
 
 
+<!-- -->
 
 
-
-<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
-<div id="ref-fujita" class="csl-entry" role="listitem">
-Fujita, Masashi, Zongmei Gao, Lu Zeng, Cristin McCabe, Charles C. White, Bernard Ng, Gilad Sahar Green, et al. n.d. <span>“Cell-Subtype Specific Effects of Genetic Variation in the Aging and Alzheimer Cortex.”</span> <a href="https://doi.org/10.1101/2022.11.07.515446">https://doi.org/10.1101/2022.11.07.515446</a>.
-</div>
-<div id="ref-kamath2022" class="csl-entry" role="listitem">
-Kamath, Tushar, Abdulraouf Abdulraouf, S. J. Burris, Jonah Langlieb, Vahid Gazestani, Naeem M. Nadaf, Karol Balderrama, Charles Vanderburg, and Evan Z. Macosko. 2022. <span>“Single-Cell Genomic Profiling of Human Dopamine Neurons Identifies a Population That Selectively Degenerates in Parkinson<span>’</span>s Disease.”</span> <em>Nature Neuroscience</em>, May, 1–8. <a href="https://doi.org/10.1038/s41593-022-01061-1">https://doi.org/10.1038/s41593-022-01061-1</a>.
-</div>
-<div id="ref-sadick2022" class="csl-entry" role="listitem">
-Sadick, Jessica S., Michael R. O’Dea, Philip Hasel, Taitea Dykstra, Arline Faustin, and Shane A. Liddelow. 2022. <span>“Astrocytes and Oligodendrocytes Undergo Subtype-Specific Transcriptional Changes in Alzheimer<span>’</span>s Disease.”</span> <em>Neuron</em>, April, S0896627322002446. <a href="https://doi.org/10.1016/j.neuron.2022.03.008">https://doi.org/10.1016/j.neuron.2022.03.008</a>.
-</div>
-</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Gene whose expression was significantly associated with one or more genetic variants (FDR &lt; 5%)<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -291,6 +279,57 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
   function tippyHover(el, contentFn) {
     const config = {
       allowHTML: true,
@@ -446,7 +485,42 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 <script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
-</script>
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Grav - a lightweight content management system"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-07-21"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [TIL]</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Today I learned about</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Grav</span><span class="co">](https://getgrav.org/)</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>a lightweight content-management system,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>from <span class="co">[</span><span class="ot">danwwilson</span><span class="co">](https://fosstodon.org/@Danwwilson/110748191305268643)</span>.</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>Grav is based on flat files, e.g. it does not require a database, and </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>automatically renders pages written in markdown. </span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>The optional </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">admin plugin</span><span class="co">](https://github.com/getgrav/grav-plugin-admin)</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>includes user management, 2-factor authentication and more.</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>Definitely something I will keep in mind, e.g. to distribute analysis results</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>within an organization.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
 </div> <!-- /content -->
 
 

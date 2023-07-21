@@ -1,0 +1,75 @@
+---
+title: "Greg Wilson: Late Night Thoughts on Listening to Ike Quebec (2018)"
+author: "Thomas Sandmann"
+date: "2023-07-21"
+freeze: true
+categories: [TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+In 2018 [Greg Wilson](https://third-bit.com/about/) presented the Keynote
+"Late Night Thoughts on Listening to Ike Quebec"
+at the 2018 CarpentryCon meeting, after he made the decision to move on
+from the 
+[Software Carpentry project](https://software-carpentry.org/scf/history/)
+he had founded in 2010. His talk is available 
+[on youtube]((https://youtu.be/7xR50ty5DZ0)), 
+and this post contains my notes.
+
+Greg has help numerous positions in his professional life, and tackled many
+large projects. While there are many books providing advice on how start
+endeavors, he realized that there was little guidance on how to best exit them.
+Reflecting on his personalexperience with transitioning out of roles -  
+including leaving Academia thrice - led Greg to formulate and share the
+following ten rules:
+
+1. Be sure you mean it.
+    - Letting go is hard.
+    - Don't be in-and-out.
+2. Do it when _others_ think it's time.
+    - You will be the last person to realize that it's time to move on. 
+      They are probably right.
+3. Tell people the what, when, and why.
+    - Communicate that the succession plan is.
+4. Don't pick your successor by yourself.
+    - Avoid picking somebody like yourself, avoid forming an old boys club.
+    - Diversity matters. 
+    - Change is good.
+    - This choice belongs to the community that will work with your successor.
+5. Train people before you go.
+    - If at all possible, arrange for some overlap.
+    - Take a vacation to identify information that needs to be transferred.
+6. When you leave, leave.
+    - Continuing in another role confuses people.
+    - Leave a clear space for your successor.
+    - People will contact the _person_, not the _role_.
+7. Have some fun before you go.
+    - Some back burner project, something you never got around to - if not now, 
+      when?
+8. Reflect on what you learned.
+    - Don't beat yourself up about things you didn't get right.
+    - Write down what you did _well_.
+9. Remember the good things, too.
+    - Give yourself some credit (even if you are Canadian).
+10. Do something next.
+    - Have a plan what to do next (not just a job).
+    - You probably don't deal well with being idle.
+
+- Academia conditions us to believe that only novel things are valuable. But many tools
+  we use and teach are old - and useful! Measure yourself by _usefulness_, not novelty.
+- Greg believes that the biggest impact of the Carpentries will be that They taught
+  participants how to _teach_, build curricula, build communities, etc.
+- Nothing worth having comes without some kind of fight. You have to be on the right
+  committee to get the decision you want.

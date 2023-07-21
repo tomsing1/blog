@@ -35,6 +35,84 @@
   <pubDate>Thu, 20 Jul 2023 22:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>Greg Wilson: Late Night Thoughts on Listening to Ike Quebec (2018)</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/CarpentryCon2018/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>In 2018 <a href="https://third-bit.com/about/">Greg Wilson</a> presented the Keynote “Late Night Thoughts on Listening to Ike Quebec” at the 2018 CarpentryCon meeting, after he made the decision to move on from the <a href="https://software-carpentry.org/scf/history/">Software Carpentry project</a> he had founded in 2010. His talk is available <a href="(https://youtu.be/7xR50ty5DZ0)">on youtube</a>, and this post contains my notes.</p>
+<p>Greg has help numerous positions in his professional life, and tackled many large projects. While there are many books providing advice on how start endeavors, he realized that there was little guidance on how to best exit them. Reflecting on his personalexperience with transitioning out of roles -<br>
+including leaving Academia thrice - led Greg to formulate and share the following ten rules:</p>
+<ol type="1">
+<li>Be sure you mean it.
+<ul>
+<li>Letting go is hard.</li>
+<li>Don’t be in-and-out.</li>
+</ul></li>
+<li>Do it when <em>others</em> think it’s time.
+<ul>
+<li>You will be the last person to realize that it’s time to move on. They are probably right.</li>
+</ul></li>
+<li>Tell people the what, when, and why.
+<ul>
+<li>Communicate that the succession plan is.</li>
+</ul></li>
+<li>Don’t pick your successor by yourself.
+<ul>
+<li>Avoid picking somebody like yourself, avoid forming an old boys club.</li>
+<li>Diversity matters.</li>
+<li>Change is good.</li>
+<li>This choice belongs to the community that will work with your successor.</li>
+</ul></li>
+<li>Train people before you go.
+<ul>
+<li>If at all possible, arrange for some overlap.</li>
+<li>Take a vacation to identify information that needs to be transferred.</li>
+</ul></li>
+<li>When you leave, leave.
+<ul>
+<li>Continuing in another role confuses people.</li>
+<li>Leave a clear space for your successor.</li>
+<li>People will contact the <em>person</em>, not the <em>role</em>.</li>
+</ul></li>
+<li>Have some fun before you go.
+<ul>
+<li>Some back burner project, something you never got around to - if not now, when?</li>
+</ul></li>
+<li>Reflect on what you learned.
+<ul>
+<li>Don’t beat yourself up about things you didn’t get right.</li>
+<li>Write down what you did <em>well</em>.</li>
+</ul></li>
+<li>Remember the good things, too.
+<ul>
+<li>Give yourself some credit (even if you are Canadian).</li>
+</ul></li>
+<li>Do something next.
+<ul>
+<li>Have a plan what to do next (not just a job).</li>
+<li>You probably don’t deal well with being idle.</li>
+</ul></li>
+</ol>
+<ul>
+<li>Academia conditions us to believe that only novel things are valuable. But many tools we use and teach are old - and useful! Measure yourself by <em>usefulness</em>, not novelty.</li>
+<li>Greg believes that the biggest impact of the Carpentries will be that They taught participants how to <em>teach</em>, build curricula, build communities, etc.</li>
+<li>Nothing worth having comes without some kind of fight. You have to be on the right committee to get the decision you want.</li>
+</ul>
+
+
+<!-- -->
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/CarpentryCon2018/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/CarpentryCon2018/index.html</guid>
+  <pubDate>Thu, 20 Jul 2023 22:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Documenting data wrangling with the dtrackr R package</title>
   <dc:creator>Thomas Sandmann</dc:creator>
   <link>https://tomsing1.github.io/blog/posts/dtrackr/index.html</link>
@@ -16792,217 +16870,6 @@ Platform: x86_64-apple-darwin17.0 (64-bit)</code></pre>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/custom-badges/index.html</guid>
   <pubDate>Wed, 16 Nov 2022 23:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Learning nextflow: blasting multiple sequences</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/nextflow-blast-tutorial/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p><a href="https://www.nextflow.io/">Nextflow</a> is both a reactive workflow framework and a domain-specific language (DSL). It is gaining lots of tracking in bioinformatics thanks in large part to the <a href="https://nf-co.re/">nf-core</a> open source community that develops and publishes reusable workflows for many use cases.</p>
-<p>To start learning nextflow, I worked through Andrew Severin’s excellent <a href="https://bioinformaticsworkbook.org/dataAnalysis/nextflow/02_creatingAworkflow.html">Creating a NextFlow workflow</a> tutorial. (The tutorial follows the older DSL1 specification of nextflow, but only a few small modifications were needed to run it under DSL2.)</p>
-<p>The DSL2 code I wrote is <a href="https://github.com/tomsing1/nf-tutorial-blast">here</a> and these are notes I took while working through the tutorial:</p>
-<ul>
-<li><p>To make a variable a pipeline parameter prepend it with <code>params.</code>, then specify them in the command line:</p>
-<p><code>main.nf</code>:</p>
-<pre><code>#! /usr/bin/env nextflow
-params.query="file.fasta"
-println "Querying file $params.query"</code></pre>
-<p><code>shell command</code>:</p>
-<pre><code>nextflow run main.nf --query other_file.fasta</code></pre></li>
-<li><p>The <code>-log</code> argument directs logging to the specified file.</p>
-<pre><code>nextflow -log nextflo.log run main.nf </code></pre></li>
-<li><p>To clean up intermediate files automatically upon workflow completion, use the <code>cleanup</code> parameter <em>within</em> a profile.</p>
-<pre><code>profiles {
-  standard {
-      cleanup = true
-  }
-  debug {
-      cleanup = false
-  }
-}</code></pre>
-<ul>
-<li>By convention the <code>standard</code> profile is implicitly used when no other<br>
-profile is specified by the user.</li>
-<li>Cleaning up intermediate files precludes the use of <code>-resume</code>.</li>
-</ul></li>
-<li><p>The <code>nextflow.config</code> file sets the global parameters, e.g.</p>
-<ul>
-<li>process</li>
-<li>manifest</li>
-<li>executor</li>
-<li>profiles</li>
-<li>docker</li>
-<li>singularity</li>
-<li>timeline</li>
-<li>report</li>
-<li>etc</li>
-</ul></li>
-<li><p>Contents of the <code>work</code> folder for a nextflow task:</p>
-<ul>
-<li><code>.command.begin</code> is the begin script if you have one</li>
-<li><code>.command.err</code> is useful when it crashes.</li>
-<li><code>.command.run</code> is the full nextflow pipeline that was run, this is helpful when trouble shooting a nextflow error rather than the script error.</li>
-<li><code>.command.sh</code> shows what was run.</li>
-<li><code>.exitcode</code> will have the exit code in it.</li>
-</ul></li>
-<li><p>Displaying help messages</p>
-<p><code>main.nf</code></p>
-<pre><code>def helpMessage() {
-log.info """
-      Usage:
-      The typical command for running the pipeline is as follows:
-      nextflow run main.nf --query QUERY.fasta --dbDir "blastDatabaseDirectory" --dbName "blastPrefixName"
-
-      Mandatory arguments:
-       --query                        Query fasta file of sequences you wish to BLAST
-       --dbDir                        BLAST database directory (full path required)
-       [...]
-"""
-}
-
-// Show help message
-if (params.help) {
-    helpMessage()
-    exit 0
-}</code></pre>
-<p><code>shell command</code>:</p>
-<pre><code>nextflow run main.nf --help</code></pre></li>
-<li><p>The <code>publishDir</code> directive accepts arguments like <code>mode</code> and <code>pattern</code> to fine tune its behavior, e.g.</p>
-<pre><code>output:
-file("${label}/short_summary.specific.*.txt")
-publishDir "${params.outdir}/BUSCOResults/${label}/", mode: 'copy', pattern: "${label}/short_summary.specific.*.txt"</code></pre></li>
-<li><p><a href="https://www.nextflow.io/docs/latest/dsl2.html#dsl2-migration-notes">DSL2</a> allows piping, e.g.</p>
-<pre><code>workflow {
-  res = Channel
-      .fromPath(params.query)
-      .splitFasta(by: 1, file:true) |
-      runBlast
-  res.collectFile(name: 'blast_output_combined.txt', storeDir: params.outdir)
-}</code></pre></li>
-<li><p>Add a <em>timeline report</em> to the output with</p>
-<pre><code>timeline {
-    enabled = true
-    file = "$params.outdir/timeline.html"
-}</code></pre>
-<p>(in <code>nextflow.config</code>).</p></li>
-<li><p>Add a detailed execution report with</p>
-<pre><code>report {
-enabled = true
-file = "$params.outdir/report.html"
-}</code></pre>
-<p>(in <code>nextflow.config</code>).</p></li>
-<li><p>Include a profile-specific configuration file</p>
-<p><code>nextflow.config</code></p>
-<pre><code>profiles {
-    slurm { includeConfig './configs/slurm.config' }
-}</code></pre>
-<p><code>configs/slurm.config</code></p>
-<pre><code>process {
-    executor = 'slurm'
-    clusterOptions =  '-N 1 -n 16 -t 24:00:00'
-}</code></pre>
-<p>and use it via <code>nextflow run main.nf -profile slurm</code></p></li>
-<li><p>Similarly, refer to a <em>test</em> profile, specified in a separate file:</p>
-<p><code>nextflow.config</code></p>
-<pre><code>test { includeConfig './configs/test.config' }</code></pre></li>
-<li><p>Adding a manifest to <code>nextflow.config</code></p>
-<pre><code>manifest {
-    name = 'isugifNF/tutorial'
-    author = 'Andrew Severin'
-    homePage = 'www.bioinformaticsworkbook.org'
-    description = 'nextflow bash'
-    mainScript = 'main.nf'
-    version = '1.0.0'
-}</code></pre></li>
-<li><p>Using a <code>label</code> for a process allows granular control of a process’ configuration</p>
-<p><code>main.nf</code></p>
-<pre><code>process runBlast { 
-    label 'blast'
-}</code></pre>
-<p><code>nextflow.config</code></p>
-<pre><code>process {
-    executor = 'slurm'
-    clusterOptions =  '-N 1 -n 16 -t 02:00:00'
-    withLabel: blast { module = 'blast-plus' }
-}</code></pre>
-<ul>
-<li>The <code>label</code> has to be placed before the <code>input</code> section.</li>
-</ul></li>
-<li><p>Loading a <code>module</code> specifically for a process</p>
-<pre><code>process runBlast {
-
-    module = 'blast-plus'
-    publishDir "${params.outdir}/blastout"
-
-    input:
-    path queryFile from queryFile_ch
-    .
-    .
-    . // these three dots mean I didn't paste the whole process.
-}</code></pre></li>
-<li><p>Enabling <code>docker</code> in the <code>nextflow.config</code></p>
-<pre><code>docker { docker.enabled = true }</code></pre>
-<ul>
-<li>The docker container can be specified in the process, e.g.</li>
-</ul>
-<pre><code>container = 'ncbi/blast'</code></pre>
-<p>or</p>
-<pre><code>container = `quay.io/biocontainers/blast/2.2.31--pl526he19e7b1_5`</code></pre>
-<ul>
-<li>We can include additional options to pass to the container as well:</li>
-</ul>
-<pre><code>containerOptions = "--bind $launchDir/$params.outdir/config:/augustus/config"</code></pre></li>
-<li><p><code>projectDir</code> refers to the directory where the main workflow script is located. (It used to be called <code>baseDir</code>.)</p></li>
-<li><p>Refering to local directories from <em>within</em> a docker container: create a channel</p>
-<ul>
-<li>Working in containers, we need a way to pass the database file location directly into the runBlast process without the need of the local path.</li>
-</ul></li>
-<li><p>Repeating a process over each element of a channel with <code>each</code>: <a href="https://www.nextflow.io/docs/latest/process.html#input-repeaters-each">input repeaters</a></p></li>
-<li><p>Turning a <a href="https://www.nextflow.io/docs/latest/channel.html#queue-channel">queue channel</a> into a <a href="https://www.nextflow.io/docs/latest/channel.html#value-channel">value channel</a>, which can be used multiple times.</p>
-<ul>
-<li>A value channel is implicitly created by a process when it is invoked with a simple value.</li>
-<li>A value channel is also implicitly created as output for a process whose inputs are all value channels.</li>
-<li>A queue channel can be converted into a value channel by returning a single value, using e.g.&nbsp;<code>first</code>, <code>last</code>, <code>collect</code>, <code>count</code>, <code>min</code>, <code>max</code>, <code>reduce</code>, <code>sum</code>, etc. For example: the <code>runBlast</code> process receives three inputs in the following example:
-<ul>
-<li>the <code>queryFile_ch</code> queue channel, with multiple sequences.</li>
-<li>the <code>dbDir_ch</code> value channel, created by calling <code>.first()</code>, which is reused for all elements of <code>queryFile_ch</code></li>
-<li>the <code>dbName_ch</code> value channel, which is also reused for all elements of <code>queryFile_ch</code></li>
-</ul></li>
-</ul>
-<pre><code>workflow {
-  channel.fromPath(params.dbDir).first()
-  .set { dbDir_ch }
-
-  channel.from(params.dbName).first()
-  .set { dbName_ch }
-
-  queryFile_ch = channel
-      .fromPath(params.query)
-      .splitFasta(by: 1, file:true)
-     res = runBlast(queryFile_ch, dbDir_ch, dbName_ch)
-  res.collectFile(name: 'blast_output_combined.txt', storeDir: params.outdir)
-}</code></pre></li>
-</ul>
-<section id="additional-resources" class="level3">
-<h3 class="anchored" data-anchor-id="additional-resources">Additional resources</h3>
-<ul>
-<li><a href="https://carpentries-incubator.github.io/workflows-nextflow/index.html">Software Carpentry course</a></li>
-<li><a href="https://github.com/danrlu/Nextflow_cheatsheet/blob/main/nextflow_cheatsheet.pdf">Nextflow cheat sheet</a></li>
-<li><a href="https://github.com/nextflow-io/awesome-nextflow">Awesome nextflow</a></li>
-</ul>
-
-
-</section>
-
-<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/nextflow-blast-tutorial/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
-  <category>TIL</category>
-  <category>nextflow</category>
-  <guid>https://tomsing1.github.io/blog/posts/nextflow-blast-tutorial/index.html</guid>
-  <pubDate>Mon, 14 Nov 2022 23:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

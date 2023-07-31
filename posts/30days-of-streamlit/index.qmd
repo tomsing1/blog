@@ -1,0 +1,107 @@
+---
+title: "Guess the correlation - a first streamlit app"
+author: "Thomas Sandmann"
+date: "2023-07-24"
+freeze: true
+categories: [TIL, python, streamlit]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+### TL;DR
+
+- I learned the basics of creating web applications with 
+  [Streamlit](https://streamlit.io/)
+- Build your intuition about correlation coefficients in 
+  [my first app here!](https://correlation.streamlit.app/)
+
+This week, I learned about [Streamlit](https://streamlit.io/), a python
+module to rapidly develop dashboards and (simple) web applications.
+Having used [Posit's shiny framework](https://shiny.posit.co/) in the
+past (using R), I enjoyed diving into a solution that uses python.
+
+There are numerous comparisons between different frameworks to develop
+dashboards with python (e.g. 
+[this one](https://medium.datadriveninvestor.com/streamlit-vs-dash-vs-voil%C3%A0-vs-panel-battle-of-the-python-dashboarding-giants-177c40b9ea57)
+). Most recently, [shiny for python](https://shiny.posit.co/py/) has
+entered the stage as well.
+
+To get started, I completed 
+[30 days of Streamlit](https://blog.streamlit.io/30-days-of-streamlit/),
+short exercises that introduce 
+[key Streamlit elements](https://docs.streamlit.io/library/cheatsheet). 
+
+Next, I tried my hands at coding a simple app from scratch. To challenge myself,
+I 
+[implemented a simplified version](https://correlation.streamlit.app/)
+of Omar Wagih's awesome
+[Guess The Corrlelation](https://www.guessthecorrelation.com/)
+game. A user is presented with a scatter plot and prompted to guess the
+(Pearson) correlation coefficient between the x- and y-variables.
+
+![My first streamlit app](screenshot.jpg)
+
+True to its promise of "turning data scripts into shareable web apps in minutes"
+I was able to get a simple application up and running very quickly, with only
+[a few lines of code](https://github.com/tomsing1/correlation).
+
+Streamlit makes it easy to add form elements, graphs or markdown-formatted text
+to a web application. While shiny defines which elements need to be refreshed
+based on user input explicitly (see 
+[with reactive epressions](https://shiny.posit.co/r/getstarted/shiny-basics/lesson6/)
+), streamlit simply reruns the entire script whenever a user interacts with 
+the application. That took some getting used to, e.g. as variables are reset
+in the process.
+
+To store selections and variables across reruns, the 
+[Session State](https://docs.streamlit.io/library/api-reference/session-state)
+a field-based API, is available, and 
+[I used it extensively](https://github.com/tomsing1/correlation/blob/b943f7b55d11ac310c48649c43e1853d8e6c630f/1_%F0%9F%8F%A0_Home.py#L63):
+
+```python
+# persistent variables
+with st.sidebar:
+    st.subheader("Settings")
+    st.session_state["n"] = st.number_input("Number of data points", 2, 1000, 100)
+if not "data" in st.session_state:
+    st.session_state["data"] = dataset(st.session_state["n"])
+if not "cor" in st.session_state:
+    st.session_state["cor"] = correlation(st.session_state["data"])
+if not "guessed" in st.session_state:
+    st.session_state["guessed"] = False
+if not "streak" in st.session_state:
+    st.session_state["streak"] = False
+if not "streak_length" in st.session_state:
+    st.session_state["streak_length"] = 0
+if not "coins" in st.session_state:
+    st.session_state["coins"] = 3
+```
+
+I also wanted to display two alternative buttons, either offering the user
+the option to submit a guess (`Submit!`) or to refresh the chart and start over
+(`Try again!`). 
+
+[Controlling the conditional flow of the app](https://github.com/tomsing1/correlation/blob/b943f7b55d11ac310c48649c43e1853d8e6c630f/1_%F0%9F%8F%A0_Home.py#L102) 
+was a bit of a challenge (for a beginner like myself), but eventually I was able
+to accomplish it through liberal use of the experimental
+[st.experimental_rerun() command](https://docs.streamlit.io/library/api-reference/control-flow/st.experimental_rerun).
+
+I deployed the final application in the streamlit cloud at 
+[https://correlation.streamlit.app/](https://correlation.streamlit.app/).
+(Any feedback is very welcome!)
+
+Overall, I was impressed how quickly I could put together a dashboard, and I
+am looking forward to sharing analysis results and interactive plots with my
+collaborators in the future. For more complex applications, I will look into
+shiny (R/phython), Flask or Django instead.

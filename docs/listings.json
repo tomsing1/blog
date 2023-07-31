@@ -2,6 +2,8 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/quarto-css/index.html",
+      "/posts/30days-of-streamlit/index.html",
       "/posts/grav/index.html",
       "/posts/CarpentryCon2018/index.html",
       "/posts/dtrackr/index.html",

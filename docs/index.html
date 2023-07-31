@@ -38,10 +38,12 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -139,6 +141,7 @@ ul.task-list li input[type="checkbox"] {
   </li>  
 </ul>
             <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
@@ -166,7 +169,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(26)</span></div><div class="category" data-category="AWS">AWS <span class="quarto-category-count">(3)</span></div><div class="category" data-category="Literature">Literature <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NGS">NGS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(12)</span></div><div class="category" data-category="SQL">SQL <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TIL">TIL <span class="quarto-category-count">(19)</span></div><div class="category" data-category="conda">conda <span class="quarto-category-count">(1)</span></div><div class="category" data-category="conference">conference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="databases">databases <span class="quarto-category-count">(1)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nextflow">nextflow <span class="quarto-category-count">(5)</span></div><div class="category" data-category="postgres">postgres <span class="quarto-category-count">(2)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(1)</span></div><div class="category" data-category="quarto">quarto <span class="quarto-category-count">(1)</span></div><div class="category" data-category="scRNAseq">scRNAseq <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tidyverse">tidyverse <span class="quarto-category-count">(1)</span></div><div class="category" data-category="visualization">visualization <span class="quarto-category-count">(2)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(28)</span></div><div class="category" data-category="AWS">AWS <span class="quarto-category-count">(3)</span></div><div class="category" data-category="CSS">CSS <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Literature">Literature <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NGS">NGS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(12)</span></div><div class="category" data-category="SQL">SQL <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TIL">TIL <span class="quarto-category-count">(21)</span></div><div class="category" data-category="conda">conda <span class="quarto-category-count">(1)</span></div><div class="category" data-category="conference">conference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="databases">databases <span class="quarto-category-count">(1)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nextflow">nextflow <span class="quarto-category-count">(5)</span></div><div class="category" data-category="postgres">postgres <span class="quarto-category-count">(2)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(2)</span></div><div class="category" data-category="quarto">quarto <span class="quarto-category-count">(2)</span></div><div class="category" data-category="scRNAseq">scRNAseq <span class="quarto-category-count">(1)</span></div><div class="category" data-category="streamlit">streamlit <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tidyverse">tidyverse <span class="quarto-category-count">(1)</span></div><div class="category" data-category="visualization">visualization <span class="quarto-category-count">(2)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -198,7 +201,35 @@ Reading Time
 </tr>
 </thead>
 <tbody class="list">
-<tr data-index="0" data-categories="TIL" data-listing-date-sort="1689890400000" data-listing-file-modified-sort="1689934825144" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Grav - a lightweight content management system" data-listing-filename-sort="index.qmd">
+<tr data-index="0" data-categories="TIL,quarto,CSS" data-listing-date-sort="1690786800000" data-listing-file-modified-sort="1690821191971" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Customizing my Quarto website" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jul 31, 2023</span>
+</td>
+<td>
+<a href="./posts/quarto-css/index.html" class="title listing-title">Customizing my Quarto website</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">1 min</span>
+</td>
+</tr>
+<tr data-index="1" data-categories="TIL,python,streamlit" data-listing-date-sort="1690182000000" data-listing-file-modified-sort="1690823601139" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Guess the correlation - a first streamlit app" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Jul 24, 2023</span>
+</td>
+<td>
+<a href="./posts/30days-of-streamlit/index.html" class="title listing-title">Guess the correlation - a first streamlit app</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">3 min</span>
+</td>
+</tr>
+<tr data-index="2" data-categories="TIL" data-listing-date-sort="1689922800000" data-listing-file-modified-sort="1689934825144" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Grav - a lightweight content management system" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jul 21, 2023</span>
 </td>
@@ -212,7 +243,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="1" data-categories="TIL" data-listing-date-sort="1689890400000" data-listing-file-modified-sort="1689965499229" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Greg Wilson: Late Night Thoughts on Listening to Ike Quebec (2018)" data-listing-filename-sort="index.qmd">
+<tr data-index="3" data-categories="TIL" data-listing-date-sort="1689922800000" data-listing-file-modified-sort="1689965499229" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Greg Wilson: Late Night Thoughts on Listening to Ike Quebec (2018)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jul 21, 2023</span>
 </td>
@@ -226,7 +257,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="2" data-categories="R,tidyverse,TIL" data-listing-date-sort="1687730400000" data-listing-file-modified-sort="1689934169676" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Documenting data wrangling with the dtrackr R package" data-listing-filename-sort="index.qmd">
+<tr data-index="4" data-categories="R,tidyverse,TIL" data-listing-date-sort="1687762800000" data-listing-file-modified-sort="1689934169676" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Documenting data wrangling with the dtrackr R package" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jun 26, 2023</span>
 </td>
@@ -240,7 +271,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="3" data-categories="SQL,AWS,TIL" data-listing-date-sort="1683324000000" data-listing-file-modified-sort="1689934169676" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Querying parquet files with duckdb" data-listing-filename-sort="index.qmd">
+<tr data-index="5" data-categories="SQL,AWS,TIL" data-listing-date-sort="1683356400000" data-listing-file-modified-sort="1689934169676" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Querying parquet files with duckdb" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">May 6, 2023</span>
 </td>
@@ -254,7 +285,7 @@ Reading Time
 <span class="listing-reading-time">6 min</span>
 </td>
 </tr>
-<tr data-index="4" data-categories="TIL,R,scRNAseq" data-listing-date-sort="1678575600000" data-listing-file-modified-sort="1689934169680" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="Lemur: analyzing multi-condition single-cell data" data-listing-filename-sort="index.qmd">
+<tr data-index="6" data-categories="TIL,R,scRNAseq" data-listing-date-sort="1678608000000" data-listing-file-modified-sort="1689934169680" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="Lemur: analyzing multi-condition single-cell data" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Mar 12, 2023</span>
 </td>
@@ -269,7 +300,7 @@ Reading Time
 </td>
 </tr>
 
-<tr data-index="5" data-categories="SQL,postgres" data-listing-date-sort="1677279600000" data-listing-file-modified-sort="1689934169737" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Simultaneously inserting records into two tables with Postgres CTEs" data-listing-filename-sort="index.qmd">
+<tr data-index="7" data-categories="SQL,postgres" data-listing-date-sort="1677312000000" data-listing-file-modified-sort="1689934169737" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Simultaneously inserting records into two tables with Postgres CTEs" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Feb 25, 2023</span>
 </td>
@@ -283,7 +314,7 @@ Reading Time
 <span class="listing-reading-time">4 min</span>
 </td>
 </tr>
-<tr data-index="6" data-categories="R,AWS,TIL" data-listing-date-sort="1674255600000" data-listing-file-modified-sort="1689934169674" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-title-sort="Distributing R packages with a drat repository hosted on AWS S3" data-listing-filename-sort="index.qmd">
+<tr data-index="8" data-categories="R,AWS,TIL" data-listing-date-sort="1674288000000" data-listing-file-modified-sort="1689934169674" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-title-sort="Distributing R packages with a drat repository hosted on AWS S3" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 21, 2023</span>
 </td>
@@ -297,7 +328,7 @@ Reading Time
 <span class="listing-reading-time">12 min</span>
 </td>
 </tr>
-<tr data-index="7" data-categories="nextflow,NGS" data-listing-date-sort="1673823600000" data-listing-file-modified-sort="1689934169680" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow" data-listing-filename-sort="index.qmd">
+<tr data-index="9" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1689934169680" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -311,7 +342,7 @@ Reading Time
 <span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-<tr data-index="8" data-categories="nextflow,NGS" data-listing-date-sort="1673823600000" data-listing-file-modified-sort="1689934169685" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output" data-listing-filename-sort="index.qmd">
+<tr data-index="10" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1689934169685" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -325,7 +356,7 @@ Reading Time
 <span class="listing-reading-time">4 min</span>
 </td>
 </tr>
-<tr data-index="9" data-categories="R,nextflow,NGS" data-listing-date-sort="1673823600000" data-listing-file-modified-sort="1689934169685" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="QuantSeq RNAseq analysis (3): Validating published results (no UMIs)" data-listing-filename-sort="index.qmd">
+<tr data-index="11" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1689934169685" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="QuantSeq RNAseq analysis (3): Validating published results (no UMIs)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -339,7 +370,7 @@ Reading Time
 <span class="listing-reading-time">14 min</span>
 </td>
 </tr>
-<tr data-index="10" data-categories="R,nextflow,NGS" data-listing-date-sort="1673823600000" data-listing-file-modified-sort="1689934169707" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (4): Validating published results (with UMIs)" data-listing-filename-sort="index.qmd">
+<tr data-index="12" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1689934169707" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (4): Validating published results (with UMIs)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -353,7 +384,7 @@ Reading Time
 <span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-<tr data-index="11" data-categories="TIL,R,databases" data-listing-date-sort="1672614000000" data-listing-file-modified-sort="1689934169678" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="SQL and noSQL approaches to creating &amp; querying databases (using R)" data-listing-filename-sort="index.qmd">
+<tr data-index="13" data-categories="TIL,R,databases" data-listing-date-sort="1672646400000" data-listing-file-modified-sort="1689934169678" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="SQL and noSQL approaches to creating &amp; querying databases (using R)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 2, 2023</span>
 </td>
@@ -368,7 +399,7 @@ Reading Time
 </td>
 </tr>
 
-<tr data-index="12" data-categories="TIL,R,visualization" data-listing-date-sort="1672095600000" data-listing-file-modified-sort="1689934169679" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-title-sort="Interactive GSEA results: visualizations with reactable &amp; plotly" data-listing-filename-sort="index.qmd">
+<tr data-index="14" data-categories="TIL,R,visualization" data-listing-date-sort="1672128000000" data-listing-file-modified-sort="1689934169679" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-title-sort="Interactive GSEA results: visualizations with reactable &amp; plotly" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 27, 2022</span>
 </td>
@@ -382,7 +413,7 @@ Reading Time
 <span class="listing-reading-time">27 min</span>
 </td>
 </tr>
-<tr data-index="13" data-categories="TIL,R,visualization" data-listing-date-sort="1671836400000" data-listing-file-modified-sort="1689934169739" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="UpSet plots: comparing differential expression across contrasts" data-listing-filename-sort="index.qmd">
+<tr data-index="15" data-categories="TIL,R,visualization" data-listing-date-sort="1671868800000" data-listing-file-modified-sort="1689934169739" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="UpSet plots: comparing differential expression across contrasts" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 24, 2022</span>
 </td>
@@ -396,7 +427,7 @@ Reading Time
 <span class="listing-reading-time">8 min</span>
 </td>
 </tr>
-<tr data-index="14" data-categories="TIL,R,quarto" data-listing-date-sort="1671663600000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Figure size, layout &amp; tabsets with Quarto" data-listing-filename-sort="index.qmd">
+<tr data-index="16" data-categories="TIL,R,quarto" data-listing-date-sort="1671696000000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Figure size, layout &amp; tabsets with Quarto" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 22, 2022</span>
 </td>
@@ -410,7 +441,7 @@ Reading Time
 <span class="listing-reading-time">2 min</span>
 </td>
 </tr>
-<tr data-index="15" data-categories="TIL,R,postgres" data-listing-date-sort="1670799600000" data-listing-file-modified-sort="1689934169737" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-title-sort="Full text search in Postgres - the R way" data-listing-filename-sort="index.qmd">
+<tr data-index="17" data-categories="TIL,R,postgres" data-listing-date-sort="1670832000000" data-listing-file-modified-sort="1689934169737" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-title-sort="Full text search in Postgres - the R way" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 12, 2022</span>
 </td>
@@ -424,7 +455,7 @@ Reading Time
 <span class="listing-reading-time">11 min</span>
 </td>
 </tr>
-<tr data-index="16" data-categories="TIL,R" data-listing-date-sort="1670713200000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Updating R the easy way: using rig command line tool" data-listing-filename-sort="index.qmd">
+<tr data-index="18" data-categories="TIL,R" data-listing-date-sort="1670745600000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Updating R the easy way: using rig command line tool" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 11, 2022</span>
 </td>
@@ -438,7 +469,7 @@ Reading Time
 <span class="listing-reading-time">2 min</span>
 </td>
 </tr>
-<tr data-index="17" data-categories="TIL,conference" data-listing-date-sort="1670626800000" data-listing-file-modified-sort="1689934169673" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="2022 normconf: lightning talks" data-listing-filename-sort="index.qmd">
+<tr data-index="19" data-categories="TIL,conference" data-listing-date-sort="1670659200000" data-listing-file-modified-sort="1689934169673" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="2022 normconf: lightning talks" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 10, 2022</span>
 </td>
@@ -452,7 +483,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="18" data-categories="TIL,R" data-listing-date-sort="1670454000000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="The rlist R package" data-listing-filename-sort="index.qmd">
+<tr data-index="20" data-categories="TIL,R" data-listing-date-sort="1670486400000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="The rlist R package" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 8, 2022</span>
 </td>
@@ -466,7 +497,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="19" data-categories="TIL" data-listing-date-sort="1668639600000" data-listing-file-modified-sort="1689934169674" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Creating custom badges for your README" data-listing-filename-sort="index.qmd">
+<tr data-index="21" data-categories="TIL" data-listing-date-sort="1668672000000" data-listing-file-modified-sort="1689934169674" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Creating custom badges for your README" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 17, 2022</span>
 </td>
@@ -480,7 +511,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="20" data-categories="TIL,nextflow" data-listing-date-sort="1668466800000" data-listing-file-modified-sort="1689934169680" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="Learning nextflow: blasting multiple sequences" data-listing-filename-sort="index.qmd">
+<tr data-index="22" data-categories="TIL,nextflow" data-listing-date-sort="1668499200000" data-listing-file-modified-sort="1689934169680" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="Learning nextflow: blasting multiple sequences" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 15, 2022</span>
 </td>
@@ -494,7 +525,7 @@ Reading Time
 <span class="listing-reading-time">8 min</span>
 </td>
 </tr>
-<tr data-index="21" data-categories="TIL,python" data-listing-date-sort="1668380400000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Python type hints" data-listing-filename-sort="index.qmd">
+<tr data-index="23" data-categories="TIL,python" data-listing-date-sort="1668412800000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Python type hints" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 14, 2022</span>
 </td>
@@ -508,7 +539,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="22" data-categories="Literature" data-listing-date-sort="1668294000000" data-listing-file-modified-sort="1689934169677" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex" data-listing-filename-sort="index.qmd">
+<tr data-index="24" data-categories="Literature" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1689934169677" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 13, 2022</span>
 </td>
@@ -522,7 +553,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="23" data-categories="TIL,AWS" data-listing-date-sort="1668294000000" data-listing-file-modified-sort="1689934169673" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Refreshing &amp; exporting temporary AWS credentials" data-listing-filename-sort="index.qmd">
+<tr data-index="25" data-categories="TIL,AWS" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1689934169673" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Refreshing &amp; exporting temporary AWS credentials" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 13, 2022</span>
 </td>
@@ -536,7 +567,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="24" data-categories="TIL,conda" data-listing-date-sort="1668207600000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Installing pyroe with conda" data-listing-filename-sort="index.qmd">
+<tr data-index="26" data-categories="TIL,conda" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1689934169738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Installing pyroe with conda" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 12, 2022</span>
 </td>
@@ -550,7 +581,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="25" data-categories="news" data-listing-date-sort="1668207600000" data-listing-file-modified-sort="1689934169739" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Welcome To My Blog" data-listing-filename-sort="index.qmd">
+<tr data-index="27" data-categories="news" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1689934169739" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Welcome To My Blog" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 12, 2022</span>
 </td>
@@ -591,6 +622,121 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
   const icon = "";
   const anchorJS = new window.AnchorJS();
   anchorJS.options = {

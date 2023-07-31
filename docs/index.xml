@@ -11,7 +11,192 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.3.353</generator>
-<lastBuildDate>Thu, 20 Jul 2023 22:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 31 Jul 2023 07:00:00 GMT</lastBuildDate>
+<item>
+  <title>Customizing my Quarto website</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/quarto-css/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<p>Today I gave <a href="https://tomsing1.github.io/blog/">my blog</a> a facelift, switching to a different theme and also including some custom CSS. <a href="https://scicomm.xyz/@basepair">Christian Gebhard’s</a> <a href="https://jollydata.blog/posts/2022-08-06-_switching-to-quarto/switching-to-quarto.html#themes">tutorial</a> was super helpful. Many thanks, Christian!</p>
+
+
+<!-- -->
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/quarto-css/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
+  <category>TIL</category>
+  <category>quarto</category>
+  <category>CSS</category>
+  <guid>https://tomsing1.github.io/blog/posts/quarto-css/index.html</guid>
+  <pubDate>Mon, 31 Jul 2023 07:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Guess the correlation - a first streamlit app</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/30days-of-streamlit/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="tldr" class="level3">
+<h3 class="anchored" data-anchor-id="tldr">TL;DR</h3>
+<ul>
+<li>I learned the basics of creating web applications with <a href="https://streamlit.io/">Streamlit</a></li>
+<li>Build your intuition about correlation coefficients in <a href="https://correlation.streamlit.app/">my first app here!</a></li>
+</ul>
+<p>This week, I learned about <a href="https://streamlit.io/">Streamlit</a>, a python module to rapidly develop dashboards and (simple) web applications. Having used <a href="https://shiny.posit.co/">Posit’s shiny framework</a> in the past (using R), I enjoyed diving into a solution that uses python.</p>
+<p>There are numerous comparisons between different frameworks to develop dashboards with python (e.g.&nbsp; <a href="https://medium.datadriveninvestor.com/streamlit-vs-dash-vs-voil%C3%A0-vs-panel-battle-of-the-python-dashboarding-giants-177c40b9ea57">this one</a> ). Most recently, <a href="https://shiny.posit.co/py/">shiny for python</a> has entered the stage as well.</p>
+<p>To get started, I completed <a href="https://blog.streamlit.io/30-days-of-streamlit/">30 days of Streamlit</a>, short exercises that introduce <a href="https://docs.streamlit.io/library/cheatsheet">key Streamlit elements</a>.</p>
+<p>Next, I tried my hands at coding a simple app from scratch. To challenge myself, I <a href="https://correlation.streamlit.app/">implemented a simplified version</a> of Omar Wagih’s awesome <a href="https://www.guessthecorrelation.com/">Guess The Corrlelation</a> game. A user is presented with a scatter plot and prompted to guess the (Pearson) correlation coefficient between the x- and y-variables.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://tomsing1.github.io/blog/posts/30days-of-streamlit/screenshot.jpg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">My first streamlit app</figcaption>
+</figure>
+</div>
+<p>True to its promise of “turning data scripts into shareable web apps in minutes” I was able to get a simple application up and running very quickly, with only <a href="https://github.com/tomsing1/correlation">a few lines of code</a>.</p>
+<p>Streamlit makes it easy to add form elements, graphs or markdown-formatted text to a web application. While shiny defines which elements need to be refreshed based on user input explicitly (see <a href="https://shiny.posit.co/r/getstarted/shiny-basics/lesson6/">with reactive epressions</a> ), streamlit simply reruns the entire script whenever a user interacts with the application. That took some getting used to, e.g.&nbsp;as variables are reset in the process.</p>
+<p>To store selections and variables across reruns, the <a href="https://docs.streamlit.io/library/api-reference/session-state">Session State</a> a field-based API, is available, and <a href="https://github.com/tomsing1/correlation/blob/b943f7b55d11ac310c48649c43e1853d8e6c630f/1_%F0%9F%8F%A0_Home.py#L63">I used it extensively</a>:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># persistent variables</span></span>
+<span id="cb1-2"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">with</span> st.sidebar:</span>
+<span id="cb1-3">    st.subheader(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Settings"</span>)</span>
+<span id="cb1-4">    st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> st.number_input(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Number of data points"</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>)</span>
+<span id="cb1-5"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> st.session_state:</span>
+<span id="cb1-6">    st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> dataset(st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"n"</span>])</span>
+<span id="cb1-7"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cor"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> st.session_state:</span>
+<span id="cb1-8">    st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cor"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> correlation(st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"data"</span>])</span>
+<span id="cb1-9"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"guessed"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> st.session_state:</span>
+<span id="cb1-10">    st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"guessed"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span></span>
+<span id="cb1-11"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"streak"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> st.session_state:</span>
+<span id="cb1-12">    st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"streak"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span></span>
+<span id="cb1-13"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"streak_length"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> st.session_state:</span>
+<span id="cb1-14">    st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"streak_length"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span>
+<span id="cb1-15"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">not</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"coins"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> st.session_state:</span>
+<span id="cb1-16">    st.session_state[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"coins"</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span></span></code></pre></div>
+<p>I also wanted to display two alternative buttons, either offering the user the option to submit a guess (<code>Submit!</code>) or to refresh the chart and start over (<code>Try again!</code>).</p>
+<p><a href="https://github.com/tomsing1/correlation/blob/b943f7b55d11ac310c48649c43e1853d8e6c630f/1_%F0%9F%8F%A0_Home.py#L102">Controlling the conditional flow of the app</a> was a bit of a challenge (for a beginner like myself), but eventually I was able to accomplish it through liberal use of the experimental <a href="https://docs.streamlit.io/library/api-reference/control-flow/st.experimental_rerun">st.experimental_rerun() command</a>.</p>
+<p>I deployed the final application in the streamlit cloud at <a href="https://correlation.streamlit.app/">https://correlation.streamlit.app/</a>. (Any feedback is very welcome!)</p>
+<p>Overall, I was impressed how quickly I could put together a dashboard, and I am looking forward to sharing analysis results and interactive plots with my collaborators in the future. For more complex applications, I will look into shiny (R/phython), Flask or Django instead.</p>
+
+
+<!-- -->
+
+</section>
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/30days-of-streamlit/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
+  <category>TIL</category>
+  <category>python</category>
+  <category>streamlit</category>
+  <guid>https://tomsing1.github.io/blog/posts/30days-of-streamlit/index.html</guid>
+  <pubDate>Mon, 24 Jul 2023 07:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Grav - a lightweight content management system</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -32,7 +217,7 @@
 <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/grav/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/grav/index.html</guid>
-  <pubDate>Thu, 20 Jul 2023 22:00:00 GMT</pubDate>
+  <pubDate>Fri, 21 Jul 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Greg Wilson: Late Night Thoughts on Listening to Ike Quebec (2018)</title>
@@ -110,7 +295,7 @@ including leaving Academia thrice - led Greg to formulate and share the followin
 <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/CarpentryCon2018/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/CarpentryCon2018/index.html</guid>
-  <pubDate>Thu, 20 Jul 2023 22:00:00 GMT</pubDate>
+  <pubDate>Fri, 21 Jul 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Documenting data wrangling with the dtrackr R package</title>
@@ -743,7 +928,7 @@ font-style: inherit;">session_info</span>()</span></code></pre></div>
   <category>tidyverse</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/dtrackr/index.html</guid>
-  <pubDate>Sun, 25 Jun 2023 22:00:00 GMT</pubDate>
+  <pubDate>Mon, 26 Jun 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Querying parquet files with duckdb</title>
@@ -1273,7 +1458,7 @@ font-style: inherit;">TRUE</span>)</span></code></pre></div>
   <category>AWS</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/duckdb/index.html</guid>
-  <pubDate>Fri, 05 May 2023 22:00:00 GMT</pubDate>
+  <pubDate>Sat, 06 May 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Lemur: analyzing multi-condition single-cell data</title>
@@ -3460,7 +3645,7 @@ Reproducibility
   <category>R</category>
   <category>scRNAseq</category>
   <guid>https://tomsing1.github.io/blog/posts/lemur/index.html</guid>
-  <pubDate>Sat, 11 Mar 2023 23:00:00 GMT</pubDate>
+  <pubDate>Sun, 12 Mar 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Simultaneously inserting records into two tables with Postgres CTEs</title>
@@ -3856,7 +4041,7 @@ font-style: inherit;">data</span></span></code></pre></div>
   <category>SQL</category>
   <category>postgres</category>
   <guid>https://tomsing1.github.io/blog/posts/postgres-returning/index.html</guid>
-  <pubDate>Fri, 24 Feb 2023 23:00:00 GMT</pubDate>
+  <pubDate>Sat, 25 Feb 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Distributing R packages with a drat repository hosted on AWS S3</title>
@@ -4581,7 +4766,7 @@ font-style: inherit;">}</span></span></code></pre></div></li>
   <category>AWS</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/drat/index.html</guid>
-  <pubDate>Fri, 20 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Sat, 21 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow</title>
@@ -5491,7 +5676,7 @@ font-style: inherit;">--outdir</span> SRP213880</span></code></pre></div>
   <category>nextflow</category>
   <category>NGS</category>
   <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-1-settings/index.html</guid>
-  <pubDate>Sun, 15 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output</title>
@@ -5723,7 +5908,7 @@ Note
   <category>nextflow</category>
   <category>NGS</category>
   <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-2-output/index.html</guid>
-  <pubDate>Sun, 15 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>QuantSeq RNAseq analysis (3): Validating published results (no UMIs)</title>
@@ -8014,7 +8199,7 @@ SessionInfo
   <category>nextflow</category>
   <category>NGS</category>
   <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/index.html</guid>
-  <pubDate>Sun, 15 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>QuantSeq RNAseq analysis (4): Validating published results (with UMIs)</title>
@@ -10167,7 +10352,7 @@ SessionInfo
   <category>nextflow</category>
   <category>NGS</category>
   <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index.html</guid>
-  <pubDate>Sun, 15 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>SQL and noSQL approaches to creating &amp; querying databases (using R)</title>
@@ -11465,7 +11650,7 @@ SessionInfo
   <category>R</category>
   <category>databases</category>
   <guid>https://tomsing1.github.io/blog/posts/geneset-sqlite-db/index.html</guid>
-  <pubDate>Sun, 01 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 02 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Interactive GSEA results: visualizations with reactable &amp; plotly</title>
@@ -14467,7 +14652,7 @@ SessionInfo
   <category>R</category>
   <category>visualization</category>
   <guid>https://tomsing1.github.io/blog/posts/interactive-gene-set-results/index.html</guid>
-  <pubDate>Mon, 26 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Tue, 27 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>UpSet plots: comparing differential expression across contrasts</title>
@@ -15215,7 +15400,7 @@ Reproducibility
   <category>R</category>
   <category>visualization</category>
   <guid>https://tomsing1.github.io/blog/posts/upset_plots/index.html</guid>
-  <pubDate>Fri, 23 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Sat, 24 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Figure size, layout &amp; tabsets with Quarto</title>
@@ -15458,7 +15643,7 @@ Tip
   <category>R</category>
   <category>quarto</category>
   <guid>https://tomsing1.github.io/blog/posts/quarto-figure-size-and-layout/index.html</guid>
-  <pubDate>Wed, 21 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Thu, 22 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Full text search in Postgres - the R way</title>
@@ -16723,7 +16908,7 @@ font-style: inherit;">session_info</span>()</span></code></pre></div>
   <category>R</category>
   <category>postgres</category>
   <guid>https://tomsing1.github.io/blog/posts/postgres-full-text-search/index.html</guid>
-  <pubDate>Sun, 11 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 12 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Updating R the easy way: using rig command line tool</title>
@@ -16776,7 +16961,7 @@ Platform: x86_64-apple-darwin17.0 (64-bit)</code></pre>
   <category>TIL</category>
   <category>R</category>
   <guid>https://tomsing1.github.io/blog/posts/r-update-with-rig/index.html</guid>
-  <pubDate>Sat, 10 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Sun, 11 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>2022 normconf: lightning talks</title>
@@ -16811,65 +16996,7 @@ Platform: x86_64-apple-darwin17.0 (64-bit)</code></pre>
   <category>TIL</category>
   <category>conference</category>
   <guid>https://tomsing1.github.io/blog/posts/conda-speedup/index.html</guid>
-  <pubDate>Fri, 09 Dec 2022 23:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>The rlist R package</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/rslist-r-package/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Whenever I deal with nested lists in R - e.g.&nbsp;after reading JSON documents - my code starts to resemble a jumbled mess of <code>lapply</code> calls. (Or, on a better day, a horrible collection of <a href="https://purrr.tidyverse.org/reference/map.html">purrr::map</a> calls).</p>
-<p>Luckily, there is help: the <a href="https://renkun-ken.github.io/rlist-tutorial/index.html">rlist R package</a> offers lots of great functionality to extract, combine, filter, select and convert nested lists. It works with JSON arrays / files out of the box as well, so it’s super useful when you deal with the response from REST APIs, for example.</p>
-<p>Available from a <a href="https://cran.r-project.org/web/packages/rlist/index.html">your nearest CRAN mirror</a>.</p>
-<p>Check it out, you won’t regret it!</p>
-
-
-
-<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/rslist-r-package/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
-  <category>TIL</category>
-  <category>R</category>
-  <guid>https://tomsing1.github.io/blog/posts/rslist-r-package/index.html</guid>
-  <pubDate>Wed, 07 Dec 2022 23:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Creating custom badges for your README</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/custom-badges/index.html</link>
-  <description><![CDATA[ 
-
-
-
-
-<p>Today I learned how to create custom badges with <a href="https://img.shields.io">shields.io</a>, and how to add them to the <code>README.md</code> file on github.</p>
-<section id="predefined-badges" class="level3">
-<h3 class="anchored" data-anchor-id="predefined-badges">Predefined badges</h3>
-<p>Many open source software packages display key pieces of information as badges (aka shields) in their github README, indicating e.g.&nbsp;code coverage, unit test results, version numbers, license, etc.</p>
-<p>The <a href="https://img.shields.io">shields.io</a> website provides many different ready-to-use badges, covering topics such as <a href="https://shields.io/category/test-results">test results</a>, <a href="https://shields.io/category/coverage">code coverage</a>, <a href="https://shields.io/category/social">social media logos</a>, <a href="https://shields.io/category/activity">activity</a>, and many more.</p>
-<p><img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/shields.io/badge/downloads-120%2Fweek-green.png" class="img-fluid"> <img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/shields.io/badge/docker%20pulls-765M-066da5.png" class="img-fluid"> <img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/shields.io/badge/change%201011478-merged-blueviolet.png" class="img-fluid"> <img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/shields.io/badge/closed%20issues-899-yellow.png" class="img-fluid"> <img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/shields.io/badge/stars-%E2%98%85%E2%98%85%E2%98%85%E2%98%85%E2%98%86-brightgreen.png" class="img-fluid"> <img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/shields.io/badge/Watch-96-lightgrey?logo=github&amp;style=social.png" class="img-fluid"></p>
-<p>Badges can show up to date information. For example, this badge shows the last commit to the <a href="https://github.com/tomsing1/blog">github repository for this blog</a>: <img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/img.shields.io/github/last-commit/tomsing1/blog.png" class="img-fluid">. They can be returned either in <code>svg</code> (recommended) or <code>png</code> formats, from the <code>img.shields.io</code> and <code>raster.shields.io</code> servers, respectively.</p>
-</section>
-<section id="custom-badges" class="level3">
-<h3 class="anchored" data-anchor-id="custom-badges">Custom badges</h3>
-<p>In addition to predefined outputs, you can also generate your own, entirely custom badges. They can be static like this one <img src="https://tomsing1.github.io/blog/posts/custom-badges/https:/img.shields.io/static/v1?label=Static&amp;message=My%20static%20badge&amp;color=blue&amp;style=flat-square.png" class="img-fluid"> or dynamically retrieve information from <a href="https://shields.io/endpoint">a JSON endpoint of your choice</a>.</p>
-</section>
-<section id="adding-badges-to-a-readme.md-file" class="level3">
-<h3 class="anchored" data-anchor-id="adding-badges-to-a-readme.md-file">Adding badges to a README.md file</h3>
-<p>To embed badges into your <code>README.md</code>, simply wrap its URL in markdown and surround it with the <code>badges: start</code> and <code>badges: end</code> tags:</p>
-<pre><code>&lt;!-- badges: start --&gt;
-![](https://img.shields.io/github/last-commit/tomsing1/blog)
-&lt;!-- badges: end --&gt;</code></pre>
-
-
-</section>
-
-<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://tomsing1.github.io/blog/posts/custom-badges/https:/i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p> ]]></description>
-  <category>TIL</category>
-  <guid>https://tomsing1.github.io/blog/posts/custom-badges/index.html</guid>
-  <pubDate>Wed, 16 Nov 2022 23:00:00 GMT</pubDate>
+  <pubDate>Sat, 10 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

@@ -2,114 +2,122 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://tomsing1.github.io/blog/posts/interactive-gene-set-results/index.html</loc>
-    <lastmod>2023-07-21T18:52:09.418Z</lastmod>
+    <lastmod>2023-07-31T17:10:06.310Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index.html</loc>
-    <lastmod>2023-07-21T18:52:11.243Z</lastmod>
+    <lastmod>2023-07-31T17:10:08.058Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/grav/index.html</loc>
-    <lastmod>2023-07-21T18:52:11.740Z</lastmod>
+    <lastmod>2023-07-31T17:10:08.537Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/index.html</loc>
-    <lastmod>2023-07-21T18:52:13.731Z</lastmod>
+    <lastmod>2023-07-31T17:10:10.451Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/geneset-sqlite-db/index.html</loc>
-    <lastmod>2023-07-21T18:52:15.978Z</lastmod>
+    <lastmod>2023-07-31T17:10:12.506Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-1-settings/index.html</loc>
-    <lastmod>2023-07-21T18:52:17.793Z</lastmod>
+    <lastmod>2023-07-31T17:10:13.986Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/pyroe-installation/index.html</loc>
-    <lastmod>2023-07-21T18:52:18.196Z</lastmod>
+    <lastmod>2023-07-31T17:10:14.332Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/quarto-figure-size-and-layout/index.html</loc>
-    <lastmod>2023-07-21T18:52:18.932Z</lastmod>
+    <lastmod>2023-07-31T17:10:15.033Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-2-output/index.html</loc>
-    <lastmod>2023-07-21T18:52:19.673Z</lastmod>
+    <lastmod>2023-07-31T17:10:15.742Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/30days-of-streamlit/index.html</loc>
+    <lastmod>2023-07-31T17:13:25.005Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/drat/index.html</loc>
-    <lastmod>2023-07-21T18:52:21.406Z</lastmod>
+    <lastmod>2023-07-31T17:10:17.776Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/rslist-r-package/index.html</loc>
-    <lastmod>2023-07-21T18:52:21.804Z</lastmod>
+    <lastmod>2023-07-31T17:10:18.117Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/postgres-returning/index.html</loc>
-    <lastmod>2023-07-21T18:52:22.860Z</lastmod>
+    <lastmod>2023-07-31T17:10:19.063Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/quarto-css/index.html</loc>
+    <lastmod>2023-07-31T17:10:19.505Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/welcome/index.html</loc>
-    <lastmod>2023-07-21T18:52:23.206Z</lastmod>
+    <lastmod>2023-07-31T17:10:20.023Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/custom-badges/index.html</loc>
-    <lastmod>2023-07-21T18:52:23.622Z</lastmod>
+    <lastmod>2023-07-31T17:10:20.546Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/r-update-with-rig/index.html</loc>
-    <lastmod>2023-07-21T18:52:24.024Z</lastmod>
+    <lastmod>2023-07-31T17:10:21.003Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/nextflow-blast-tutorial/index.html</loc>
-    <lastmod>2023-07-21T18:52:24.545Z</lastmod>
+    <lastmod>2023-07-31T17:10:21.630Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/CarpentryCon2018/index.html</loc>
-    <lastmod>2023-07-21T18:52:25.153Z</lastmod>
+    <lastmod>2023-07-31T17:10:22.541Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/dtrackr/index.html</loc>
-    <lastmod>2023-07-21T18:52:25.968Z</lastmod>
+    <lastmod>2023-07-31T17:10:23.497Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/python-hints/index.html</loc>
-    <lastmod>2023-07-21T18:52:26.430Z</lastmod>
+    <lastmod>2023-07-31T17:10:23.926Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
-    <lastmod>2023-07-21T18:52:26.919Z</lastmod>
+    <lastmod>2023-07-31T17:10:24.492Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/duckdb/index.html</loc>
-    <lastmod>2023-07-21T18:52:27.842Z</lastmod>
+    <lastmod>2023-07-31T17:10:25.573Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/postgres-full-text-search/index.html</loc>
-    <lastmod>2023-07-21T18:52:28.798Z</lastmod>
+    <lastmod>2023-07-31T17:10:26.402Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/upset_plots/index.html</loc>
-    <lastmod>2023-07-21T18:52:30.103Z</lastmod>
+    <lastmod>2023-07-31T17:10:27.549Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/aws-export-credentials/index.html</loc>
-    <lastmod>2023-07-21T18:52:30.797Z</lastmod>
+    <lastmod>2023-07-31T17:10:28.229Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/lemur/index.html</loc>
-    <lastmod>2023-07-21T18:52:32.546Z</lastmod>
+    <lastmod>2023-07-31T17:10:29.888Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/conda-speedup/index.html</loc>
-    <lastmod>2023-07-21T18:52:32.958Z</lastmod>
+    <lastmod>2023-07-31T17:10:30.325Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-07-21T18:52:33.807Z</lastmod>
+    <lastmod>2023-07-31T17:13:26.159Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/about.html</loc>
-    <lastmod>2023-07-21T18:52:34.143Z</lastmod>
+    <lastmod>2023-07-31T17:10:31.596Z</lastmod>
   </url>
 </urlset>

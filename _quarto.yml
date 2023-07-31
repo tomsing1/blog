@@ -28,5 +28,7 @@ website:
       mapping: title
 format:
   html:
-    theme: sandstone
+    theme:
+      light: [litera, tomsing1.scss]
+      dark: [superhero, tomsing1.scss]
 editor: source

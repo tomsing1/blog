@@ -11,7 +11,7 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.3.353</generator>
-<lastBuildDate>Sun, 25 Jun 2023 22:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 26 Jun 2023 07:00:00 GMT</lastBuildDate>
 <item>
   <title>Documenting data wrangling with the dtrackr R package</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -643,7 +643,7 @@ font-style: inherit;">session_info</span>()</span></code></pre></div>
   <category>tidyverse</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/dtrackr/index.html</guid>
-  <pubDate>Sun, 25 Jun 2023 22:00:00 GMT</pubDate>
+  <pubDate>Mon, 26 Jun 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Lemur: analyzing multi-condition single-cell data</title>
@@ -2830,7 +2830,7 @@ Reproducibility
   <category>R</category>
   <category>scRNAseq</category>
   <guid>https://tomsing1.github.io/blog/posts/lemur/index.html</guid>
-  <pubDate>Sat, 11 Mar 2023 23:00:00 GMT</pubDate>
+  <pubDate>Sun, 12 Mar 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Distributing R packages with a drat repository hosted on AWS S3</title>
@@ -3555,7 +3555,7 @@ font-style: inherit;">}</span></span></code></pre></div></li>
   <category>AWS</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/drat/index.html</guid>
-  <pubDate>Fri, 20 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Sat, 21 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>QuantSeq RNAseq analysis (3): Validating published results (no UMIs)</title>
@@ -5846,7 +5846,7 @@ SessionInfo
   <category>nextflow</category>
   <category>NGS</category>
   <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/index.html</guid>
-  <pubDate>Sun, 15 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>QuantSeq RNAseq analysis (4): Validating published results (with UMIs)</title>
@@ -7999,7 +7999,7 @@ SessionInfo
   <category>nextflow</category>
   <category>NGS</category>
   <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-4-nugent/index.html</guid>
-  <pubDate>Sun, 15 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 16 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>SQL and noSQL approaches to creating &amp; querying databases (using R)</title>
@@ -9297,7 +9297,7 @@ SessionInfo
   <category>R</category>
   <category>databases</category>
   <guid>https://tomsing1.github.io/blog/posts/geneset-sqlite-db/index.html</guid>
-  <pubDate>Sun, 01 Jan 2023 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 02 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Interactive GSEA results: visualizations with reactable &amp; plotly</title>
@@ -12299,7 +12299,7 @@ SessionInfo
   <category>R</category>
   <category>visualization</category>
   <guid>https://tomsing1.github.io/blog/posts/interactive-gene-set-results/index.html</guid>
-  <pubDate>Mon, 26 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Tue, 27 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>UpSet plots: comparing differential expression across contrasts</title>
@@ -13047,7 +13047,7 @@ Reproducibility
   <category>R</category>
   <category>visualization</category>
   <guid>https://tomsing1.github.io/blog/posts/upset_plots/index.html</guid>
-  <pubDate>Fri, 23 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Sat, 24 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Figure size, layout &amp; tabsets with Quarto</title>
@@ -13290,7 +13290,7 @@ Tip
   <category>R</category>
   <category>quarto</category>
   <guid>https://tomsing1.github.io/blog/posts/quarto-figure-size-and-layout/index.html</guid>
-  <pubDate>Wed, 21 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Thu, 22 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Full text search in Postgres - the R way</title>
@@ -14555,7 +14555,7 @@ font-style: inherit;">session_info</span>()</span></code></pre></div>
   <category>R</category>
   <category>postgres</category>
   <guid>https://tomsing1.github.io/blog/posts/postgres-full-text-search/index.html</guid>
-  <pubDate>Sun, 11 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Mon, 12 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Updating R the easy way: using rig command line tool</title>
@@ -14608,7 +14608,7 @@ Platform: x86_64-apple-darwin17.0 (64-bit)</code></pre>
   <category>TIL</category>
   <category>R</category>
   <guid>https://tomsing1.github.io/blog/posts/r-update-with-rig/index.html</guid>
-  <pubDate>Sat, 10 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Sun, 11 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>The rlist R package</title>
@@ -14630,7 +14630,7 @@ Platform: x86_64-apple-darwin17.0 (64-bit)</code></pre>
   <category>TIL</category>
   <category>R</category>
   <guid>https://tomsing1.github.io/blog/posts/rslist-r-package/index.html</guid>
-  <pubDate>Wed, 07 Dec 2022 23:00:00 GMT</pubDate>
+  <pubDate>Thu, 08 Dec 2022 08:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

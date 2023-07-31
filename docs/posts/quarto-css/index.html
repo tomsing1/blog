@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Thomas Sandmann">
-<meta name="dcterms.date" content="2022-11-13">
+<meta name="dcterms.date" content="2023-07-31">
 
-<title>Thomas Sandmann’s blog - Refreshing &amp; exporting temporary AWS credentials</title>
+<title>Thomas Sandmann’s blog - Customizing my Quarto website</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -101,7 +101,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -154,10 +154,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Refreshing &amp; exporting temporary AWS credentials</h1>
+      <div class="quarto-title-block"><div><h1 class="title">Customizing my Quarto website</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
                                 <div class="quarto-categories">
                 <div class="quarto-category">TIL</div>
-                <div class="quarto-category">AWS</div>
+                <div class="quarto-category">quarto</div>
+                <div class="quarto-category">CSS</div>
               </div>
                   </div>
   </div>
@@ -175,7 +176,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 13, 2022</p>
+        <p class="date">July 31, 2023</p>
       </div>
     </div>
     
@@ -186,92 +187,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        
+    </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
-<p>To increase security when interacting with AWS services, the <a href="https://aws.amazon.com/iam/identity-center/">AWS IAM Identity Center</a> (formerly known as AWS SSO) generates temporary credentials for different AWS roles.</p>
-<p>Today I learned how to configure and refresh these credentials in the command line, as well how to export them either as environmental variables or write them to the <code>credentials</code> file where tools that do not interact with AWS SSO natively can access them.</p>
-<section id="configuring-an-aws-sso-profile" class="level3">
-<h3 class="anchored" data-anchor-id="configuring-an-aws-sso-profile">Configuring an AWS SSO profile</h3>
-<p>First, we need to <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html">configure a named profile</a> for use with AWS SSO. The following <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI version 2</a> command will interactively walk you through the necessary steps:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> configure sso</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The information you provide will be written to the <code>config</code> file, located in the <code>~/.aws</code> directory on Mac OS. Here is an example:</p>
-<pre><code>[profile my-dev-profile]
-sso_start_url = https://my-sso-portal.awsapps.com/start
-sso_region = us-east-1
-sso_account_id = 123456789011
-sso_role_name = readOnly
-region = us-west-2
-output = json</code></pre>
-</section>
-<section id="logging-into-the-aws-sso-profile" class="level3">
-<h3 class="anchored" data-anchor-id="logging-into-the-aws-sso-profile">Logging into the AWS SSO profile</h3>
-<p>Now we can log into AWS SSO and request temporary credentials:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> my-dev-profile</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This command will try to open a web browser for you and prompt you to confirm the login. Alternatively, you can copy &amp; paste the displayed URL and manually enter the confirmation code output by the command.</p>
-<p>If the login was successful, you can now adopt the <code>my-dev-profile</code> when using the AWS CLI, e.g.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 ls <span class="at">--profile</span> my-dev-profile</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The AWS SSO endpoint recognizes many environmental variables that you can use to specify defaults, e.g.</p>
-<ul>
-<li><code>AWS_PROFILE</code>: The profile to use (e.g.&nbsp;my-dev-profile)</li>
-<li><code>AWS_SHARED_CREDENTIALS_FILE</code>: the location of the shared credentials files (default on Mac OS: ~/.aws/.credentials)</li>
-<li><code>AWS_CONFIG_FILE</code>: the location of the AWS CLI configuration file (default on Mac OS: ~/.aws.config)</li>
-</ul>
-</section>
-<section id="accessing-temporary-credentials" class="level3">
-<h3 class="anchored" data-anchor-id="accessing-temporary-credentials">Accessing temporary credentials</h3>
-<p>The AWS CLI and many of the AWS SKDs will automatically detect and use SSO credentials. But other tools might not (yet) be compatible with this authentication route. Instead, they might</p>
-<ul>
-<li>read credentials for a profile from the <code>credentials</code> file</li>
-<li>rely on environmental variables, e.g.&nbsp;<code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code></li>
-</ul>
-<p>To expose the temporary credentials, Ben Kehoe has made the <a href="https://github.com/benkehoe/aws-export-credentials">aws-export-credentials</a> tool available.</p>
-</section>
-<section id="installing-aws-export-credentials" class="level3">
-<h3 class="anchored" data-anchor-id="installing-aws-export-credentials">Installing aws-export-credentials</h3>
-<p>The recommended way to install <code>aws-export-credentials</code> is via <a href="https://pypa.github.io/pipx/">pipx</a> because it will automatically make it available in your PATH.</p>
-<ol type="1">
-<li>If you don’t have <code>pipx</code> available on your system, <a href="https://pypa.github.io/pipx/#install-pipx">install it first</a>.</li>
-<li>Next, install aws-export-credentials by executing the following steps in your shell:</li>
-</ol>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pipx</span> ensurepath  <span class="co"># in case you haven't run this before</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pipx</span> install aws-export-credentials</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">aws-export-credentials</span> <span class="at">--version</span>  <span class="co"># verify the installation</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="updating-the-credentials-file" class="level3">
-<h3 class="anchored" data-anchor-id="updating-the-credentials-file">Updating the credentials file</h3>
-<p>At the beginning of your workday - or whenever needed - run the following set of commands. (Replace the SSO profile with the one you want to adopt.)</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="va">PROFILE</span><span class="op">=</span><span class="st">"my-dev-profile"</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># retrieve new credentials from AWS</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> sso login <span class="at">--profile</span> <span class="st">"</span><span class="va">${PROFILE}</span><span class="st">"</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># write the temporary credentials to the ~/.aws/credentials file</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="ex">aws-export-credentials</span> <span class="dt">\</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">--profile</span> <span class="st">"</span><span class="va">${PROFILE}</span><span class="st">"</span> <span class="dt">\</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">--credentials-file-profile</span> <span class="st">"</span><span class="va">${PROFILE}</span><span class="st">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This will refresh the credentials (via <code>aws sso login</code>) and then write them to the <code>my-dev-profile</code> profiles in the <code>~/.aws/.credentials</code> file. Now we can access them e.g.&nbsp;in the <a href="https://cloud.r-project.org/web/packages/aws.s3/index.html">aws.s3</a> R package:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(aws.s3)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(aws.signature)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>aws.signature<span class="sc">::</span><span class="fu">use_credentials</span>(<span class="at">profile =</span> <span class="st">"my-dev-profile"</span>)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>aws.s3<span class="sc">::</span><span class="fu">bucketlist</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="exposing-environmental-variables" class="level3">
-<h3 class="anchored" data-anchor-id="exposing-environmental-variables">Exposing environmental variables</h3>
-<p>Some tools <em>only</em> recognize environmental variables. Luckily, <code>aws-export-credentials</code> can automate this process, too:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">$(</span><span class="ex">aws-export-credentials</span> <span class="at">--profile</span> my-dev-profile <span class="at">--env-export</span><span class="va">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>will export <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> variables in your shell session.</p>
-</section>
-<section id="sourcing-credentials-with-an-external-process" class="level3">
-<h3 class="anchored" data-anchor-id="sourcing-credentials-with-an-external-process">Sourcing credentials with an external process</h3>
-<p>Finally, you can also include a command that looks up credentials as a <code>credential_process</code> in your config file. (<a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sourcing-external.html">More information here</a>) But that’s not a use case I have explored, yet.</p>
+<p>Today I gave <a href="https://tomsing1.github.io/blog/">my blog</a> a facelift, switching to a different theme and also including some custom CSS. <a href="https://scicomm.xyz/@basepair">Christian Gebhard’s</a> <a href="https://jollydata.blog/posts/2022-08-06-_switching-to-quarto/switching-to-quarto.html#themes">tutorial</a> was super helpful. Many thanks, Christian!</p>
 
 
-</section>
+<!-- -->
+
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -468,6 +397,57 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
   function tippyHover(el, contentFn) {
     const config = {
       allowHTML: true,
@@ -623,7 +603,34 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 <script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
-</script>
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Customizing my Quarto website"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-07-31"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [TIL, quarto, CSS]</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Today I gave <span class="co">[</span><span class="ot">my blog</span><span class="co">](https://tomsing1.github.io/blog/)</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>a facelift, switching to a different theme and also including some custom CSS. </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Christian Gebhard's</span><span class="co">](https://scicomm.xyz/@basepair)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">tutorial</span><span class="co">](https://jollydata.blog/posts/2022-08-06-_switching-to-quarto/switching-to-quarto.html#themes)</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>was super helpful. Many thanks, Christian!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
 </div> <!-- /content -->
 
 

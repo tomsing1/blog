@@ -1,0 +1,26 @@
+---
+title: "Customizing my Quarto website"
+author: "Thomas Sandmann"
+date: "2023-07-31"
+freeze: true
+categories: [TIL, quarto, CSS]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+Today I gave [my blog](https://tomsing1.github.io/blog/)
+a facelift, switching to a different theme and also including some custom CSS. 
+[Christian Gebhard's](https://scicomm.xyz/@basepair)
+[tutorial](https://jollydata.blog/posts/2022-08-06-_switching-to-quarto/switching-to-quarto.html#themes)
+was super helpful. Many thanks, Christian!

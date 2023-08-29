@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/tourr/index.html",
       "/posts/quarto-css/index.html",
       "/posts/30days-of-streamlit/index.html",
       "/posts/grav/index.html",

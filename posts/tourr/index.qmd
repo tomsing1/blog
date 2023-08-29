@@ -1,0 +1,247 @@
+---
+title: "tourrr: Exploring multi-dimensional data"
+author: "Thomas Sandmann"
+date: "2023-08-28"
+freeze: true
+categories: [R, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+Today I learned about exploring multivariate data using _tours_ of projections
+into lower dimensions. The 
+[tourr R package](https://cran.r-project.org/package=tourr) makes it easy to
+experiment with different tours. Let's go on a grand tour! 
+
+## Introduction
+
+Earlier this month, Dianne Cook and Ursula Laa published 
+[Interactively exploring high-dimensional data and models in R](https://dicook.github.io/mulgar_book/), 
+a free online book accompanied by the 
+[mulgar R package](https://cran.r-project.org/package=mulgar). 
+It's a great introduction to exploratory analysis of multivariate data 🚀.
+
+The authors introduce data _tours_ to interactively visualize high-dimensional
+data. (And also highlight the rich history of this field, including the 
+[PRIM-9](https://youtu.be/B7XoW2qiFUA?si=KrHCTYoWoX667RaDp) system created at
+Stanford in the 
+[early 1970s](https://inspirehep.net/literature/91655)
+).
+
+The
+[tourr R package](https://cran.r-project.org/package=tourr)
+provides user-friendly functions to run a tour.
+
+## A gorilla hiding in plain sight
+
+In 2020, 
+[Itai Yanai and Martin Lercher](https://www.biorxiv.org/content/10.1101/2020.07.30.228916v1)
+asked whether "focus on a specific hypothesis prevents the exploration
+of other aspects of the data". [^1] They simulated a dataset with two variables, 
+`bmi` and `steps` for both male and female subjects. Let's start with a similar
+dataset [^2].
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+gorilla <- read.csv(
+  paste0("https://gist.githubusercontent.com/tomsing1/",
+         "d29496382e8b8f4163c34df46b00686f/raw/",
+         "40c0b7b5d25fff188a7365df59aa8634fef9adb9/gorilla.csv")
+)
+with(gorilla, plot(steps, bmi, col = ifelse(group == "M", "navy", "firebrick")))
+```
+
+Here, we want to examine only the numerical measurements (e.g. `bmi` and `steps`
+), so let's remove the categorical `group` variable and add two noise variables
+to create a dataset with five numerical variables.
+
+```{r}
+for (dimension in paste0("noise", 1:2)) {
+  gorilla[[dimension]] <- rnorm(n = nrow(gorilla))
+}
+numeric_cols <- setdiff(colnames(gorilla), "group")
+head(gorilla)
+```
+
+Plotting all pairwise combinations of the `r ncol(gorilla)` variables quickly
+reveals the gorilla hidden in the `bmi` ~ `steps` relationship:
+
+```{r}
+#| fig-width: 5
+#| fig-height: 5
+pairs(gorilla[, numeric_cols], pch = ".")
+```
+
+## Taking tours
+
+```{r}
+library(tourr)
+```
+
+```{r}
+gorilla[, numeric_cols] <- tourr::rescale(gorilla[, numeric_cols])
+clrs <- c("#486030", "#c03018", "#f0a800")
+group_col <- clrs[as.numeric(factor(gorilla$group))]
+```
+
+### Taking a little tour
+
+The _little tour_ cycles through all axis parallel projections, reproducing
+all of the static plots we obtained with the `pairs()` call above
+(corresponding to 90 degree angles between the axes) as well as additional
+projections in between. 
+
+As expected, the gorilla cartoon reveals itself whenever the `steps` and `bmi`
+variables are projected into the x and y coordinates.
+
+```{r}
+#| results: false
+#| message: false
+if (interactive()) {
+  tourr::animate(data = gorilla[, numeric_cols], 
+                 tour_path = little_tour(d = 2), 
+                 display = display_xy())
+} else {
+  tourr::render_gif(
+    data = gorilla[, numeric_cols],
+    little_tour(), 
+    display_xy(),
+    gif_file = "little_tour.gif",
+    width = 300,
+    height = 300,
+    frames = 500,
+    loop = TRUE
+  )
+}
+```
+
+![Little tour](little_tour.gif)
+
+### Grand tour
+
+The _grand tour_ picks a new projection at random and smoothly interpolates
+between them, eventually showing every possible projection of the data into the
+selected number of dimensions (here: 2). With a very high dimensional dataset, 
+traversing all possibilities can take quite a while.
+
+```{r}
+#| results: false
+#| message: false
+if (interactive()) {
+  tourr::animate(data = gorilla[, numeric_cols], 
+                 tour_path = grand_tour(d = 2), 
+                 display = display_xy())
+} else {
+  tourr::render_gif(
+    data = gorilla[, numeric_cols],
+    grand_tour(d = 2), 
+    display_xy(),
+    gif_file = "grand_tour.gif",
+    width = 300,
+    height = 300,
+    frames = 500,
+    loop = TRUE
+  )
+}
+```
+
+![Grand tour](grand_tour.gif)
+
+[^1]: In addition to being asked what they could conclude from the dataset, half
+of the students were asked to also test specific hypotheses. [...] students in
+the hypothesis-free group were almost 5 times more likely to observe an image of
+a gorilla when simply plotting the data, a proxy for an initial step towards
+data analysis. 
+
+[^2]: Matt Dray showed how to recreate the dataset using R in 
+[this great blog post.](https://www.rostrum.blog/posts/2021-10-05-gorilla/),
+the code to generate the `gorilla` dataset I use here is in
+[this gist](https://gist.github.com/tomsing1/27cce955193aede83038e4422bbac9e4).
+
+## Adding interactivity
+
+Dianne Cook's and Ursula Laa's book also demonstrates how to make the tours more
+interactive with the 
+[plotly](https://cran.r-project.org/package=plotly)
+and
+[htmlwidgets](https://cran.r-project.org/web/packages/htmlwidgets/index.html)
+R packages.
+
+```{r}
+#| label: tour-plotly
+#| code-fold: true
+#| code-summary: "Code to generate interactive animation"
+#| message: false
+#| warning: false
+library(plotly, quietly = TRUE)
+library(htmlwidgets, quietly = TRUE)
+set.seed(123)
+subsample <- sample(nrow(gorilla), size = 500L)
+pn_t <- tourr::save_history(data = gorilla[subsample, numeric_cols], 
+                            tour_path = grand_tour())
+pn_t <- interpolate(pn_t, angle = 1)
+pn_anim <- render_anim(gorilla[subsample, numeric_cols], frames = pn_t)
+
+pn_gp <- suppressWarnings({
+  ggplot() +
+    geom_path(
+      data = pn_anim$circle, 
+      aes(x = c1, y = c2, frame = frame - 100), 
+      linewidth = 0.1) +
+    geom_segment(
+      data = pn_anim$axes, 
+      aes(x = x1, y = y1, xend = x2, yend = y2, frame = frame - 100), 
+      linewidth = 0.1) +
+    geom_text(
+      data = pn_anim$axes, 
+      aes(x = x2, y = y2, label = axis_labels, frame = frame - 100), 
+      size = 5) +
+    geom_point(
+      data = pn_anim$frames, 
+      aes(x = P1, y = P2, frame = frame - 100), 
+      alpha = 0.8, size = 0.5) +
+    xlim(-0.8, 0.8) + ylim(-0.8, 0.8) +
+    coord_equal() +
+    theme_bw() +
+    theme(axis.text = element_blank(),
+          axis.title = element_blank(),
+          axis.ticks = element_blank(),
+          panel.grid = element_blank())
+})
+ggplotly(
+  pn_gp,
+  width = 500,
+  height = 550) %>%
+  animation_button(label="Go") %>%
+  animation_slider(len = 0.8, x = 0.5, xanchor = "center", 
+                   currentvalue = list(prefix = "frame: ")) %>%
+  animation_opts(easing = "linear", transition = 0)
+```
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info()
+```
+
+</details>
+   

@@ -261,9 +261,10 @@ Note
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.Mm.eg.db)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SummarizedExperiment)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(statmod)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SummarizedExperiment)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="sample-annotations" class="level2">
@@ -472,10 +473,10 @@ ENSMUSG00000000682.7       Cd52 -0.7939756 4.846100e-06 3.079696e-03</code></pre
 <span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
-<pre><code>First sample weights (min/max) 0.3858285/1.6444242</code></pre>
+<pre><code>First sample weights (min/max) 0.3856833/1.6439976</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Final sample weights (min/max) 0.3854635/1.6427464</code></pre>
+<pre><code>Final sample weights (min/max) 0.3853171/1.6423319</code></pre>
 </div>
 <details>
 <summary>Code</summary>
@@ -743,8 +744,8 @@ Note
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tt[genes, ])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                     gene_name    geo nfcore
-ENSMUSG00000000682.7      Cd52 0.0031  0.089
-ENSMUSG00000053318.7    Slamf8 0.0190  0.270</code></pre>
+ENSMUSG00000000682.7      Cd52 0.0031   0.09
+ENSMUSG00000053318.7    Slamf8 0.0190   0.27</code></pre>
 </div>
 </div>
 </section>
@@ -803,106 +804,109 @@ SessionInfo
 <div class="cell-output cell-output-stdout">
 <pre><code>─ Session info ───────────────────────────────────────────────────────────────
  setting  value
- version  R version 4.2.2 (2022-10-31)
- os       macOS Big Sur ... 10.16
- system   x86_64, darwin17.0
+ version  R version 4.3.1 (2023-06-16)
+ os       macOS Ventura 13.5.1
+ system   aarch64, darwin20
  ui       X11
  language (EN)
  collate  en_US.UTF-8
  ctype    en_US.UTF-8
  tz       America/Los_Angeles
- date     2023-01-16
- pandoc   2.19.2 @ /Applications/RStudio.app/Contents/MacOS/quarto/bin/tools/ (via rmarkdown)
+ date     2023-08-30
+ pandoc   3.1.1 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────
- package              * version  date (UTC) lib source
- AnnotationDbi        * 1.60.0   2022-11-01 [1] Bioconductor
- askpass                1.1      2019-01-13 [1] CRAN (R 4.2.0)
- assertthat             0.2.1    2019-03-21 [1] CRAN (R 4.2.0)
- Biobase              * 2.58.0   2022-11-01 [1] Bioconductor
- BiocGenerics         * 0.44.0   2022-11-01 [1] Bioconductor
- Biostrings             2.66.0   2022-11-01 [1] Bioconductor
- bit                    4.0.5    2022-11-15 [1] CRAN (R 4.2.0)
- bit64                  4.0.5    2020-08-30 [1] CRAN (R 4.2.0)
- bitops                 1.0-7    2021-04-24 [1] CRAN (R 4.2.0)
- blob                   1.2.3    2022-04-10 [1] CRAN (R 4.2.0)
- cachem                 1.0.6    2021-08-19 [1] CRAN (R 4.2.0)
- cli                    3.5.0    2022-12-20 [1] CRAN (R 4.2.0)
- colorspace             2.0-3    2022-02-21 [1] CRAN (R 4.2.0)
- crayon                 1.5.2    2022-09-29 [1] CRAN (R 4.2.0)
- credentials            1.3.2    2021-11-29 [1] CRAN (R 4.2.0)
- DBI                    1.1.3    2022-06-18 [1] CRAN (R 4.2.0)
- DelayedArray           0.24.0   2022-11-01 [1] Bioconductor
- digest                 0.6.31   2022-12-11 [1] CRAN (R 4.2.0)
- dplyr                * 1.0.10   2022-09-01 [1] CRAN (R 4.2.0)
- edgeR                * 3.40.1   2022-12-14 [1] Bioconductor
- ellipsis               0.3.2    2021-04-29 [1] CRAN (R 4.2.0)
- evaluate               0.19     2022-12-13 [1] CRAN (R 4.2.0)
- fansi                  1.0.3    2022-03-24 [1] CRAN (R 4.2.0)
- farver                 2.1.1    2022-07-06 [1] CRAN (R 4.2.0)
- fastmap                1.1.0    2021-01-25 [1] CRAN (R 4.2.0)
- generics               0.1.3    2022-07-05 [1] CRAN (R 4.2.0)
- GenomeInfoDb         * 1.34.4   2022-12-01 [1] Bioconductor
- GenomeInfoDbData       1.2.9    2022-12-12 [1] Bioconductor
- GenomicRanges        * 1.50.2   2022-12-16 [1] Bioconductor
- ggplot2              * 3.4.0    2022-11-04 [1] CRAN (R 4.2.0)
- glue                   1.6.2    2022-02-24 [1] CRAN (R 4.2.0)
- gtable                 0.3.1    2022-09-01 [1] CRAN (R 4.2.0)
- here                 * 1.0.1    2020-12-13 [1] CRAN (R 4.2.0)
- htmltools              0.5.4    2022-12-07 [1] CRAN (R 4.2.0)
- htmlwidgets            1.5.4    2021-09-08 [1] CRAN (R 4.2.2)
- httr                   1.4.4    2022-08-17 [1] CRAN (R 4.2.0)
- IRanges              * 2.32.0   2022-11-01 [1] Bioconductor
- jsonlite               1.8.4    2022-12-06 [1] CRAN (R 4.2.0)
- KEGGREST               1.38.0   2022-11-01 [1] Bioconductor
- KernSmooth             2.23-20  2021-05-03 [2] CRAN (R 4.2.2)
- knitr                  1.41     2022-11-18 [1] CRAN (R 4.2.0)
- labeling               0.4.2    2020-10-20 [1] CRAN (R 4.2.0)
- lattice                0.20-45  2021-09-22 [2] CRAN (R 4.2.2)
- lifecycle              1.0.3    2022-10-07 [1] CRAN (R 4.2.0)
- limma                * 3.54.0   2022-11-01 [1] Bioconductor
- locfit                 1.5-9.6  2022-07-11 [1] CRAN (R 4.2.0)
- magrittr               2.0.3    2022-03-30 [1] CRAN (R 4.2.0)
- Matrix                 1.5-3    2022-11-11 [1] CRAN (R 4.2.0)
- MatrixGenerics       * 1.10.0   2022-11-01 [1] Bioconductor
- matrixStats          * 0.63.0   2022-11-18 [1] CRAN (R 4.2.0)
- memoise                2.0.1    2021-11-26 [1] CRAN (R 4.2.0)
- munsell                0.5.0    2018-06-12 [1] CRAN (R 4.2.0)
- openssl                2.0.5    2022-12-06 [1] CRAN (R 4.2.0)
- org.Mm.eg.db         * 3.16.0   2022-12-29 [1] Bioconductor
- pillar                 1.8.1    2022-08-19 [1] CRAN (R 4.2.0)
- pkgconfig              2.0.3    2019-09-22 [1] CRAN (R 4.2.0)
- png                    0.1-8    2022-11-29 [1] CRAN (R 4.2.0)
- purrr                  1.0.0    2022-12-20 [1] CRAN (R 4.2.0)
- R6                     2.5.1    2021-08-19 [1] CRAN (R 4.2.0)
- Rcpp                   1.0.9    2022-07-08 [1] CRAN (R 4.2.0)
- RCurl                  1.98-1.9 2022-10-03 [1] CRAN (R 4.2.0)
- rlang                  1.0.6    2022-09-24 [1] CRAN (R 4.2.0)
- rmarkdown              2.19     2022-12-15 [1] CRAN (R 4.2.0)
- rprojroot              2.0.3    2022-04-02 [1] CRAN (R 4.2.0)
- RSQLite                2.2.19   2022-11-24 [1] CRAN (R 4.2.0)
- rstudioapi             0.14     2022-08-22 [1] CRAN (R 4.2.0)
- S4Vectors            * 0.36.1   2022-12-05 [1] Bioconductor
- scales                 1.2.1    2022-08-20 [1] CRAN (R 4.2.0)
- sessioninfo            1.2.2    2021-12-06 [1] CRAN (R 4.2.0)
- statmod                1.4.37   2022-08-12 [1] CRAN (R 4.2.0)
- stringi                1.7.8    2022-07-11 [1] CRAN (R 4.2.0)
- stringr                1.5.0    2022-12-02 [1] CRAN (R 4.2.0)
- SummarizedExperiment * 1.28.0   2022-11-01 [1] Bioconductor
- sys                    3.4.1    2022-10-18 [1] CRAN (R 4.2.0)
- tibble               * 3.1.8    2022-07-22 [1] CRAN (R 4.2.0)
- tidyr                * 1.2.1    2022-09-08 [1] CRAN (R 4.2.0)
- tidyselect             1.2.0    2022-10-10 [1] CRAN (R 4.2.0)
- utf8                   1.2.2    2021-07-24 [1] CRAN (R 4.2.0)
- vctrs                  0.5.1    2022-11-16 [1] CRAN (R 4.2.0)
- withr                  2.5.0    2022-03-03 [1] CRAN (R 4.2.0)
- xfun                   0.35     2022-11-16 [1] CRAN (R 4.2.0)
- XVector                0.38.0   2022-11-01 [1] Bioconductor
- yaml                   2.3.6    2022-10-18 [1] CRAN (R 4.2.0)
- zlibbioc               1.44.0   2022-11-01 [1] Bioconductor
+ ! package              * version   date (UTC) lib source
+ P abind                  1.4-5     2016-07-21 [?] CRAN (R 4.3.0)
+ P AnnotationDbi        * 1.62.2    2023-07-02 [?] Bioconductor
+ P askpass                1.1       2019-01-13 [?] CRAN (R 4.3.0)
+ P Biobase              * 2.60.0    2023-05-08 [?] Bioconductor
+ P BiocGenerics         * 0.46.0    2023-06-04 [?] Bioconductor
+ P BiocManager            1.30.22   2023-08-08 [?] CRAN (R 4.3.0)
+ P Biostrings             2.68.1    2023-05-21 [?] Bioconductor
+ P bit                    4.0.5     2022-11-15 [?] CRAN (R 4.3.0)
+ P bit64                  4.0.5     2020-08-30 [?] CRAN (R 4.3.0)
+ P bitops                 1.0-7     2021-04-24 [?] CRAN (R 4.3.0)
+ P blob                   1.2.4     2023-03-17 [?] CRAN (R 4.3.0)
+ P cachem                 1.0.8     2023-05-01 [?] CRAN (R 4.3.0)
+ P cli                    3.6.1     2023-03-23 [?] CRAN (R 4.3.0)
+ P colorspace             2.1-0     2023-01-23 [?] CRAN (R 4.3.0)
+ P crayon                 1.5.2     2022-09-29 [?] CRAN (R 4.3.0)
+ R credentials            1.3.2     &lt;NA&gt;       [?] &lt;NA&gt;
+ P DBI                    1.1.3     2022-06-18 [?] CRAN (R 4.3.0)
+ P DelayedArray           0.26.7    2023-07-30 [?] Bioconductor
+ P digest                 0.6.33    2023-07-07 [?] CRAN (R 4.3.0)
+ P dplyr                * 1.1.2     2023-04-20 [?] CRAN (R 4.3.0)
+ P edgeR                * 3.42.4    2023-06-04 [?] Bioconductor
+ P evaluate               0.21      2023-05-05 [?] CRAN (R 4.3.0)
+ P fansi                  1.0.4     2023-01-22 [?] CRAN (R 4.3.0)
+ P farver                 2.1.1     2022-07-06 [?] CRAN (R 4.3.0)
+ P fastmap                1.1.1     2023-02-24 [?] CRAN (R 4.3.0)
+ P generics               0.1.3     2022-07-05 [?] CRAN (R 4.3.0)
+ P GenomeInfoDb         * 1.36.1    2023-07-02 [?] Bioconductor
+ P GenomeInfoDbData       1.2.10    2023-08-23 [?] Bioconductor
+ P GenomicRanges        * 1.52.0    2023-05-08 [?] Bioconductor
+ P ggplot2              * 3.4.3     2023-08-14 [?] CRAN (R 4.3.0)
+ P glue                   1.6.2     2022-02-24 [?] CRAN (R 4.3.0)
+ P gtable                 0.3.4     2023-08-21 [?] CRAN (R 4.3.1)
+ P here                 * 1.0.1     2020-12-13 [?] CRAN (R 4.3.0)
+ P htmltools              0.5.6     2023-08-10 [?] CRAN (R 4.3.0)
+ P htmlwidgets            1.6.2     2023-03-17 [?] CRAN (R 4.3.0)
+ P httr                   1.4.7     2023-08-15 [?] CRAN (R 4.3.0)
+ P IRanges              * 2.34.1    2023-07-02 [?] Bioconductor
+ P jsonlite               1.8.7     2023-06-29 [?] CRAN (R 4.3.0)
+ P KEGGREST               1.40.0    2023-05-08 [?] Bioconductor
+ P KernSmooth             2.23-21   2023-05-03 [?] CRAN (R 4.3.1)
+ P knitr                  1.43      2023-05-25 [?] CRAN (R 4.3.0)
+ P labeling               0.4.2     2020-10-20 [?] CRAN (R 4.3.0)
+ P lattice                0.21-8    2023-04-05 [?] CRAN (R 4.3.1)
+ P lifecycle              1.0.3     2022-10-07 [?] CRAN (R 4.3.0)
+ P limma                * 3.56.2    2023-06-04 [?] Bioconductor
+ P locfit                 1.5-9.8   2023-06-11 [?] CRAN (R 4.3.0)
+ P magrittr               2.0.3     2022-03-30 [?] CRAN (R 4.3.0)
+ P Matrix                 1.5-4.1   2023-05-18 [?] CRAN (R 4.3.1)
+ P MatrixGenerics       * 1.12.3    2023-07-30 [?] Bioconductor
+ P matrixStats          * 1.0.0     2023-06-02 [?] CRAN (R 4.3.0)
+ P memoise                2.0.1     2021-11-26 [?] CRAN (R 4.3.0)
+ P munsell                0.5.0     2018-06-12 [?] CRAN (R 4.3.0)
+ P openssl                2.1.0     2023-07-15 [?] CRAN (R 4.3.0)
+ P org.Mm.eg.db         * 3.17.0    2023-08-23 [?] Bioconductor
+ P pillar                 1.9.0     2023-03-22 [?] CRAN (R 4.3.0)
+ P pkgconfig              2.0.3     2019-09-22 [?] CRAN (R 4.3.0)
+ P png                    0.1-8     2022-11-29 [?] CRAN (R 4.3.0)
+ P purrr                  1.0.2     2023-08-10 [?] CRAN (R 4.3.0)
+ P R6                     2.5.1     2021-08-19 [?] CRAN (R 4.3.0)
+ P Rcpp                   1.0.11    2023-07-06 [?] CRAN (R 4.3.0)
+ P RCurl                  1.98-1.12 2023-03-27 [?] CRAN (R 4.3.0)
+   renv                   1.0.2     2023-08-15 [1] CRAN (R 4.3.0)
+ P rlang                  1.1.1     2023-04-28 [?] CRAN (R 4.3.0)
+ P rmarkdown              2.24      2023-08-14 [?] CRAN (R 4.3.0)
+ P rprojroot              2.0.3     2022-04-02 [?] CRAN (R 4.3.0)
+ P RSQLite                2.3.1     2023-04-03 [?] CRAN (R 4.3.0)
+ P rstudioapi             0.15.0    2023-07-07 [?] CRAN (R 4.3.0)
+ P S4Arrays               1.0.5     2023-07-30 [?] Bioconductor
+ P S4Vectors            * 0.38.1    2023-05-08 [?] Bioconductor
+ P scales                 1.2.1     2022-08-20 [?] CRAN (R 4.3.0)
+ P sessioninfo            1.2.2     2021-12-06 [?] CRAN (R 4.3.0)
+ P statmod              * 1.5.0     2023-01-06 [?] CRAN (R 4.3.0)
+ P SummarizedExperiment * 1.30.2    2023-06-11 [?] Bioconductor
+ P sys                    3.4.2     2023-05-23 [?] CRAN (R 4.3.0)
+ P tibble               * 3.2.1     2023-03-20 [?] CRAN (R 4.3.0)
+ P tidyr                * 1.3.0     2023-01-24 [?] CRAN (R 4.3.0)
+ P tidyselect             1.2.0     2022-10-10 [?] CRAN (R 4.3.0)
+ P utf8                   1.2.3     2023-01-31 [?] CRAN (R 4.3.0)
+ P vctrs                  0.6.3     2023-06-14 [?] CRAN (R 4.3.0)
+ P withr                  2.5.0     2022-03-03 [?] CRAN (R 4.3.0)
+ P xfun                   0.40      2023-08-09 [?] CRAN (R 4.3.0)
+ P XVector                0.40.0    2023-05-08 [?] Bioconductor
+ P yaml                   2.3.7     2023-01-23 [?] CRAN (R 4.3.0)
+ P zlibbioc               1.46.0    2023-05-08 [?] Bioconductor
 
- [1] /Users/sandmann/Library/R/x86_64/4.2/library
- [2] /Library/Frameworks/R.framework/Versions/4.2/Resources/library
+ [1] /Users/sandmann/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20
+ [2] /Users/sandmann/Library/Caches/org.R-project.R/R/renv/sandbox/R-4.3/aarch64-apple-darwin20/ac5c2659
+
+ P ── Loaded and on-disk path mismatch.
+ R ── Package was removed from disk.
 
 ──────────────────────────────────────────────────────────────────────────────</code></pre>
 </div>
@@ -1403,518 +1407,519 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb42-81"><a href="#cb42-81" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb42-82"><a href="#cb42-82" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
 <span id="cb42-83"><a href="#cb42-83" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.Mm.eg.db)</span>
-<span id="cb42-84"><a href="#cb42-84" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SummarizedExperiment)</span>
-<span id="cb42-85"><a href="#cb42-85" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb42-86"><a href="#cb42-86" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb42-87"><a href="#cb42-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-88"><a href="#cb42-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-91"><a href="#cb42-91" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-92"><a href="#cb42-92" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb42-93"><a href="#cb42-93" aria-hidden="true" tabindex="-1"></a>work_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"nextflow-core-quantseq-4-nugent"</span>)</span>
-<span id="cb42-94"><a href="#cb42-94" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-95"><a href="#cb42-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-96"><a href="#cb42-96" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sample annotations</span></span>
-<span id="cb42-97"><a href="#cb42-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-98"><a href="#cb42-98" aria-hidden="true" tabindex="-1"></a>We start by retrieving the sample annotation table, listing e.g. the <span class="in">`sex`</span>,</span>
-<span id="cb42-99"><a href="#cb42-99" aria-hidden="true" tabindex="-1"></a>and <span class="in">`genotype`</span> for each mouse, and the <span class="in">`batch`</span> for each collected sample.</span>
-<span id="cb42-100"><a href="#cb42-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-101"><a href="#cb42-101" aria-hidden="true" tabindex="-1"></a>This information is available in the <span class="co">[</span><span class="ot">SRA Run Explorer</span><span class="co">](https://www.ncbi.nlm.nih.gov/Traces/study/?query_key=4&amp;WebEnv=MCID_63c1d2b51518446806822e1d&amp;o=acc_s%3Aa#)</span>. </span>
-<span id="cb42-102"><a href="#cb42-102" aria-hidden="true" tabindex="-1"></a>(I saved it in the <span class="co">[</span><span class="ot">sample_metadata.csv CSV file</span><span class="co">](sample_metadata.csv)</span> if you </span>
-<span id="cb42-103"><a href="#cb42-103" aria-hidden="true" tabindex="-1"></a>want to follow along&gt;.</span>
-<span id="cb42-104"><a href="#cb42-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-107"><a href="#cb42-107" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-108"><a href="#cb42-108" aria-hidden="true" tabindex="-1"></a>sample_sheet <span class="ot">&lt;-</span> <span class="fu">file.path</span>(work_dir, <span class="st">"sample_metadata.csv"</span>)</span>
-<span id="cb42-109"><a href="#cb42-109" aria-hidden="true" tabindex="-1"></a>sample_anno <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(sample_sheet, <span class="at">row.names =</span> <span class="st">"Experiment"</span>)</span>
-<span id="cb42-110"><a href="#cb42-110" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample_anno[, <span class="fu">c</span>(<span class="st">"Run"</span>, <span class="st">"Animal.ID"</span>, <span class="st">"Age"</span>, <span class="st">"age_unit"</span>, <span class="st">"Cell_type"</span>,</span>
-<span id="cb42-111"><a href="#cb42-111" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"sex"</span>, <span class="st">"Genotype"</span>, <span class="st">"Sample.Name"</span>)])</span>
-<span id="cb42-112"><a href="#cb42-112" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-113"><a href="#cb42-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-114"><a href="#cb42-114" aria-hidden="true" tabindex="-1"></a>Because our SRA metadata doesn't include the GEO sample title, I saved the</span>
-<span id="cb42-115"><a href="#cb42-115" aria-hidden="true" tabindex="-1"></a>identifier mappings in the <span class="co">[</span><span class="ot">GEO_sample_ids.csv CSV file</span><span class="co">](GEO_sample_ids.csv)</span>.</span>
-<span id="cb42-116"><a href="#cb42-116" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-119"><a href="#cb42-119" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-120"><a href="#cb42-120" aria-hidden="true" tabindex="-1"></a>geo_ids <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">file.path</span>(work_dir, <span class="st">"GEO_sample_ids.csv"</span>))</span>
-<span id="cb42-121"><a href="#cb42-121" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(geo_ids)</span>
-<span id="cb42-122"><a href="#cb42-122" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-123"><a href="#cb42-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-126"><a href="#cb42-126" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-127"><a href="#cb42-127" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb42-128"><a href="#cb42-128" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sample_anno)<span class="ot">&lt;-</span> <span class="fu">tolower</span>(<span class="fu">colnames</span>(sample_anno))</span>
-<span id="cb42-129"><a href="#cb42-129" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sample_anno) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"."</span>, <span class="st">"_"</span>, <span class="fu">colnames</span>(sample_anno), </span>
-<span id="cb42-130"><a href="#cb42-130" aria-hidden="true" tabindex="-1"></a>                             <span class="at">fixed =</span> <span class="cn">TRUE</span>) </span>
-<span id="cb42-131"><a href="#cb42-131" aria-hidden="true" tabindex="-1"></a>sample_anno <span class="ot">&lt;-</span> sample_anno[, <span class="fu">c</span>(<span class="st">"sample_name"</span>, <span class="st">"animal_id"</span>, <span class="st">"genotype"</span>, <span class="st">"sex"</span>,</span>
-<span id="cb42-132"><a href="#cb42-132" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"age"</span>, <span class="st">"cell_type"</span>)]</span>
-<span id="cb42-133"><a href="#cb42-133" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>genotype <span class="ot">&lt;-</span> <span class="fu">factor</span>(sample_anno<span class="sc">$</span>genotype, </span>
-<span id="cb42-134"><a href="#cb42-134" aria-hidden="true" tabindex="-1"></a>                               <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"TREM2 +/+"</span>, <span class="st">"TREM2 -/-"</span>))</span>
-<span id="cb42-135"><a href="#cb42-135" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>genotype <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">recode_factor</span>(</span>
-<span id="cb42-136"><a href="#cb42-136" aria-hidden="true" tabindex="-1"></a>  sample_anno<span class="sc">$</span>genotype,<span class="st">"TREM2 +/+"</span> <span class="ot">=</span> <span class="st">"WT"</span>, <span class="st">"TREM2 -/-"</span> <span class="ot">=</span> <span class="st">"KO"</span>)</span>
-<span id="cb42-137"><a href="#cb42-137" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">factor</span>(sample_anno<span class="sc">$</span>age)</span>
-<span id="cb42-138"><a href="#cb42-138" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>sample_title <span class="ot">&lt;-</span> geo_ids[</span>
-<span id="cb42-139"><a href="#cb42-139" aria-hidden="true" tabindex="-1"></a>  <span class="fu">match</span>(sample_anno<span class="sc">$</span>sample_name, geo_ids<span class="sc">$</span>sample_name), <span class="st">"sample_id"</span>]</span>
-<span id="cb42-140"><a href="#cb42-140" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample_anno)</span>
-<span id="cb42-141"><a href="#cb42-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-142"><a href="#cb42-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-143"><a href="#cb42-143" aria-hidden="true" tabindex="-1"></a>This experiment includes <span class="in">`r nrow(sample_anno)`</span> samples of astrocytes or </span>
-<span id="cb42-144"><a href="#cb42-144" aria-hidden="true" tabindex="-1"></a>microglia cells obtained from <span class="in">`r length(unique(sample_anno$animal_id))`</span> </span>
-<span id="cb42-145"><a href="#cb42-145" aria-hidden="true" tabindex="-1"></a>female mice that were either 2- or 16 months of age.</span>
-<span id="cb42-146"><a href="#cb42-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-147"><a href="#cb42-147" aria-hidden="true" tabindex="-1"></a>The animals are either wildtype (<span class="in">`WT`</span>) or  homozygous knockouts (<span class="in">`KO`</span>) for the</span>
-<span id="cb42-148"><a href="#cb42-148" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Trem2 gene</span><span class="co">](https://www.uniprot.org/uniprotkb/Q99NH8/entry)</span>.</span>
-<span id="cb42-149"><a href="#cb42-149" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-150"><a href="#cb42-150" aria-hidden="true" tabindex="-1"></a><span class="fu">## Nugent et al's original count data</span></span>
-<span id="cb42-151"><a href="#cb42-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-152"><a href="#cb42-152" aria-hidden="true" tabindex="-1"></a>First, we retrieve the authors' count matrix from </span>
-<span id="cb42-153"><a href="#cb42-153" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">NCBI GEO</span><span class="co">](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE158152)</span>, available</span>
-<span id="cb42-154"><a href="#cb42-154" aria-hidden="true" tabindex="-1"></a>as a Supplementary tab-delimited text file.</span>
-<span id="cb42-155"><a href="#cb42-155" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-158"><a href="#cb42-158" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-159"><a href="#cb42-159" aria-hidden="true" tabindex="-1"></a>geo_url <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE134031&amp;"</span>,</span>
-<span id="cb42-160"><a href="#cb42-160" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"format=file&amp;file=GSE134031%5FDST120%2Etab%2Egz"</span>)</span>
-<span id="cb42-161"><a href="#cb42-161" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="fu">textConnection</span>(<span class="fu">readLines</span>(<span class="fu">gzcon</span>(<span class="fu">url</span>(geo_url)))))</span>
-<span id="cb42-162"><a href="#cb42-162" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colnames</span>(raw_counts), <span class="dv">10</span>)</span>
-<span id="cb42-163"><a href="#cb42-163" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-164"><a href="#cb42-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-165"><a href="#cb42-165" aria-hidden="true" tabindex="-1"></a>The <span class="in">`raw_counts`</span> data.frame contains information about the detected genes (</span>
-<span id="cb42-166"><a href="#cb42-166" aria-hidden="true" tabindex="-1"></a><span class="in">`mgi_symbol`</span>, <span class="in">`ensembl_gene_id_version`</span>) and the samples are identified by a</span>
-<span id="cb42-167"><a href="#cb42-167" aria-hidden="true" tabindex="-1"></a>shorthand of their GEO title (e.g. <span class="in">`IL1_M`</span>, <span class="in">`IL1_A`</span>). </span>
-<span id="cb42-168"><a href="#cb42-168" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-169"><a href="#cb42-169" aria-hidden="true" tabindex="-1"></a>We use the raw counts to populate a new <span class="in">`DGEList`</span> object and perform</span>
-<span id="cb42-170"><a href="#cb42-170" aria-hidden="true" tabindex="-1"></a>Library Size Normalization with the <span class="in">`TMM`</span> approach.</span>
-<span id="cb42-171"><a href="#cb42-171" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-174"><a href="#cb42-174" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-175"><a href="#cb42-175" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb42-176"><a href="#cb42-176" aria-hidden="true" tabindex="-1"></a>count_data <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(raw_counts[, <span class="fu">grep</span>(<span class="st">"^IL"</span>, <span class="fu">colnames</span>(raw_counts))])</span>
-<span id="cb42-177"><a href="#cb42-177" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(count_data) <span class="ot">&lt;-</span> raw_counts<span class="sc">$</span>ensembl_gene_id_version</span>
-<span id="cb42-178"><a href="#cb42-178" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(count_data) <span class="ot">&lt;-</span> <span class="fu">row.names</span>(sample_anno)[</span>
-<span id="cb42-179"><a href="#cb42-179" aria-hidden="true" tabindex="-1"></a>  <span class="fu">match</span>(<span class="fu">colnames</span>(count_data), sample_anno<span class="sc">$</span>sample_title)</span>
-<span id="cb42-180"><a href="#cb42-180" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb42-181"><a href="#cb42-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-182"><a href="#cb42-182" aria-hidden="true" tabindex="-1"></a>gene_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb42-183"><a href="#cb42-183" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_id =</span> raw_counts<span class="sc">$</span>ensembl_gene_id_version,</span>
-<span id="cb42-184"><a href="#cb42-184" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_name =</span> raw_counts<span class="sc">$</span>mgi_symbol,</span>
-<span id="cb42-185"><a href="#cb42-185" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> raw_counts<span class="sc">$</span>ensembl_gene_id_version</span>
-<span id="cb42-186"><a href="#cb42-186" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-187"><a href="#cb42-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-188"><a href="#cb42-188" aria-hidden="true" tabindex="-1"></a>col_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb42-189"><a href="#cb42-189" aria-hidden="true" tabindex="-1"></a>  sample_anno[<span class="fu">colnames</span>(count_data),</span>
-<span id="cb42-190"><a href="#cb42-190" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>(<span class="st">"sample_title"</span>, <span class="st">"animal_id"</span>,  <span class="st">"age"</span>, <span class="st">"genotype"</span>, <span class="st">"cell_type"</span>)],</span>
-<span id="cb42-191"><a href="#cb42-191" aria-hidden="true" tabindex="-1"></a>  <span class="at">workflow =</span> <span class="st">"geo"</span></span>
-<span id="cb42-192"><a href="#cb42-192" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-193"><a href="#cb42-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-194"><a href="#cb42-194" aria-hidden="true" tabindex="-1"></a>dge <span class="ot">&lt;-</span> <span class="fu">DGEList</span>(</span>
-<span id="cb42-195"><a href="#cb42-195" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts =</span> <span class="fu">as.matrix</span>(count_data), </span>
-<span id="cb42-196"><a href="#cb42-196" aria-hidden="true" tabindex="-1"></a>  <span class="at">samples =</span> col_data[<span class="fu">colnames</span>(count_data), ], </span>
-<span id="cb42-197"><a href="#cb42-197" aria-hidden="true" tabindex="-1"></a>  <span class="at">genes =</span> gene_data[<span class="fu">row.names</span>(count_data), ]</span>
-<span id="cb42-198"><a href="#cb42-198" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-199"><a href="#cb42-199" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-200"><a href="#cb42-200" aria-hidden="true" tabindex="-1"></a>dge <span class="ot">&lt;-</span> <span class="fu">calcNormFactors</span>(dge, <span class="at">method =</span> <span class="st">"TMM"</span>)</span>
-<span id="cb42-201"><a href="#cb42-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-202"><a href="#cb42-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-203"><a href="#cb42-203" aria-hidden="true" tabindex="-1"></a>This is a large dataset, containing e.g. samples from two different cell types</span>
-<span id="cb42-204"><a href="#cb42-204" aria-hidden="true" tabindex="-1"></a>(microglia and astrocytes) and two different age groups (2 and 16 months).</span>
-<span id="cb42-205"><a href="#cb42-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-206"><a href="#cb42-206" aria-hidden="true" tabindex="-1"></a>Here, we will restrict the analysis to microglia samples collected from older</span>
-<span id="cb42-207"><a href="#cb42-207" aria-hidden="true" tabindex="-1"></a>animals.</span>
-<span id="cb42-208"><a href="#cb42-208" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-211"><a href="#cb42-211" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-212"><a href="#cb42-212" aria-hidden="true" tabindex="-1"></a>dge <span class="ot">&lt;-</span> dge[, dge<span class="sc">$</span>samples<span class="sc">$</span>cell_type <span class="sc">==</span> <span class="st">"microglia"</span> <span class="sc">&amp;</span> dge<span class="sc">$</span>samples<span class="sc">$</span>age <span class="sc">==</span> <span class="st">"16"</span>]</span>
-<span id="cb42-213"><a href="#cb42-213" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-214"><a href="#cb42-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-215"><a href="#cb42-215" aria-hidden="true" tabindex="-1"></a>Let's identify which genes are significantly differentially expressed between</span>
-<span id="cb42-216"><a href="#cb42-216" aria-hidden="true" tabindex="-1"></a>the two genotypes!</span>
-<span id="cb42-217"><a href="#cb42-217" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-218"><a href="#cb42-218" aria-hidden="true" tabindex="-1"></a><span class="fu">### Linear modeling with limma/voom</span></span>
-<span id="cb42-219"><a href="#cb42-219" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-220"><a href="#cb42-220" aria-hidden="true" tabindex="-1"></a>First, we use the <span class="in">`edgeR::filterByExpr()`</span> function to identify genes with</span>
-<span id="cb42-221"><a href="#cb42-221" aria-hidden="true" tabindex="-1"></a>sufficiently large counts to be examined for differential expression.</span>
-<span id="cb42-222"><a href="#cb42-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-225"><a href="#cb42-225" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-226"><a href="#cb42-226" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
-<span id="cb42-227"><a href="#cb42-227" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
-<span id="cb42-228"><a href="#cb42-228" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> genotype, <span class="at">data =</span> dge<span class="sc">$</span>samples)</span>
-<span id="cb42-229"><a href="#cb42-229" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(design) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"genotype"</span>, <span class="st">""</span>, <span class="fu">colnames</span>(design))</span>
-<span id="cb42-230"><a href="#cb42-230" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">filterByExpr</span>(dge, <span class="at">design =</span> design)</span>
-<span id="cb42-231"><a href="#cb42-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-232"><a href="#cb42-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-233"><a href="#cb42-233" aria-hidden="true" tabindex="-1"></a>Next, we fit a linear model to the data using the </span>
-<span id="cb42-234"><a href="#cb42-234" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">limma/voom</span><span class="co">](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)</span></span>
-<span id="cb42-235"><a href="#cb42-235" aria-hidden="true" tabindex="-1"></a>approach. The model only includes the <span class="in">`genotype`</span> (with <span class="in">`WT`</span> as the reference</span>
-<span id="cb42-236"><a href="#cb42-236" aria-hidden="true" tabindex="-1"></a>level) as a fixed effect.</span>
-<span id="cb42-237"><a href="#cb42-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-240"><a href="#cb42-240" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-241"><a href="#cb42-241" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
-<span id="cb42-242"><a href="#cb42-242" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
-<span id="cb42-243"><a href="#cb42-243" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">voomLmFit</span>(</span>
-<span id="cb42-244"><a href="#cb42-244" aria-hidden="true" tabindex="-1"></a>  dge[keep, <span class="fu">row.names</span>(design)], </span>
-<span id="cb42-245"><a href="#cb42-245" aria-hidden="true" tabindex="-1"></a>  <span class="at">design =</span> design,</span>
-<span id="cb42-246"><a href="#cb42-246" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample.weights =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb42-247"><a href="#cb42-247" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> <span class="cn">FALSE</span></span>
-<span id="cb42-248"><a href="#cb42-248" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-249"><a href="#cb42-249" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">eBayes</span>(fit, <span class="at">robust=</span><span class="cn">TRUE</span>)</span>
-<span id="cb42-250"><a href="#cb42-250" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-251"><a href="#cb42-251" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-252"><a href="#cb42-252" aria-hidden="true" tabindex="-1"></a>The following table displays the number of differentially up- and down-regulated</span>
-<span id="cb42-253"><a href="#cb42-253" aria-hidden="true" tabindex="-1"></a>genes after applying a false-discovery (<span class="in">`adj.P.Val`</span>) threshold of 5%. </span>
-<span id="cb42-254"><a href="#cb42-254" aria-hidden="true" tabindex="-1"></a>We detect significant differences between <span class="in">`KO`</span> and <span class="in">`WT`</span> animals in a small</span>
-<span id="cb42-255"><a href="#cb42-255" aria-hidden="true" tabindex="-1"></a>number of genes</span>
-<span id="cb42-256"><a href="#cb42-256" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-259"><a href="#cb42-259" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-260"><a href="#cb42-260" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">decideTests</span>(fit)[, <span class="st">"KO"</span>])</span>
-<span id="cb42-261"><a href="#cb42-261" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-262"><a href="#cb42-262" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-263"><a href="#cb42-263" aria-hidden="true" tabindex="-1"></a>The top 10 genes with the smallest p-values include well known markers of</span>
-<span id="cb42-264"><a href="#cb42-264" aria-hidden="true" tabindex="-1"></a>microglia activation:</span>
-<span id="cb42-265"><a href="#cb42-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-268"><a href="#cb42-268" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-269"><a href="#cb42-269" aria-hidden="true" tabindex="-1"></a><span class="fu">topTreat</span>(fit, <span class="at">coef =</span> <span class="st">"KO"</span>)[, <span class="fu">c</span>(<span class="st">"gene_name"</span>, <span class="st">"logFC"</span>, <span class="st">"P.Value"</span>, <span class="st">"adj.P.Val"</span>)]</span>
-<span id="cb42-270"><a href="#cb42-270" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-271"><a href="#cb42-271" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-272"><a href="#cb42-272" aria-hidden="true" tabindex="-1"></a>Next we repeat *the same analysis* with the output of the nf-core/rnaseq</span>
-<span id="cb42-273"><a href="#cb42-273" aria-hidden="true" tabindex="-1"></a>workflow.</span>
-<span id="cb42-274"><a href="#cb42-274" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-275"><a href="#cb42-275" aria-hidden="true" tabindex="-1"></a><span class="fu">## nf-core/rnaseq results</span></span>
-<span id="cb42-276"><a href="#cb42-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-277"><a href="#cb42-277" aria-hidden="true" tabindex="-1"></a>We start with the raw counts contained in the </span>
-<span id="cb42-278"><a href="#cb42-278" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">salmon.merged.gene_counts.rds</span><span class="co">](salmon.merged.gene_counts.rds)</span> </span>
-<span id="cb42-279"><a href="#cb42-279" aria-hidden="true" tabindex="-1"></a>file generated by the nf-core/rnaseq workflow. </span>
-<span id="cb42-280"><a href="#cb42-280" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-281"><a href="#cb42-281" aria-hidden="true" tabindex="-1"></a>We TMM-normalize the data, as before. (This step converts the </span>
-<span id="cb42-282"><a href="#cb42-282" aria-hidden="true" tabindex="-1"></a><span class="in">`SummarizedExperiment`</span> into a `DGEList object as well.)</span>
-<span id="cb42-283"><a href="#cb42-283" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-286"><a href="#cb42-286" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-287"><a href="#cb42-287" aria-hidden="true" tabindex="-1"></a>count_file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(work_dir, <span class="st">"salmon.merged.gene_counts.rds"</span>)</span>
-<span id="cb42-288"><a href="#cb42-288" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(count_file)</span>
-<span id="cb42-289"><a href="#cb42-289" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">colnames</span>(se) <span class="sc">%in%</span> <span class="fu">row.names</span>(sample_anno)))</span>
-<span id="cb42-290"><a href="#cb42-290" aria-hidden="true" tabindex="-1"></a>dge_nfcore <span class="ot">&lt;-</span> <span class="fu">calcNormFactors</span>(se, <span class="at">method =</span> <span class="st">"TMM"</span>)</span>
-<span id="cb42-291"><a href="#cb42-291" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-292"><a href="#cb42-292" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-293"><a href="#cb42-293" aria-hidden="true" tabindex="-1"></a>Next, we add the sample metadata and fit the same linear model as before.</span>
-<span id="cb42-294"><a href="#cb42-294" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-297"><a href="#cb42-297" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-298"><a href="#cb42-298" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb42-299"><a href="#cb42-299" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
-<span id="cb42-300"><a href="#cb42-300" aria-hidden="true" tabindex="-1"></a>dge_nfcore<span class="sc">$</span>samples <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb42-301"><a href="#cb42-301" aria-hidden="true" tabindex="-1"></a>  dge_nfcore<span class="sc">$</span>samples,</span>
-<span id="cb42-302"><a href="#cb42-302" aria-hidden="true" tabindex="-1"></a>  sample_anno[<span class="fu">colnames</span>(dge_nfcore),</span>
-<span id="cb42-303"><a href="#cb42-303" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>(<span class="st">"sample_title"</span>, <span class="st">"animal_id"</span>, <span class="st">"age"</span>, <span class="st">"genotype"</span>, <span class="st">"cell_type"</span>)],</span>
-<span id="cb42-304"><a href="#cb42-304" aria-hidden="true" tabindex="-1"></a>  <span class="at">workflow =</span> <span class="st">"nfcore"</span></span>
-<span id="cb42-305"><a href="#cb42-305" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-306"><a href="#cb42-306" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">colnames</span>(dge) <span class="sc">%in%</span> <span class="fu">colnames</span>(dge_nfcore)))</span>
-<span id="cb42-307"><a href="#cb42-307" aria-hidden="true" tabindex="-1"></a>dge_nfcore <span class="ot">&lt;-</span> dge_nfcore[, <span class="fu">colnames</span>(dge)]</span>
-<span id="cb42-308"><a href="#cb42-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-309"><a href="#cb42-309" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> genotype, <span class="at">data =</span> dge_nfcore<span class="sc">$</span>samples)</span>
-<span id="cb42-310"><a href="#cb42-310" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(design) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"genotype"</span>, <span class="st">""</span>, <span class="fu">colnames</span>(design))</span>
-<span id="cb42-311"><a href="#cb42-311" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">filterByExpr</span>(dge_nfcore, <span class="at">design =</span> design)</span>
-<span id="cb42-312"><a href="#cb42-312" aria-hidden="true" tabindex="-1"></a>fit_nfcore <span class="ot">&lt;-</span> <span class="fu">voomLmFit</span>(</span>
-<span id="cb42-313"><a href="#cb42-313" aria-hidden="true" tabindex="-1"></a>  dge_nfcore[keep, <span class="fu">row.names</span>(design)], </span>
-<span id="cb42-314"><a href="#cb42-314" aria-hidden="true" tabindex="-1"></a>  <span class="at">design =</span> design,</span>
-<span id="cb42-315"><a href="#cb42-315" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample.weights =</span> <span class="cn">TRUE</span>, </span>
-<span id="cb42-316"><a href="#cb42-316" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> <span class="cn">FALSE</span></span>
-<span id="cb42-317"><a href="#cb42-317" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-318"><a href="#cb42-318" aria-hidden="true" tabindex="-1"></a>fit_nfcore <span class="ot">&lt;-</span> <span class="fu">eBayes</span>(fit_nfcore, <span class="at">robust=</span><span class="cn">TRUE</span>)</span>
-<span id="cb42-319"><a href="#cb42-319" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-320"><a href="#cb42-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-321"><a href="#cb42-321" aria-hidden="true" tabindex="-1"></a>As with the original count data from NCBI GEO, we detect small number of</span>
-<span id="cb42-322"><a href="#cb42-322" aria-hidden="true" tabindex="-1"></a>differentially expressed genes (FDR &lt; 5%).</span>
-<span id="cb42-323"><a href="#cb42-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-326"><a href="#cb42-326" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-327"><a href="#cb42-327" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">decideTests</span>(fit_nfcore)[, <span class="st">"KO"</span>])</span>
-<span id="cb42-328"><a href="#cb42-328" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-329"><a href="#cb42-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-332"><a href="#cb42-332" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-333"><a href="#cb42-333" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb42-334"><a href="#cb42-334" aria-hidden="true" tabindex="-1"></a>cpms <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
-<span id="cb42-335"><a href="#cb42-335" aria-hidden="true" tabindex="-1"></a>  geo <span class="ot">&lt;-</span> <span class="fu">cpm</span>(dge, <span class="at">normalized.lib.sizes =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-336"><a href="#cb42-336" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb42-337"><a href="#cb42-337" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(dge<span class="sc">$</span>genes) <span class="sc">%&gt;%</span></span>
-<span id="cb42-338"><a href="#cb42-338" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"SRX"</span>), </span>
-<span id="cb42-339"><a href="#cb42-339" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_to =</span> <span class="st">"sample_name"</span>,</span>
-<span id="cb42-340"><a href="#cb42-340" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> <span class="st">"cpm"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-341"><a href="#cb42-341" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
-<span id="cb42-342"><a href="#cb42-342" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(dge<span class="sc">$</span>samples, <span class="st">"sample_name"</span>),</span>
-<span id="cb42-343"><a href="#cb42-343" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"sample_name"</span></span>
-<span id="cb42-344"><a href="#cb42-344" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb42-345"><a href="#cb42-345" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"Nugent et al"</span>)</span>
-<span id="cb42-346"><a href="#cb42-346" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb42-347"><a href="#cb42-347" aria-hidden="true" tabindex="-1"></a>  nfcore <span class="ot">&lt;-</span> <span class="fu">cpm</span>(dge_nfcore, <span class="at">normalized.lib.sizes =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-348"><a href="#cb42-348" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb42-349"><a href="#cb42-349" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(dge_nfcore<span class="sc">$</span>genes) <span class="sc">%&gt;%</span></span>
-<span id="cb42-350"><a href="#cb42-350" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"SRX"</span>), </span>
-<span id="cb42-351"><a href="#cb42-351" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_to =</span> <span class="st">"sample_name"</span>,</span>
-<span id="cb42-352"><a href="#cb42-352" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> <span class="st">"cpm"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-353"><a href="#cb42-353" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
-<span id="cb42-354"><a href="#cb42-354" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(dge_nfcore<span class="sc">$</span>samples, <span class="st">"sample_name"</span>),</span>
-<span id="cb42-355"><a href="#cb42-355" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"sample_name"</span></span>
-<span id="cb42-356"><a href="#cb42-356" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb42-357"><a href="#cb42-357" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"nf-core"</span>)</span>
-<span id="cb42-358"><a href="#cb42-358" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb42-359"><a href="#cb42-359" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(</span>
-<span id="cb42-360"><a href="#cb42-360" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(geo, <span class="fu">any_of</span>(<span class="fu">intersect</span>(<span class="fu">colnames</span>(geo), <span class="fu">colnames</span>(nfcore)))),</span>
-<span id="cb42-361"><a href="#cb42-361" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(nfcore, <span class="fu">any_of</span>(<span class="fu">intersect</span>(<span class="fu">colnames</span>(geo), <span class="fu">colnames</span>(nfcore))))</span>
-<span id="cb42-362"><a href="#cb42-362" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb42-363"><a href="#cb42-363" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb42-364"><a href="#cb42-364" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-365"><a href="#cb42-365" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb42-366"><a href="#cb42-366" aria-hidden="true" tabindex="-1"></a>  <span class="fu">topTreat</span>(fit, <span class="at">coef =</span> <span class="st">"KO"</span>, <span class="at">number =</span> <span class="cn">Inf</span>)[</span>
-<span id="cb42-367"><a href="#cb42-367" aria-hidden="true" tabindex="-1"></a>    , <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>, <span class="st">"logFC"</span>, <span class="st">"P.Value"</span>, <span class="st">"adj.P.Val"</span>)] <span class="sc">%&gt;%</span></span>
-<span id="cb42-368"><a href="#cb42-368" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"geo"</span>),</span>
-<span id="cb42-369"><a href="#cb42-369" aria-hidden="true" tabindex="-1"></a>   <span class="fu">topTreat</span>(fit_nfcore, <span class="at">coef =</span> <span class="st">"KO"</span>, <span class="at">number =</span> <span class="cn">Inf</span>)[</span>
-<span id="cb42-370"><a href="#cb42-370" aria-hidden="true" tabindex="-1"></a>     , <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>, <span class="st">"logFC"</span>, <span class="st">"P.Value"</span>, <span class="st">"adj.P.Val"</span>)] <span class="sc">%&gt;%</span></span>
-<span id="cb42-371"><a href="#cb42-371" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"nfcore"</span>)</span>
-<span id="cb42-372"><a href="#cb42-372" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-373"><a href="#cb42-373" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">adj.P.Val =</span> <span class="fu">signif</span>(adj.P.Val, <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb42-374"><a href="#cb42-374" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb42-375"><a href="#cb42-375" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>), </span>
-<span id="cb42-376"><a href="#cb42-376" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> <span class="st">"dataset"</span>, </span>
-<span id="cb42-377"><a href="#cb42-377" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> <span class="st">"adj.P.Val"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-378"><a href="#cb42-378" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(nfcore) <span class="sc">%&gt;%</span></span>
-<span id="cb42-379"><a href="#cb42-379" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb42-380"><a href="#cb42-380" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="st">"gene_id"</span>)</span>
-<span id="cb42-381"><a href="#cb42-381" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-382"><a href="#cb42-382" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-383"><a href="#cb42-383" aria-hidden="true" tabindex="-1"></a><span class="fu">### Normalized expression</span></span>
-<span id="cb42-384"><a href="#cb42-384" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-385"><a href="#cb42-385" aria-hidden="true" tabindex="-1"></a>First, we examine the correlation between the normalized log-transformed</span>
-<span id="cb42-386"><a href="#cb42-386" aria-hidden="true" tabindex="-1"></a>gene expression estimates returned from the two workflows. We focus on those</span>
-<span id="cb42-387"><a href="#cb42-387" aria-hidden="true" tabindex="-1"></a>genes that passed the <span class="in">`filterByExpr`</span> thresholds above, e.g. those genes</span>
-<span id="cb42-388"><a href="#cb42-388" aria-hidden="true" tabindex="-1"></a>deemed sufficiently highly expressed to be assessed for differential expression.</span>
-<span id="cb42-389"><a href="#cb42-389" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-392"><a href="#cb42-392" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-393"><a href="#cb42-393" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 5.5</span></span>
-<span id="cb42-394"><a href="#cb42-394" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.5</span></span>
-<span id="cb42-395"><a href="#cb42-395" aria-hidden="true" tabindex="-1"></a>common_genes <span class="ot">&lt;-</span> <span class="fu">intersect</span>(<span class="fu">row.names</span>(fit), <span class="fu">row.names</span>(fit_nfcore))</span>
-<span id="cb42-396"><a href="#cb42-396" aria-hidden="true" tabindex="-1"></a>sum_stats <span class="ot">&lt;-</span> cpms <span class="sc">%&gt;%</span></span>
-<span id="cb42-397"><a href="#cb42-397" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(gene_id <span class="sc">%in%</span> common_genes) <span class="sc">%&gt;%</span></span>
-<span id="cb42-398"><a href="#cb42-398" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
-<span id="cb42-399"><a href="#cb42-399" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"sample_name"</span>),</span>
-<span id="cb42-400"><a href="#cb42-400" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> <span class="st">"cpm"</span>,</span>
-<span id="cb42-401"><a href="#cb42-401" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> <span class="st">"dataset"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb42-402"><a href="#cb42-402" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(gene_id) <span class="sc">%&gt;%</span></span>
-<span id="cb42-403"><a href="#cb42-403" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
-<span id="cb42-404"><a href="#cb42-404" aria-hidden="true" tabindex="-1"></a>    <span class="at">r =</span> <span class="fu">cor</span>(<span class="fu">log1p</span>(<span class="st">`</span><span class="at">Nugent et al</span><span class="st">`</span>), <span class="fu">log1p</span>(<span class="st">`</span><span class="at">nf-core</span><span class="st">`</span>)),</span>
-<span id="cb42-405"><a href="#cb42-405" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_nugent =</span> <span class="fu">mean</span>(<span class="st">`</span><span class="at">Nugent et al</span><span class="st">`</span>),</span>
-<span id="cb42-406"><a href="#cb42-406" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_nfcore =</span> <span class="fu">mean</span>(<span class="st">`</span><span class="at">nf-core</span><span class="st">`</span>))</span>
-<span id="cb42-407"><a href="#cb42-407" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-408"><a href="#cb42-408" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sum_stats, <span class="fu">aes</span>(<span class="at">x =</span> r)) <span class="sc">+</span> </span>
-<span id="cb42-409"><a href="#cb42-409" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>) <span class="sc">+</span></span>
-<span id="cb42-410"><a href="#cb42-410" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1.02</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.2</span>)) <span class="sc">+</span></span>
-<span id="cb42-411"><a href="#cb42-411" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Pearson correlation coefficient (R)"</span>, </span>
-<span id="cb42-412"><a href="#cb42-412" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of genes"</span>,</span>
-<span id="cb42-413"><a href="#cb42-413" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Correlation between normalized log2 counts"</span>) <span class="sc">+</span></span>
-<span id="cb42-414"><a href="#cb42-414" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
-<span id="cb42-415"><a href="#cb42-415" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span>
-<span id="cb42-416"><a href="#cb42-416" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-417"><a href="#cb42-417" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-418"><a href="#cb42-418" aria-hidden="true" tabindex="-1"></a>The correlation between normalized log2 expression estimates is reasonably high,</span>
-<span id="cb42-419"><a href="#cb42-419" aria-hidden="true" tabindex="-1"></a>e.g. 80% of all genes showing a Pearson correlation coefficient &gt; </span>
-<span id="cb42-420"><a href="#cb42-420" aria-hidden="true" tabindex="-1"></a><span class="in">`r signif(quantile(sum_stats$r, c(0.2)), 2)`</span>. </span>
-<span id="cb42-421"><a href="#cb42-421" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-422"><a href="#cb42-422" aria-hidden="true" tabindex="-1"></a>The relatively low correlation might reflect the low RNA input of </span>
-<span id="cb42-423"><a href="#cb42-423" aria-hidden="true" tabindex="-1"></a>this experiment, e.g. only <span class="in">`r length(common_genes)`</span> of the genes </span>
-<span id="cb42-424"><a href="#cb42-424" aria-hidden="true" tabindex="-1"></a>genes were detected with &gt; 10 UMI-corrected normalized counts per million reads.</span>
-<span id="cb42-425"><a href="#cb42-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-84"><a href="#cb42-84" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(statmod)</span>
+<span id="cb42-85"><a href="#cb42-85" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SummarizedExperiment)</span>
+<span id="cb42-86"><a href="#cb42-86" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb42-87"><a href="#cb42-87" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb42-88"><a href="#cb42-88" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-89"><a href="#cb42-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-92"><a href="#cb42-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-93"><a href="#cb42-93" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb42-94"><a href="#cb42-94" aria-hidden="true" tabindex="-1"></a>work_dir <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"posts"</span>, <span class="st">"nextflow-core-quantseq-4-nugent"</span>)</span>
+<span id="cb42-95"><a href="#cb42-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-96"><a href="#cb42-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-97"><a href="#cb42-97" aria-hidden="true" tabindex="-1"></a><span class="fu">## Sample annotations</span></span>
+<span id="cb42-98"><a href="#cb42-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-99"><a href="#cb42-99" aria-hidden="true" tabindex="-1"></a>We start by retrieving the sample annotation table, listing e.g. the <span class="in">`sex`</span>,</span>
+<span id="cb42-100"><a href="#cb42-100" aria-hidden="true" tabindex="-1"></a>and <span class="in">`genotype`</span> for each mouse, and the <span class="in">`batch`</span> for each collected sample.</span>
+<span id="cb42-101"><a href="#cb42-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-102"><a href="#cb42-102" aria-hidden="true" tabindex="-1"></a>This information is available in the <span class="co">[</span><span class="ot">SRA Run Explorer</span><span class="co">](https://www.ncbi.nlm.nih.gov/Traces/study/?query_key=4&amp;WebEnv=MCID_63c1d2b51518446806822e1d&amp;o=acc_s%3Aa#)</span>. </span>
+<span id="cb42-103"><a href="#cb42-103" aria-hidden="true" tabindex="-1"></a>(I saved it in the <span class="co">[</span><span class="ot">sample_metadata.csv CSV file</span><span class="co">](sample_metadata.csv)</span> if you </span>
+<span id="cb42-104"><a href="#cb42-104" aria-hidden="true" tabindex="-1"></a>want to follow along&gt;.</span>
+<span id="cb42-105"><a href="#cb42-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-108"><a href="#cb42-108" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-109"><a href="#cb42-109" aria-hidden="true" tabindex="-1"></a>sample_sheet <span class="ot">&lt;-</span> <span class="fu">file.path</span>(work_dir, <span class="st">"sample_metadata.csv"</span>)</span>
+<span id="cb42-110"><a href="#cb42-110" aria-hidden="true" tabindex="-1"></a>sample_anno <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(sample_sheet, <span class="at">row.names =</span> <span class="st">"Experiment"</span>)</span>
+<span id="cb42-111"><a href="#cb42-111" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample_anno[, <span class="fu">c</span>(<span class="st">"Run"</span>, <span class="st">"Animal.ID"</span>, <span class="st">"Age"</span>, <span class="st">"age_unit"</span>, <span class="st">"Cell_type"</span>,</span>
+<span id="cb42-112"><a href="#cb42-112" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"sex"</span>, <span class="st">"Genotype"</span>, <span class="st">"Sample.Name"</span>)])</span>
+<span id="cb42-113"><a href="#cb42-113" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-114"><a href="#cb42-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-115"><a href="#cb42-115" aria-hidden="true" tabindex="-1"></a>Because our SRA metadata doesn't include the GEO sample title, I saved the</span>
+<span id="cb42-116"><a href="#cb42-116" aria-hidden="true" tabindex="-1"></a>identifier mappings in the <span class="co">[</span><span class="ot">GEO_sample_ids.csv CSV file</span><span class="co">](GEO_sample_ids.csv)</span>.</span>
+<span id="cb42-117"><a href="#cb42-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-120"><a href="#cb42-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-121"><a href="#cb42-121" aria-hidden="true" tabindex="-1"></a>geo_ids <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">file.path</span>(work_dir, <span class="st">"GEO_sample_ids.csv"</span>))</span>
+<span id="cb42-122"><a href="#cb42-122" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(geo_ids)</span>
+<span id="cb42-123"><a href="#cb42-123" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-124"><a href="#cb42-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-127"><a href="#cb42-127" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-128"><a href="#cb42-128" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb42-129"><a href="#cb42-129" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sample_anno)<span class="ot">&lt;-</span> <span class="fu">tolower</span>(<span class="fu">colnames</span>(sample_anno))</span>
+<span id="cb42-130"><a href="#cb42-130" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(sample_anno) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"."</span>, <span class="st">"_"</span>, <span class="fu">colnames</span>(sample_anno), </span>
+<span id="cb42-131"><a href="#cb42-131" aria-hidden="true" tabindex="-1"></a>                             <span class="at">fixed =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb42-132"><a href="#cb42-132" aria-hidden="true" tabindex="-1"></a>sample_anno <span class="ot">&lt;-</span> sample_anno[, <span class="fu">c</span>(<span class="st">"sample_name"</span>, <span class="st">"animal_id"</span>, <span class="st">"genotype"</span>, <span class="st">"sex"</span>,</span>
+<span id="cb42-133"><a href="#cb42-133" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"age"</span>, <span class="st">"cell_type"</span>)]</span>
+<span id="cb42-134"><a href="#cb42-134" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>genotype <span class="ot">&lt;-</span> <span class="fu">factor</span>(sample_anno<span class="sc">$</span>genotype, </span>
+<span id="cb42-135"><a href="#cb42-135" aria-hidden="true" tabindex="-1"></a>                               <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"TREM2 +/+"</span>, <span class="st">"TREM2 -/-"</span>))</span>
+<span id="cb42-136"><a href="#cb42-136" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>genotype <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">recode_factor</span>(</span>
+<span id="cb42-137"><a href="#cb42-137" aria-hidden="true" tabindex="-1"></a>  sample_anno<span class="sc">$</span>genotype,<span class="st">"TREM2 +/+"</span> <span class="ot">=</span> <span class="st">"WT"</span>, <span class="st">"TREM2 -/-"</span> <span class="ot">=</span> <span class="st">"KO"</span>)</span>
+<span id="cb42-138"><a href="#cb42-138" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">factor</span>(sample_anno<span class="sc">$</span>age)</span>
+<span id="cb42-139"><a href="#cb42-139" aria-hidden="true" tabindex="-1"></a>sample_anno<span class="sc">$</span>sample_title <span class="ot">&lt;-</span> geo_ids[</span>
+<span id="cb42-140"><a href="#cb42-140" aria-hidden="true" tabindex="-1"></a>  <span class="fu">match</span>(sample_anno<span class="sc">$</span>sample_name, geo_ids<span class="sc">$</span>sample_name), <span class="st">"sample_id"</span>]</span>
+<span id="cb42-141"><a href="#cb42-141" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sample_anno)</span>
+<span id="cb42-142"><a href="#cb42-142" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-143"><a href="#cb42-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-144"><a href="#cb42-144" aria-hidden="true" tabindex="-1"></a>This experiment includes <span class="in">`r nrow(sample_anno)`</span> samples of astrocytes or </span>
+<span id="cb42-145"><a href="#cb42-145" aria-hidden="true" tabindex="-1"></a>microglia cells obtained from <span class="in">`r length(unique(sample_anno$animal_id))`</span> </span>
+<span id="cb42-146"><a href="#cb42-146" aria-hidden="true" tabindex="-1"></a>female mice that were either 2- or 16 months of age.</span>
+<span id="cb42-147"><a href="#cb42-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-148"><a href="#cb42-148" aria-hidden="true" tabindex="-1"></a>The animals are either wildtype (<span class="in">`WT`</span>) or  homozygous knockouts (<span class="in">`KO`</span>) for the</span>
+<span id="cb42-149"><a href="#cb42-149" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Trem2 gene</span><span class="co">](https://www.uniprot.org/uniprotkb/Q99NH8/entry)</span>.</span>
+<span id="cb42-150"><a href="#cb42-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-151"><a href="#cb42-151" aria-hidden="true" tabindex="-1"></a><span class="fu">## Nugent et al's original count data</span></span>
+<span id="cb42-152"><a href="#cb42-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-153"><a href="#cb42-153" aria-hidden="true" tabindex="-1"></a>First, we retrieve the authors' count matrix from </span>
+<span id="cb42-154"><a href="#cb42-154" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">NCBI GEO</span><span class="co">](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE158152)</span>, available</span>
+<span id="cb42-155"><a href="#cb42-155" aria-hidden="true" tabindex="-1"></a>as a Supplementary tab-delimited text file.</span>
+<span id="cb42-156"><a href="#cb42-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-159"><a href="#cb42-159" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-160"><a href="#cb42-160" aria-hidden="true" tabindex="-1"></a>geo_url <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE134031&amp;"</span>,</span>
+<span id="cb42-161"><a href="#cb42-161" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"format=file&amp;file=GSE134031%5FDST120%2Etab%2Egz"</span>)</span>
+<span id="cb42-162"><a href="#cb42-162" aria-hidden="true" tabindex="-1"></a>raw_counts <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="fu">textConnection</span>(<span class="fu">readLines</span>(<span class="fu">gzcon</span>(<span class="fu">url</span>(geo_url)))))</span>
+<span id="cb42-163"><a href="#cb42-163" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">colnames</span>(raw_counts), <span class="dv">10</span>)</span>
+<span id="cb42-164"><a href="#cb42-164" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-165"><a href="#cb42-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-166"><a href="#cb42-166" aria-hidden="true" tabindex="-1"></a>The <span class="in">`raw_counts`</span> data.frame contains information about the detected genes (</span>
+<span id="cb42-167"><a href="#cb42-167" aria-hidden="true" tabindex="-1"></a><span class="in">`mgi_symbol`</span>, <span class="in">`ensembl_gene_id_version`</span>) and the samples are identified by a</span>
+<span id="cb42-168"><a href="#cb42-168" aria-hidden="true" tabindex="-1"></a>shorthand of their GEO title (e.g. <span class="in">`IL1_M`</span>, <span class="in">`IL1_A`</span>). </span>
+<span id="cb42-169"><a href="#cb42-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-170"><a href="#cb42-170" aria-hidden="true" tabindex="-1"></a>We use the raw counts to populate a new <span class="in">`DGEList`</span> object and perform</span>
+<span id="cb42-171"><a href="#cb42-171" aria-hidden="true" tabindex="-1"></a>Library Size Normalization with the <span class="in">`TMM`</span> approach.</span>
+<span id="cb42-172"><a href="#cb42-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-175"><a href="#cb42-175" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-176"><a href="#cb42-176" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb42-177"><a href="#cb42-177" aria-hidden="true" tabindex="-1"></a>count_data <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(raw_counts[, <span class="fu">grep</span>(<span class="st">"^IL"</span>, <span class="fu">colnames</span>(raw_counts))])</span>
+<span id="cb42-178"><a href="#cb42-178" aria-hidden="true" tabindex="-1"></a><span class="fu">row.names</span>(count_data) <span class="ot">&lt;-</span> raw_counts<span class="sc">$</span>ensembl_gene_id_version</span>
+<span id="cb42-179"><a href="#cb42-179" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(count_data) <span class="ot">&lt;-</span> <span class="fu">row.names</span>(sample_anno)[</span>
+<span id="cb42-180"><a href="#cb42-180" aria-hidden="true" tabindex="-1"></a>  <span class="fu">match</span>(<span class="fu">colnames</span>(count_data), sample_anno<span class="sc">$</span>sample_title)</span>
+<span id="cb42-181"><a href="#cb42-181" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb42-182"><a href="#cb42-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-183"><a href="#cb42-183" aria-hidden="true" tabindex="-1"></a>gene_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb42-184"><a href="#cb42-184" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_id =</span> raw_counts<span class="sc">$</span>ensembl_gene_id_version,</span>
+<span id="cb42-185"><a href="#cb42-185" aria-hidden="true" tabindex="-1"></a>  <span class="at">gene_name =</span> raw_counts<span class="sc">$</span>mgi_symbol,</span>
+<span id="cb42-186"><a href="#cb42-186" aria-hidden="true" tabindex="-1"></a>  <span class="at">row.names =</span> raw_counts<span class="sc">$</span>ensembl_gene_id_version</span>
+<span id="cb42-187"><a href="#cb42-187" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-188"><a href="#cb42-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-189"><a href="#cb42-189" aria-hidden="true" tabindex="-1"></a>col_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb42-190"><a href="#cb42-190" aria-hidden="true" tabindex="-1"></a>  sample_anno[<span class="fu">colnames</span>(count_data),</span>
+<span id="cb42-191"><a href="#cb42-191" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>(<span class="st">"sample_title"</span>, <span class="st">"animal_id"</span>,  <span class="st">"age"</span>, <span class="st">"genotype"</span>, <span class="st">"cell_type"</span>)],</span>
+<span id="cb42-192"><a href="#cb42-192" aria-hidden="true" tabindex="-1"></a>  <span class="at">workflow =</span> <span class="st">"geo"</span></span>
+<span id="cb42-193"><a href="#cb42-193" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-194"><a href="#cb42-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-195"><a href="#cb42-195" aria-hidden="true" tabindex="-1"></a>dge <span class="ot">&lt;-</span> <span class="fu">DGEList</span>(</span>
+<span id="cb42-196"><a href="#cb42-196" aria-hidden="true" tabindex="-1"></a>  <span class="at">counts =</span> <span class="fu">as.matrix</span>(count_data), </span>
+<span id="cb42-197"><a href="#cb42-197" aria-hidden="true" tabindex="-1"></a>  <span class="at">samples =</span> col_data[<span class="fu">colnames</span>(count_data), ], </span>
+<span id="cb42-198"><a href="#cb42-198" aria-hidden="true" tabindex="-1"></a>  <span class="at">genes =</span> gene_data[<span class="fu">row.names</span>(count_data), ]</span>
+<span id="cb42-199"><a href="#cb42-199" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-200"><a href="#cb42-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-201"><a href="#cb42-201" aria-hidden="true" tabindex="-1"></a>dge <span class="ot">&lt;-</span> <span class="fu">calcNormFactors</span>(dge, <span class="at">method =</span> <span class="st">"TMM"</span>)</span>
+<span id="cb42-202"><a href="#cb42-202" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-203"><a href="#cb42-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-204"><a href="#cb42-204" aria-hidden="true" tabindex="-1"></a>This is a large dataset, containing e.g. samples from two different cell types</span>
+<span id="cb42-205"><a href="#cb42-205" aria-hidden="true" tabindex="-1"></a>(microglia and astrocytes) and two different age groups (2 and 16 months).</span>
+<span id="cb42-206"><a href="#cb42-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-207"><a href="#cb42-207" aria-hidden="true" tabindex="-1"></a>Here, we will restrict the analysis to microglia samples collected from older</span>
+<span id="cb42-208"><a href="#cb42-208" aria-hidden="true" tabindex="-1"></a>animals.</span>
+<span id="cb42-209"><a href="#cb42-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-212"><a href="#cb42-212" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-213"><a href="#cb42-213" aria-hidden="true" tabindex="-1"></a>dge <span class="ot">&lt;-</span> dge[, dge<span class="sc">$</span>samples<span class="sc">$</span>cell_type <span class="sc">==</span> <span class="st">"microglia"</span> <span class="sc">&amp;</span> dge<span class="sc">$</span>samples<span class="sc">$</span>age <span class="sc">==</span> <span class="st">"16"</span>]</span>
+<span id="cb42-214"><a href="#cb42-214" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-215"><a href="#cb42-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-216"><a href="#cb42-216" aria-hidden="true" tabindex="-1"></a>Let's identify which genes are significantly differentially expressed between</span>
+<span id="cb42-217"><a href="#cb42-217" aria-hidden="true" tabindex="-1"></a>the two genotypes!</span>
+<span id="cb42-218"><a href="#cb42-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-219"><a href="#cb42-219" aria-hidden="true" tabindex="-1"></a><span class="fu">### Linear modeling with limma/voom</span></span>
+<span id="cb42-220"><a href="#cb42-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-221"><a href="#cb42-221" aria-hidden="true" tabindex="-1"></a>First, we use the <span class="in">`edgeR::filterByExpr()`</span> function to identify genes with</span>
+<span id="cb42-222"><a href="#cb42-222" aria-hidden="true" tabindex="-1"></a>sufficiently large counts to be examined for differential expression.</span>
+<span id="cb42-223"><a href="#cb42-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-226"><a href="#cb42-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-227"><a href="#cb42-227" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb42-228"><a href="#cb42-228" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb42-229"><a href="#cb42-229" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> genotype, <span class="at">data =</span> dge<span class="sc">$</span>samples)</span>
+<span id="cb42-230"><a href="#cb42-230" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(design) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"genotype"</span>, <span class="st">""</span>, <span class="fu">colnames</span>(design))</span>
+<span id="cb42-231"><a href="#cb42-231" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">filterByExpr</span>(dge, <span class="at">design =</span> design)</span>
+<span id="cb42-232"><a href="#cb42-232" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-233"><a href="#cb42-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-234"><a href="#cb42-234" aria-hidden="true" tabindex="-1"></a>Next, we fit a linear model to the data using the </span>
+<span id="cb42-235"><a href="#cb42-235" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">limma/voom</span><span class="co">](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29)</span></span>
+<span id="cb42-236"><a href="#cb42-236" aria-hidden="true" tabindex="-1"></a>approach. The model only includes the <span class="in">`genotype`</span> (with <span class="in">`WT`</span> as the reference</span>
+<span id="cb42-237"><a href="#cb42-237" aria-hidden="true" tabindex="-1"></a>level) as a fixed effect.</span>
+<span id="cb42-238"><a href="#cb42-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-241"><a href="#cb42-241" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-242"><a href="#cb42-242" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb42-243"><a href="#cb42-243" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb42-244"><a href="#cb42-244" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">voomLmFit</span>(</span>
+<span id="cb42-245"><a href="#cb42-245" aria-hidden="true" tabindex="-1"></a>  dge[keep, <span class="fu">row.names</span>(design)], </span>
+<span id="cb42-246"><a href="#cb42-246" aria-hidden="true" tabindex="-1"></a>  <span class="at">design =</span> design,</span>
+<span id="cb42-247"><a href="#cb42-247" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample.weights =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb42-248"><a href="#cb42-248" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb42-249"><a href="#cb42-249" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-250"><a href="#cb42-250" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">eBayes</span>(fit, <span class="at">robust=</span><span class="cn">TRUE</span>)</span>
+<span id="cb42-251"><a href="#cb42-251" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-252"><a href="#cb42-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-253"><a href="#cb42-253" aria-hidden="true" tabindex="-1"></a>The following table displays the number of differentially up- and down-regulated</span>
+<span id="cb42-254"><a href="#cb42-254" aria-hidden="true" tabindex="-1"></a>genes after applying a false-discovery (<span class="in">`adj.P.Val`</span>) threshold of 5%. </span>
+<span id="cb42-255"><a href="#cb42-255" aria-hidden="true" tabindex="-1"></a>We detect significant differences between <span class="in">`KO`</span> and <span class="in">`WT`</span> animals in a small</span>
+<span id="cb42-256"><a href="#cb42-256" aria-hidden="true" tabindex="-1"></a>number of genes</span>
+<span id="cb42-257"><a href="#cb42-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-260"><a href="#cb42-260" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-261"><a href="#cb42-261" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">decideTests</span>(fit)[, <span class="st">"KO"</span>])</span>
+<span id="cb42-262"><a href="#cb42-262" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-263"><a href="#cb42-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-264"><a href="#cb42-264" aria-hidden="true" tabindex="-1"></a>The top 10 genes with the smallest p-values include well known markers of</span>
+<span id="cb42-265"><a href="#cb42-265" aria-hidden="true" tabindex="-1"></a>microglia activation:</span>
+<span id="cb42-266"><a href="#cb42-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-269"><a href="#cb42-269" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-270"><a href="#cb42-270" aria-hidden="true" tabindex="-1"></a><span class="fu">topTreat</span>(fit, <span class="at">coef =</span> <span class="st">"KO"</span>)[, <span class="fu">c</span>(<span class="st">"gene_name"</span>, <span class="st">"logFC"</span>, <span class="st">"P.Value"</span>, <span class="st">"adj.P.Val"</span>)]</span>
+<span id="cb42-271"><a href="#cb42-271" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-272"><a href="#cb42-272" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-273"><a href="#cb42-273" aria-hidden="true" tabindex="-1"></a>Next we repeat *the same analysis* with the output of the nf-core/rnaseq</span>
+<span id="cb42-274"><a href="#cb42-274" aria-hidden="true" tabindex="-1"></a>workflow.</span>
+<span id="cb42-275"><a href="#cb42-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-276"><a href="#cb42-276" aria-hidden="true" tabindex="-1"></a><span class="fu">## nf-core/rnaseq results</span></span>
+<span id="cb42-277"><a href="#cb42-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-278"><a href="#cb42-278" aria-hidden="true" tabindex="-1"></a>We start with the raw counts contained in the </span>
+<span id="cb42-279"><a href="#cb42-279" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">salmon.merged.gene_counts.rds</span><span class="co">](salmon.merged.gene_counts.rds)</span> </span>
+<span id="cb42-280"><a href="#cb42-280" aria-hidden="true" tabindex="-1"></a>file generated by the nf-core/rnaseq workflow. </span>
+<span id="cb42-281"><a href="#cb42-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-282"><a href="#cb42-282" aria-hidden="true" tabindex="-1"></a>We TMM-normalize the data, as before. (This step converts the </span>
+<span id="cb42-283"><a href="#cb42-283" aria-hidden="true" tabindex="-1"></a><span class="in">`SummarizedExperiment`</span> into a `DGEList object as well.)</span>
+<span id="cb42-284"><a href="#cb42-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-287"><a href="#cb42-287" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-288"><a href="#cb42-288" aria-hidden="true" tabindex="-1"></a>count_file <span class="ot">&lt;-</span> <span class="fu">file.path</span>(work_dir, <span class="st">"salmon.merged.gene_counts.rds"</span>)</span>
+<span id="cb42-289"><a href="#cb42-289" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(count_file)</span>
+<span id="cb42-290"><a href="#cb42-290" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">colnames</span>(se) <span class="sc">%in%</span> <span class="fu">row.names</span>(sample_anno)))</span>
+<span id="cb42-291"><a href="#cb42-291" aria-hidden="true" tabindex="-1"></a>dge_nfcore <span class="ot">&lt;-</span> <span class="fu">calcNormFactors</span>(se, <span class="at">method =</span> <span class="st">"TMM"</span>)</span>
+<span id="cb42-292"><a href="#cb42-292" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-293"><a href="#cb42-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-294"><a href="#cb42-294" aria-hidden="true" tabindex="-1"></a>Next, we add the sample metadata and fit the same linear model as before.</span>
+<span id="cb42-295"><a href="#cb42-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-298"><a href="#cb42-298" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-299"><a href="#cb42-299" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb42-300"><a href="#cb42-300" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb42-301"><a href="#cb42-301" aria-hidden="true" tabindex="-1"></a>dge_nfcore<span class="sc">$</span>samples <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb42-302"><a href="#cb42-302" aria-hidden="true" tabindex="-1"></a>  dge_nfcore<span class="sc">$</span>samples,</span>
+<span id="cb42-303"><a href="#cb42-303" aria-hidden="true" tabindex="-1"></a>  sample_anno[<span class="fu">colnames</span>(dge_nfcore),</span>
+<span id="cb42-304"><a href="#cb42-304" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>(<span class="st">"sample_title"</span>, <span class="st">"animal_id"</span>, <span class="st">"age"</span>, <span class="st">"genotype"</span>, <span class="st">"cell_type"</span>)],</span>
+<span id="cb42-305"><a href="#cb42-305" aria-hidden="true" tabindex="-1"></a>  <span class="at">workflow =</span> <span class="st">"nfcore"</span></span>
+<span id="cb42-306"><a href="#cb42-306" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-307"><a href="#cb42-307" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">all</span>(<span class="fu">colnames</span>(dge) <span class="sc">%in%</span> <span class="fu">colnames</span>(dge_nfcore)))</span>
+<span id="cb42-308"><a href="#cb42-308" aria-hidden="true" tabindex="-1"></a>dge_nfcore <span class="ot">&lt;-</span> dge_nfcore[, <span class="fu">colnames</span>(dge)]</span>
+<span id="cb42-309"><a href="#cb42-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-310"><a href="#cb42-310" aria-hidden="true" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span> genotype, <span class="at">data =</span> dge_nfcore<span class="sc">$</span>samples)</span>
+<span id="cb42-311"><a href="#cb42-311" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(design) <span class="ot">&lt;-</span> <span class="fu">sub</span>(<span class="st">"genotype"</span>, <span class="st">""</span>, <span class="fu">colnames</span>(design))</span>
+<span id="cb42-312"><a href="#cb42-312" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">filterByExpr</span>(dge_nfcore, <span class="at">design =</span> design)</span>
+<span id="cb42-313"><a href="#cb42-313" aria-hidden="true" tabindex="-1"></a>fit_nfcore <span class="ot">&lt;-</span> <span class="fu">voomLmFit</span>(</span>
+<span id="cb42-314"><a href="#cb42-314" aria-hidden="true" tabindex="-1"></a>  dge_nfcore[keep, <span class="fu">row.names</span>(design)], </span>
+<span id="cb42-315"><a href="#cb42-315" aria-hidden="true" tabindex="-1"></a>  <span class="at">design =</span> design,</span>
+<span id="cb42-316"><a href="#cb42-316" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample.weights =</span> <span class="cn">TRUE</span>, </span>
+<span id="cb42-317"><a href="#cb42-317" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot =</span> <span class="cn">FALSE</span></span>
+<span id="cb42-318"><a href="#cb42-318" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-319"><a href="#cb42-319" aria-hidden="true" tabindex="-1"></a>fit_nfcore <span class="ot">&lt;-</span> <span class="fu">eBayes</span>(fit_nfcore, <span class="at">robust=</span><span class="cn">TRUE</span>)</span>
+<span id="cb42-320"><a href="#cb42-320" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-321"><a href="#cb42-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-322"><a href="#cb42-322" aria-hidden="true" tabindex="-1"></a>As with the original count data from NCBI GEO, we detect small number of</span>
+<span id="cb42-323"><a href="#cb42-323" aria-hidden="true" tabindex="-1"></a>differentially expressed genes (FDR &lt; 5%).</span>
+<span id="cb42-324"><a href="#cb42-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-327"><a href="#cb42-327" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-328"><a href="#cb42-328" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">decideTests</span>(fit_nfcore)[, <span class="st">"KO"</span>])</span>
+<span id="cb42-329"><a href="#cb42-329" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-330"><a href="#cb42-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-333"><a href="#cb42-333" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-334"><a href="#cb42-334" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb42-335"><a href="#cb42-335" aria-hidden="true" tabindex="-1"></a>cpms <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
+<span id="cb42-336"><a href="#cb42-336" aria-hidden="true" tabindex="-1"></a>  geo <span class="ot">&lt;-</span> <span class="fu">cpm</span>(dge, <span class="at">normalized.lib.sizes =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-337"><a href="#cb42-337" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb42-338"><a href="#cb42-338" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(dge<span class="sc">$</span>genes) <span class="sc">%&gt;%</span></span>
+<span id="cb42-339"><a href="#cb42-339" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"SRX"</span>), </span>
+<span id="cb42-340"><a href="#cb42-340" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_to =</span> <span class="st">"sample_name"</span>,</span>
+<span id="cb42-341"><a href="#cb42-341" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> <span class="st">"cpm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-342"><a href="#cb42-342" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb42-343"><a href="#cb42-343" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(dge<span class="sc">$</span>samples, <span class="st">"sample_name"</span>),</span>
+<span id="cb42-344"><a href="#cb42-344" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"sample_name"</span></span>
+<span id="cb42-345"><a href="#cb42-345" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb42-346"><a href="#cb42-346" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"Nugent et al"</span>)</span>
+<span id="cb42-347"><a href="#cb42-347" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb42-348"><a href="#cb42-348" aria-hidden="true" tabindex="-1"></a>  nfcore <span class="ot">&lt;-</span> <span class="fu">cpm</span>(dge_nfcore, <span class="at">normalized.lib.sizes =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-349"><a href="#cb42-349" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb42-350"><a href="#cb42-350" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(dge_nfcore<span class="sc">$</span>genes) <span class="sc">%&gt;%</span></span>
+<span id="cb42-351"><a href="#cb42-351" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"SRX"</span>), </span>
+<span id="cb42-352"><a href="#cb42-352" aria-hidden="true" tabindex="-1"></a>                 <span class="at">names_to =</span> <span class="st">"sample_name"</span>,</span>
+<span id="cb42-353"><a href="#cb42-353" aria-hidden="true" tabindex="-1"></a>                 <span class="at">values_to =</span> <span class="st">"cpm"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-354"><a href="#cb42-354" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb42-355"><a href="#cb42-355" aria-hidden="true" tabindex="-1"></a>      tibble<span class="sc">::</span><span class="fu">rownames_to_column</span>(dge_nfcore<span class="sc">$</span>samples, <span class="st">"sample_name"</span>),</span>
+<span id="cb42-356"><a href="#cb42-356" aria-hidden="true" tabindex="-1"></a>      <span class="at">by =</span> <span class="st">"sample_name"</span></span>
+<span id="cb42-357"><a href="#cb42-357" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb42-358"><a href="#cb42-358" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"nf-core"</span>)</span>
+<span id="cb42-359"><a href="#cb42-359" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb42-360"><a href="#cb42-360" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">bind_rows</span>(</span>
+<span id="cb42-361"><a href="#cb42-361" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(geo, <span class="fu">any_of</span>(<span class="fu">intersect</span>(<span class="fu">colnames</span>(geo), <span class="fu">colnames</span>(nfcore)))),</span>
+<span id="cb42-362"><a href="#cb42-362" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(nfcore, <span class="fu">any_of</span>(<span class="fu">intersect</span>(<span class="fu">colnames</span>(geo), <span class="fu">colnames</span>(nfcore))))</span>
+<span id="cb42-363"><a href="#cb42-363" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb42-364"><a href="#cb42-364" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb42-365"><a href="#cb42-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-366"><a href="#cb42-366" aria-hidden="true" tabindex="-1"></a>tt <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb42-367"><a href="#cb42-367" aria-hidden="true" tabindex="-1"></a>  <span class="fu">topTreat</span>(fit, <span class="at">coef =</span> <span class="st">"KO"</span>, <span class="at">number =</span> <span class="cn">Inf</span>)[</span>
+<span id="cb42-368"><a href="#cb42-368" aria-hidden="true" tabindex="-1"></a>    , <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>, <span class="st">"logFC"</span>, <span class="st">"P.Value"</span>, <span class="st">"adj.P.Val"</span>)] <span class="sc">%&gt;%</span></span>
+<span id="cb42-369"><a href="#cb42-369" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"geo"</span>),</span>
+<span id="cb42-370"><a href="#cb42-370" aria-hidden="true" tabindex="-1"></a>   <span class="fu">topTreat</span>(fit_nfcore, <span class="at">coef =</span> <span class="st">"KO"</span>, <span class="at">number =</span> <span class="cn">Inf</span>)[</span>
+<span id="cb42-371"><a href="#cb42-371" aria-hidden="true" tabindex="-1"></a>     , <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>, <span class="st">"logFC"</span>, <span class="st">"P.Value"</span>, <span class="st">"adj.P.Val"</span>)] <span class="sc">%&gt;%</span></span>
+<span id="cb42-372"><a href="#cb42-372" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">dataset =</span> <span class="st">"nfcore"</span>)</span>
+<span id="cb42-373"><a href="#cb42-373" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-374"><a href="#cb42-374" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">adj.P.Val =</span> <span class="fu">signif</span>(adj.P.Val, <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb42-375"><a href="#cb42-375" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb42-376"><a href="#cb42-376" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"gene_name"</span>), </span>
+<span id="cb42-377"><a href="#cb42-377" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> <span class="st">"dataset"</span>, </span>
+<span id="cb42-378"><a href="#cb42-378" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> <span class="st">"adj.P.Val"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-379"><a href="#cb42-379" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(nfcore) <span class="sc">%&gt;%</span></span>
+<span id="cb42-380"><a href="#cb42-380" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb42-381"><a href="#cb42-381" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">column_to_rownames</span>(<span class="st">"gene_id"</span>)</span>
+<span id="cb42-382"><a href="#cb42-382" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-383"><a href="#cb42-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-384"><a href="#cb42-384" aria-hidden="true" tabindex="-1"></a><span class="fu">### Normalized expression</span></span>
+<span id="cb42-385"><a href="#cb42-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-386"><a href="#cb42-386" aria-hidden="true" tabindex="-1"></a>First, we examine the correlation between the normalized log-transformed</span>
+<span id="cb42-387"><a href="#cb42-387" aria-hidden="true" tabindex="-1"></a>gene expression estimates returned from the two workflows. We focus on those</span>
+<span id="cb42-388"><a href="#cb42-388" aria-hidden="true" tabindex="-1"></a>genes that passed the <span class="in">`filterByExpr`</span> thresholds above, e.g. those genes</span>
+<span id="cb42-389"><a href="#cb42-389" aria-hidden="true" tabindex="-1"></a>deemed sufficiently highly expressed to be assessed for differential expression.</span>
+<span id="cb42-390"><a href="#cb42-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-393"><a href="#cb42-393" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-394"><a href="#cb42-394" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 5.5</span></span>
+<span id="cb42-395"><a href="#cb42-395" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.5</span></span>
+<span id="cb42-396"><a href="#cb42-396" aria-hidden="true" tabindex="-1"></a>common_genes <span class="ot">&lt;-</span> <span class="fu">intersect</span>(<span class="fu">row.names</span>(fit), <span class="fu">row.names</span>(fit_nfcore))</span>
+<span id="cb42-397"><a href="#cb42-397" aria-hidden="true" tabindex="-1"></a>sum_stats <span class="ot">&lt;-</span> cpms <span class="sc">%&gt;%</span></span>
+<span id="cb42-398"><a href="#cb42-398" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(gene_id <span class="sc">%in%</span> common_genes) <span class="sc">%&gt;%</span></span>
+<span id="cb42-399"><a href="#cb42-399" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">pivot_wider</span>(</span>
+<span id="cb42-400"><a href="#cb42-400" aria-hidden="true" tabindex="-1"></a>    <span class="at">id_cols =</span> <span class="fu">c</span>(<span class="st">"gene_id"</span>, <span class="st">"sample_name"</span>),</span>
+<span id="cb42-401"><a href="#cb42-401" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_from =</span> <span class="st">"cpm"</span>,</span>
+<span id="cb42-402"><a href="#cb42-402" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_from =</span> <span class="st">"dataset"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-403"><a href="#cb42-403" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(gene_id) <span class="sc">%&gt;%</span></span>
+<span id="cb42-404"><a href="#cb42-404" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb42-405"><a href="#cb42-405" aria-hidden="true" tabindex="-1"></a>    <span class="at">r =</span> <span class="fu">cor</span>(<span class="fu">log1p</span>(<span class="st">`</span><span class="at">Nugent et al</span><span class="st">`</span>), <span class="fu">log1p</span>(<span class="st">`</span><span class="at">nf-core</span><span class="st">`</span>)),</span>
+<span id="cb42-406"><a href="#cb42-406" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_nugent =</span> <span class="fu">mean</span>(<span class="st">`</span><span class="at">Nugent et al</span><span class="st">`</span>),</span>
+<span id="cb42-407"><a href="#cb42-407" aria-hidden="true" tabindex="-1"></a>    <span class="at">mean_nfcore =</span> <span class="fu">mean</span>(<span class="st">`</span><span class="at">nf-core</span><span class="st">`</span>))</span>
+<span id="cb42-408"><a href="#cb42-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-409"><a href="#cb42-409" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sum_stats, <span class="fu">aes</span>(<span class="at">x =</span> r)) <span class="sc">+</span> </span>
+<span id="cb42-410"><a href="#cb42-410" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>) <span class="sc">+</span></span>
+<span id="cb42-411"><a href="#cb42-411" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">1.02</span>), <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.2</span>)) <span class="sc">+</span></span>
+<span id="cb42-412"><a href="#cb42-412" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Pearson correlation coefficient (R)"</span>, </span>
+<span id="cb42-413"><a href="#cb42-413" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of genes"</span>,</span>
+<span id="cb42-414"><a href="#cb42-414" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Correlation between normalized log2 counts"</span>) <span class="sc">+</span></span>
+<span id="cb42-415"><a href="#cb42-415" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
+<span id="cb42-416"><a href="#cb42-416" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span>
+<span id="cb42-417"><a href="#cb42-417" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-418"><a href="#cb42-418" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-419"><a href="#cb42-419" aria-hidden="true" tabindex="-1"></a>The correlation between normalized log2 expression estimates is reasonably high,</span>
+<span id="cb42-420"><a href="#cb42-420" aria-hidden="true" tabindex="-1"></a>e.g. 80% of all genes showing a Pearson correlation coefficient &gt; </span>
+<span id="cb42-421"><a href="#cb42-421" aria-hidden="true" tabindex="-1"></a><span class="in">`r signif(quantile(sum_stats$r, c(0.2)), 2)`</span>. </span>
+<span id="cb42-422"><a href="#cb42-422" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-423"><a href="#cb42-423" aria-hidden="true" tabindex="-1"></a>The relatively low correlation might reflect the low RNA input of </span>
+<span id="cb42-424"><a href="#cb42-424" aria-hidden="true" tabindex="-1"></a>this experiment, e.g. only <span class="in">`r length(common_genes)`</span> of the genes </span>
+<span id="cb42-425"><a href="#cb42-425" aria-hidden="true" tabindex="-1"></a>genes were detected with &gt; 10 UMI-corrected normalized counts per million reads.</span>
 <span id="cb42-426"><a href="#cb42-426" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-429"><a href="#cb42-429" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-430"><a href="#cb42-430" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sum_stats, <span class="fu">aes</span>(<span class="at">x =</span> mean_nugent <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">+</span> </span>
-<span id="cb42-431"><a href="#cb42-431" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>) <span class="sc">+</span></span>
-<span id="cb42-432"><a href="#cb42-432" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">trans =</span> scales<span class="sc">::</span><span class="fu">log10_trans</span>(),</span>
-<span id="cb42-433"><a href="#cb42-433" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">comma_format</span>()) <span class="sc">+</span></span>
-<span id="cb42-434"><a href="#cb42-434" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Mean normalized counts per million"</span>, </span>
-<span id="cb42-435"><a href="#cb42-435" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of genes"</span>,</span>
-<span id="cb42-436"><a href="#cb42-436" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Average expression"</span>,</span>
-<span id="cb42-437"><a href="#cb42-437" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Nugent et al"</span>) <span class="sc">+</span></span>
-<span id="cb42-438"><a href="#cb42-438" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
-<span id="cb42-439"><a href="#cb42-439" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span>
-<span id="cb42-440"><a href="#cb42-440" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-441"><a href="#cb42-441" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-442"><a href="#cb42-442" aria-hidden="true" tabindex="-1"></a>Next, we will examine the results of the _differential_ expression analysis.</span>
-<span id="cb42-443"><a href="#cb42-443" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-444"><a href="#cb42-444" aria-hidden="true" tabindex="-1"></a><span class="fu">### Differential expression results</span></span>
-<span id="cb42-445"><a href="#cb42-445" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-446"><a href="#cb42-446" aria-hidden="true" tabindex="-1"></a>Analyses based on either preprocessing pipeline yield similar numbers of </span>
-<span id="cb42-447"><a href="#cb42-447" aria-hidden="true" tabindex="-1"></a>differentially expressed genes.</span>
-<span id="cb42-448"><a href="#cb42-448" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-451"><a href="#cb42-451" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-452"><a href="#cb42-452" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb42-453"><a href="#cb42-453" aria-hidden="true" tabindex="-1"></a>common_genes <span class="ot">&lt;-</span> <span class="fu">intersect</span>(<span class="fu">row.names</span>(fit), <span class="fu">row.names</span>(fit_nfcore))</span>
-<span id="cb42-454"><a href="#cb42-454" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
-<span id="cb42-455"><a href="#cb42-455" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decideTests</span>(fit)[common_genes, <span class="st">"KO"</span>], </span>
-<span id="cb42-456"><a href="#cb42-456" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decideTests</span>(fit_nfcore)[common_genes, <span class="st">"KO"</span>]</span>
-<span id="cb42-457"><a href="#cb42-457" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-458"><a href="#cb42-458" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(results) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Nugent et al"</span>, <span class="st">"nf-core"</span>)</span>
-<span id="cb42-459"><a href="#cb42-459" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(results) <span class="ot">&lt;-</span> <span class="st">"TestResults"</span></span>
-<span id="cb42-460"><a href="#cb42-460" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results)</span>
-<span id="cb42-461"><a href="#cb42-461" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-462"><a href="#cb42-462" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-463"><a href="#cb42-463" aria-hidden="true" tabindex="-1"></a>But are these _the same genes_ in both sets of results?</span>
-<span id="cb42-464"><a href="#cb42-464" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-465"><a href="#cb42-465" aria-hidden="true" tabindex="-1"></a>We can visualize the overlap between the sets of significant genes in a Venn </span>
-<span id="cb42-466"><a href="#cb42-466" aria-hidden="true" tabindex="-1"></a>diagram (FDR &lt; 5%). The majority of differentially expressed genes is </span>
-<span id="cb42-467"><a href="#cb42-467" aria-hidden="true" tabindex="-1"></a>detected with both quantitation approaches (for both up- and down-regulated</span>
-<span id="cb42-468"><a href="#cb42-468" aria-hidden="true" tabindex="-1"></a>genes.)</span>
-<span id="cb42-469"><a href="#cb42-469" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-472"><a href="#cb42-472" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-473"><a href="#cb42-473" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 5.5</span></span>
-<span id="cb42-474"><a href="#cb42-474" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5.5</span></span>
-<span id="cb42-475"><a href="#cb42-475" aria-hidden="true" tabindex="-1"></a>limma<span class="sc">::</span><span class="fu">vennDiagram</span>(results, <span class="at">include =</span> <span class="fu">c</span>(<span class="st">"up"</span>, <span class="st">"down"</span>),</span>
-<span id="cb42-476"><a href="#cb42-476" aria-hidden="true" tabindex="-1"></a>                   <span class="at">counts.col=</span><span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">4</span>))</span>
-<span id="cb42-477"><a href="#cb42-477" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-478"><a href="#cb42-478" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-479"><a href="#cb42-479" aria-hidden="true" tabindex="-1"></a>For example, the following plots show the normalized expression of the most</span>
-<span id="cb42-480"><a href="#cb42-480" aria-hidden="true" tabindex="-1"></a>significantly differentially expressed genes (known markers of active </span>
-<span id="cb42-481"><a href="#cb42-481" aria-hidden="true" tabindex="-1"></a>microglia).</span>
-<span id="cb42-482"><a href="#cb42-482" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-485"><a href="#cb42-485" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-486"><a href="#cb42-486" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb42-487"><a href="#cb42-487" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 3</span></span>
-<span id="cb42-488"><a href="#cb42-488" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.25</span></span>
-<span id="cb42-489"><a href="#cb42-489" aria-hidden="true" tabindex="-1"></a><span class="co">#| layout-ncol: 2</span></span>
-<span id="cb42-490"><a href="#cb42-490" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (gene <span class="cf">in</span> <span class="fu">topTreat</span>(fit, <span class="at">coef =</span> <span class="st">"KO"</span>, <span class="at">number =</span> <span class="dv">6</span>)[[<span class="st">"gene_id"</span>]]) {</span>
-<span id="cb42-491"><a href="#cb42-491" aria-hidden="true" tabindex="-1"></a> p <span class="ot">&lt;-</span> cpms <span class="sc">%&gt;%</span></span>
-<span id="cb42-492"><a href="#cb42-492" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(gene_id <span class="sc">==</span> gene) <span class="sc">%&gt;%</span></span>
-<span id="cb42-493"><a href="#cb42-493" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> genotype, <span class="at">y =</span> cpm)) <span class="sc">+</span> </span>
-<span id="cb42-494"><a href="#cb42-494" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>), <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
-<span id="cb42-495"><a href="#cb42-495" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(dataset <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> </span>
-<span id="cb42-496"><a href="#cb42-496" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> dge<span class="sc">$</span>genes[gene, <span class="st">"gene_name"</span>],</span>
-<span id="cb42-497"><a href="#cb42-497" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">"Normalized expression (CPM)"</span>,</span>
-<span id="cb42-498"><a href="#cb42-498" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb42-499"><a href="#cb42-499" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">sprintf</span>(<span class="st">"FDR nf-core: %s</span><span class="sc">\n</span><span class="st">FDR GEO: %s"</span>,</span>
-<span id="cb42-500"><a href="#cb42-500" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"nfcore"</span>],</span>
-<span id="cb42-501"><a href="#cb42-501" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"geo"</span>]</span>
-<span id="cb42-502"><a href="#cb42-502" aria-hidden="true" tabindex="-1"></a>                       )</span>
-<span id="cb42-503"><a href="#cb42-503" aria-hidden="true" tabindex="-1"></a>         ) <span class="sc">+</span></span>
-<span id="cb42-504"><a href="#cb42-504" aria-hidden="true" tabindex="-1"></a>   <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
-<span id="cb42-505"><a href="#cb42-505" aria-hidden="true" tabindex="-1"></a> <span class="fu">print</span>(p)</span>
-<span id="cb42-506"><a href="#cb42-506" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb42-507"><a href="#cb42-507" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-508"><a href="#cb42-508" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-509"><a href="#cb42-509" aria-hidden="true" tabindex="-1"></a>Applying a hard FDR threshold can inflate the number of apparent differences,</span>
-<span id="cb42-510"><a href="#cb42-510" aria-hidden="true" tabindex="-1"></a>e.g. when a gene is close to the significance threshold (see below).</span>
-<span id="cb42-511"><a href="#cb42-511" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-514"><a href="#cb42-514" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-515"><a href="#cb42-515" aria-hidden="true" tabindex="-1"></a>p_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(</span>
-<span id="cb42-516"><a href="#cb42-516" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>], </span>
-<span id="cb42-517"><a href="#cb42-517" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>])</span>
-<span id="cb42-518"><a href="#cb42-518" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-519"><a href="#cb42-519" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-520"><a href="#cb42-520" aria-hidden="true" tabindex="-1"></a>The log2 fold estimates for the <span class="in">`Hom`</span> vs <span class="in">`WT`</span> comparison are well correlated</span>
-<span id="cb42-521"><a href="#cb42-521" aria-hidden="true" tabindex="-1"></a>across the two analysis workflows (Pearson correlation coefficient </span>
-<span id="cb42-522"><a href="#cb42-522" aria-hidden="true" tabindex="-1"></a>R = <span class="in">`r signif(p_cor, 2)`</span> ).</span>
-<span id="cb42-523"><a href="#cb42-523" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-526"><a href="#cb42-526" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-527"><a href="#cb42-527" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 4.5</span></span>
-<span id="cb42-528"><a href="#cb42-528" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.5</span></span>
-<span id="cb42-529"><a href="#cb42-529" aria-hidden="true" tabindex="-1"></a><span class="fu">smoothScatter</span>(</span>
-<span id="cb42-530"><a href="#cb42-530" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>], </span>
-<span id="cb42-531"><a href="#cb42-531" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>],</span>
-<span id="cb42-532"><a href="#cb42-532" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"nf-core (log2FC)"</span>,</span>
-<span id="cb42-533"><a href="#cb42-533" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Nugent et al (log2FC)"</span>,</span>
-<span id="cb42-534"><a href="#cb42-534" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Homozygous APP vs WT (effect size)"</span></span>
-<span id="cb42-535"><a href="#cb42-535" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb42-536"><a href="#cb42-536" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> <span class="dv">1</span>, <span class="at">y =</span> <span class="sc">-</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">sprintf</span>(<span class="st">"R = %s"</span>, <span class="fu">signif</span>(p_cor, <span class="dv">2</span>)))</span>
-<span id="cb42-537"><a href="#cb42-537" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb42-538"><a href="#cb42-538" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb42-539"><a href="#cb42-539" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-540"><a href="#cb42-540" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-541"><a href="#cb42-541" aria-hidden="true" tabindex="-1"></a>as are the t-statistics across all examined genes:</span>
-<span id="cb42-542"><a href="#cb42-542" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-545"><a href="#cb42-545" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-546"><a href="#cb42-546" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 4.5</span></span>
-<span id="cb42-547"><a href="#cb42-547" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.5</span></span>
-<span id="cb42-548"><a href="#cb42-548" aria-hidden="true" tabindex="-1"></a>p_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(</span>
-<span id="cb42-549"><a href="#cb42-549" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>], </span>
-<span id="cb42-550"><a href="#cb42-550" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>])</span>
-<span id="cb42-551"><a href="#cb42-551" aria-hidden="true" tabindex="-1"></a><span class="fu">smoothScatter</span>(</span>
-<span id="cb42-552"><a href="#cb42-552" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>], </span>
-<span id="cb42-553"><a href="#cb42-553" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>],</span>
-<span id="cb42-554"><a href="#cb42-554" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"nf-core (t-statistic)"</span>,</span>
-<span id="cb42-555"><a href="#cb42-555" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Nugent et al (t-statistic)"</span>,</span>
-<span id="cb42-556"><a href="#cb42-556" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Homozygous APP vs WT (t-statistic)"</span>)</span>
-<span id="cb42-557"><a href="#cb42-557" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> <span class="dv">3</span>, <span class="at">y =</span> <span class="sc">-</span><span class="dv">15</span>, <span class="at">labels =</span> <span class="fu">sprintf</span>(<span class="st">"R = %s"</span>, <span class="fu">signif</span>(p_cor, <span class="dv">2</span>)))</span>
-<span id="cb42-558"><a href="#cb42-558" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb42-559"><a href="#cb42-559" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
-<span id="cb42-560"><a href="#cb42-560" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-561"><a href="#cb42-561" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-562"><a href="#cb42-562" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb42-563"><a href="#cb42-563" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-564"><a href="#cb42-564" aria-hidden="true" tabindex="-1"></a>Because this comparison yields only a small number of bona-fide differentially</span>
-<span id="cb42-565"><a href="#cb42-565" aria-hidden="true" tabindex="-1"></a>expressed genes, we don't expect to see a high correlation between the </span>
-<span id="cb42-566"><a href="#cb42-566" aria-hidden="true" tabindex="-1"></a>log2 fold changes or the t-statistics between the two analyses: most of the </span>
-<span id="cb42-567"><a href="#cb42-567" aria-hidden="true" tabindex="-1"></a>values are very close to zero.</span>
-<span id="cb42-568"><a href="#cb42-568" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-569"><a href="#cb42-569" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb42-570"><a href="#cb42-570" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-571"><a href="#cb42-571" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Discordant significance calls</span></span>
-<span id="cb42-572"><a href="#cb42-572" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-575"><a href="#cb42-575" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-576"><a href="#cb42-576" aria-hidden="true" tabindex="-1"></a><span class="co"># genes detected in Nugent et al, but not significant with nf-core</span></span>
-<span id="cb42-577"><a href="#cb42-577" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">row.names</span>(results)[<span class="fu">which</span>(<span class="fu">abs</span>(results[, <span class="dv">1</span>]) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> results[, <span class="dv">2</span>] <span class="sc">==</span> <span class="dv">0</span>)]</span>
-<span id="cb42-578"><a href="#cb42-578" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-579"><a href="#cb42-579" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-580"><a href="#cb42-580" aria-hidden="true" tabindex="-1"></a>At FDR &lt; 5% <span class="in">`r length(genes)`</span> genes were reported as significantly </span>
-<span id="cb42-581"><a href="#cb42-581" aria-hidden="true" tabindex="-1"></a>differentially expressed with the original Nugent et al count matrix</span>
-<span id="cb42-582"><a href="#cb42-582" aria-hidden="true" tabindex="-1"></a>but *not* with the output of the nf-core/rnaseq workflow.</span>
-<span id="cb42-583"><a href="#cb42-583" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-584"><a href="#cb42-584" aria-hidden="true" tabindex="-1"></a>As side-by-side comparison of the FDR (<span class="in">`adj.P.Val`</span>) for these genes confirms</span>
-<span id="cb42-585"><a href="#cb42-585" aria-hidden="true" tabindex="-1"></a>that the one of them (*Cd52*) displays significance close to the 5% threshold</span>
-<span id="cb42-586"><a href="#cb42-586" aria-hidden="true" tabindex="-1"></a>in the nf-core/rnaseq output as well. The second gene (*Slamf8*) also displays</span>
-<span id="cb42-587"><a href="#cb42-587" aria-hidden="true" tabindex="-1"></a>the same trend in both datasets, but is detected at lower levels (e.g. lower</span>
-<span id="cb42-588"><a href="#cb42-588" aria-hidden="true" tabindex="-1"></a>normalized CPMs) in the nf-core/rnaseq output.</span>
-<span id="cb42-589"><a href="#cb42-589" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-592"><a href="#cb42-592" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-593"><a href="#cb42-593" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tt[genes, ])</span>
-<span id="cb42-594"><a href="#cb42-594" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-595"><a href="#cb42-595" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-596"><a href="#cb42-596" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Examples</span></span>
-<span id="cb42-597"><a href="#cb42-597" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-598"><a href="#cb42-598" aria-hidden="true" tabindex="-1"></a>Finally, we plot the normalized gene expression estimates for the </span>
-<span id="cb42-599"><a href="#cb42-599" aria-hidden="true" tabindex="-1"></a><span class="in">`r length(genes)`</span> discordant genes.</span>
-<span id="cb42-600"><a href="#cb42-600" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-603"><a href="#cb42-603" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-604"><a href="#cb42-604" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 3</span></span>
-<span id="cb42-605"><a href="#cb42-605" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.25</span></span>
-<span id="cb42-606"><a href="#cb42-606" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb42-607"><a href="#cb42-607" aria-hidden="true" tabindex="-1"></a><span class="co">#| layout-ncol: 2</span></span>
-<span id="cb42-608"><a href="#cb42-608" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (gene <span class="cf">in</span> genes) {</span>
-<span id="cb42-609"><a href="#cb42-609" aria-hidden="true" tabindex="-1"></a> p <span class="ot">&lt;-</span> cpms <span class="sc">%&gt;%</span></span>
-<span id="cb42-610"><a href="#cb42-610" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(gene_id <span class="sc">==</span> gene) <span class="sc">%&gt;%</span></span>
-<span id="cb42-611"><a href="#cb42-611" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> genotype, <span class="at">y =</span> cpm)) <span class="sc">+</span> </span>
-<span id="cb42-612"><a href="#cb42-612" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>), <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
-<span id="cb42-613"><a href="#cb42-613" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(dataset <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> </span>
-<span id="cb42-614"><a href="#cb42-614" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> dge<span class="sc">$</span>genes[gene, <span class="st">"gene_name"</span>],</span>
-<span id="cb42-615"><a href="#cb42-615" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">"Normalized expression (CPM)"</span>,</span>
-<span id="cb42-616"><a href="#cb42-616" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb42-617"><a href="#cb42-617" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">sprintf</span>(<span class="st">"FDR nf-core: %s</span><span class="sc">\n</span><span class="st">FDR GEO: %s"</span>,</span>
-<span id="cb42-618"><a href="#cb42-618" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"nfcore"</span>],</span>
-<span id="cb42-619"><a href="#cb42-619" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"geo"</span>]</span>
-<span id="cb42-620"><a href="#cb42-620" aria-hidden="true" tabindex="-1"></a>                       )</span>
-<span id="cb42-621"><a href="#cb42-621" aria-hidden="true" tabindex="-1"></a>         ) <span class="sc">+</span></span>
-<span id="cb42-622"><a href="#cb42-622" aria-hidden="true" tabindex="-1"></a>   <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
-<span id="cb42-623"><a href="#cb42-623" aria-hidden="true" tabindex="-1"></a> <span class="fu">print</span>(p)</span>
-<span id="cb42-624"><a href="#cb42-624" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb42-625"><a href="#cb42-625" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-626"><a href="#cb42-626" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-627"><a href="#cb42-627" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusions</span></span>
-<span id="cb42-628"><a href="#cb42-628" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-629"><a href="#cb42-629" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Differential expression analyses of raw counts obtained with the </span>
-<span id="cb42-630"><a href="#cb42-630" aria-hidden="true" tabindex="-1"></a>  <span class="in">`nc-core/rnaseq`</span> workflow yields results that are highly concordant with those</span>
-<span id="cb42-631"><a href="#cb42-631" aria-hidden="true" tabindex="-1"></a>  obtained with the raw counts the authors deposited in NCBI GEO.</span>
-<span id="cb42-632"><a href="#cb42-632" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>With appropriate parameters the <span class="in">`nf-core/rnaseq`</span> workflow can be applied to</span>
-<span id="cb42-633"><a href="#cb42-633" aria-hidden="true" tabindex="-1"></a>  QuantSeq FWD 3'tag RNA-seq data that includes unique molecular identifiers.</span>
-<span id="cb42-634"><a href="#cb42-634" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-635"><a href="#cb42-635" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducibility</span></span>
-<span id="cb42-636"><a href="#cb42-636" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-637"><a href="#cb42-637" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
-<span id="cb42-638"><a href="#cb42-638" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;</span></span>
-<span id="cb42-639"><a href="#cb42-639" aria-hidden="true" tabindex="-1"></a>SessionInfo</span>
-<span id="cb42-640"><a href="#cb42-640" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/summary&gt;</span></span>
-<span id="cb42-641"><a href="#cb42-641" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-644"><a href="#cb42-644" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb42-645"><a href="#cb42-645" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb42-646"><a href="#cb42-646" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
-<span id="cb42-647"><a href="#cb42-647" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb42-648"><a href="#cb42-648" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-649"><a href="#cb42-649" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
+<span id="cb42-427"><a href="#cb42-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-430"><a href="#cb42-430" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-431"><a href="#cb42-431" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> sum_stats, <span class="fu">aes</span>(<span class="at">x =</span> mean_nugent <span class="sc">+</span> <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb42-432"><a href="#cb42-432" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>) <span class="sc">+</span></span>
+<span id="cb42-433"><a href="#cb42-433" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">trans =</span> scales<span class="sc">::</span><span class="fu">log10_trans</span>(),</span>
+<span id="cb42-434"><a href="#cb42-434" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">comma_format</span>()) <span class="sc">+</span></span>
+<span id="cb42-435"><a href="#cb42-435" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Mean normalized counts per million"</span>, </span>
+<span id="cb42-436"><a href="#cb42-436" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of genes"</span>,</span>
+<span id="cb42-437"><a href="#cb42-437" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Average expression"</span>,</span>
+<span id="cb42-438"><a href="#cb42-438" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Nugent et al"</span>) <span class="sc">+</span></span>
+<span id="cb42-439"><a href="#cb42-439" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
+<span id="cb42-440"><a href="#cb42-440" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p)</span>
+<span id="cb42-441"><a href="#cb42-441" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-442"><a href="#cb42-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-443"><a href="#cb42-443" aria-hidden="true" tabindex="-1"></a>Next, we will examine the results of the _differential_ expression analysis.</span>
+<span id="cb42-444"><a href="#cb42-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-445"><a href="#cb42-445" aria-hidden="true" tabindex="-1"></a><span class="fu">### Differential expression results</span></span>
+<span id="cb42-446"><a href="#cb42-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-447"><a href="#cb42-447" aria-hidden="true" tabindex="-1"></a>Analyses based on either preprocessing pipeline yield similar numbers of </span>
+<span id="cb42-448"><a href="#cb42-448" aria-hidden="true" tabindex="-1"></a>differentially expressed genes.</span>
+<span id="cb42-449"><a href="#cb42-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-452"><a href="#cb42-452" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-453"><a href="#cb42-453" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb42-454"><a href="#cb42-454" aria-hidden="true" tabindex="-1"></a>common_genes <span class="ot">&lt;-</span> <span class="fu">intersect</span>(<span class="fu">row.names</span>(fit), <span class="fu">row.names</span>(fit_nfcore))</span>
+<span id="cb42-455"><a href="#cb42-455" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb42-456"><a href="#cb42-456" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decideTests</span>(fit)[common_genes, <span class="st">"KO"</span>], </span>
+<span id="cb42-457"><a href="#cb42-457" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decideTests</span>(fit_nfcore)[common_genes, <span class="st">"KO"</span>]</span>
+<span id="cb42-458"><a href="#cb42-458" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-459"><a href="#cb42-459" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(results) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Nugent et al"</span>, <span class="st">"nf-core"</span>)</span>
+<span id="cb42-460"><a href="#cb42-460" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(results) <span class="ot">&lt;-</span> <span class="st">"TestResults"</span></span>
+<span id="cb42-461"><a href="#cb42-461" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(results)</span>
+<span id="cb42-462"><a href="#cb42-462" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-463"><a href="#cb42-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-464"><a href="#cb42-464" aria-hidden="true" tabindex="-1"></a>But are these _the same genes_ in both sets of results?</span>
+<span id="cb42-465"><a href="#cb42-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-466"><a href="#cb42-466" aria-hidden="true" tabindex="-1"></a>We can visualize the overlap between the sets of significant genes in a Venn </span>
+<span id="cb42-467"><a href="#cb42-467" aria-hidden="true" tabindex="-1"></a>diagram (FDR &lt; 5%). The majority of differentially expressed genes is </span>
+<span id="cb42-468"><a href="#cb42-468" aria-hidden="true" tabindex="-1"></a>detected with both quantitation approaches (for both up- and down-regulated</span>
+<span id="cb42-469"><a href="#cb42-469" aria-hidden="true" tabindex="-1"></a>genes.)</span>
+<span id="cb42-470"><a href="#cb42-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-473"><a href="#cb42-473" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-474"><a href="#cb42-474" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 5.5</span></span>
+<span id="cb42-475"><a href="#cb42-475" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5.5</span></span>
+<span id="cb42-476"><a href="#cb42-476" aria-hidden="true" tabindex="-1"></a>limma<span class="sc">::</span><span class="fu">vennDiagram</span>(results, <span class="at">include =</span> <span class="fu">c</span>(<span class="st">"up"</span>, <span class="st">"down"</span>),</span>
+<span id="cb42-477"><a href="#cb42-477" aria-hidden="true" tabindex="-1"></a>                   <span class="at">counts.col=</span><span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"blue"</span>), <span class="at">mar =</span> <span class="fu">rep</span>(<span class="dv">0</span>,<span class="dv">4</span>))</span>
+<span id="cb42-478"><a href="#cb42-478" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-479"><a href="#cb42-479" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-480"><a href="#cb42-480" aria-hidden="true" tabindex="-1"></a>For example, the following plots show the normalized expression of the most</span>
+<span id="cb42-481"><a href="#cb42-481" aria-hidden="true" tabindex="-1"></a>significantly differentially expressed genes (known markers of active </span>
+<span id="cb42-482"><a href="#cb42-482" aria-hidden="true" tabindex="-1"></a>microglia).</span>
+<span id="cb42-483"><a href="#cb42-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-486"><a href="#cb42-486" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-487"><a href="#cb42-487" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb42-488"><a href="#cb42-488" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 3</span></span>
+<span id="cb42-489"><a href="#cb42-489" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.25</span></span>
+<span id="cb42-490"><a href="#cb42-490" aria-hidden="true" tabindex="-1"></a><span class="co">#| layout-ncol: 2</span></span>
+<span id="cb42-491"><a href="#cb42-491" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (gene <span class="cf">in</span> <span class="fu">topTreat</span>(fit, <span class="at">coef =</span> <span class="st">"KO"</span>, <span class="at">number =</span> <span class="dv">6</span>)[[<span class="st">"gene_id"</span>]]) {</span>
+<span id="cb42-492"><a href="#cb42-492" aria-hidden="true" tabindex="-1"></a> p <span class="ot">&lt;-</span> cpms <span class="sc">%&gt;%</span></span>
+<span id="cb42-493"><a href="#cb42-493" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(gene_id <span class="sc">==</span> gene) <span class="sc">%&gt;%</span></span>
+<span id="cb42-494"><a href="#cb42-494" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> genotype, <span class="at">y =</span> cpm)) <span class="sc">+</span> </span>
+<span id="cb42-495"><a href="#cb42-495" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>), <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
+<span id="cb42-496"><a href="#cb42-496" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(dataset <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> </span>
+<span id="cb42-497"><a href="#cb42-497" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> dge<span class="sc">$</span>genes[gene, <span class="st">"gene_name"</span>],</span>
+<span id="cb42-498"><a href="#cb42-498" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">"Normalized expression (CPM)"</span>,</span>
+<span id="cb42-499"><a href="#cb42-499" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb42-500"><a href="#cb42-500" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">sprintf</span>(<span class="st">"FDR nf-core: %s</span><span class="sc">\n</span><span class="st">FDR GEO: %s"</span>,</span>
+<span id="cb42-501"><a href="#cb42-501" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"nfcore"</span>],</span>
+<span id="cb42-502"><a href="#cb42-502" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"geo"</span>]</span>
+<span id="cb42-503"><a href="#cb42-503" aria-hidden="true" tabindex="-1"></a>                       )</span>
+<span id="cb42-504"><a href="#cb42-504" aria-hidden="true" tabindex="-1"></a>         ) <span class="sc">+</span></span>
+<span id="cb42-505"><a href="#cb42-505" aria-hidden="true" tabindex="-1"></a>   <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
+<span id="cb42-506"><a href="#cb42-506" aria-hidden="true" tabindex="-1"></a> <span class="fu">print</span>(p)</span>
+<span id="cb42-507"><a href="#cb42-507" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb42-508"><a href="#cb42-508" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-509"><a href="#cb42-509" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-510"><a href="#cb42-510" aria-hidden="true" tabindex="-1"></a>Applying a hard FDR threshold can inflate the number of apparent differences,</span>
+<span id="cb42-511"><a href="#cb42-511" aria-hidden="true" tabindex="-1"></a>e.g. when a gene is close to the significance threshold (see below).</span>
+<span id="cb42-512"><a href="#cb42-512" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-515"><a href="#cb42-515" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-516"><a href="#cb42-516" aria-hidden="true" tabindex="-1"></a>p_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(</span>
+<span id="cb42-517"><a href="#cb42-517" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>], </span>
+<span id="cb42-518"><a href="#cb42-518" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>])</span>
+<span id="cb42-519"><a href="#cb42-519" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-520"><a href="#cb42-520" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-521"><a href="#cb42-521" aria-hidden="true" tabindex="-1"></a>The log2 fold estimates for the <span class="in">`Hom`</span> vs <span class="in">`WT`</span> comparison are well correlated</span>
+<span id="cb42-522"><a href="#cb42-522" aria-hidden="true" tabindex="-1"></a>across the two analysis workflows (Pearson correlation coefficient </span>
+<span id="cb42-523"><a href="#cb42-523" aria-hidden="true" tabindex="-1"></a>R = <span class="in">`r signif(p_cor, 2)`</span> ).</span>
+<span id="cb42-524"><a href="#cb42-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-527"><a href="#cb42-527" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-528"><a href="#cb42-528" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 4.5</span></span>
+<span id="cb42-529"><a href="#cb42-529" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.5</span></span>
+<span id="cb42-530"><a href="#cb42-530" aria-hidden="true" tabindex="-1"></a><span class="fu">smoothScatter</span>(</span>
+<span id="cb42-531"><a href="#cb42-531" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>], </span>
+<span id="cb42-532"><a href="#cb42-532" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>coefficients[common_genes, <span class="st">"KO"</span>],</span>
+<span id="cb42-533"><a href="#cb42-533" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"nf-core (log2FC)"</span>,</span>
+<span id="cb42-534"><a href="#cb42-534" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Nugent et al (log2FC)"</span>,</span>
+<span id="cb42-535"><a href="#cb42-535" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Homozygous APP vs WT (effect size)"</span></span>
+<span id="cb42-536"><a href="#cb42-536" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb42-537"><a href="#cb42-537" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> <span class="dv">1</span>, <span class="at">y =</span> <span class="sc">-</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">sprintf</span>(<span class="st">"R = %s"</span>, <span class="fu">signif</span>(p_cor, <span class="dv">2</span>)))</span>
+<span id="cb42-538"><a href="#cb42-538" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb42-539"><a href="#cb42-539" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb42-540"><a href="#cb42-540" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-541"><a href="#cb42-541" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-542"><a href="#cb42-542" aria-hidden="true" tabindex="-1"></a>as are the t-statistics across all examined genes:</span>
+<span id="cb42-543"><a href="#cb42-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-546"><a href="#cb42-546" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-547"><a href="#cb42-547" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 4.5</span></span>
+<span id="cb42-548"><a href="#cb42-548" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.5</span></span>
+<span id="cb42-549"><a href="#cb42-549" aria-hidden="true" tabindex="-1"></a>p_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(</span>
+<span id="cb42-550"><a href="#cb42-550" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>], </span>
+<span id="cb42-551"><a href="#cb42-551" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>])</span>
+<span id="cb42-552"><a href="#cb42-552" aria-hidden="true" tabindex="-1"></a><span class="fu">smoothScatter</span>(</span>
+<span id="cb42-553"><a href="#cb42-553" aria-hidden="true" tabindex="-1"></a>  fit<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>], </span>
+<span id="cb42-554"><a href="#cb42-554" aria-hidden="true" tabindex="-1"></a>  fit_nfcore<span class="sc">$</span>t[common_genes, <span class="st">"KO"</span>],</span>
+<span id="cb42-555"><a href="#cb42-555" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">"nf-core (t-statistic)"</span>,</span>
+<span id="cb42-556"><a href="#cb42-556" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"Nugent et al (t-statistic)"</span>,</span>
+<span id="cb42-557"><a href="#cb42-557" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">"Homozygous APP vs WT (t-statistic)"</span>)</span>
+<span id="cb42-558"><a href="#cb42-558" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> <span class="dv">3</span>, <span class="at">y =</span> <span class="sc">-</span><span class="dv">15</span>, <span class="at">labels =</span> <span class="fu">sprintf</span>(<span class="st">"R = %s"</span>, <span class="fu">signif</span>(p_cor, <span class="dv">2</span>)))</span>
+<span id="cb42-559"><a href="#cb42-559" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb42-560"><a href="#cb42-560" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">h =</span> <span class="dv">0</span>, <span class="at">v =</span> <span class="dv">0</span>, <span class="at">lty =</span> <span class="dv">2</span>)</span>
+<span id="cb42-561"><a href="#cb42-561" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-562"><a href="#cb42-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-563"><a href="#cb42-563" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb42-564"><a href="#cb42-564" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-565"><a href="#cb42-565" aria-hidden="true" tabindex="-1"></a>Because this comparison yields only a small number of bona-fide differentially</span>
+<span id="cb42-566"><a href="#cb42-566" aria-hidden="true" tabindex="-1"></a>expressed genes, we don't expect to see a high correlation between the </span>
+<span id="cb42-567"><a href="#cb42-567" aria-hidden="true" tabindex="-1"></a>log2 fold changes or the t-statistics between the two analyses: most of the </span>
+<span id="cb42-568"><a href="#cb42-568" aria-hidden="true" tabindex="-1"></a>values are very close to zero.</span>
+<span id="cb42-569"><a href="#cb42-569" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-570"><a href="#cb42-570" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb42-571"><a href="#cb42-571" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-572"><a href="#cb42-572" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Discordant significance calls</span></span>
+<span id="cb42-573"><a href="#cb42-573" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-576"><a href="#cb42-576" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-577"><a href="#cb42-577" aria-hidden="true" tabindex="-1"></a><span class="co"># genes detected in Nugent et al, but not significant with nf-core</span></span>
+<span id="cb42-578"><a href="#cb42-578" aria-hidden="true" tabindex="-1"></a>genes <span class="ot">&lt;-</span> <span class="fu">row.names</span>(results)[<span class="fu">which</span>(<span class="fu">abs</span>(results[, <span class="dv">1</span>]) <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> results[, <span class="dv">2</span>] <span class="sc">==</span> <span class="dv">0</span>)]</span>
+<span id="cb42-579"><a href="#cb42-579" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-580"><a href="#cb42-580" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-581"><a href="#cb42-581" aria-hidden="true" tabindex="-1"></a>At FDR &lt; 5% <span class="in">`r length(genes)`</span> genes were reported as significantly </span>
+<span id="cb42-582"><a href="#cb42-582" aria-hidden="true" tabindex="-1"></a>differentially expressed with the original Nugent et al count matrix</span>
+<span id="cb42-583"><a href="#cb42-583" aria-hidden="true" tabindex="-1"></a>but *not* with the output of the nf-core/rnaseq workflow.</span>
+<span id="cb42-584"><a href="#cb42-584" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-585"><a href="#cb42-585" aria-hidden="true" tabindex="-1"></a>As side-by-side comparison of the FDR (<span class="in">`adj.P.Val`</span>) for these genes confirms</span>
+<span id="cb42-586"><a href="#cb42-586" aria-hidden="true" tabindex="-1"></a>that the one of them (*Cd52*) displays significance close to the 5% threshold</span>
+<span id="cb42-587"><a href="#cb42-587" aria-hidden="true" tabindex="-1"></a>in the nf-core/rnaseq output as well. The second gene (*Slamf8*) also displays</span>
+<span id="cb42-588"><a href="#cb42-588" aria-hidden="true" tabindex="-1"></a>the same trend in both datasets, but is detected at lower levels (e.g. lower</span>
+<span id="cb42-589"><a href="#cb42-589" aria-hidden="true" tabindex="-1"></a>normalized CPMs) in the nf-core/rnaseq output.</span>
+<span id="cb42-590"><a href="#cb42-590" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-593"><a href="#cb42-593" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-594"><a href="#cb42-594" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tt[genes, ])</span>
+<span id="cb42-595"><a href="#cb42-595" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-596"><a href="#cb42-596" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-597"><a href="#cb42-597" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Examples</span></span>
+<span id="cb42-598"><a href="#cb42-598" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-599"><a href="#cb42-599" aria-hidden="true" tabindex="-1"></a>Finally, we plot the normalized gene expression estimates for the </span>
+<span id="cb42-600"><a href="#cb42-600" aria-hidden="true" tabindex="-1"></a><span class="in">`r length(genes)`</span> discordant genes.</span>
+<span id="cb42-601"><a href="#cb42-601" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-604"><a href="#cb42-604" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-605"><a href="#cb42-605" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 3</span></span>
+<span id="cb42-606"><a href="#cb42-606" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.25</span></span>
+<span id="cb42-607"><a href="#cb42-607" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
+<span id="cb42-608"><a href="#cb42-608" aria-hidden="true" tabindex="-1"></a><span class="co">#| layout-ncol: 2</span></span>
+<span id="cb42-609"><a href="#cb42-609" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (gene <span class="cf">in</span> genes) {</span>
+<span id="cb42-610"><a href="#cb42-610" aria-hidden="true" tabindex="-1"></a> p <span class="ot">&lt;-</span> cpms <span class="sc">%&gt;%</span></span>
+<span id="cb42-611"><a href="#cb42-611" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(gene_id <span class="sc">==</span> gene) <span class="sc">%&gt;%</span></span>
+<span id="cb42-612"><a href="#cb42-612" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> genotype, <span class="at">y =</span> cpm)) <span class="sc">+</span> </span>
+<span id="cb42-613"><a href="#cb42-613" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.05</span>), <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span> </span>
+<span id="cb42-614"><a href="#cb42-614" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(dataset <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span> </span>
+<span id="cb42-615"><a href="#cb42-615" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> dge<span class="sc">$</span>genes[gene, <span class="st">"gene_name"</span>],</span>
+<span id="cb42-616"><a href="#cb42-616" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> <span class="st">"Normalized expression (CPM)"</span>,</span>
+<span id="cb42-617"><a href="#cb42-617" aria-hidden="true" tabindex="-1"></a>         <span class="at">x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb42-618"><a href="#cb42-618" aria-hidden="true" tabindex="-1"></a>         <span class="at">subtitle =</span> <span class="fu">sprintf</span>(<span class="st">"FDR nf-core: %s</span><span class="sc">\n</span><span class="st">FDR GEO: %s"</span>,</span>
+<span id="cb42-619"><a href="#cb42-619" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"nfcore"</span>],</span>
+<span id="cb42-620"><a href="#cb42-620" aria-hidden="true" tabindex="-1"></a>                       tt[gene, <span class="st">"geo"</span>]</span>
+<span id="cb42-621"><a href="#cb42-621" aria-hidden="true" tabindex="-1"></a>                       )</span>
+<span id="cb42-622"><a href="#cb42-622" aria-hidden="true" tabindex="-1"></a>         ) <span class="sc">+</span></span>
+<span id="cb42-623"><a href="#cb42-623" aria-hidden="true" tabindex="-1"></a>   <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
+<span id="cb42-624"><a href="#cb42-624" aria-hidden="true" tabindex="-1"></a> <span class="fu">print</span>(p)</span>
+<span id="cb42-625"><a href="#cb42-625" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb42-626"><a href="#cb42-626" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-627"><a href="#cb42-627" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-628"><a href="#cb42-628" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusions</span></span>
+<span id="cb42-629"><a href="#cb42-629" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-630"><a href="#cb42-630" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Differential expression analyses of raw counts obtained with the </span>
+<span id="cb42-631"><a href="#cb42-631" aria-hidden="true" tabindex="-1"></a>  <span class="in">`nc-core/rnaseq`</span> workflow yields results that are highly concordant with those</span>
+<span id="cb42-632"><a href="#cb42-632" aria-hidden="true" tabindex="-1"></a>  obtained with the raw counts the authors deposited in NCBI GEO.</span>
+<span id="cb42-633"><a href="#cb42-633" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>With appropriate parameters the <span class="in">`nf-core/rnaseq`</span> workflow can be applied to</span>
+<span id="cb42-634"><a href="#cb42-634" aria-hidden="true" tabindex="-1"></a>  QuantSeq FWD 3'tag RNA-seq data that includes unique molecular identifiers.</span>
+<span id="cb42-635"><a href="#cb42-635" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-636"><a href="#cb42-636" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducibility</span></span>
+<span id="cb42-637"><a href="#cb42-637" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-638"><a href="#cb42-638" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
+<span id="cb42-639"><a href="#cb42-639" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb42-640"><a href="#cb42-640" aria-hidden="true" tabindex="-1"></a>SessionInfo</span>
+<span id="cb42-641"><a href="#cb42-641" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb42-642"><a href="#cb42-642" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-645"><a href="#cb42-645" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb42-646"><a href="#cb42-646" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb42-647"><a href="#cb42-647" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb42-648"><a href="#cb42-648" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb42-649"><a href="#cb42-649" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-650"><a href="#cb42-650" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

@@ -98,10 +98,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<script src="../../site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+<script src="../../site_libs/htmlwidgets-1.6.2/htmlwidgets.js"></script>
 <script src="../../site_libs/viz-1.8.2/viz.js"></script>
 <link href="../../site_libs/DiagrammeR-styles-0.2/styles.css" rel="stylesheet">
-<script src="../../site_libs/grViz-binding-1.0.9/grViz.js"></script>
+<script src="../../site_libs/grViz-binding-1.0.10/grViz.js"></script>
 
 
 </head>
@@ -250,9 +250,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nodbi)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.Mm.eg.db)</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DiagrammeR)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -427,7 +428,7 @@ Unnesting columns
  8 HALLMARK_ADIPOGENESIS Aco2       
  9 HALLMARK_ADIPOGENESIS Acox1      
 10 HALLMARK_ADIPOGENESIS Adcy6      
-# … with 788 more rows</code></pre>
+# ℹ 788 more rows</code></pre>
 </div>
 </div>
 </div>
@@ -709,7 +710,7 @@ Verifying foreign keys
 <span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_draw</span>(<span class="at">view_type =</span> <span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 
-<div id="htmlwidget-aaf8b96f471cb6a5008c" style="width:50%;height:240px;" class="grViz html-widget"></div>
+<div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-aaf8b96f471cb6a5008c" style="width:50%;height:240px;"></div>
 <script type="application/json" data-for="htmlwidget-aaf8b96f471cb6a5008c">{"x":{"diagram":"#data_model\ndigraph {\ngraph [rankdir=LR tooltip=\"Data Model\" ]\n\nnode [margin=0 fontcolor = \"#444444\" ]\n\nedge [color = \"#555555\", arrowsize = 1, ]\n\npack=true\npackmode= \"node\"\n\n  \"tbl_element\" [id = \"tbl_element\", label = <<TABLE ALIGN=\"LEFT\" BORDER=\"1\" CELLBORDER=\"0\" CELLSPACING=\"0\" COLOR=\"#555555\">\n    <TR>\n      <TD COLSPAN=\"1\" BGCOLOR=\"#EFEBDD\" BORDER=\"0\"><FONT COLOR=\"#000000\">tbl_element<\/FONT>\n<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"element\"><U>element<\/U><\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\">entrezid<\/TD>\n    <\/TR>\n  <\/TABLE>>, shape = \"plaintext\"] \n\n  \"tbl_elementset\" [id = \"tbl_elementset\", label = <<TABLE ALIGN=\"LEFT\" BORDER=\"1\" CELLBORDER=\"0\" CELLSPACING=\"0\" COLOR=\"#555555\">\n    <TR>\n      <TD COLSPAN=\"1\" BGCOLOR=\"#EFEBDD\" BORDER=\"0\"><FONT COLOR=\"#000000\">tbl_elementset<\/FONT>\n<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"element\">element<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"geneset\">geneset<\/TD>\n    <\/TR>\n  <\/TABLE>>, shape = \"plaintext\"] \n\n  \"tbl_geneset\" [id = \"tbl_geneset\", label = <<TABLE ALIGN=\"LEFT\" BORDER=\"1\" CELLBORDER=\"0\" CELLSPACING=\"0\" COLOR=\"#555555\">\n    <TR>\n      <TD COLSPAN=\"1\" BGCOLOR=\"#EFEBDD\" BORDER=\"0\"><FONT COLOR=\"#000000\">tbl_geneset<\/FONT>\n<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"geneset\"><U>geneset<\/U><\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\">url<\/TD>\n    <\/TR>\n  <\/TABLE>>, shape = \"plaintext\"] \n\n\"tbl_elementset\":\"element\"->\"tbl_element\":\"element\" [id=\"tbl_elementset_1\"]\n\"tbl_elementset\":\"geneset\"->\"tbl_geneset\":\"geneset\" [id=\"tbl_elementset_2\"]\n}","config":{"engine":null,"options":null}},"evals":[],"jsHooks":[]}</script>
 <p>Model diagram</p>
 </div>
@@ -733,7 +734,7 @@ Verifying foreign keys
 <span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>result</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># Source:   SQL [5 x 3]
-# Database: sqlite 3.39.4 [:memory:]
+# Database: sqlite 3.41.2 [:memory:]
   element geneset               entrezid
   &lt;chr&gt;   &lt;chr&gt;                 &lt;chr&gt;   
 1 Abca1   HALLMARK_ADIPOGENESIS 11303   
@@ -749,7 +750,7 @@ Verifying foreign keys
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(tbl_geneset, <span class="at">by =</span> <span class="st">"geneset"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># Source:   SQL [5 x 4]
-# Database: sqlite 3.39.4 [:memory:]
+# Database: sqlite 3.41.2 [:memory:]
   element geneset               entrezid url                                    
   &lt;chr&gt;   &lt;chr&gt;                 &lt;chr&gt;    &lt;chr&gt;                                  
 1 Abca1   HALLMARK_ADIPOGENESIS 11303    https://www.gsea-msigdb.org/gsea/msigd…
@@ -815,7 +816,7 @@ Verifying foreign keys
  8 B2m     12010   
  9 Bcat1   12035   
 10 Bcl10   12042   
-# … with 1,223 more rows</code></pre>
+# ℹ 1,223 more rows</code></pre>
 </div>
 </div>
 </section>
@@ -847,106 +848,107 @@ SessionInfo
 <div class="cell-output cell-output-stdout">
 <pre><code>─ Session info ───────────────────────────────────────────────────────────────
  setting  value
- version  R version 4.2.2 (2022-10-31)
- os       macOS Big Sur ... 10.16
- system   x86_64, darwin17.0
+ version  R version 4.3.1 (2023-06-16)
+ os       macOS Ventura 13.5.1
+ system   aarch64, darwin20
  ui       X11
  language (EN)
  collate  en_US.UTF-8
  ctype    en_US.UTF-8
  tz       America/Los_Angeles
- date     2023-01-16
- pandoc   2.19.2 @ /Applications/RStudio.app/Contents/MacOS/quarto/bin/tools/ (via rmarkdown)
+ date     2023-08-30
+ pandoc   3.1.1 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────
- package          * version  date (UTC) lib source
- AnnotationDbi    * 1.60.0   2022-11-01 [1] Bioconductor
- askpass            1.1      2019-01-13 [1] CRAN (R 4.2.0)
- assertthat         0.2.1    2019-03-21 [1] CRAN (R 4.2.0)
- backports          1.4.1    2021-12-13 [1] CRAN (R 4.2.0)
- Biobase          * 2.58.0   2022-11-01 [1] Bioconductor
- BiocGenerics     * 0.44.0   2022-11-01 [1] Bioconductor
- BiocIO             1.8.0    2022-11-01 [1] Bioconductor
- BiocSet          * 1.12.0   2022-11-01 [1] Bioconductor
- Biostrings         2.66.0   2022-11-01 [1] Bioconductor
- bit                4.0.5    2022-11-15 [1] CRAN (R 4.2.0)
- bit64              4.0.5    2020-08-30 [1] CRAN (R 4.2.0)
- bitops             1.0-7    2021-04-24 [1] CRAN (R 4.2.0)
- blob               1.2.3    2022-04-10 [1] CRAN (R 4.2.0)
- cachem             1.0.6    2021-08-19 [1] CRAN (R 4.2.0)
- cli                3.5.0    2022-12-20 [1] CRAN (R 4.2.0)
- crayon             1.5.2    2022-09-29 [1] CRAN (R 4.2.0)
- credentials        1.3.2    2021-11-29 [1] CRAN (R 4.2.0)
- DBI                1.1.3    2022-06-18 [1] CRAN (R 4.2.0)
- dbplyr             2.2.1    2022-06-27 [1] CRAN (R 4.2.0)
- DiagrammeR         1.0.9    2022-03-05 [1] CRAN (R 4.2.0)
- digest             0.6.31   2022-12-11 [1] CRAN (R 4.2.0)
- dm               * 1.0.3    2022-10-12 [1] CRAN (R 4.2.0)
- dplyr            * 1.0.10   2022-09-01 [1] CRAN (R 4.2.0)
- ellipsis           0.3.2    2021-04-29 [1] CRAN (R 4.2.0)
- evaluate           0.19     2022-12-13 [1] CRAN (R 4.2.0)
- fansi              1.0.3    2022-03-24 [1] CRAN (R 4.2.0)
- fastmap            1.1.0    2021-01-25 [1] CRAN (R 4.2.0)
- generics           0.1.3    2022-07-05 [1] CRAN (R 4.2.0)
- GenomeInfoDb       1.34.4   2022-12-01 [1] Bioconductor
- GenomeInfoDbData   1.2.9    2022-12-12 [1] Bioconductor
- glue               1.6.2    2022-02-24 [1] CRAN (R 4.2.0)
- highr              0.9      2021-04-16 [1] CRAN (R 4.2.0)
- htmltools          0.5.4    2022-12-07 [1] CRAN (R 4.2.0)
- htmlwidgets        1.5.4    2021-09-08 [1] CRAN (R 4.2.2)
- httpuv             1.6.7    2022-12-14 [1] CRAN (R 4.2.0)
- httr               1.4.4    2022-08-17 [1] CRAN (R 4.2.0)
- igraph             1.3.5    2022-09-22 [1] CRAN (R 4.2.0)
- IRanges          * 2.32.0   2022-11-01 [1] Bioconductor
- jsonify            1.2.2    2022-11-09 [1] CRAN (R 4.2.0)
- jsonlite         * 1.8.4    2022-12-06 [1] CRAN (R 4.2.0)
- KEGGREST           1.38.0   2022-11-01 [1] Bioconductor
- knitr              1.41     2022-11-18 [1] CRAN (R 4.2.0)
- later              1.3.0    2021-08-18 [1] CRAN (R 4.2.0)
- lifecycle          1.0.3    2022-10-07 [1] CRAN (R 4.2.0)
- magrittr           2.0.3    2022-03-30 [1] CRAN (R 4.2.0)
- memoise            2.0.1    2021-11-26 [1] CRAN (R 4.2.0)
- mime               0.12     2021-09-28 [1] CRAN (R 4.2.0)
- nodbi            * 0.9.1    2022-11-20 [1] CRAN (R 4.2.0)
- ontologyIndex      2.10     2022-08-24 [1] CRAN (R 4.2.0)
- openssl            2.0.5    2022-12-06 [1] CRAN (R 4.2.0)
- org.Mm.eg.db     * 3.16.0   2022-12-29 [1] Bioconductor
- pillar             1.8.1    2022-08-19 [1] CRAN (R 4.2.0)
- pkgconfig          2.0.3    2019-09-22 [1] CRAN (R 4.2.0)
- plyr               1.8.8    2022-11-11 [1] CRAN (R 4.2.0)
- png                0.1-8    2022-11-29 [1] CRAN (R 4.2.0)
- promises           1.2.0.1  2021-02-11 [1] CRAN (R 4.2.0)
- purrr            * 1.0.0    2022-12-20 [1] CRAN (R 4.2.0)
- R6                 2.5.1    2021-08-19 [1] CRAN (R 4.2.0)
- RColorBrewer       1.1-3    2022-04-03 [1] CRAN (R 4.2.0)
- Rcpp               1.0.9    2022-07-08 [1] CRAN (R 4.2.0)
- RCurl              1.98-1.9 2022-10-03 [1] CRAN (R 4.2.0)
- rlang              1.0.6    2022-09-24 [1] CRAN (R 4.2.0)
- rmarkdown          2.19     2022-12-15 [1] CRAN (R 4.2.0)
- RSQLite          * 2.2.19   2022-11-24 [1] CRAN (R 4.2.0)
- rstudioapi         0.14     2022-08-22 [1] CRAN (R 4.2.0)
- S4Vectors        * 0.36.1   2022-12-05 [1] Bioconductor
- sessioninfo        1.2.2    2021-12-06 [1] CRAN (R 4.2.0)
- shiny              1.7.4    2022-12-15 [1] CRAN (R 4.2.0)
- stringi            1.7.8    2022-07-11 [1] CRAN (R 4.2.0)
- stringr            1.5.0    2022-12-02 [1] CRAN (R 4.2.0)
- sys                3.4.1    2022-10-18 [1] CRAN (R 4.2.0)
- tibble           * 3.1.8    2022-07-22 [1] CRAN (R 4.2.0)
- tidyr            * 1.2.1    2022-09-08 [1] CRAN (R 4.2.0)
- tidyselect         1.2.0    2022-10-10 [1] CRAN (R 4.2.0)
- utf8               1.2.2    2021-07-24 [1] CRAN (R 4.2.0)
- uuid               1.1-0    2022-04-19 [1] CRAN (R 4.2.0)
- vctrs              0.5.1    2022-11-16 [1] CRAN (R 4.2.0)
- visNetwork         2.1.2    2022-09-29 [1] CRAN (R 4.2.0)
- withr              2.5.0    2022-03-03 [1] CRAN (R 4.2.0)
- xfun               0.35     2022-11-16 [1] CRAN (R 4.2.0)
- xtable             1.8-4    2019-04-21 [1] CRAN (R 4.2.0)
- XVector            0.38.0   2022-11-01 [1] Bioconductor
- yaml               2.3.6    2022-10-18 [1] CRAN (R 4.2.0)
- zlibbioc           1.44.0   2022-11-01 [1] Bioconductor
+ ! package          * version   date (UTC) lib source
+ P AnnotationDbi    * 1.62.2    2023-07-02 [?] Bioconductor
+ P askpass            1.1       2019-01-13 [?] CRAN (R 4.3.0)
+ P backports          1.4.1     2021-12-13 [?] CRAN (R 4.3.0)
+ P Biobase          * 2.60.0    2023-05-08 [?] Bioconductor
+ P BiocGenerics     * 0.46.0    2023-06-04 [?] Bioconductor
+ P BiocIO             1.10.0    2023-05-08 [?] Bioconductor
+ P BiocManager        1.30.22   2023-08-08 [?] CRAN (R 4.3.0)
+ P BiocSet          * 1.14.0    2023-05-08 [?] Bioconductor
+ P Biostrings         2.68.1    2023-05-21 [?] Bioconductor
+ P bit                4.0.5     2022-11-15 [?] CRAN (R 4.3.0)
+ P bit64              4.0.5     2020-08-30 [?] CRAN (R 4.3.0)
+ P bitops             1.0-7     2021-04-24 [?] CRAN (R 4.3.0)
+ P blob               1.2.4     2023-03-17 [?] CRAN (R 4.3.0)
+ P cachem             1.0.8     2023-05-01 [?] CRAN (R 4.3.0)
+ P cli                3.6.1     2023-03-23 [?] CRAN (R 4.3.0)
+ P crayon             1.5.2     2022-09-29 [?] CRAN (R 4.3.0)
+ R credentials        1.3.2     &lt;NA&gt;       [?] &lt;NA&gt;
+ P DBI                1.1.3     2022-06-18 [?] CRAN (R 4.3.0)
+ P dbplyr             2.3.3     2023-07-07 [?] CRAN (R 4.3.0)
+ P DiagrammeR       * 1.0.10    2023-05-18 [?] CRAN (R 4.3.0)
+ P digest             0.6.33    2023-07-07 [?] CRAN (R 4.3.0)
+ P dm               * 1.0.6     2023-07-21 [?] CRAN (R 4.3.0)
+ P dplyr            * 1.1.2     2023-04-20 [?] CRAN (R 4.3.0)
+ P ellipsis           0.3.2     2021-04-29 [?] CRAN (R 4.3.0)
+ P evaluate           0.21      2023-05-05 [?] CRAN (R 4.3.0)
+ P fansi              1.0.4     2023-01-22 [?] CRAN (R 4.3.0)
+ P fastmap            1.1.1     2023-02-24 [?] CRAN (R 4.3.0)
+ P generics           0.1.3     2022-07-05 [?] CRAN (R 4.3.0)
+ P GenomeInfoDb       1.36.1    2023-07-02 [?] Bioconductor
+ P GenomeInfoDbData   1.2.10    2023-08-23 [?] Bioconductor
+ P glue               1.6.2     2022-02-24 [?] CRAN (R 4.3.0)
+ P htmltools          0.5.6     2023-08-10 [?] CRAN (R 4.3.0)
+ P htmlwidgets        1.6.2     2023-03-17 [?] CRAN (R 4.3.0)
+ P httpuv             1.6.11    2023-05-11 [?] CRAN (R 4.3.0)
+ P httr               1.4.7     2023-08-15 [?] CRAN (R 4.3.0)
+ P igraph             1.5.1     2023-08-10 [?] CRAN (R 4.3.0)
+ P IRanges          * 2.34.1    2023-07-02 [?] Bioconductor
+ P jsonlite         * 1.8.7     2023-06-29 [?] CRAN (R 4.3.0)
+ P KEGGREST           1.40.0    2023-05-08 [?] Bioconductor
+ P knitr              1.43      2023-05-25 [?] CRAN (R 4.3.0)
+ P later              1.3.1     2023-05-02 [?] CRAN (R 4.3.0)
+ P lifecycle          1.0.3     2022-10-07 [?] CRAN (R 4.3.0)
+ P magrittr           2.0.3     2022-03-30 [?] CRAN (R 4.3.0)
+ P memoise            2.0.1     2021-11-26 [?] CRAN (R 4.3.0)
+ P mime               0.12      2021-09-28 [?] CRAN (R 4.3.0)
+ P nodbi            * 0.9.6     2023-08-07 [?] CRAN (R 4.3.0)
+ P ontologyIndex      2.11      2023-05-30 [?] CRAN (R 4.3.0)
+ P openssl            2.1.0     2023-07-15 [?] CRAN (R 4.3.0)
+ P org.Mm.eg.db     * 3.17.0    2023-08-23 [?] Bioconductor
+ P pillar             1.9.0     2023-03-22 [?] CRAN (R 4.3.0)
+ P pkgconfig          2.0.3     2019-09-22 [?] CRAN (R 4.3.0)
+ P plyr               1.8.8     2022-11-11 [?] CRAN (R 4.3.0)
+ P png                0.1-8     2022-11-29 [?] CRAN (R 4.3.0)
+ P promises           1.2.1     2023-08-10 [?] CRAN (R 4.3.0)
+ P purrr            * 1.0.2     2023-08-10 [?] CRAN (R 4.3.0)
+ P R6                 2.5.1     2021-08-19 [?] CRAN (R 4.3.0)
+ P RColorBrewer       1.1-3     2022-04-03 [?] CRAN (R 4.3.0)
+ P Rcpp               1.0.11    2023-07-06 [?] CRAN (R 4.3.0)
+ P RCurl              1.98-1.12 2023-03-27 [?] CRAN (R 4.3.0)
+   renv               1.0.2     2023-08-15 [1] CRAN (R 4.3.0)
+ P rlang              1.1.1     2023-04-28 [?] CRAN (R 4.3.0)
+ P rmarkdown          2.24      2023-08-14 [?] CRAN (R 4.3.0)
+ P RSQLite          * 2.3.1     2023-04-03 [?] CRAN (R 4.3.0)
+ P rstudioapi         0.15.0    2023-07-07 [?] CRAN (R 4.3.0)
+ P S4Vectors        * 0.38.1    2023-05-08 [?] Bioconductor
+ P sessioninfo        1.2.2     2021-12-06 [?] CRAN (R 4.3.0)
+ P shiny              1.7.5     2023-08-12 [?] CRAN (R 4.3.0)
+ P stringi            1.7.12    2023-01-11 [?] CRAN (R 4.3.0)
+ P sys                3.4.2     2023-05-23 [?] CRAN (R 4.3.0)
+ P tibble           * 3.2.1     2023-03-20 [?] CRAN (R 4.3.0)
+ P tidyr            * 1.3.0     2023-01-24 [?] CRAN (R 4.3.0)
+ P tidyselect         1.2.0     2022-10-10 [?] CRAN (R 4.3.0)
+ P utf8               1.2.3     2023-01-31 [?] CRAN (R 4.3.0)
+ P uuid               1.1-1     2023-08-17 [?] CRAN (R 4.3.0)
+ P vctrs              0.6.3     2023-06-14 [?] CRAN (R 4.3.0)
+ P visNetwork         2.1.2     2022-09-29 [?] CRAN (R 4.3.0)
+ P withr              2.5.0     2022-03-03 [?] CRAN (R 4.3.0)
+ P xfun               0.40      2023-08-09 [?] CRAN (R 4.3.0)
+ P xtable             1.8-4     2019-04-21 [?] CRAN (R 4.3.0)
+ P XVector            0.40.0    2023-05-08 [?] Bioconductor
+ P yaml               2.3.7     2023-01-23 [?] CRAN (R 4.3.0)
+ P zlibbioc           1.46.0    2023-05-08 [?] Bioconductor
 
- [1] /Users/sandmann/Library/R/x86_64/4.2/library
- [2] /Library/Frameworks/R.framework/Versions/4.2/Resources/library
+ [1] /Users/sandmann/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20
+ [2] /Users/sandmann/Library/Caches/org.R-project.R/R/renv/sandbox/R-4.3/aarch64-apple-darwin20/ac5c2659
+
+ P ── Loaded and on-disk path mismatch.
+ R ── Package was removed from disk.
 
 ──────────────────────────────────────────────────────────────────────────────</code></pre>
 </div>
@@ -1436,549 +1438,550 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-74"><a href="#cb60-74" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nodbi)</span>
 <span id="cb60-75"><a href="#cb60-75" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.Mm.eg.db)</span>
 <span id="cb60-76"><a href="#cb60-76" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
-<span id="cb60-77"><a href="#cb60-77" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
-<span id="cb60-78"><a href="#cb60-78" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb60-79"><a href="#cb60-79" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb60-80"><a href="#cb60-80" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-81"><a href="#cb60-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-82"><a href="#cb60-82" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Mouse Hallmarks MSigDB collection</span></span>
-<span id="cb60-83"><a href="#cb60-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-84"><a href="#cb60-84" aria-hidden="true" tabindex="-1"></a>At the time of writing, </span>
-<span id="cb60-85"><a href="#cb60-85" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Mouse Molecular Signatures Database (MSigDB)</span><span class="co">](https://www.gsea-msigdb.org/gsea/msigdb/mouse/collections.jsp?targetSpeciesDB=Mouse)</span></span>
-<span id="cb60-86"><a href="#cb60-86" aria-hidden="true" tabindex="-1"></a>contains 15918 gene sets, organized into numerous different collections. For</span>
-<span id="cb60-87"><a href="#cb60-87" aria-hidden="true" tabindex="-1"></a>example, the 50</span>
-<span id="cb60-88"><a href="#cb60-88" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">hallmark gene sets (MH)</span><span class="co">](http://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp?collection=MH)</span></span>
-<span id="cb60-89"><a href="#cb60-89" aria-hidden="true" tabindex="-1"></a>summarize and represent specific well-defined biological states or processes</span>
-<span id="cb60-90"><a href="#cb60-90" aria-hidden="true" tabindex="-1"></a>(</span>
-<span id="cb60-91"><a href="#cb60-91" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Liberzon et al, Cell Systems, 2015</span><span class="co">](https://doi.org/10.1016%2Fj.cels.2015.12.004)</span></span>
-<span id="cb60-92"><a href="#cb60-92" aria-hidden="true" tabindex="-1"></a>). </span>
-<span id="cb60-93"><a href="#cb60-93" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-94"><a href="#cb60-94" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
-<span id="cb60-95"><a href="#cb60-95" aria-hidden="true" tabindex="-1"></a>json_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
-<span id="cb60-96"><a href="#cb60-96" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/main/posts/"</span>,</span>
-<span id="cb60-97"><a href="#cb60-97" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset-sqlite-db/mh.all.v2022.1.Mm.json"</span>)</span>
-<span id="cb60-98"><a href="#cb60-98" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> jsonlite<span class="sc">::</span><span class="fu">read_json</span>(json_file, <span class="at">simplifyVector =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-99"><a href="#cb60-99" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-100"><a href="#cb60-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-101"><a href="#cb60-101" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb60-102"><a href="#cb60-102" aria-hidden="true" tabindex="-1"></a><span class="fu">### Gene symbols</span></span>
-<span id="cb60-103"><a href="#cb60-103" aria-hidden="true" tabindex="-1"></a>Each of the <span class="in">`r length(mh)`</span> sets in the collection contains between </span>
-<span id="cb60-104"><a href="#cb60-104" aria-hidden="true" tabindex="-1"></a><span class="in">`r min(lengths(lapply(mh, \(x) x$geneSymbols)))`</span> and</span>
-<span id="cb60-105"><a href="#cb60-105" aria-hidden="true" tabindex="-1"></a><span class="in">`r max(lengths(lapply(mh, \(x) x$geneSymbols)))`</span> official</span>
-<span id="cb60-106"><a href="#cb60-106" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">gene symbols</span><span class="co">](https://rosalind.info/glossary/gene-symbol/)</span>, specifying the</span>
-<span id="cb60-107"><a href="#cb60-107" aria-hidden="true" tabindex="-1"></a>members of the gene set.</span>
-<span id="cb60-108"><a href="#cb60-108" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb60-109"><a href="#cb60-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-110"><a href="#cb60-110" aria-hidden="true" tabindex="-1"></a>Here, I will use the hallmarks collection as an example but the overall approach</span>
-<span id="cb60-111"><a href="#cb60-111" aria-hidden="true" tabindex="-1"></a>can be applied to other gene set collection in a similar way. (You might need</span>
-<span id="cb60-112"><a href="#cb60-112" aria-hidden="true" tabindex="-1"></a>additional / different annotation fields, though.)</span>
-<span id="cb60-113"><a href="#cb60-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-114"><a href="#cb60-114" aria-hidden="true" tabindex="-1"></a>The mouse hallmarks collection is available in different formats, including as a</span>
-<span id="cb60-115"><a href="#cb60-115" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">JSON file</span><span class="co">](https://raw.githubusercontent.com/tomsing1/blog/main/posts/geneset-sqlite-db/mh.all.v2022.1.Mm.json)</span>. </span>
-<span id="cb60-116"><a href="#cb60-116" aria-hidden="true" tabindex="-1"></a>Let's start by reading it into an R session as nested list <span class="in">`mh`</span>.</span>
-<span id="cb60-117"><a href="#cb60-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-120"><a href="#cb60-120" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-121"><a href="#cb60-121" aria-hidden="true" tabindex="-1"></a>json_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
-<span id="cb60-122"><a href="#cb60-122" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/main/posts/"</span>,</span>
-<span id="cb60-123"><a href="#cb60-123" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset-sqlite-db/mh.all.v2022.1.Mm.json"</span>)</span>
-<span id="cb60-124"><a href="#cb60-124" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> jsonlite<span class="sc">::</span><span class="fu">read_json</span>(json_file, <span class="at">simplifyVector =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-125"><a href="#cb60-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-126"><a href="#cb60-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-127"><a href="#cb60-127" aria-hidden="true" tabindex="-1"></a>Each of the <span class="in">`r length(mh)`</span> elements in the JSON file corresponds to a different</span>
-<span id="cb60-128"><a href="#cb60-128" aria-hidden="true" tabindex="-1"></a>gene set,</span>
-<span id="cb60-129"><a href="#cb60-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-132"><a href="#cb60-132" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-133"><a href="#cb60-133" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">names</span>(mh))</span>
-<span id="cb60-134"><a href="#cb60-134" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-135"><a href="#cb60-135" aria-hidden="true" tabindex="-1"></a>each gene set is a nested list with the following elements,</span>
-<span id="cb60-136"><a href="#cb60-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-139"><a href="#cb60-139" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-140"><a href="#cb60-140" aria-hidden="true" tabindex="-1"></a><span class="fu">lengths</span>(mh[[<span class="dv">1</span>]])</span>
-<span id="cb60-141"><a href="#cb60-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-142"><a href="#cb60-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-143"><a href="#cb60-143" aria-hidden="true" tabindex="-1"></a>and the gene symbols that make up the set are listed in the <span class="in">`geneSymbols`</span> </span>
-<span id="cb60-144"><a href="#cb60-144" aria-hidden="true" tabindex="-1"></a>vector:</span>
-<span id="cb60-145"><a href="#cb60-145" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-148"><a href="#cb60-148" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-149"><a href="#cb60-149" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mh[[<span class="dv">1</span>]]<span class="sc">$</span>geneSymbols)</span>
-<span id="cb60-150"><a href="#cb60-150" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-151"><a href="#cb60-151" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-152"><a href="#cb60-152" aria-hidden="true" tabindex="-1"></a><span class="fu">## noSQL: storing gene sets as unstructured documents</span></span>
-<span id="cb60-153"><a href="#cb60-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-154"><a href="#cb60-154" aria-hidden="true" tabindex="-1"></a>Each gene set is represented as a list - so why not store it in the same</span>
-<span id="cb60-155"><a href="#cb60-155" aria-hidden="true" tabindex="-1"></a>way? A</span>
-<span id="cb60-156"><a href="#cb60-156" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">noSQL</span><span class="co">](https://en.wikipedia.org/wiki/NoSQL)</span></span>
-<span id="cb60-157"><a href="#cb60-157" aria-hidden="true" tabindex="-1"></a>database is designed to store unstructed information, e.g. data models that are </span>
-<span id="cb60-158"><a href="#cb60-158" aria-hidden="true" tabindex="-1"></a>not organized in tables, making them flexible and scalable. </span>
-<span id="cb60-159"><a href="#cb60-159" aria-hidden="true" tabindex="-1"></a>Examples of <span class="in">`noSQL`</span> databases include e.g.</span>
-<span id="cb60-160"><a href="#cb60-160" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Mongodb</span><span class="co">](https://www.mongodb.com/)</span>,</span>
-<span id="cb60-161"><a href="#cb60-161" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">CouchDB</span><span class="co">](https://couchdb.apache.org/)</span></span>
-<span id="cb60-162"><a href="#cb60-162" aria-hidden="true" tabindex="-1"></a>or</span>
-<span id="cb60-163"><a href="#cb60-163" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">AWS dynamodb</span><span class="co">](https://en.wikipedia.org/wiki/Amazon_DynamoDB)</span>.</span>
-<span id="cb60-164"><a href="#cb60-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-165"><a href="#cb60-165" aria-hidden="true" tabindex="-1"></a>In addition, traditional relational database engines - including <span class="in">`SQLite`</span> and</span>
-<span id="cb60-166"><a href="#cb60-166" aria-hidden="true" tabindex="-1"></a><span class="in">`Postgres`</span> - can also store unstructured data in dedicated <span class="in">`JSON`</span> fields.</span>
-<span id="cb60-167"><a href="#cb60-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-168"><a href="#cb60-168" aria-hidden="true" tabindex="-1"></a>The</span>
-<span id="cb60-169"><a href="#cb60-169" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">nodbi R package</span><span class="co">](https://docs.ropensci.org/nodbi/)</span></span>
-<span id="cb60-170"><a href="#cb60-170" aria-hidden="true" tabindex="-1"></a>provides a unified interface to multiple <span class="in">`noSQL`</span> implementations, including </span>
-<span id="cb60-171"><a href="#cb60-171" aria-hidden="true" tabindex="-1"></a><span class="in">`SQLite`</span>. (If you are interested in a deeper look at how to create &amp; query </span>
-<span id="cb60-172"><a href="#cb60-172" aria-hidden="true" tabindex="-1"></a>a JSON field in SQLite with raw SQL, check out</span>
-<span id="cb60-173"><a href="#cb60-173" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">this gist</span><span class="co">](https://gist.github.com/tomsing1/304762fce66353310b254e8b22094a6e)</span></span>
-<span id="cb60-174"><a href="#cb60-174" aria-hidden="true" tabindex="-1"></a>).</span>
-<span id="cb60-175"><a href="#cb60-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-176"><a href="#cb60-176" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating &amp; populating a noSQL database with the `nodbi` R package</span></span>
-<span id="cb60-177"><a href="#cb60-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-178"><a href="#cb60-178" aria-hidden="true" tabindex="-1"></a>To experiment with its <span class="in">`noSQL`</span> mode, we create a temporary <span class="in">`SQLite`</span> database in</span>
-<span id="cb60-179"><a href="#cb60-179" aria-hidden="true" tabindex="-1"></a>memory. (For real data, you definitely want to provide a file path as the </span>
-<span id="cb60-180"><a href="#cb60-180" aria-hidden="true" tabindex="-1"></a><span class="in">`dbname`</span> instead!) </span>
-<span id="cb60-181"><a href="#cb60-181" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-184"><a href="#cb60-184" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-185"><a href="#cb60-185" aria-hidden="true" tabindex="-1"></a>src <span class="ot">&lt;-</span> nodbi<span class="sc">::</span><span class="fu">src_sqlite</span>(<span class="at">dbname =</span> <span class="st">":memory:"</span>)</span>
-<span id="cb60-186"><a href="#cb60-186" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-187"><a href="#cb60-187" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-188"><a href="#cb60-188" aria-hidden="true" tabindex="-1"></a>Right now, the names of the gene sets are only stored as the <span class="in">`names()`</span> of the</span>
-<span id="cb60-189"><a href="#cb60-189" aria-hidden="true" tabindex="-1"></a>list elements, e.g. not in a field _within_ each sub-list itself. To make sure</span>
-<span id="cb60-190"><a href="#cb60-190" aria-hidden="true" tabindex="-1"></a>they are included in each database record, we add them to each sub-list in a new</span>
-<span id="cb60-191"><a href="#cb60-191" aria-hidden="true" tabindex="-1"></a><span class="in">`name`</span> field.</span>
-<span id="cb60-192"><a href="#cb60-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-195"><a href="#cb60-195" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-196"><a href="#cb60-196" aria-hidden="true" tabindex="-1"></a>mh2 <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">names</span>(mh), \(gs) <span class="fu">c</span>(<span class="st">"name"</span> <span class="ot">=</span> gs, mh[[gs]]))</span>
-<span id="cb60-197"><a href="#cb60-197" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-198"><a href="#cb60-198" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-199"><a href="#cb60-199" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb60-200"><a href="#cb60-200" aria-hidden="true" tabindex="-1"></a><span class="fu">### Unique identifiers</span></span>
-<span id="cb60-201"><a href="#cb60-201" aria-hidden="true" tabindex="-1"></a>The <span class="in">`docdb_create()`</span> function accepts either a data.frame, a JSON string or a</span>
-<span id="cb60-202"><a href="#cb60-202" aria-hidden="true" tabindex="-1"></a>list as its <span class="in">`value`</span> argument.</span>
-<span id="cb60-203"><a href="#cb60-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-204"><a href="#cb60-204" aria-hidden="true" tabindex="-1"></a>If you include a field <span class="in">`_id`</span> in your list, it will be used as the primary key</span>
-<span id="cb60-205"><a href="#cb60-205" aria-hidden="true" tabindex="-1"></a>for each element. If no <span class="in">`_id`</span> field is found, then the <span class="in">`_id`</span> field is created</span>
-<span id="cb60-206"><a href="#cb60-206" aria-hidden="true" tabindex="-1"></a>automatically with a call to the <span class="in">`uuid::UUIDgenerate()`</span> function.</span>
-<span id="cb60-207"><a href="#cb60-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-208"><a href="#cb60-208" aria-hidden="true" tabindex="-1"></a>If you provide a <span class="in">`data.frames()`</span> with row.names, they will be used to populate </span>
-<span id="cb60-209"><a href="#cb60-209" aria-hidden="true" tabindex="-1"></a>the <span class="in">`_id`</span> field.</span>
-<span id="cb60-210"><a href="#cb60-210" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb60-211"><a href="#cb60-211" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-212"><a href="#cb60-212" aria-hidden="true" tabindex="-1"></a>Now we are ready to create a new SQLite table <span class="in">`hallmarks`</span> and populate it with</span>
-<span id="cb60-213"><a href="#cb60-213" aria-hidden="true" tabindex="-1"></a>the  <span class="in">`r length(mh)`</span> gene sets. </span>
-<span id="cb60-214"><a href="#cb60-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-215"><a href="#cb60-215" aria-hidden="true" tabindex="-1"></a><span class="in">```{r message=FALSE, warning=FALSE}</span></span>
-<span id="cb60-216"><a href="#cb60-216" aria-hidden="true" tabindex="-1"></a><span class="fu">docdb_create</span>(src, <span class="at">key =</span> <span class="st">"hallmarks"</span>, <span class="at">value =</span> mh2)</span>
-<span id="cb60-217"><a href="#cb60-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-218"><a href="#cb60-218" aria-hidden="true" tabindex="-1"></a>We can retrieve the full set of records as a <span class="in">`data.frame`</span> with the <span class="in">`docdb_get()`</span></span>
-<span id="cb60-219"><a href="#cb60-219" aria-hidden="true" tabindex="-1"></a>function. (Here we select a subset of the returned columns due to space </span>
-<span id="cb60-220"><a href="#cb60-220" aria-hidden="true" tabindex="-1"></a>constraints.) Because each gene set contains multiple <span class="in">`geneSymbols`</span>, this field</span>
-<span id="cb60-221"><a href="#cb60-221" aria-hidden="true" tabindex="-1"></a>is a list-column.</span>
-<span id="cb60-222"><a href="#cb60-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-225"><a href="#cb60-225" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-226"><a href="#cb60-226" aria-hidden="true" tabindex="-1"></a><span class="fu">docdb_get</span>(src, <span class="st">"hallmarks"</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="fu">c</span>(<span class="st">"name"</span>, <span class="st">"geneSymbols"</span>, <span class="st">"pmid"</span>)]</span>
-<span id="cb60-227"><a href="#cb60-227" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-228"><a href="#cb60-228" aria-hidden="true" tabindex="-1"></a><span class="fu">### Querying with JSON filters</span></span>
-<span id="cb60-229"><a href="#cb60-229" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-230"><a href="#cb60-230" aria-hidden="true" tabindex="-1"></a>More commonly, users might want to retrieve one or more gene sets by name.</span>
-<span id="cb60-231"><a href="#cb60-231" aria-hidden="true" tabindex="-1"></a>The <span class="in">`docdb_query()`</span> function accepts a <span class="in">`query`</span> argument specifying the</span>
-<span id="cb60-232"><a href="#cb60-232" aria-hidden="true" tabindex="-1"></a>desired filter criteria (as </span>
-<span id="cb60-233"><a href="#cb60-233" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">MongoDB JSON</span><span class="co">](https://www.mongodb.com/docs/manual/tutorial/query-documents/#specify-equality-condition)</span></span>
-<span id="cb60-234"><a href="#cb60-234" aria-hidden="true" tabindex="-1"></a>).</span>
-<span id="cb60-235"><a href="#cb60-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-238"><a href="#cb60-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-239"><a href="#cb60-239" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> nodbi<span class="sc">::</span><span class="fu">docdb_query</span>(</span>
-<span id="cb60-240"><a href="#cb60-240" aria-hidden="true" tabindex="-1"></a>  <span class="at">src =</span> src, <span class="at">key =</span> <span class="st">"hallmarks"</span>,</span>
-<span id="cb60-241"><a href="#cb60-241" aria-hidden="true" tabindex="-1"></a>  <span class="at">query =</span> <span class="st">'{"name": "HALLMARK_ADIPOGENESIS"}'</span>)</span>
-<span id="cb60-242"><a href="#cb60-242" aria-hidden="true" tabindex="-1"></a>results[, <span class="fu">c</span>(<span class="st">"name"</span>, <span class="st">"geneSymbols"</span>, <span class="st">"pmid"</span>)]</span>
-<span id="cb60-243"><a href="#cb60-243" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-244"><a href="#cb60-244" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-245"><a href="#cb60-245" aria-hidden="true" tabindex="-1"></a>The <span class="in">`fields`</span> argument allows us to return only specific columns. (Specifying a </span>
-<span id="cb60-246"><a href="#cb60-246" aria-hidden="true" tabindex="-1"></a>field as <span class="in">`1`</span> or <span class="in">`0`</span> will include or exclude it, respectively.)</span>
-<span id="cb60-247"><a href="#cb60-247" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-250"><a href="#cb60-250" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-251"><a href="#cb60-251" aria-hidden="true" tabindex="-1"></a>nodbi<span class="sc">::</span><span class="fu">docdb_query</span>(</span>
-<span id="cb60-252"><a href="#cb60-252" aria-hidden="true" tabindex="-1"></a>  <span class="at">src =</span> src, <span class="at">key =</span> <span class="st">"hallmarks"</span>,</span>
-<span id="cb60-253"><a href="#cb60-253" aria-hidden="true" tabindex="-1"></a>  <span class="at">query =</span> <span class="st">'{"name": "HALLMARK_ADIPOGENESIS"}'</span>,</span>
-<span id="cb60-254"><a href="#cb60-254" aria-hidden="true" tabindex="-1"></a>  <span class="at">fields =</span> <span class="st">'{"name": 1, "geneSymbols": 1}'</span></span>
-<span id="cb60-255"><a href="#cb60-255" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb60-256"><a href="#cb60-256" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-257"><a href="#cb60-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-258"><a href="#cb60-258" aria-hidden="true" tabindex="-1"></a>We can also identify gene sets containing at least one of the given gene</span>
-<span id="cb60-259"><a href="#cb60-259" aria-hidden="true" tabindex="-1"></a>symbols:</span>
-<span id="cb60-260"><a href="#cb60-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-263"><a href="#cb60-263" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-264"><a href="#cb60-264" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> nodbi<span class="sc">::</span><span class="fu">docdb_query</span>(</span>
-<span id="cb60-265"><a href="#cb60-265" aria-hidden="true" tabindex="-1"></a>  <span class="at">src =</span> src, <span class="at">key =</span> <span class="st">"hallmarks"</span>,</span>
-<span id="cb60-266"><a href="#cb60-266" aria-hidden="true" tabindex="-1"></a>  <span class="at">query =</span> <span class="fu">paste0</span>(<span class="st">'{"$or":['</span>,</span>
-<span id="cb60-267"><a href="#cb60-267" aria-hidden="true" tabindex="-1"></a>                 <span class="st">'{"geneSymbols": "Abca1"},'</span>, </span>
-<span id="cb60-268"><a href="#cb60-268" aria-hidden="true" tabindex="-1"></a>                 <span class="st">'{"geneSymbols": "Gapdh"}'</span>,</span>
-<span id="cb60-269"><a href="#cb60-269" aria-hidden="true" tabindex="-1"></a>                 <span class="st">']}'</span>),</span>
-<span id="cb60-270"><a href="#cb60-270" aria-hidden="true" tabindex="-1"></a>  <span class="at">fields =</span> <span class="st">'{"name": 1, "geneSymbols": 1}'</span></span>
-<span id="cb60-271"><a href="#cb60-271" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb60-272"><a href="#cb60-272" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-273"><a href="#cb60-273" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-274"><a href="#cb60-274" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb60-275"><a href="#cb60-275" aria-hidden="true" tabindex="-1"></a><span class="fu">### Unnesting columns</span></span>
-<span id="cb60-276"><a href="#cb60-276" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-277"><a href="#cb60-277" aria-hidden="true" tabindex="-1"></a>Because the set contains more than one <span class="in">`geneSymbol`</span>, we obtain a nested</span>
-<span id="cb60-278"><a href="#cb60-278" aria-hidden="true" tabindex="-1"></a>data.frame. We can unnest it e.g. with the <span class="in">`tidyr`</span> R package</span>
-<span id="cb60-279"><a href="#cb60-279" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-282"><a href="#cb60-282" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-283"><a href="#cb60-283" aria-hidden="true" tabindex="-1"></a>tidyr<span class="sc">::</span><span class="fu">unnest</span>(results, <span class="at">cols =</span> <span class="fu">c</span>(geneSymbols))</span>
-<span id="cb60-284"><a href="#cb60-284" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-285"><a href="#cb60-285" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb60-286"><a href="#cb60-286" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-287"><a href="#cb60-287" aria-hidden="true" tabindex="-1"></a><span class="fu">### Querying using SQL</span></span>
-<span id="cb60-288"><a href="#cb60-288" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-289"><a href="#cb60-289" aria-hidden="true" tabindex="-1"></a>Formulating the queries as JSON strings is tedious, though. Alternatively,</span>
-<span id="cb60-290"><a href="#cb60-290" aria-hidden="true" tabindex="-1"></a>SQLite also supports querying JSON columns using SQL (muddying the border</span>
-<span id="cb60-291"><a href="#cb60-291" aria-hidden="true" tabindex="-1"></a>between <span class="in">`noSQL`</span> and <span class="in">`SQL`</span>). For example, we can use SQLite's </span>
-<span id="cb60-292"><a href="#cb60-292" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">-&gt; and -&gt;&gt; operators</span><span class="co">](https://www.sqlite.org/json1.html#jptr)</span> and the </span>
-<span id="cb60-293"><a href="#cb60-293" aria-hidden="true" tabindex="-1"></a><span class="in">`json_each()`</span> SQL function to create a query that returns the names of all gene</span>
-<span id="cb60-294"><a href="#cb60-294" aria-hidden="true" tabindex="-1"></a>sets that include e.g. the <span class="in">`Abca1`</span> gene:</span>
-<span id="cb60-295"><a href="#cb60-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-296"><a href="#cb60-296" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
-<span id="cb60-297"><a href="#cb60-297" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> src<span class="sc">$</span>con</span>
-<span id="cb60-298"><a href="#cb60-298" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-299"><a href="#cb60-299" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-300"><a href="#cb60-300" aria-hidden="true" tabindex="-1"></a><span class="in">```{sql connection=con}</span></span>
-<span id="cb60-301"><a href="#cb60-301" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> hallmarks<span class="ch">.</span>json<span class="op">-&gt;&gt;</span><span class="st">'name'</span> <span class="kw">as</span> name</span>
-<span id="cb60-302"><a href="#cb60-302" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> hallmarks, json_each(hallmarks<span class="ch">.</span>json, <span class="st">'$.geneSymbols'</span>)</span>
-<span id="cb60-303"><a href="#cb60-303" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> json_each<span class="ch">.</span>value <span class="kw">LIKE</span> <span class="st">'%Abca1%'</span></span>
-<span id="cb60-304"><a href="#cb60-304" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-305"><a href="#cb60-305" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-306"><a href="#cb60-306" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
-<span id="cb60-307"><a href="#cb60-307" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
-<span id="cb60-308"><a href="#cb60-308" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(src)</span>
-<span id="cb60-309"><a href="#cb60-309" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-310"><a href="#cb60-310" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-311"><a href="#cb60-311" aria-hidden="true" tabindex="-1"></a>Depending on comfortable you are reading / writing SQL, this might be a nicer</span>
-<span id="cb60-312"><a href="#cb60-312" aria-hidden="true" tabindex="-1"></a>approach. </span>
-<span id="cb60-313"><a href="#cb60-313" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-314"><a href="#cb60-314" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb60-315"><a href="#cb60-315" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limitations</span></span>
-<span id="cb60-316"><a href="#cb60-316" aria-hidden="true" tabindex="-1"></a>SQLite's JSON operators are somewhat limited, e.g. there is no straightforward</span>
-<span id="cb60-317"><a href="#cb60-317" aria-hidden="true" tabindex="-1"></a>way to ask whether a column _contains_ one or more gene identifiers (e.g. the</span>
-<span id="cb60-318"><a href="#cb60-318" aria-hidden="true" tabindex="-1"></a>query we performed above using a query JSON string). Indexing a SQLite JSON</span>
-<span id="cb60-319"><a href="#cb60-319" aria-hidden="true" tabindex="-1"></a>column also comes with limitations. </span>
-<span id="cb60-320"><a href="#cb60-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-321"><a href="#cb60-321" aria-hidden="true" tabindex="-1"></a>The Postgres database engine </span>
-<span id="cb60-322"><a href="#cb60-322" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">supports JSON and binary JSONB fields)</span><span class="co">](https://www.postgresql.org/docs/current/functions-json.html)</span> </span>
-<span id="cb60-323"><a href="#cb60-323" aria-hidden="true" tabindex="-1"></a>with indexing &amp; additional operators like the <span class="in">`@&gt;`</span> contains operator.</span>
-<span id="cb60-324"><a href="#cb60-324" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb60-325"><a href="#cb60-325" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-326"><a href="#cb60-326" aria-hidden="true" tabindex="-1"></a><span class="fu">### noSQL summary</span></span>
-<span id="cb60-327"><a href="#cb60-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-328"><a href="#cb60-328" aria-hidden="true" tabindex="-1"></a>This example highlights some of the advantages of a noSQL solution:</span>
-<span id="cb60-329"><a href="#cb60-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-330"><a href="#cb60-330" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Rapid ingestion of data without the need for a rigid schema.</span>
-<span id="cb60-331"><a href="#cb60-331" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Simple retrieval of individual object identified by their primary key.</span>
-<span id="cb60-332"><a href="#cb60-332" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-333"><a href="#cb60-333" aria-hidden="true" tabindex="-1"></a>But also some of the disadvantages:</span>
-<span id="cb60-334"><a href="#cb60-334" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-335"><a href="#cb60-335" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Queries that descend into the (potentially nested) objects must be carefully</span>
-<span id="cb60-336"><a href="#cb60-336" aria-hidden="true" tabindex="-1"></a>constructed.</span>
-<span id="cb60-337"><a href="#cb60-337" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Increasing database performance with indices is more complicated than for </span>
-<span id="cb60-338"><a href="#cb60-338" aria-hidden="true" tabindex="-1"></a>relational databases (see below.)</span>
-<span id="cb60-339"><a href="#cb60-339" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-340"><a href="#cb60-340" aria-hidden="true" tabindex="-1"></a>Next, we will try another approach: reshaping the gene set collection into a set</span>
-<span id="cb60-341"><a href="#cb60-341" aria-hidden="true" tabindex="-1"></a>of tables and modeling the relationship between them.s</span>
-<span id="cb60-342"><a href="#cb60-342" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-343"><a href="#cb60-343" aria-hidden="true" tabindex="-1"></a><span class="fu">## SQL: storing gene sets in a relational database</span></span>
-<span id="cb60-344"><a href="#cb60-344" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-345"><a href="#cb60-345" aria-hidden="true" tabindex="-1"></a>R has excellent support for interacting with </span>
-<span id="cb60-346"><a href="#cb60-346" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">relational database</span><span class="co">](https://en.wikipedia.org/wiki/Relational_database)</span>,</span>
-<span id="cb60-347"><a href="#cb60-347" aria-hidden="true" tabindex="-1"></a>e.g. via the foundational</span>
-<span id="cb60-348"><a href="#cb60-348" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">'Common Database Interface' (DBI) package</span><span class="co">](https://cran.r-project.org/package=DBI)</span></span>
-<span id="cb60-349"><a href="#cb60-349" aria-hidden="true" tabindex="-1"></a>and the numerous database-specific packages built on top of it, including the</span>
-<span id="cb60-350"><a href="#cb60-350" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">RSQLite</span><span class="co">](https://cran.r-project.org/web/packages/RSQLite/index.html)</span>,</span>
-<span id="cb60-351"><a href="#cb60-351" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">RPostgres</span><span class="co">](https://cran.r-project.org/web/packages/RPostgres/index.html)</span></span>
-<span id="cb60-352"><a href="#cb60-352" aria-hidden="true" tabindex="-1"></a>and many others.</span>
-<span id="cb60-353"><a href="#cb60-353" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-354"><a href="#cb60-354" aria-hidden="true" tabindex="-1"></a>To take advantage of a relational database we have perform a little more work </span>
-<span id="cb60-355"><a href="#cb60-355" aria-hidden="true" tabindex="-1"></a>up-front. But this effort is amply repaid by simplifying subsequent queries.</span>
-<span id="cb60-356"><a href="#cb60-356" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-357"><a href="#cb60-357" aria-hidden="true" tabindex="-1"></a><span class="fu">### Learning from Bioconductor: BiocSet's three tables</span></span>
-<span id="cb60-358"><a href="#cb60-358" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-359"><a href="#cb60-359" aria-hidden="true" tabindex="-1"></a>The <span class="in">`BiocSet`</span> Class from the eponymous Bioconductor package represents a </span>
-<span id="cb60-360"><a href="#cb60-360" aria-hidden="true" tabindex="-1"></a>collection of gene sets in three tibbles. Let's create a simple <span class="in">`BiocSet`</span> with</span>
-<span id="cb60-361"><a href="#cb60-361" aria-hidden="true" tabindex="-1"></a>two gene sets for illustration:</span>
-<span id="cb60-362"><a href="#cb60-362" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-365"><a href="#cb60-365" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-366"><a href="#cb60-366" aria-hidden="true" tabindex="-1"></a>set_names <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(mh2[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="st">"name"</span>)</span>
-<span id="cb60-367"><a href="#cb60-367" aria-hidden="true" tabindex="-1"></a>gene_ids <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(mh2[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="st">"geneSymbols"</span>)</span>
-<span id="cb60-368"><a href="#cb60-368" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">BiocSet</span>(<span class="fu">setNames</span>(gene_ids, set_names))</span>
-<span id="cb60-369"><a href="#cb60-369" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-370"><a href="#cb60-370" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-371"><a href="#cb60-371" aria-hidden="true" tabindex="-1"></a>The first two tibbles represent genes (called <span class="in">`elements`</span>) and <span class="in">`sets`</span>, </span>
-<span id="cb60-372"><a href="#cb60-372" aria-hidden="true" tabindex="-1"></a>respectively:</span>
-<span id="cb60-373"><a href="#cb60-373" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-374"><a href="#cb60-374" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`es_element`</span>: one row per gene</span>
-<span id="cb60-375"><a href="#cb60-375" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-378"><a href="#cb60-378" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-379"><a href="#cb60-379" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">es_element</span>(es))</span>
-<span id="cb60-380"><a href="#cb60-380" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-381"><a href="#cb60-381" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-382"><a href="#cb60-382" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span><span class="in">`es_set`</span>: one row per gene set</span>
-<span id="cb60-383"><a href="#cb60-383" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-386"><a href="#cb60-386" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-387"><a href="#cb60-387" aria-hidden="true" tabindex="-1"></a><span class="fu">es_set</span>(es)</span>
-<span id="cb60-388"><a href="#cb60-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-389"><a href="#cb60-389" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-390"><a href="#cb60-390" aria-hidden="true" tabindex="-1"></a>The third table establishes the </span>
-<span id="cb60-391"><a href="#cb60-391" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">many-to-many relationship</span><span class="co">]</span>(https://en.wikipedia.org/wiki/Many-to-many_(data_model))</span>
-<span id="cb60-392"><a href="#cb60-392" aria-hidden="true" tabindex="-1"></a>between genes and sets, e.g. it tracks which gene is a member of each set.</span>
-<span id="cb60-393"><a href="#cb60-393" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-394"><a href="#cb60-394" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span><span class="in">`es_elementset`</span>: gene x set combination</span>
-<span id="cb60-395"><a href="#cb60-395" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-398"><a href="#cb60-398" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-399"><a href="#cb60-399" aria-hidden="true" tabindex="-1"></a><span class="co"># we are showing 10 random rows</span></span>
-<span id="cb60-400"><a href="#cb60-400" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb60-401"><a href="#cb60-401" aria-hidden="true" tabindex="-1"></a><span class="fu">es_elementset</span>(es)[<span class="fu">sample</span>(<span class="fu">nrow</span>(<span class="fu">es_elementset</span>(es)), <span class="at">size =</span> <span class="dv">10</span>), ]</span>
-<span id="cb60-402"><a href="#cb60-402" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-403"><a href="#cb60-403" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-404"><a href="#cb60-404" aria-hidden="true" tabindex="-1"></a>Each of these tables can be augmented with additional metadata, e.g. we could</span>
-<span id="cb60-405"><a href="#cb60-405" aria-hidden="true" tabindex="-1"></a>add </span>
-<span id="cb60-406"><a href="#cb60-406" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Entrez</span><span class="co">](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1761442/)</span></span>
-<span id="cb60-407"><a href="#cb60-407" aria-hidden="true" tabindex="-1"></a>gene identifiers to the <span class="in">`es_element`</span> (see below), or long-form descriptions for</span>
-<span id="cb60-408"><a href="#cb60-408" aria-hidden="true" tabindex="-1"></a>each set to the <span class="in">`es_set`</span> tibble.</span>
-<span id="cb60-409"><a href="#cb60-409" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-410"><a href="#cb60-410" aria-hidden="true" tabindex="-1"></a>These three tables can easily be represented in a relational database, using</span>
-<span id="cb60-411"><a href="#cb60-411" aria-hidden="true" tabindex="-1"></a>the <span class="in">`element`</span> and <span class="in">`set`</span> columns as primary keys.</span>
-<span id="cb60-412"><a href="#cb60-412" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-413"><a href="#cb60-413" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating and populating a relational database</span></span>
-<span id="cb60-414"><a href="#cb60-414" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-415"><a href="#cb60-415" aria-hidden="true" tabindex="-1"></a>Let's start with a fresh SQLite database.</span>
-<span id="cb60-416"><a href="#cb60-416" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-419"><a href="#cb60-419" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-420"><a href="#cb60-420" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">":memory:"</span>)</span>
-<span id="cb60-421"><a href="#cb60-421" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-422"><a href="#cb60-422" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-423"><a href="#cb60-423" aria-hidden="true" tabindex="-1"></a>First, we create the <span class="in">`geneset`</span> data.frame that lists all gene sets, and we also</span>
-<span id="cb60-424"><a href="#cb60-424" aria-hidden="true" tabindex="-1"></a>include their MSigDb URLs as metadata:</span>
-<span id="cb60-425"><a href="#cb60-425" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-428"><a href="#cb60-428" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-429"><a href="#cb60-429" aria-hidden="true" tabindex="-1"></a>geneset <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb60-430"><a href="#cb60-430" aria-hidden="true" tabindex="-1"></a>  <span class="at">geneset =</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(mh2, <span class="st">"name"</span>),</span>
-<span id="cb60-431"><a href="#cb60-431" aria-hidden="true" tabindex="-1"></a>  <span class="at">url =</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(mh2, <span class="st">"msigdbURL"</span>))</span>
-<span id="cb60-432"><a href="#cb60-432" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(geneset)</span>
-<span id="cb60-433"><a href="#cb60-433" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-434"><a href="#cb60-434" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-435"><a href="#cb60-435" aria-hidden="true" tabindex="-1"></a>Next, we identify all unique gene symbols, annotate them with their Entrez ids</span>
-<span id="cb60-436"><a href="#cb60-436" aria-hidden="true" tabindex="-1"></a>(using the</span>
-<span id="cb60-437"><a href="#cb60-437" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">org.Mm.eg.db</span><span class="co">](https://bioconductor.org/packages/release/data/annotation/html/org.Mm.eg.db.html)</span></span>
-<span id="cb60-438"><a href="#cb60-438" aria-hidden="true" tabindex="-1"></a>Bioconductor annotation package), and store both identifier types in the</span>
-<span id="cb60-439"><a href="#cb60-439" aria-hidden="true" tabindex="-1"></a><span class="in">`element`</span> data.frame.</span>
-<span id="cb60-440"><a href="#cb60-440" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-441"><a href="#cb60-441" aria-hidden="true" tabindex="-1"></a><span class="in">```{r warning=FALSE, message=FALSE}</span></span>
-<span id="cb60-442"><a href="#cb60-442" aria-hidden="true" tabindex="-1"></a>gene_symbols <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">unlist</span>(purrr<span class="sc">::</span><span class="fu">map</span>(mh2, <span class="st">"geneSymbols"</span>)))</span>
-<span id="cb60-443"><a href="#cb60-443" aria-hidden="true" tabindex="-1"></a>element <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb60-444"><a href="#cb60-444" aria-hidden="true" tabindex="-1"></a>  <span class="at">element =</span> gene_symbols,</span>
-<span id="cb60-445"><a href="#cb60-445" aria-hidden="true" tabindex="-1"></a>  <span class="at">entrezid =</span> <span class="fu">mapIds</span>(org.Mm.eg.db, <span class="at">keys =</span> gene_symbols, <span class="at">keytype =</span> <span class="st">"SYMBOL"</span>, </span>
-<span id="cb60-446"><a href="#cb60-446" aria-hidden="true" tabindex="-1"></a>                    <span class="at">column =</span> <span class="st">"ENTREZID"</span>)</span>
-<span id="cb60-447"><a href="#cb60-447" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb60-448"><a href="#cb60-448" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(element)</span>
-<span id="cb60-449"><a href="#cb60-449" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-450"><a href="#cb60-450" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-451"><a href="#cb60-451" aria-hidden="true" tabindex="-1"></a>Finally, we create the <span class="in">`element_set`</span> *join table*, connecting gene sets to</span>
-<span id="cb60-452"><a href="#cb60-452" aria-hidden="true" tabindex="-1"></a>their constituent genes:</span>
-<span id="cb60-453"><a href="#cb60-453" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-456"><a href="#cb60-456" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-457"><a href="#cb60-457" aria-hidden="true" tabindex="-1"></a>elementset <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_df</span>(mh2, \(gs) {</span>
-<span id="cb60-458"><a href="#cb60-458" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(gs, </span>
-<span id="cb60-459"><a href="#cb60-459" aria-hidden="true" tabindex="-1"></a>       <span class="fu">data.frame</span>(</span>
-<span id="cb60-460"><a href="#cb60-460" aria-hidden="true" tabindex="-1"></a>         <span class="at">element =</span> geneSymbols,</span>
-<span id="cb60-461"><a href="#cb60-461" aria-hidden="true" tabindex="-1"></a>         <span class="at">geneset =</span> name</span>
-<span id="cb60-462"><a href="#cb60-462" aria-hidden="true" tabindex="-1"></a>       )</span>
-<span id="cb60-463"><a href="#cb60-463" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb60-464"><a href="#cb60-464" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb60-465"><a href="#cb60-465" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(elementset)</span>
-<span id="cb60-466"><a href="#cb60-466" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-467"><a href="#cb60-467" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-468"><a href="#cb60-468" aria-hidden="true" tabindex="-1"></a>Next, we write each data.frame into a separate table in our SQLite database.</span>
-<span id="cb60-469"><a href="#cb60-469" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-470"><a href="#cb60-470" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb60-471"><a href="#cb60-471" aria-hidden="true" tabindex="-1"></a><span class="fu">### Verifying foreign keys</span></span>
-<span id="cb60-472"><a href="#cb60-472" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-473"><a href="#cb60-473" aria-hidden="true" tabindex="-1"></a>By default, SQLite does </span>
-<span id="cb60-474"><a href="#cb60-474" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">not verify that foreign keys actually exist</span><span class="co">](https://www.sqlite.org/pragma.html#pragma_foreign_keys)</span></span>
-<span id="cb60-475"><a href="#cb60-475" aria-hidden="true" tabindex="-1"></a>in the referenced table. To make this a requirement, we can enable checking</span>
-<span id="cb60-476"><a href="#cb60-476" aria-hidden="true" tabindex="-1"></a>with the following command:</span>
-<span id="cb60-477"><a href="#cb60-477" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-480"><a href="#cb60-480" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-481"><a href="#cb60-481" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, <span class="st">'PRAGMA foreign_keys = 1;'</span>)</span>
-<span id="cb60-482"><a href="#cb60-482" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-483"><a href="#cb60-483" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb60-484"><a href="#cb60-484" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-487"><a href="#cb60-487" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-488"><a href="#cb60-488" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, </span>
-<span id="cb60-489"><a href="#cb60-489" aria-hidden="true" tabindex="-1"></a>          <span class="st">"CREATE TABLE tbl_geneset (geneset TEXT PRIMARY KEY, url TEXT)"</span>)</span>
-<span id="cb60-490"><a href="#cb60-490" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="at">name =</span> <span class="st">"tbl_geneset"</span>, <span class="at">value =</span> geneset, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-491"><a href="#cb60-491" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-492"><a href="#cb60-492" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, </span>
-<span id="cb60-493"><a href="#cb60-493" aria-hidden="true" tabindex="-1"></a>          <span class="st">"CREATE TABLE tbl_element (element TEXT PRIMARY KEY, entrezid TEXT)"</span>)</span>
-<span id="cb60-494"><a href="#cb60-494" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="at">name =</span> <span class="st">"tbl_element"</span>, <span class="at">value =</span> element, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-495"><a href="#cb60-495" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-496"><a href="#cb60-496" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, <span class="fu">paste</span>(</span>
-<span id="cb60-497"><a href="#cb60-497" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CREATE TABLE tbl_elementset ("</span>,</span>
-<span id="cb60-498"><a href="#cb60-498" aria-hidden="true" tabindex="-1"></a>  <span class="st">"element TEXT,"</span>, </span>
-<span id="cb60-499"><a href="#cb60-499" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset TEXT,"</span>,</span>
-<span id="cb60-500"><a href="#cb60-500" aria-hidden="true" tabindex="-1"></a>  <span class="st">"FOREIGN KEY(geneset) REFERENCES tbl_geneset(geneset),"</span>,</span>
-<span id="cb60-501"><a href="#cb60-501" aria-hidden="true" tabindex="-1"></a>  <span class="st">"FOREIGN KEY(element) REFERENCES tbl_element(element)"</span>,</span>
-<span id="cb60-502"><a href="#cb60-502" aria-hidden="true" tabindex="-1"></a>  <span class="st">")"</span>)</span>
-<span id="cb60-503"><a href="#cb60-503" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb60-504"><a href="#cb60-504" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="at">name =</span> <span class="st">"tbl_elementset"</span>, <span class="at">value =</span> elementset, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-505"><a href="#cb60-505" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-508"><a href="#cb60-508" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-509"><a href="#cb60-509" aria-hidden="true" tabindex="-1"></a><span class="fu">dbListTables</span>(con)</span>
-<span id="cb60-510"><a href="#cb60-510" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-511"><a href="#cb60-511" aria-hidden="true" tabindex="-1"></a><span class="fu">### Plotting relationships</span></span>
-<span id="cb60-512"><a href="#cb60-512" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-513"><a href="#cb60-513" aria-hidden="true" tabindex="-1"></a>As we create and need to keep track of multiple tables, it is useful to</span>
-<span id="cb60-514"><a href="#cb60-514" aria-hidden="true" tabindex="-1"></a>visualize their contents (fields, columns) and relationships in a</span>
-<span id="cb60-515"><a href="#cb60-515" aria-hidden="true" tabindex="-1"></a>*model diagram*. The awesome</span>
-<span id="cb60-516"><a href="#cb60-516" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">dm R package</span><span class="co">](https://dm.cynkra.com/index.html)</span>, </span>
-<span id="cb60-517"><a href="#cb60-517" aria-hidden="true" tabindex="-1"></a>designed to bring an existing relational data model into your R session, can</span>
-<span id="cb60-518"><a href="#cb60-518" aria-hidden="true" tabindex="-1"></a>be used to generate diagrams like the one shown below. (<span class="in">`dm`</span> can identify the</span>
-<span id="cb60-519"><a href="#cb60-519" aria-hidden="true" tabindex="-1"></a>keys in postgres and SQL server database engines automatically, but for SQLite</span>
-<span id="cb60-520"><a href="#cb60-520" aria-hidden="true" tabindex="-1"></a>we need to specify them ourselves with the <span class="in">`dm_add_pk()`</span> and <span class="in">`dm_add_fk()`</span></span>
-<span id="cb60-521"><a href="#cb60-521" aria-hidden="true" tabindex="-1"></a>functions.)</span>
-<span id="cb60-522"><a href="#cb60-522" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-523"><a href="#cb60-523" aria-hidden="true" tabindex="-1"></a><span class="in">```{r message=FALSE}</span></span>
-<span id="cb60-524"><a href="#cb60-524" aria-hidden="true" tabindex="-1"></a><span class="co">#| out-width: "50%"</span></span>
-<span id="cb60-525"><a href="#cb60-525" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: "center"</span></span>
-<span id="cb60-526"><a href="#cb60-526" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig.widh: 5</span></span>
-<span id="cb60-527"><a href="#cb60-527" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig.height: 2.5</span></span>
-<span id="cb60-528"><a href="#cb60-528" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Model diagram"</span></span>
-<span id="cb60-529"><a href="#cb60-529" aria-hidden="true" tabindex="-1"></a><span class="fu">dm_from_con</span>(con, <span class="at">learn_keys =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-530"><a href="#cb60-530" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_pk</span>(tbl_element, element) <span class="sc">%&gt;%</span></span>
-<span id="cb60-531"><a href="#cb60-531" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_pk</span>(tbl_geneset, geneset) <span class="sc">%&gt;%</span></span>
-<span id="cb60-532"><a href="#cb60-532" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_fk</span>(tbl_elementset, element, tbl_element) <span class="sc">%&gt;%</span></span>
-<span id="cb60-533"><a href="#cb60-533" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_fk</span>(tbl_elementset, geneset, tbl_geneset) <span class="sc">%&gt;%</span></span>
-<span id="cb60-534"><a href="#cb60-534" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_draw</span>(<span class="at">view_type =</span> <span class="st">"all"</span>)</span>
-<span id="cb60-535"><a href="#cb60-535" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-536"><a href="#cb60-536" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-537"><a href="#cb60-537" aria-hidden="true" tabindex="-1"></a><span class="fu">### Querying the database</span></span>
-<span id="cb60-538"><a href="#cb60-538" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-539"><a href="#cb60-539" aria-hidden="true" tabindex="-1"></a>Great! Now we are ready to query our database. To make our lives easier, we will</span>
-<span id="cb60-540"><a href="#cb60-540" aria-hidden="true" tabindex="-1"></a>use the </span>
-<span id="cb60-541"><a href="#cb60-541" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">dplyr</span><span class="co">](https://cran.r-project.org/package=dplyr)</span></span>
-<span id="cb60-542"><a href="#cb60-542" aria-hidden="true" tabindex="-1"></a>package to translate our R syntax into SQL. (But we could just as well use plain</span>
-<span id="cb60-543"><a href="#cb60-543" aria-hidden="true" tabindex="-1"></a>SQL instead.)</span>
-<span id="cb60-544"><a href="#cb60-544" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-545"><a href="#cb60-545" aria-hidden="true" tabindex="-1"></a>First we define the remote tables by connecting to our brand new database:</span>
-<span id="cb60-546"><a href="#cb60-546" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-549"><a href="#cb60-549" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-550"><a href="#cb60-550" aria-hidden="true" tabindex="-1"></a>tbl_geneset <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"tbl_geneset"</span>)</span>
-<span id="cb60-551"><a href="#cb60-551" aria-hidden="true" tabindex="-1"></a>tbl_element <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"tbl_element"</span>)</span>
-<span id="cb60-552"><a href="#cb60-552" aria-hidden="true" tabindex="-1"></a>tbl_elementset <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"tbl_elementset"</span>)</span>
-<span id="cb60-553"><a href="#cb60-553" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-554"><a href="#cb60-554" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-555"><a href="#cb60-555" aria-hidden="true" tabindex="-1"></a>Let's return the gene symbols and entrez identifiers that make up the </span>
-<span id="cb60-556"><a href="#cb60-556" aria-hidden="true" tabindex="-1"></a><span class="in">`HALLMARK_APOPTOSIS`</span> gene set and display the first 5 (in alphabetical order of</span>
-<span id="cb60-557"><a href="#cb60-557" aria-hidden="true" tabindex="-1"></a>the gene symbols).</span>
-<span id="cb60-558"><a href="#cb60-558" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-561"><a href="#cb60-561" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-562"><a href="#cb60-562" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> tbl_elementset <span class="sc">%&gt;%</span> </span>
-<span id="cb60-563"><a href="#cb60-563" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(geneset <span class="sc">==</span> <span class="st">"HALLMARK_ADIPOGENESIS"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-564"><a href="#cb60-564" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(tbl_element, <span class="at">by =</span> <span class="st">"element"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-565"><a href="#cb60-565" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_min</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">order_by =</span> element)</span>
-<span id="cb60-566"><a href="#cb60-566" aria-hidden="true" tabindex="-1"></a>result</span>
-<span id="cb60-567"><a href="#cb60-567" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-568"><a href="#cb60-568" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-569"><a href="#cb60-569" aria-hidden="true" tabindex="-1"></a>And now let's add the gene set's URL as well:</span>
-<span id="cb60-570"><a href="#cb60-570" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-573"><a href="#cb60-573" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-574"><a href="#cb60-574" aria-hidden="true" tabindex="-1"></a>result <span class="sc">%&gt;%</span></span>
-<span id="cb60-575"><a href="#cb60-575" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(tbl_geneset, <span class="at">by =</span> <span class="st">"geneset"</span>)</span>
-<span id="cb60-576"><a href="#cb60-576" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-577"><a href="#cb60-577" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-578"><a href="#cb60-578" aria-hidden="true" tabindex="-1"></a><span class="fu">### Pulling data into a BiocSet</span></span>
-<span id="cb60-579"><a href="#cb60-579" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-580"><a href="#cb60-580" aria-hidden="true" tabindex="-1"></a>Finally, we can easily pull selected (or even all) gene sets into a Bioconductor</span>
-<span id="cb60-581"><a href="#cb60-581" aria-hidden="true" tabindex="-1"></a><span class="in">`BiocSet`</span> object for analysis in R. Importantly, the database does _not require_</span>
-<span id="cb60-582"><a href="#cb60-582" aria-hidden="true" tabindex="-1"></a>us to use R: e.g. python users can connect to the same SQLite database </span>
-<span id="cb60-583"><a href="#cb60-583" aria-hidden="true" tabindex="-1"></a>(e.g. using </span>
-<span id="cb60-584"><a href="#cb60-584" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">sqlalchemy</span><span class="co">](https://www.sqlalchemy.org/)</span></span>
-<span id="cb60-585"><a href="#cb60-585" aria-hidden="true" tabindex="-1"></a>) and retrieve the information in whatever form is most useful to them.</span>
-<span id="cb60-586"><a href="#cb60-586" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-587"><a href="#cb60-587" aria-hidden="true" tabindex="-1"></a>For example, let's retrieve all gene sets whose name ends in the letter <span class="in">`N`</span>,</span>
-<span id="cb60-588"><a href="#cb60-588" aria-hidden="true" tabindex="-1"></a>store them in a list and create a <span class="in">`BiocSet`</span> object.</span>
-<span id="cb60-589"><a href="#cb60-589" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-592"><a href="#cb60-592" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-593"><a href="#cb60-593" aria-hidden="true" tabindex="-1"></a>gene_set_list <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
-<span id="cb60-594"><a href="#cb60-594" aria-hidden="true" tabindex="-1"></a>  tbl_elementset <span class="sc">%&gt;%</span> </span>
-<span id="cb60-595"><a href="#cb60-595" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(geneset <span class="sc">%like%</span> <span class="st">'%N'</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-596"><a href="#cb60-596" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>(), </span>
-<span id="cb60-597"><a href="#cb60-597" aria-hidden="true" tabindex="-1"></a>  <span class="fu">split</span>(element, geneset)</span>
-<span id="cb60-598"><a href="#cb60-598" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb60-599"><a href="#cb60-599" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">BiocSet</span>(gene_set_list)</span>
-<span id="cb60-600"><a href="#cb60-600" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-601"><a href="#cb60-601" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-602"><a href="#cb60-602" aria-hidden="true" tabindex="-1"></a>Next, we add gene set metadata to the <span class="in">`es_set`</span> tibble, by joining it with the</span>
-<span id="cb60-603"><a href="#cb60-603" aria-hidden="true" tabindex="-1"></a>(richer) information in the database. This will add the <span class="in">`url`</span> column.</span>
-<span id="cb60-604"><a href="#cb60-604" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-607"><a href="#cb60-607" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-608"><a href="#cb60-608" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">left_join_set</span>(es, </span>
-<span id="cb60-609"><a href="#cb60-609" aria-hidden="true" tabindex="-1"></a>  tbl_geneset, <span class="at">by =</span> <span class="fu">c</span>(<span class="at">set =</span> <span class="st">"geneset"</span>), </span>
-<span id="cb60-610"><a href="#cb60-610" aria-hidden="true" tabindex="-1"></a>  <span class="at">copy =</span> <span class="cn">TRUE</span></span>
-<span id="cb60-611"><a href="#cb60-611" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb60-612"><a href="#cb60-612" aria-hidden="true" tabindex="-1"></a><span class="fu">es_set</span>(es)</span>
-<span id="cb60-613"><a href="#cb60-613" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-614"><a href="#cb60-614" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-615"><a href="#cb60-615" aria-hidden="true" tabindex="-1"></a>And finally, let's also add the <span class="in">`entrezid`</span> column from out database </span>
-<span id="cb60-616"><a href="#cb60-616" aria-hidden="true" tabindex="-1"></a>to the <span class="in">`es_element`</span> table:</span>
-<span id="cb60-617"><a href="#cb60-617" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-620"><a href="#cb60-620" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-621"><a href="#cb60-621" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">left_join_element</span>(es, </span>
-<span id="cb60-622"><a href="#cb60-622" aria-hidden="true" tabindex="-1"></a>  tbl_element, <span class="at">by =</span> <span class="st">"element"</span>, </span>
-<span id="cb60-623"><a href="#cb60-623" aria-hidden="true" tabindex="-1"></a>  <span class="at">copy =</span> <span class="cn">TRUE</span></span>
-<span id="cb60-624"><a href="#cb60-624" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb60-625"><a href="#cb60-625" aria-hidden="true" tabindex="-1"></a><span class="fu">es_element</span>(es)</span>
-<span id="cb60-626"><a href="#cb60-626" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-627"><a href="#cb60-627" aria-hidden="true" tabindex="-1"></a><span class="fu">### SQL summary</span></span>
-<span id="cb60-628"><a href="#cb60-628" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-629"><a href="#cb60-629" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For this example the effort required to transform the dataset into a set of</span>
-<span id="cb60-630"><a href="#cb60-630" aria-hidden="true" tabindex="-1"></a>three tables - the starting point for import into a relational database - was </span>
-<span id="cb60-631"><a href="#cb60-631" aria-hidden="true" tabindex="-1"></a>minimal. </span>
-<span id="cb60-632"><a href="#cb60-632" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Given the use case, e.g. management of a gene set collections, the number of</span>
-<span id="cb60-633"><a href="#cb60-633" aria-hidden="true" tabindex="-1"></a>times that data is added to the database is likely much smaller than the number </span>
-<span id="cb60-634"><a href="#cb60-634" aria-hidden="true" tabindex="-1"></a>of times it is queried. That makes it worth the effort to transform it once - </span>
-<span id="cb60-635"><a href="#cb60-635" aria-hidden="true" tabindex="-1"></a>and benefit from this upfront cost ever after.</span>
-<span id="cb60-636"><a href="#cb60-636" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Because we knew exactly which properties / annotations we wanted to capture</span>
-<span id="cb60-637"><a href="#cb60-637" aria-hidden="true" tabindex="-1"></a>in the database, defining the database tables and their relationships (e.g. the</span>
-<span id="cb60-638"><a href="#cb60-638" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">schema</span><span class="co">](https://en.wikipedia.org/wiki/Database_schema)</span></span>
-<span id="cb60-639"><a href="#cb60-639" aria-hidden="true" tabindex="-1"></a>) was not an obstacle, either.</span>
-<span id="cb60-640"><a href="#cb60-640" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Enabling users to query the data using simple SQL or via a higher level</span>
-<span id="cb60-641"><a href="#cb60-641" aria-hidden="true" tabindex="-1"></a>abstraction like <span class="in">`dplyr`</span> makes it accessible to a broader audience.</span>
-<span id="cb60-642"><a href="#cb60-642" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-643"><a href="#cb60-643" aria-hidden="true" tabindex="-1"></a>::: {.callout-warn}</span>
-<span id="cb60-644"><a href="#cb60-644" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-645"><a href="#cb60-645" aria-hidden="true" tabindex="-1"></a>Defining a schema is much harder when we deal with datasets that are less</span>
-<span id="cb60-646"><a href="#cb60-646" aria-hidden="true" tabindex="-1"></a>standardized, deeply nested, changing over time, etc.</span>
-<span id="cb60-647"><a href="#cb60-647" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-648"><a href="#cb60-648" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb60-649"><a href="#cb60-649" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-650"><a href="#cb60-650" aria-hidden="true" tabindex="-1"></a><span class="fu">## References</span></span>
-<span id="cb60-651"><a href="#cb60-651" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-652"><a href="#cb60-652" aria-hidden="true" tabindex="-1"></a>If you are new to working with databases, then you might find these two great</span>
-<span id="cb60-653"><a href="#cb60-653" aria-hidden="true" tabindex="-1"></a>books useful:</span>
-<span id="cb60-654"><a href="#cb60-654" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-655"><a href="#cb60-655" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">SQL for Data Scientists: A Beginner's Guide for Building Datasets for Analysis</span><span class="co">](https://www.wiley.com/en-us/SQL+for+Data+Scientists:+A+Beginner's+Guide+for+Building+Datasets+for+Analysis-p-9781119669388)</span> by </span>
-<span id="cb60-656"><a href="#cb60-656" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Renee M. P. Teate</span><span class="co">](https://twitter.com/BecomingDataSci)</span> is a great starting </span>
-<span id="cb60-657"><a href="#cb60-657" aria-hidden="true" tabindex="-1"></a>place to learn SQL. It mainly focusses on accessing existing databases.</span>
-<span id="cb60-658"><a href="#cb60-658" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Practical SQL: A Beginner’s Guide to Storytelling with Data</span><span class="co">](https://anthonydebarros.com/practical-sql-a-beginners-guide-to-storytelling-with-data/)</span> by </span>
-<span id="cb60-659"><a href="#cb60-659" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Anthony DeBarros</span><span class="co">](https://anthonydebarros.com/about/)</span> teaches readers how</span>
-<span id="cb60-660"><a href="#cb60-660" aria-hidden="true" tabindex="-1"></a>to create &amp; populate a Postgres database, and how to index and search it </span>
-<span id="cb60-661"><a href="#cb60-661" aria-hidden="true" tabindex="-1"></a>effectively.</span>
-<span id="cb60-662"><a href="#cb60-662" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-663"><a href="#cb60-663" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
-<span id="cb60-664"><a href="#cb60-664" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;</span></span>
-<span id="cb60-665"><a href="#cb60-665" aria-hidden="true" tabindex="-1"></a>SessionInfo</span>
-<span id="cb60-666"><a href="#cb60-666" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/summary&gt;</span></span>
-<span id="cb60-667"><a href="#cb60-667" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-670"><a href="#cb60-670" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb60-671"><a href="#cb60-671" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb60-672"><a href="#cb60-672" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
-<span id="cb60-673"><a href="#cb60-673" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb60-674"><a href="#cb60-674" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-675"><a href="#cb60-675" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
+<span id="cb60-77"><a href="#cb60-77" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DiagrammeR)</span>
+<span id="cb60-78"><a href="#cb60-78" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
+<span id="cb60-79"><a href="#cb60-79" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
+<span id="cb60-80"><a href="#cb60-80" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb60-81"><a href="#cb60-81" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-82"><a href="#cb60-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-83"><a href="#cb60-83" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Mouse Hallmarks MSigDB collection</span></span>
+<span id="cb60-84"><a href="#cb60-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-85"><a href="#cb60-85" aria-hidden="true" tabindex="-1"></a>At the time of writing, </span>
+<span id="cb60-86"><a href="#cb60-86" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Mouse Molecular Signatures Database (MSigDB)</span><span class="co">](https://www.gsea-msigdb.org/gsea/msigdb/mouse/collections.jsp?targetSpeciesDB=Mouse)</span></span>
+<span id="cb60-87"><a href="#cb60-87" aria-hidden="true" tabindex="-1"></a>contains 15918 gene sets, organized into numerous different collections. For</span>
+<span id="cb60-88"><a href="#cb60-88" aria-hidden="true" tabindex="-1"></a>example, the 50</span>
+<span id="cb60-89"><a href="#cb60-89" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">hallmark gene sets (MH)</span><span class="co">](http://www.gsea-msigdb.org/gsea/msigdb/mouse/genesets.jsp?collection=MH)</span></span>
+<span id="cb60-90"><a href="#cb60-90" aria-hidden="true" tabindex="-1"></a>summarize and represent specific well-defined biological states or processes</span>
+<span id="cb60-91"><a href="#cb60-91" aria-hidden="true" tabindex="-1"></a>(</span>
+<span id="cb60-92"><a href="#cb60-92" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Liberzon et al, Cell Systems, 2015</span><span class="co">](https://doi.org/10.1016%2Fj.cels.2015.12.004)</span></span>
+<span id="cb60-93"><a href="#cb60-93" aria-hidden="true" tabindex="-1"></a>). </span>
+<span id="cb60-94"><a href="#cb60-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-95"><a href="#cb60-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
+<span id="cb60-96"><a href="#cb60-96" aria-hidden="true" tabindex="-1"></a>json_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
+<span id="cb60-97"><a href="#cb60-97" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/main/posts/"</span>,</span>
+<span id="cb60-98"><a href="#cb60-98" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset-sqlite-db/mh.all.v2022.1.Mm.json"</span>)</span>
+<span id="cb60-99"><a href="#cb60-99" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> jsonlite<span class="sc">::</span><span class="fu">read_json</span>(json_file, <span class="at">simplifyVector =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-100"><a href="#cb60-100" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-101"><a href="#cb60-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-102"><a href="#cb60-102" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb60-103"><a href="#cb60-103" aria-hidden="true" tabindex="-1"></a><span class="fu">### Gene symbols</span></span>
+<span id="cb60-104"><a href="#cb60-104" aria-hidden="true" tabindex="-1"></a>Each of the <span class="in">`r length(mh)`</span> sets in the collection contains between </span>
+<span id="cb60-105"><a href="#cb60-105" aria-hidden="true" tabindex="-1"></a><span class="in">`r min(lengths(lapply(mh, \(x) x$geneSymbols)))`</span> and</span>
+<span id="cb60-106"><a href="#cb60-106" aria-hidden="true" tabindex="-1"></a><span class="in">`r max(lengths(lapply(mh, \(x) x$geneSymbols)))`</span> official</span>
+<span id="cb60-107"><a href="#cb60-107" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">gene symbols</span><span class="co">](https://rosalind.info/glossary/gene-symbol/)</span>, specifying the</span>
+<span id="cb60-108"><a href="#cb60-108" aria-hidden="true" tabindex="-1"></a>members of the gene set.</span>
+<span id="cb60-109"><a href="#cb60-109" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb60-110"><a href="#cb60-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-111"><a href="#cb60-111" aria-hidden="true" tabindex="-1"></a>Here, I will use the hallmarks collection as an example but the overall approach</span>
+<span id="cb60-112"><a href="#cb60-112" aria-hidden="true" tabindex="-1"></a>can be applied to other gene set collection in a similar way. (You might need</span>
+<span id="cb60-113"><a href="#cb60-113" aria-hidden="true" tabindex="-1"></a>additional / different annotation fields, though.)</span>
+<span id="cb60-114"><a href="#cb60-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-115"><a href="#cb60-115" aria-hidden="true" tabindex="-1"></a>The mouse hallmarks collection is available in different formats, including as a</span>
+<span id="cb60-116"><a href="#cb60-116" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">JSON file</span><span class="co">](https://raw.githubusercontent.com/tomsing1/blog/main/posts/geneset-sqlite-db/mh.all.v2022.1.Mm.json)</span>. </span>
+<span id="cb60-117"><a href="#cb60-117" aria-hidden="true" tabindex="-1"></a>Let's start by reading it into an R session as nested list <span class="in">`mh`</span>.</span>
+<span id="cb60-118"><a href="#cb60-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-121"><a href="#cb60-121" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-122"><a href="#cb60-122" aria-hidden="true" tabindex="-1"></a>json_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
+<span id="cb60-123"><a href="#cb60-123" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/main/posts/"</span>,</span>
+<span id="cb60-124"><a href="#cb60-124" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset-sqlite-db/mh.all.v2022.1.Mm.json"</span>)</span>
+<span id="cb60-125"><a href="#cb60-125" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> jsonlite<span class="sc">::</span><span class="fu">read_json</span>(json_file, <span class="at">simplifyVector =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-126"><a href="#cb60-126" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-127"><a href="#cb60-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-128"><a href="#cb60-128" aria-hidden="true" tabindex="-1"></a>Each of the <span class="in">`r length(mh)`</span> elements in the JSON file corresponds to a different</span>
+<span id="cb60-129"><a href="#cb60-129" aria-hidden="true" tabindex="-1"></a>gene set,</span>
+<span id="cb60-130"><a href="#cb60-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-133"><a href="#cb60-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-134"><a href="#cb60-134" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">names</span>(mh))</span>
+<span id="cb60-135"><a href="#cb60-135" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-136"><a href="#cb60-136" aria-hidden="true" tabindex="-1"></a>each gene set is a nested list with the following elements,</span>
+<span id="cb60-137"><a href="#cb60-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-140"><a href="#cb60-140" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-141"><a href="#cb60-141" aria-hidden="true" tabindex="-1"></a><span class="fu">lengths</span>(mh[[<span class="dv">1</span>]])</span>
+<span id="cb60-142"><a href="#cb60-142" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-143"><a href="#cb60-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-144"><a href="#cb60-144" aria-hidden="true" tabindex="-1"></a>and the gene symbols that make up the set are listed in the <span class="in">`geneSymbols`</span> </span>
+<span id="cb60-145"><a href="#cb60-145" aria-hidden="true" tabindex="-1"></a>vector:</span>
+<span id="cb60-146"><a href="#cb60-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-149"><a href="#cb60-149" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-150"><a href="#cb60-150" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mh[[<span class="dv">1</span>]]<span class="sc">$</span>geneSymbols)</span>
+<span id="cb60-151"><a href="#cb60-151" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-152"><a href="#cb60-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-153"><a href="#cb60-153" aria-hidden="true" tabindex="-1"></a><span class="fu">## noSQL: storing gene sets as unstructured documents</span></span>
+<span id="cb60-154"><a href="#cb60-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-155"><a href="#cb60-155" aria-hidden="true" tabindex="-1"></a>Each gene set is represented as a list - so why not store it in the same</span>
+<span id="cb60-156"><a href="#cb60-156" aria-hidden="true" tabindex="-1"></a>way? A</span>
+<span id="cb60-157"><a href="#cb60-157" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">noSQL</span><span class="co">](https://en.wikipedia.org/wiki/NoSQL)</span></span>
+<span id="cb60-158"><a href="#cb60-158" aria-hidden="true" tabindex="-1"></a>database is designed to store unstructed information, e.g. data models that are </span>
+<span id="cb60-159"><a href="#cb60-159" aria-hidden="true" tabindex="-1"></a>not organized in tables, making them flexible and scalable. </span>
+<span id="cb60-160"><a href="#cb60-160" aria-hidden="true" tabindex="-1"></a>Examples of <span class="in">`noSQL`</span> databases include e.g.</span>
+<span id="cb60-161"><a href="#cb60-161" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Mongodb</span><span class="co">](https://www.mongodb.com/)</span>,</span>
+<span id="cb60-162"><a href="#cb60-162" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">CouchDB</span><span class="co">](https://couchdb.apache.org/)</span></span>
+<span id="cb60-163"><a href="#cb60-163" aria-hidden="true" tabindex="-1"></a>or</span>
+<span id="cb60-164"><a href="#cb60-164" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">AWS dynamodb</span><span class="co">](https://en.wikipedia.org/wiki/Amazon_DynamoDB)</span>.</span>
+<span id="cb60-165"><a href="#cb60-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-166"><a href="#cb60-166" aria-hidden="true" tabindex="-1"></a>In addition, traditional relational database engines - including <span class="in">`SQLite`</span> and</span>
+<span id="cb60-167"><a href="#cb60-167" aria-hidden="true" tabindex="-1"></a><span class="in">`Postgres`</span> - can also store unstructured data in dedicated <span class="in">`JSON`</span> fields.</span>
+<span id="cb60-168"><a href="#cb60-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-169"><a href="#cb60-169" aria-hidden="true" tabindex="-1"></a>The</span>
+<span id="cb60-170"><a href="#cb60-170" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">nodbi R package</span><span class="co">](https://docs.ropensci.org/nodbi/)</span></span>
+<span id="cb60-171"><a href="#cb60-171" aria-hidden="true" tabindex="-1"></a>provides a unified interface to multiple <span class="in">`noSQL`</span> implementations, including </span>
+<span id="cb60-172"><a href="#cb60-172" aria-hidden="true" tabindex="-1"></a><span class="in">`SQLite`</span>. (If you are interested in a deeper look at how to create &amp; query </span>
+<span id="cb60-173"><a href="#cb60-173" aria-hidden="true" tabindex="-1"></a>a JSON field in SQLite with raw SQL, check out</span>
+<span id="cb60-174"><a href="#cb60-174" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">this gist</span><span class="co">](https://gist.github.com/tomsing1/304762fce66353310b254e8b22094a6e)</span></span>
+<span id="cb60-175"><a href="#cb60-175" aria-hidden="true" tabindex="-1"></a>).</span>
+<span id="cb60-176"><a href="#cb60-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-177"><a href="#cb60-177" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating &amp; populating a noSQL database with the `nodbi` R package</span></span>
+<span id="cb60-178"><a href="#cb60-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-179"><a href="#cb60-179" aria-hidden="true" tabindex="-1"></a>To experiment with its <span class="in">`noSQL`</span> mode, we create a temporary <span class="in">`SQLite`</span> database in</span>
+<span id="cb60-180"><a href="#cb60-180" aria-hidden="true" tabindex="-1"></a>memory. (For real data, you definitely want to provide a file path as the </span>
+<span id="cb60-181"><a href="#cb60-181" aria-hidden="true" tabindex="-1"></a><span class="in">`dbname`</span> instead!) </span>
+<span id="cb60-182"><a href="#cb60-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-185"><a href="#cb60-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-186"><a href="#cb60-186" aria-hidden="true" tabindex="-1"></a>src <span class="ot">&lt;-</span> nodbi<span class="sc">::</span><span class="fu">src_sqlite</span>(<span class="at">dbname =</span> <span class="st">":memory:"</span>)</span>
+<span id="cb60-187"><a href="#cb60-187" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-188"><a href="#cb60-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-189"><a href="#cb60-189" aria-hidden="true" tabindex="-1"></a>Right now, the names of the gene sets are only stored as the <span class="in">`names()`</span> of the</span>
+<span id="cb60-190"><a href="#cb60-190" aria-hidden="true" tabindex="-1"></a>list elements, e.g. not in a field _within_ each sub-list itself. To make sure</span>
+<span id="cb60-191"><a href="#cb60-191" aria-hidden="true" tabindex="-1"></a>they are included in each database record, we add them to each sub-list in a new</span>
+<span id="cb60-192"><a href="#cb60-192" aria-hidden="true" tabindex="-1"></a><span class="in">`name`</span> field.</span>
+<span id="cb60-193"><a href="#cb60-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-196"><a href="#cb60-196" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-197"><a href="#cb60-197" aria-hidden="true" tabindex="-1"></a>mh2 <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">names</span>(mh), \(gs) <span class="fu">c</span>(<span class="st">"name"</span> <span class="ot">=</span> gs, mh[[gs]]))</span>
+<span id="cb60-198"><a href="#cb60-198" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-199"><a href="#cb60-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-200"><a href="#cb60-200" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb60-201"><a href="#cb60-201" aria-hidden="true" tabindex="-1"></a><span class="fu">### Unique identifiers</span></span>
+<span id="cb60-202"><a href="#cb60-202" aria-hidden="true" tabindex="-1"></a>The <span class="in">`docdb_create()`</span> function accepts either a data.frame, a JSON string or a</span>
+<span id="cb60-203"><a href="#cb60-203" aria-hidden="true" tabindex="-1"></a>list as its <span class="in">`value`</span> argument.</span>
+<span id="cb60-204"><a href="#cb60-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-205"><a href="#cb60-205" aria-hidden="true" tabindex="-1"></a>If you include a field <span class="in">`_id`</span> in your list, it will be used as the primary key</span>
+<span id="cb60-206"><a href="#cb60-206" aria-hidden="true" tabindex="-1"></a>for each element. If no <span class="in">`_id`</span> field is found, then the <span class="in">`_id`</span> field is created</span>
+<span id="cb60-207"><a href="#cb60-207" aria-hidden="true" tabindex="-1"></a>automatically with a call to the <span class="in">`uuid::UUIDgenerate()`</span> function.</span>
+<span id="cb60-208"><a href="#cb60-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-209"><a href="#cb60-209" aria-hidden="true" tabindex="-1"></a>If you provide a <span class="in">`data.frames()`</span> with row.names, they will be used to populate </span>
+<span id="cb60-210"><a href="#cb60-210" aria-hidden="true" tabindex="-1"></a>the <span class="in">`_id`</span> field.</span>
+<span id="cb60-211"><a href="#cb60-211" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb60-212"><a href="#cb60-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-213"><a href="#cb60-213" aria-hidden="true" tabindex="-1"></a>Now we are ready to create a new SQLite table <span class="in">`hallmarks`</span> and populate it with</span>
+<span id="cb60-214"><a href="#cb60-214" aria-hidden="true" tabindex="-1"></a>the  <span class="in">`r length(mh)`</span> gene sets. </span>
+<span id="cb60-215"><a href="#cb60-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-216"><a href="#cb60-216" aria-hidden="true" tabindex="-1"></a><span class="in">```{r message=FALSE, warning=FALSE}</span></span>
+<span id="cb60-217"><a href="#cb60-217" aria-hidden="true" tabindex="-1"></a><span class="fu">docdb_create</span>(src, <span class="at">key =</span> <span class="st">"hallmarks"</span>, <span class="at">value =</span> mh2)</span>
+<span id="cb60-218"><a href="#cb60-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-219"><a href="#cb60-219" aria-hidden="true" tabindex="-1"></a>We can retrieve the full set of records as a <span class="in">`data.frame`</span> with the <span class="in">`docdb_get()`</span></span>
+<span id="cb60-220"><a href="#cb60-220" aria-hidden="true" tabindex="-1"></a>function. (Here we select a subset of the returned columns due to space </span>
+<span id="cb60-221"><a href="#cb60-221" aria-hidden="true" tabindex="-1"></a>constraints.) Because each gene set contains multiple <span class="in">`geneSymbols`</span>, this field</span>
+<span id="cb60-222"><a href="#cb60-222" aria-hidden="true" tabindex="-1"></a>is a list-column.</span>
+<span id="cb60-223"><a href="#cb60-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-226"><a href="#cb60-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-227"><a href="#cb60-227" aria-hidden="true" tabindex="-1"></a><span class="fu">docdb_get</span>(src, <span class="st">"hallmarks"</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="fu">c</span>(<span class="st">"name"</span>, <span class="st">"geneSymbols"</span>, <span class="st">"pmid"</span>)]</span>
+<span id="cb60-228"><a href="#cb60-228" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-229"><a href="#cb60-229" aria-hidden="true" tabindex="-1"></a><span class="fu">### Querying with JSON filters</span></span>
+<span id="cb60-230"><a href="#cb60-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-231"><a href="#cb60-231" aria-hidden="true" tabindex="-1"></a>More commonly, users might want to retrieve one or more gene sets by name.</span>
+<span id="cb60-232"><a href="#cb60-232" aria-hidden="true" tabindex="-1"></a>The <span class="in">`docdb_query()`</span> function accepts a <span class="in">`query`</span> argument specifying the</span>
+<span id="cb60-233"><a href="#cb60-233" aria-hidden="true" tabindex="-1"></a>desired filter criteria (as </span>
+<span id="cb60-234"><a href="#cb60-234" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">MongoDB JSON</span><span class="co">](https://www.mongodb.com/docs/manual/tutorial/query-documents/#specify-equality-condition)</span></span>
+<span id="cb60-235"><a href="#cb60-235" aria-hidden="true" tabindex="-1"></a>).</span>
+<span id="cb60-236"><a href="#cb60-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-239"><a href="#cb60-239" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-240"><a href="#cb60-240" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> nodbi<span class="sc">::</span><span class="fu">docdb_query</span>(</span>
+<span id="cb60-241"><a href="#cb60-241" aria-hidden="true" tabindex="-1"></a>  <span class="at">src =</span> src, <span class="at">key =</span> <span class="st">"hallmarks"</span>,</span>
+<span id="cb60-242"><a href="#cb60-242" aria-hidden="true" tabindex="-1"></a>  <span class="at">query =</span> <span class="st">'{"name": "HALLMARK_ADIPOGENESIS"}'</span>)</span>
+<span id="cb60-243"><a href="#cb60-243" aria-hidden="true" tabindex="-1"></a>results[, <span class="fu">c</span>(<span class="st">"name"</span>, <span class="st">"geneSymbols"</span>, <span class="st">"pmid"</span>)]</span>
+<span id="cb60-244"><a href="#cb60-244" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-245"><a href="#cb60-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-246"><a href="#cb60-246" aria-hidden="true" tabindex="-1"></a>The <span class="in">`fields`</span> argument allows us to return only specific columns. (Specifying a </span>
+<span id="cb60-247"><a href="#cb60-247" aria-hidden="true" tabindex="-1"></a>field as <span class="in">`1`</span> or <span class="in">`0`</span> will include or exclude it, respectively.)</span>
+<span id="cb60-248"><a href="#cb60-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-251"><a href="#cb60-251" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-252"><a href="#cb60-252" aria-hidden="true" tabindex="-1"></a>nodbi<span class="sc">::</span><span class="fu">docdb_query</span>(</span>
+<span id="cb60-253"><a href="#cb60-253" aria-hidden="true" tabindex="-1"></a>  <span class="at">src =</span> src, <span class="at">key =</span> <span class="st">"hallmarks"</span>,</span>
+<span id="cb60-254"><a href="#cb60-254" aria-hidden="true" tabindex="-1"></a>  <span class="at">query =</span> <span class="st">'{"name": "HALLMARK_ADIPOGENESIS"}'</span>,</span>
+<span id="cb60-255"><a href="#cb60-255" aria-hidden="true" tabindex="-1"></a>  <span class="at">fields =</span> <span class="st">'{"name": 1, "geneSymbols": 1}'</span></span>
+<span id="cb60-256"><a href="#cb60-256" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-257"><a href="#cb60-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-258"><a href="#cb60-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-259"><a href="#cb60-259" aria-hidden="true" tabindex="-1"></a>We can also identify gene sets containing at least one of the given gene</span>
+<span id="cb60-260"><a href="#cb60-260" aria-hidden="true" tabindex="-1"></a>symbols:</span>
+<span id="cb60-261"><a href="#cb60-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-264"><a href="#cb60-264" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-265"><a href="#cb60-265" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> nodbi<span class="sc">::</span><span class="fu">docdb_query</span>(</span>
+<span id="cb60-266"><a href="#cb60-266" aria-hidden="true" tabindex="-1"></a>  <span class="at">src =</span> src, <span class="at">key =</span> <span class="st">"hallmarks"</span>,</span>
+<span id="cb60-267"><a href="#cb60-267" aria-hidden="true" tabindex="-1"></a>  <span class="at">query =</span> <span class="fu">paste0</span>(<span class="st">'{"$or":['</span>,</span>
+<span id="cb60-268"><a href="#cb60-268" aria-hidden="true" tabindex="-1"></a>                 <span class="st">'{"geneSymbols": "Abca1"},'</span>, </span>
+<span id="cb60-269"><a href="#cb60-269" aria-hidden="true" tabindex="-1"></a>                 <span class="st">'{"geneSymbols": "Gapdh"}'</span>,</span>
+<span id="cb60-270"><a href="#cb60-270" aria-hidden="true" tabindex="-1"></a>                 <span class="st">']}'</span>),</span>
+<span id="cb60-271"><a href="#cb60-271" aria-hidden="true" tabindex="-1"></a>  <span class="at">fields =</span> <span class="st">'{"name": 1, "geneSymbols": 1}'</span></span>
+<span id="cb60-272"><a href="#cb60-272" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-273"><a href="#cb60-273" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-274"><a href="#cb60-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-275"><a href="#cb60-275" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb60-276"><a href="#cb60-276" aria-hidden="true" tabindex="-1"></a><span class="fu">### Unnesting columns</span></span>
+<span id="cb60-277"><a href="#cb60-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-278"><a href="#cb60-278" aria-hidden="true" tabindex="-1"></a>Because the set contains more than one <span class="in">`geneSymbol`</span>, we obtain a nested</span>
+<span id="cb60-279"><a href="#cb60-279" aria-hidden="true" tabindex="-1"></a>data.frame. We can unnest it e.g. with the <span class="in">`tidyr`</span> R package</span>
+<span id="cb60-280"><a href="#cb60-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-283"><a href="#cb60-283" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-284"><a href="#cb60-284" aria-hidden="true" tabindex="-1"></a>tidyr<span class="sc">::</span><span class="fu">unnest</span>(results, <span class="at">cols =</span> <span class="fu">c</span>(geneSymbols))</span>
+<span id="cb60-285"><a href="#cb60-285" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-286"><a href="#cb60-286" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb60-287"><a href="#cb60-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-288"><a href="#cb60-288" aria-hidden="true" tabindex="-1"></a><span class="fu">### Querying using SQL</span></span>
+<span id="cb60-289"><a href="#cb60-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-290"><a href="#cb60-290" aria-hidden="true" tabindex="-1"></a>Formulating the queries as JSON strings is tedious, though. Alternatively,</span>
+<span id="cb60-291"><a href="#cb60-291" aria-hidden="true" tabindex="-1"></a>SQLite also supports querying JSON columns using SQL (muddying the border</span>
+<span id="cb60-292"><a href="#cb60-292" aria-hidden="true" tabindex="-1"></a>between <span class="in">`noSQL`</span> and <span class="in">`SQL`</span>). For example, we can use SQLite's </span>
+<span id="cb60-293"><a href="#cb60-293" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">-&gt; and -&gt;&gt; operators</span><span class="co">](https://www.sqlite.org/json1.html#jptr)</span> and the </span>
+<span id="cb60-294"><a href="#cb60-294" aria-hidden="true" tabindex="-1"></a><span class="in">`json_each()`</span> SQL function to create a query that returns the names of all gene</span>
+<span id="cb60-295"><a href="#cb60-295" aria-hidden="true" tabindex="-1"></a>sets that include e.g. the <span class="in">`Abca1`</span> gene:</span>
+<span id="cb60-296"><a href="#cb60-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-297"><a href="#cb60-297" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
+<span id="cb60-298"><a href="#cb60-298" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> src<span class="sc">$</span>con</span>
+<span id="cb60-299"><a href="#cb60-299" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-300"><a href="#cb60-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-301"><a href="#cb60-301" aria-hidden="true" tabindex="-1"></a><span class="in">```{sql connection=con}</span></span>
+<span id="cb60-302"><a href="#cb60-302" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> hallmarks<span class="ch">.</span>json<span class="op">-&gt;&gt;</span><span class="st">'name'</span> <span class="kw">as</span> name</span>
+<span id="cb60-303"><a href="#cb60-303" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> hallmarks, json_each(hallmarks<span class="ch">.</span>json, <span class="st">'$.geneSymbols'</span>)</span>
+<span id="cb60-304"><a href="#cb60-304" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> json_each<span class="ch">.</span>value <span class="kw">LIKE</span> <span class="st">'%Abca1%'</span></span>
+<span id="cb60-305"><a href="#cb60-305" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-306"><a href="#cb60-306" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-307"><a href="#cb60-307" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
+<span id="cb60-308"><a href="#cb60-308" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
+<span id="cb60-309"><a href="#cb60-309" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(src)</span>
+<span id="cb60-310"><a href="#cb60-310" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-311"><a href="#cb60-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-312"><a href="#cb60-312" aria-hidden="true" tabindex="-1"></a>Depending on comfortable you are reading / writing SQL, this might be a nicer</span>
+<span id="cb60-313"><a href="#cb60-313" aria-hidden="true" tabindex="-1"></a>approach. </span>
+<span id="cb60-314"><a href="#cb60-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-315"><a href="#cb60-315" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb60-316"><a href="#cb60-316" aria-hidden="true" tabindex="-1"></a><span class="fu">### Limitations</span></span>
+<span id="cb60-317"><a href="#cb60-317" aria-hidden="true" tabindex="-1"></a>SQLite's JSON operators are somewhat limited, e.g. there is no straightforward</span>
+<span id="cb60-318"><a href="#cb60-318" aria-hidden="true" tabindex="-1"></a>way to ask whether a column _contains_ one or more gene identifiers (e.g. the</span>
+<span id="cb60-319"><a href="#cb60-319" aria-hidden="true" tabindex="-1"></a>query we performed above using a query JSON string). Indexing a SQLite JSON</span>
+<span id="cb60-320"><a href="#cb60-320" aria-hidden="true" tabindex="-1"></a>column also comes with limitations. </span>
+<span id="cb60-321"><a href="#cb60-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-322"><a href="#cb60-322" aria-hidden="true" tabindex="-1"></a>The Postgres database engine </span>
+<span id="cb60-323"><a href="#cb60-323" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">supports JSON and binary JSONB fields)</span><span class="co">](https://www.postgresql.org/docs/current/functions-json.html)</span> </span>
+<span id="cb60-324"><a href="#cb60-324" aria-hidden="true" tabindex="-1"></a>with indexing &amp; additional operators like the <span class="in">`@&gt;`</span> contains operator.</span>
+<span id="cb60-325"><a href="#cb60-325" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb60-326"><a href="#cb60-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-327"><a href="#cb60-327" aria-hidden="true" tabindex="-1"></a><span class="fu">### noSQL summary</span></span>
+<span id="cb60-328"><a href="#cb60-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-329"><a href="#cb60-329" aria-hidden="true" tabindex="-1"></a>This example highlights some of the advantages of a noSQL solution:</span>
+<span id="cb60-330"><a href="#cb60-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-331"><a href="#cb60-331" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Rapid ingestion of data without the need for a rigid schema.</span>
+<span id="cb60-332"><a href="#cb60-332" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Simple retrieval of individual object identified by their primary key.</span>
+<span id="cb60-333"><a href="#cb60-333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-334"><a href="#cb60-334" aria-hidden="true" tabindex="-1"></a>But also some of the disadvantages:</span>
+<span id="cb60-335"><a href="#cb60-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-336"><a href="#cb60-336" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Queries that descend into the (potentially nested) objects must be carefully</span>
+<span id="cb60-337"><a href="#cb60-337" aria-hidden="true" tabindex="-1"></a>constructed.</span>
+<span id="cb60-338"><a href="#cb60-338" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Increasing database performance with indices is more complicated than for </span>
+<span id="cb60-339"><a href="#cb60-339" aria-hidden="true" tabindex="-1"></a>relational databases (see below.)</span>
+<span id="cb60-340"><a href="#cb60-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-341"><a href="#cb60-341" aria-hidden="true" tabindex="-1"></a>Next, we will try another approach: reshaping the gene set collection into a set</span>
+<span id="cb60-342"><a href="#cb60-342" aria-hidden="true" tabindex="-1"></a>of tables and modeling the relationship between them.s</span>
+<span id="cb60-343"><a href="#cb60-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-344"><a href="#cb60-344" aria-hidden="true" tabindex="-1"></a><span class="fu">## SQL: storing gene sets in a relational database</span></span>
+<span id="cb60-345"><a href="#cb60-345" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-346"><a href="#cb60-346" aria-hidden="true" tabindex="-1"></a>R has excellent support for interacting with </span>
+<span id="cb60-347"><a href="#cb60-347" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">relational database</span><span class="co">](https://en.wikipedia.org/wiki/Relational_database)</span>,</span>
+<span id="cb60-348"><a href="#cb60-348" aria-hidden="true" tabindex="-1"></a>e.g. via the foundational</span>
+<span id="cb60-349"><a href="#cb60-349" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">'Common Database Interface' (DBI) package</span><span class="co">](https://cran.r-project.org/package=DBI)</span></span>
+<span id="cb60-350"><a href="#cb60-350" aria-hidden="true" tabindex="-1"></a>and the numerous database-specific packages built on top of it, including the</span>
+<span id="cb60-351"><a href="#cb60-351" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">RSQLite</span><span class="co">](https://cran.r-project.org/web/packages/RSQLite/index.html)</span>,</span>
+<span id="cb60-352"><a href="#cb60-352" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">RPostgres</span><span class="co">](https://cran.r-project.org/web/packages/RPostgres/index.html)</span></span>
+<span id="cb60-353"><a href="#cb60-353" aria-hidden="true" tabindex="-1"></a>and many others.</span>
+<span id="cb60-354"><a href="#cb60-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-355"><a href="#cb60-355" aria-hidden="true" tabindex="-1"></a>To take advantage of a relational database we have perform a little more work </span>
+<span id="cb60-356"><a href="#cb60-356" aria-hidden="true" tabindex="-1"></a>up-front. But this effort is amply repaid by simplifying subsequent queries.</span>
+<span id="cb60-357"><a href="#cb60-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-358"><a href="#cb60-358" aria-hidden="true" tabindex="-1"></a><span class="fu">### Learning from Bioconductor: BiocSet's three tables</span></span>
+<span id="cb60-359"><a href="#cb60-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-360"><a href="#cb60-360" aria-hidden="true" tabindex="-1"></a>The <span class="in">`BiocSet`</span> Class from the eponymous Bioconductor package represents a </span>
+<span id="cb60-361"><a href="#cb60-361" aria-hidden="true" tabindex="-1"></a>collection of gene sets in three tibbles. Let's create a simple <span class="in">`BiocSet`</span> with</span>
+<span id="cb60-362"><a href="#cb60-362" aria-hidden="true" tabindex="-1"></a>two gene sets for illustration:</span>
+<span id="cb60-363"><a href="#cb60-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-366"><a href="#cb60-366" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-367"><a href="#cb60-367" aria-hidden="true" tabindex="-1"></a>set_names <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(mh2[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="st">"name"</span>)</span>
+<span id="cb60-368"><a href="#cb60-368" aria-hidden="true" tabindex="-1"></a>gene_ids <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map</span>(mh2[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], <span class="st">"geneSymbols"</span>)</span>
+<span id="cb60-369"><a href="#cb60-369" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">BiocSet</span>(<span class="fu">setNames</span>(gene_ids, set_names))</span>
+<span id="cb60-370"><a href="#cb60-370" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-371"><a href="#cb60-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-372"><a href="#cb60-372" aria-hidden="true" tabindex="-1"></a>The first two tibbles represent genes (called <span class="in">`elements`</span>) and <span class="in">`sets`</span>, </span>
+<span id="cb60-373"><a href="#cb60-373" aria-hidden="true" tabindex="-1"></a>respectively:</span>
+<span id="cb60-374"><a href="#cb60-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-375"><a href="#cb60-375" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span><span class="in">`es_element`</span>: one row per gene</span>
+<span id="cb60-376"><a href="#cb60-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-379"><a href="#cb60-379" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-380"><a href="#cb60-380" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">es_element</span>(es))</span>
+<span id="cb60-381"><a href="#cb60-381" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-382"><a href="#cb60-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-383"><a href="#cb60-383" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span><span class="in">`es_set`</span>: one row per gene set</span>
+<span id="cb60-384"><a href="#cb60-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-387"><a href="#cb60-387" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-388"><a href="#cb60-388" aria-hidden="true" tabindex="-1"></a><span class="fu">es_set</span>(es)</span>
+<span id="cb60-389"><a href="#cb60-389" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-390"><a href="#cb60-390" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-391"><a href="#cb60-391" aria-hidden="true" tabindex="-1"></a>The third table establishes the </span>
+<span id="cb60-392"><a href="#cb60-392" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">many-to-many relationship</span><span class="co">]</span>(https://en.wikipedia.org/wiki/Many-to-many_(data_model))</span>
+<span id="cb60-393"><a href="#cb60-393" aria-hidden="true" tabindex="-1"></a>between genes and sets, e.g. it tracks which gene is a member of each set.</span>
+<span id="cb60-394"><a href="#cb60-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-395"><a href="#cb60-395" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span><span class="in">`es_elementset`</span>: gene x set combination</span>
+<span id="cb60-396"><a href="#cb60-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-399"><a href="#cb60-399" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-400"><a href="#cb60-400" aria-hidden="true" tabindex="-1"></a><span class="co"># we are showing 10 random rows</span></span>
+<span id="cb60-401"><a href="#cb60-401" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb60-402"><a href="#cb60-402" aria-hidden="true" tabindex="-1"></a><span class="fu">es_elementset</span>(es)[<span class="fu">sample</span>(<span class="fu">nrow</span>(<span class="fu">es_elementset</span>(es)), <span class="at">size =</span> <span class="dv">10</span>), ]</span>
+<span id="cb60-403"><a href="#cb60-403" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-404"><a href="#cb60-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-405"><a href="#cb60-405" aria-hidden="true" tabindex="-1"></a>Each of these tables can be augmented with additional metadata, e.g. we could</span>
+<span id="cb60-406"><a href="#cb60-406" aria-hidden="true" tabindex="-1"></a>add </span>
+<span id="cb60-407"><a href="#cb60-407" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Entrez</span><span class="co">](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1761442/)</span></span>
+<span id="cb60-408"><a href="#cb60-408" aria-hidden="true" tabindex="-1"></a>gene identifiers to the <span class="in">`es_element`</span> (see below), or long-form descriptions for</span>
+<span id="cb60-409"><a href="#cb60-409" aria-hidden="true" tabindex="-1"></a>each set to the <span class="in">`es_set`</span> tibble.</span>
+<span id="cb60-410"><a href="#cb60-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-411"><a href="#cb60-411" aria-hidden="true" tabindex="-1"></a>These three tables can easily be represented in a relational database, using</span>
+<span id="cb60-412"><a href="#cb60-412" aria-hidden="true" tabindex="-1"></a>the <span class="in">`element`</span> and <span class="in">`set`</span> columns as primary keys.</span>
+<span id="cb60-413"><a href="#cb60-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-414"><a href="#cb60-414" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating and populating a relational database</span></span>
+<span id="cb60-415"><a href="#cb60-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-416"><a href="#cb60-416" aria-hidden="true" tabindex="-1"></a>Let's start with a fresh SQLite database.</span>
+<span id="cb60-417"><a href="#cb60-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-420"><a href="#cb60-420" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-421"><a href="#cb60-421" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RSQLite<span class="sc">::</span><span class="fu">SQLite</span>(), <span class="st">":memory:"</span>)</span>
+<span id="cb60-422"><a href="#cb60-422" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-423"><a href="#cb60-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-424"><a href="#cb60-424" aria-hidden="true" tabindex="-1"></a>First, we create the <span class="in">`geneset`</span> data.frame that lists all gene sets, and we also</span>
+<span id="cb60-425"><a href="#cb60-425" aria-hidden="true" tabindex="-1"></a>include their MSigDb URLs as metadata:</span>
+<span id="cb60-426"><a href="#cb60-426" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-429"><a href="#cb60-429" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-430"><a href="#cb60-430" aria-hidden="true" tabindex="-1"></a>geneset <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb60-431"><a href="#cb60-431" aria-hidden="true" tabindex="-1"></a>  <span class="at">geneset =</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(mh2, <span class="st">"name"</span>),</span>
+<span id="cb60-432"><a href="#cb60-432" aria-hidden="true" tabindex="-1"></a>  <span class="at">url =</span> purrr<span class="sc">::</span><span class="fu">map_chr</span>(mh2, <span class="st">"msigdbURL"</span>))</span>
+<span id="cb60-433"><a href="#cb60-433" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(geneset)</span>
+<span id="cb60-434"><a href="#cb60-434" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-435"><a href="#cb60-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-436"><a href="#cb60-436" aria-hidden="true" tabindex="-1"></a>Next, we identify all unique gene symbols, annotate them with their Entrez ids</span>
+<span id="cb60-437"><a href="#cb60-437" aria-hidden="true" tabindex="-1"></a>(using the</span>
+<span id="cb60-438"><a href="#cb60-438" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">org.Mm.eg.db</span><span class="co">](https://bioconductor.org/packages/release/data/annotation/html/org.Mm.eg.db.html)</span></span>
+<span id="cb60-439"><a href="#cb60-439" aria-hidden="true" tabindex="-1"></a>Bioconductor annotation package), and store both identifier types in the</span>
+<span id="cb60-440"><a href="#cb60-440" aria-hidden="true" tabindex="-1"></a><span class="in">`element`</span> data.frame.</span>
+<span id="cb60-441"><a href="#cb60-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-442"><a href="#cb60-442" aria-hidden="true" tabindex="-1"></a><span class="in">```{r warning=FALSE, message=FALSE}</span></span>
+<span id="cb60-443"><a href="#cb60-443" aria-hidden="true" tabindex="-1"></a>gene_symbols <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">unlist</span>(purrr<span class="sc">::</span><span class="fu">map</span>(mh2, <span class="st">"geneSymbols"</span>)))</span>
+<span id="cb60-444"><a href="#cb60-444" aria-hidden="true" tabindex="-1"></a>element <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb60-445"><a href="#cb60-445" aria-hidden="true" tabindex="-1"></a>  <span class="at">element =</span> gene_symbols,</span>
+<span id="cb60-446"><a href="#cb60-446" aria-hidden="true" tabindex="-1"></a>  <span class="at">entrezid =</span> <span class="fu">mapIds</span>(org.Mm.eg.db, <span class="at">keys =</span> gene_symbols, <span class="at">keytype =</span> <span class="st">"SYMBOL"</span>, </span>
+<span id="cb60-447"><a href="#cb60-447" aria-hidden="true" tabindex="-1"></a>                    <span class="at">column =</span> <span class="st">"ENTREZID"</span>)</span>
+<span id="cb60-448"><a href="#cb60-448" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb60-449"><a href="#cb60-449" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(element)</span>
+<span id="cb60-450"><a href="#cb60-450" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-451"><a href="#cb60-451" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-452"><a href="#cb60-452" aria-hidden="true" tabindex="-1"></a>Finally, we create the <span class="in">`element_set`</span> *join table*, connecting gene sets to</span>
+<span id="cb60-453"><a href="#cb60-453" aria-hidden="true" tabindex="-1"></a>their constituent genes:</span>
+<span id="cb60-454"><a href="#cb60-454" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-457"><a href="#cb60-457" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-458"><a href="#cb60-458" aria-hidden="true" tabindex="-1"></a>elementset <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map_df</span>(mh2, \(gs) {</span>
+<span id="cb60-459"><a href="#cb60-459" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(gs, </span>
+<span id="cb60-460"><a href="#cb60-460" aria-hidden="true" tabindex="-1"></a>       <span class="fu">data.frame</span>(</span>
+<span id="cb60-461"><a href="#cb60-461" aria-hidden="true" tabindex="-1"></a>         <span class="at">element =</span> geneSymbols,</span>
+<span id="cb60-462"><a href="#cb60-462" aria-hidden="true" tabindex="-1"></a>         <span class="at">geneset =</span> name</span>
+<span id="cb60-463"><a href="#cb60-463" aria-hidden="true" tabindex="-1"></a>       )</span>
+<span id="cb60-464"><a href="#cb60-464" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb60-465"><a href="#cb60-465" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb60-466"><a href="#cb60-466" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(elementset)</span>
+<span id="cb60-467"><a href="#cb60-467" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-468"><a href="#cb60-468" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-469"><a href="#cb60-469" aria-hidden="true" tabindex="-1"></a>Next, we write each data.frame into a separate table in our SQLite database.</span>
+<span id="cb60-470"><a href="#cb60-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-471"><a href="#cb60-471" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb60-472"><a href="#cb60-472" aria-hidden="true" tabindex="-1"></a><span class="fu">### Verifying foreign keys</span></span>
+<span id="cb60-473"><a href="#cb60-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-474"><a href="#cb60-474" aria-hidden="true" tabindex="-1"></a>By default, SQLite does </span>
+<span id="cb60-475"><a href="#cb60-475" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">not verify that foreign keys actually exist</span><span class="co">](https://www.sqlite.org/pragma.html#pragma_foreign_keys)</span></span>
+<span id="cb60-476"><a href="#cb60-476" aria-hidden="true" tabindex="-1"></a>in the referenced table. To make this a requirement, we can enable checking</span>
+<span id="cb60-477"><a href="#cb60-477" aria-hidden="true" tabindex="-1"></a>with the following command:</span>
+<span id="cb60-478"><a href="#cb60-478" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-481"><a href="#cb60-481" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-482"><a href="#cb60-482" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, <span class="st">'PRAGMA foreign_keys = 1;'</span>)</span>
+<span id="cb60-483"><a href="#cb60-483" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-484"><a href="#cb60-484" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb60-485"><a href="#cb60-485" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-488"><a href="#cb60-488" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-489"><a href="#cb60-489" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, </span>
+<span id="cb60-490"><a href="#cb60-490" aria-hidden="true" tabindex="-1"></a>          <span class="st">"CREATE TABLE tbl_geneset (geneset TEXT PRIMARY KEY, url TEXT)"</span>)</span>
+<span id="cb60-491"><a href="#cb60-491" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="at">name =</span> <span class="st">"tbl_geneset"</span>, <span class="at">value =</span> geneset, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-492"><a href="#cb60-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-493"><a href="#cb60-493" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, </span>
+<span id="cb60-494"><a href="#cb60-494" aria-hidden="true" tabindex="-1"></a>          <span class="st">"CREATE TABLE tbl_element (element TEXT PRIMARY KEY, entrezid TEXT)"</span>)</span>
+<span id="cb60-495"><a href="#cb60-495" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="at">name =</span> <span class="st">"tbl_element"</span>, <span class="at">value =</span> element, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-496"><a href="#cb60-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-497"><a href="#cb60-497" aria-hidden="true" tabindex="-1"></a><span class="fu">dbExecute</span>(con, <span class="fu">paste</span>(</span>
+<span id="cb60-498"><a href="#cb60-498" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CREATE TABLE tbl_elementset ("</span>,</span>
+<span id="cb60-499"><a href="#cb60-499" aria-hidden="true" tabindex="-1"></a>  <span class="st">"element TEXT,"</span>, </span>
+<span id="cb60-500"><a href="#cb60-500" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset TEXT,"</span>,</span>
+<span id="cb60-501"><a href="#cb60-501" aria-hidden="true" tabindex="-1"></a>  <span class="st">"FOREIGN KEY(geneset) REFERENCES tbl_geneset(geneset),"</span>,</span>
+<span id="cb60-502"><a href="#cb60-502" aria-hidden="true" tabindex="-1"></a>  <span class="st">"FOREIGN KEY(element) REFERENCES tbl_element(element)"</span>,</span>
+<span id="cb60-503"><a href="#cb60-503" aria-hidden="true" tabindex="-1"></a>  <span class="st">")"</span>)</span>
+<span id="cb60-504"><a href="#cb60-504" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb60-505"><a href="#cb60-505" aria-hidden="true" tabindex="-1"></a><span class="fu">dbWriteTable</span>(con, <span class="at">name =</span> <span class="st">"tbl_elementset"</span>, <span class="at">value =</span> elementset, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-506"><a href="#cb60-506" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-509"><a href="#cb60-509" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-510"><a href="#cb60-510" aria-hidden="true" tabindex="-1"></a><span class="fu">dbListTables</span>(con)</span>
+<span id="cb60-511"><a href="#cb60-511" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-512"><a href="#cb60-512" aria-hidden="true" tabindex="-1"></a><span class="fu">### Plotting relationships</span></span>
+<span id="cb60-513"><a href="#cb60-513" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-514"><a href="#cb60-514" aria-hidden="true" tabindex="-1"></a>As we create and need to keep track of multiple tables, it is useful to</span>
+<span id="cb60-515"><a href="#cb60-515" aria-hidden="true" tabindex="-1"></a>visualize their contents (fields, columns) and relationships in a</span>
+<span id="cb60-516"><a href="#cb60-516" aria-hidden="true" tabindex="-1"></a>*model diagram*. The awesome</span>
+<span id="cb60-517"><a href="#cb60-517" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">dm R package</span><span class="co">](https://dm.cynkra.com/index.html)</span>, </span>
+<span id="cb60-518"><a href="#cb60-518" aria-hidden="true" tabindex="-1"></a>designed to bring an existing relational data model into your R session, can</span>
+<span id="cb60-519"><a href="#cb60-519" aria-hidden="true" tabindex="-1"></a>be used to generate diagrams like the one shown below. (<span class="in">`dm`</span> can identify the</span>
+<span id="cb60-520"><a href="#cb60-520" aria-hidden="true" tabindex="-1"></a>keys in postgres and SQL server database engines automatically, but for SQLite</span>
+<span id="cb60-521"><a href="#cb60-521" aria-hidden="true" tabindex="-1"></a>we need to specify them ourselves with the <span class="in">`dm_add_pk()`</span> and <span class="in">`dm_add_fk()`</span></span>
+<span id="cb60-522"><a href="#cb60-522" aria-hidden="true" tabindex="-1"></a>functions.)</span>
+<span id="cb60-523"><a href="#cb60-523" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-524"><a href="#cb60-524" aria-hidden="true" tabindex="-1"></a><span class="in">```{r message=FALSE}</span></span>
+<span id="cb60-525"><a href="#cb60-525" aria-hidden="true" tabindex="-1"></a><span class="co">#| out-width: "50%"</span></span>
+<span id="cb60-526"><a href="#cb60-526" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: "center"</span></span>
+<span id="cb60-527"><a href="#cb60-527" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig.widh: 5</span></span>
+<span id="cb60-528"><a href="#cb60-528" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig.height: 2.5</span></span>
+<span id="cb60-529"><a href="#cb60-529" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Model diagram"</span></span>
+<span id="cb60-530"><a href="#cb60-530" aria-hidden="true" tabindex="-1"></a><span class="fu">dm_from_con</span>(con, <span class="at">learn_keys =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-531"><a href="#cb60-531" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_pk</span>(tbl_element, element) <span class="sc">%&gt;%</span></span>
+<span id="cb60-532"><a href="#cb60-532" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_pk</span>(tbl_geneset, geneset) <span class="sc">%&gt;%</span></span>
+<span id="cb60-533"><a href="#cb60-533" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_fk</span>(tbl_elementset, element, tbl_element) <span class="sc">%&gt;%</span></span>
+<span id="cb60-534"><a href="#cb60-534" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_fk</span>(tbl_elementset, geneset, tbl_geneset) <span class="sc">%&gt;%</span></span>
+<span id="cb60-535"><a href="#cb60-535" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_draw</span>(<span class="at">view_type =</span> <span class="st">"all"</span>)</span>
+<span id="cb60-536"><a href="#cb60-536" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-537"><a href="#cb60-537" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-538"><a href="#cb60-538" aria-hidden="true" tabindex="-1"></a><span class="fu">### Querying the database</span></span>
+<span id="cb60-539"><a href="#cb60-539" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-540"><a href="#cb60-540" aria-hidden="true" tabindex="-1"></a>Great! Now we are ready to query our database. To make our lives easier, we will</span>
+<span id="cb60-541"><a href="#cb60-541" aria-hidden="true" tabindex="-1"></a>use the </span>
+<span id="cb60-542"><a href="#cb60-542" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">dplyr</span><span class="co">](https://cran.r-project.org/package=dplyr)</span></span>
+<span id="cb60-543"><a href="#cb60-543" aria-hidden="true" tabindex="-1"></a>package to translate our R syntax into SQL. (But we could just as well use plain</span>
+<span id="cb60-544"><a href="#cb60-544" aria-hidden="true" tabindex="-1"></a>SQL instead.)</span>
+<span id="cb60-545"><a href="#cb60-545" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-546"><a href="#cb60-546" aria-hidden="true" tabindex="-1"></a>First we define the remote tables by connecting to our brand new database:</span>
+<span id="cb60-547"><a href="#cb60-547" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-550"><a href="#cb60-550" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-551"><a href="#cb60-551" aria-hidden="true" tabindex="-1"></a>tbl_geneset <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"tbl_geneset"</span>)</span>
+<span id="cb60-552"><a href="#cb60-552" aria-hidden="true" tabindex="-1"></a>tbl_element <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"tbl_element"</span>)</span>
+<span id="cb60-553"><a href="#cb60-553" aria-hidden="true" tabindex="-1"></a>tbl_elementset <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"tbl_elementset"</span>)</span>
+<span id="cb60-554"><a href="#cb60-554" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-555"><a href="#cb60-555" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-556"><a href="#cb60-556" aria-hidden="true" tabindex="-1"></a>Let's return the gene symbols and entrez identifiers that make up the </span>
+<span id="cb60-557"><a href="#cb60-557" aria-hidden="true" tabindex="-1"></a><span class="in">`HALLMARK_APOPTOSIS`</span> gene set and display the first 5 (in alphabetical order of</span>
+<span id="cb60-558"><a href="#cb60-558" aria-hidden="true" tabindex="-1"></a>the gene symbols).</span>
+<span id="cb60-559"><a href="#cb60-559" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-562"><a href="#cb60-562" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-563"><a href="#cb60-563" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> tbl_elementset <span class="sc">%&gt;%</span> </span>
+<span id="cb60-564"><a href="#cb60-564" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(geneset <span class="sc">==</span> <span class="st">"HALLMARK_ADIPOGENESIS"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-565"><a href="#cb60-565" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">inner_join</span>(tbl_element, <span class="at">by =</span> <span class="st">"element"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-566"><a href="#cb60-566" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">slice_min</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="at">order_by =</span> element)</span>
+<span id="cb60-567"><a href="#cb60-567" aria-hidden="true" tabindex="-1"></a>result</span>
+<span id="cb60-568"><a href="#cb60-568" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-569"><a href="#cb60-569" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-570"><a href="#cb60-570" aria-hidden="true" tabindex="-1"></a>And now let's add the gene set's URL as well:</span>
+<span id="cb60-571"><a href="#cb60-571" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-574"><a href="#cb60-574" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-575"><a href="#cb60-575" aria-hidden="true" tabindex="-1"></a>result <span class="sc">%&gt;%</span></span>
+<span id="cb60-576"><a href="#cb60-576" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">left_join</span>(tbl_geneset, <span class="at">by =</span> <span class="st">"geneset"</span>)</span>
+<span id="cb60-577"><a href="#cb60-577" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-578"><a href="#cb60-578" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-579"><a href="#cb60-579" aria-hidden="true" tabindex="-1"></a><span class="fu">### Pulling data into a BiocSet</span></span>
+<span id="cb60-580"><a href="#cb60-580" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-581"><a href="#cb60-581" aria-hidden="true" tabindex="-1"></a>Finally, we can easily pull selected (or even all) gene sets into a Bioconductor</span>
+<span id="cb60-582"><a href="#cb60-582" aria-hidden="true" tabindex="-1"></a><span class="in">`BiocSet`</span> object for analysis in R. Importantly, the database does _not require_</span>
+<span id="cb60-583"><a href="#cb60-583" aria-hidden="true" tabindex="-1"></a>us to use R: e.g. python users can connect to the same SQLite database </span>
+<span id="cb60-584"><a href="#cb60-584" aria-hidden="true" tabindex="-1"></a>(e.g. using </span>
+<span id="cb60-585"><a href="#cb60-585" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">sqlalchemy</span><span class="co">](https://www.sqlalchemy.org/)</span></span>
+<span id="cb60-586"><a href="#cb60-586" aria-hidden="true" tabindex="-1"></a>) and retrieve the information in whatever form is most useful to them.</span>
+<span id="cb60-587"><a href="#cb60-587" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-588"><a href="#cb60-588" aria-hidden="true" tabindex="-1"></a>For example, let's retrieve all gene sets whose name ends in the letter <span class="in">`N`</span>,</span>
+<span id="cb60-589"><a href="#cb60-589" aria-hidden="true" tabindex="-1"></a>store them in a list and create a <span class="in">`BiocSet`</span> object.</span>
+<span id="cb60-590"><a href="#cb60-590" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-593"><a href="#cb60-593" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-594"><a href="#cb60-594" aria-hidden="true" tabindex="-1"></a>gene_set_list <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb60-595"><a href="#cb60-595" aria-hidden="true" tabindex="-1"></a>  tbl_elementset <span class="sc">%&gt;%</span> </span>
+<span id="cb60-596"><a href="#cb60-596" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(geneset <span class="sc">%like%</span> <span class="st">'%N'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb60-597"><a href="#cb60-597" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>(), </span>
+<span id="cb60-598"><a href="#cb60-598" aria-hidden="true" tabindex="-1"></a>  <span class="fu">split</span>(element, geneset)</span>
+<span id="cb60-599"><a href="#cb60-599" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-600"><a href="#cb60-600" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">BiocSet</span>(gene_set_list)</span>
+<span id="cb60-601"><a href="#cb60-601" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-602"><a href="#cb60-602" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-603"><a href="#cb60-603" aria-hidden="true" tabindex="-1"></a>Next, we add gene set metadata to the <span class="in">`es_set`</span> tibble, by joining it with the</span>
+<span id="cb60-604"><a href="#cb60-604" aria-hidden="true" tabindex="-1"></a>(richer) information in the database. This will add the <span class="in">`url`</span> column.</span>
+<span id="cb60-605"><a href="#cb60-605" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-608"><a href="#cb60-608" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-609"><a href="#cb60-609" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">left_join_set</span>(es, </span>
+<span id="cb60-610"><a href="#cb60-610" aria-hidden="true" tabindex="-1"></a>  tbl_geneset, <span class="at">by =</span> <span class="fu">c</span>(<span class="at">set =</span> <span class="st">"geneset"</span>), </span>
+<span id="cb60-611"><a href="#cb60-611" aria-hidden="true" tabindex="-1"></a>  <span class="at">copy =</span> <span class="cn">TRUE</span></span>
+<span id="cb60-612"><a href="#cb60-612" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-613"><a href="#cb60-613" aria-hidden="true" tabindex="-1"></a><span class="fu">es_set</span>(es)</span>
+<span id="cb60-614"><a href="#cb60-614" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-615"><a href="#cb60-615" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-616"><a href="#cb60-616" aria-hidden="true" tabindex="-1"></a>And finally, let's also add the <span class="in">`entrezid`</span> column from out database </span>
+<span id="cb60-617"><a href="#cb60-617" aria-hidden="true" tabindex="-1"></a>to the <span class="in">`es_element`</span> table:</span>
+<span id="cb60-618"><a href="#cb60-618" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-621"><a href="#cb60-621" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-622"><a href="#cb60-622" aria-hidden="true" tabindex="-1"></a>es <span class="ot">&lt;-</span> <span class="fu">left_join_element</span>(es, </span>
+<span id="cb60-623"><a href="#cb60-623" aria-hidden="true" tabindex="-1"></a>  tbl_element, <span class="at">by =</span> <span class="st">"element"</span>, </span>
+<span id="cb60-624"><a href="#cb60-624" aria-hidden="true" tabindex="-1"></a>  <span class="at">copy =</span> <span class="cn">TRUE</span></span>
+<span id="cb60-625"><a href="#cb60-625" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-626"><a href="#cb60-626" aria-hidden="true" tabindex="-1"></a><span class="fu">es_element</span>(es)</span>
+<span id="cb60-627"><a href="#cb60-627" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-628"><a href="#cb60-628" aria-hidden="true" tabindex="-1"></a><span class="fu">### SQL summary</span></span>
+<span id="cb60-629"><a href="#cb60-629" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-630"><a href="#cb60-630" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>For this example the effort required to transform the dataset into a set of</span>
+<span id="cb60-631"><a href="#cb60-631" aria-hidden="true" tabindex="-1"></a>three tables - the starting point for import into a relational database - was </span>
+<span id="cb60-632"><a href="#cb60-632" aria-hidden="true" tabindex="-1"></a>minimal. </span>
+<span id="cb60-633"><a href="#cb60-633" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Given the use case, e.g. management of a gene set collections, the number of</span>
+<span id="cb60-634"><a href="#cb60-634" aria-hidden="true" tabindex="-1"></a>times that data is added to the database is likely much smaller than the number </span>
+<span id="cb60-635"><a href="#cb60-635" aria-hidden="true" tabindex="-1"></a>of times it is queried. That makes it worth the effort to transform it once - </span>
+<span id="cb60-636"><a href="#cb60-636" aria-hidden="true" tabindex="-1"></a>and benefit from this upfront cost ever after.</span>
+<span id="cb60-637"><a href="#cb60-637" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Because we knew exactly which properties / annotations we wanted to capture</span>
+<span id="cb60-638"><a href="#cb60-638" aria-hidden="true" tabindex="-1"></a>in the database, defining the database tables and their relationships (e.g. the</span>
+<span id="cb60-639"><a href="#cb60-639" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">schema</span><span class="co">](https://en.wikipedia.org/wiki/Database_schema)</span></span>
+<span id="cb60-640"><a href="#cb60-640" aria-hidden="true" tabindex="-1"></a>) was not an obstacle, either.</span>
+<span id="cb60-641"><a href="#cb60-641" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Enabling users to query the data using simple SQL or via a higher level</span>
+<span id="cb60-642"><a href="#cb60-642" aria-hidden="true" tabindex="-1"></a>abstraction like <span class="in">`dplyr`</span> makes it accessible to a broader audience.</span>
+<span id="cb60-643"><a href="#cb60-643" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-644"><a href="#cb60-644" aria-hidden="true" tabindex="-1"></a>::: {.callout-warn}</span>
+<span id="cb60-645"><a href="#cb60-645" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-646"><a href="#cb60-646" aria-hidden="true" tabindex="-1"></a>Defining a schema is much harder when we deal with datasets that are less</span>
+<span id="cb60-647"><a href="#cb60-647" aria-hidden="true" tabindex="-1"></a>standardized, deeply nested, changing over time, etc.</span>
+<span id="cb60-648"><a href="#cb60-648" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-649"><a href="#cb60-649" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb60-650"><a href="#cb60-650" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-651"><a href="#cb60-651" aria-hidden="true" tabindex="-1"></a><span class="fu">## References</span></span>
+<span id="cb60-652"><a href="#cb60-652" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-653"><a href="#cb60-653" aria-hidden="true" tabindex="-1"></a>If you are new to working with databases, then you might find these two great</span>
+<span id="cb60-654"><a href="#cb60-654" aria-hidden="true" tabindex="-1"></a>books useful:</span>
+<span id="cb60-655"><a href="#cb60-655" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-656"><a href="#cb60-656" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">SQL for Data Scientists: A Beginner's Guide for Building Datasets for Analysis</span><span class="co">](https://www.wiley.com/en-us/SQL+for+Data+Scientists:+A+Beginner's+Guide+for+Building+Datasets+for+Analysis-p-9781119669388)</span> by </span>
+<span id="cb60-657"><a href="#cb60-657" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Renee M. P. Teate</span><span class="co">](https://twitter.com/BecomingDataSci)</span> is a great starting </span>
+<span id="cb60-658"><a href="#cb60-658" aria-hidden="true" tabindex="-1"></a>place to learn SQL. It mainly focusses on accessing existing databases.</span>
+<span id="cb60-659"><a href="#cb60-659" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Practical SQL: A Beginner’s Guide to Storytelling with Data</span><span class="co">](https://anthonydebarros.com/practical-sql-a-beginners-guide-to-storytelling-with-data/)</span> by </span>
+<span id="cb60-660"><a href="#cb60-660" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Anthony DeBarros</span><span class="co">](https://anthonydebarros.com/about/)</span> teaches readers how</span>
+<span id="cb60-661"><a href="#cb60-661" aria-hidden="true" tabindex="-1"></a>to create &amp; populate a Postgres database, and how to index and search it </span>
+<span id="cb60-662"><a href="#cb60-662" aria-hidden="true" tabindex="-1"></a>effectively.</span>
+<span id="cb60-663"><a href="#cb60-663" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-664"><a href="#cb60-664" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
+<span id="cb60-665"><a href="#cb60-665" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb60-666"><a href="#cb60-666" aria-hidden="true" tabindex="-1"></a>SessionInfo</span>
+<span id="cb60-667"><a href="#cb60-667" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb60-668"><a href="#cb60-668" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-671"><a href="#cb60-671" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb60-672"><a href="#cb60-672" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb60-673"><a href="#cb60-673" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb60-674"><a href="#cb60-674" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb60-675"><a href="#cb60-675" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-676"><a href="#cb60-676" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

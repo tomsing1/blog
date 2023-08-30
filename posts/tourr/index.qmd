@@ -90,6 +90,7 @@ pairs(gorilla[, numeric_cols], pch = ".")
 
 ```{r}
 library(tourr)
+library(gifski)  # to create animated gifs
 ```
 
 ```{r}
@@ -240,7 +241,7 @@ Session Information
 </summary>
 
 ```{r}
-sessioninfo::session_info()
+sessioninfo::session_info("attached")
 ```
 
 </details>

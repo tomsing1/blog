@@ -1,0 +1,433 @@
+---
+title: "Organizing sequencing metadata: experimenting with S7"
+author: "Thomas Sandmann"
+date: "2023-08-30"
+freeze: true
+categories: [R, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+
+This week I learned about R's new S7 object oriented programming (OOP) system
+by experimenting with classes represent the major metadata entities of a
+next-generation sequencing experiment.
+
+## Introduction
+
+This week, version 0.1.0 of the
+[S7 R package](https://cran.r-project.org/package=S7)
+was released on CRAN. Designed by a consortium spanning major R user communities
+it is designed to combine the simplicity of the S3 object oriented programming
+system with the control offered by S4. The authors have provided 
+[several vignettes](https://rconsortium.github.io/OOP-WG/index.html), 
+a great starting point for my first steps with S7.
+
+## Next-generation sequencing experiments
+
+[Next generation sequencing](https://en.wikipedia.org/wiki/Massive_parallel_sequencing)
+data is publicly available from multiple repositories, including
+[The European Nucleotide Archive (ENA)](https://www.ebi.ac.uk/ena/browser/).
+Each dataset contains information about the overall `study`, the analyzed
+`samples`, the sequencing `experiment` (e.g. libraries) and the individual
+`runs` that generated the raw reads [^1].
+
+![ENA metadata model](metadata_model_reads.png)
+
+Understanding the relationship between these entities is critical for
+interpreting and (re-)using the sequencing data. In short:
+
+- One or more runs are part of an experiment.
+- One or more experiments are part of a study.
+- One or more experiments are associated with a sample.
+
+[^1]: [Figure source: ENA documentation](https://ena-docs.readthedocs.io/en/latest/submit/reads/programmatic.html)
+
+Let's represent these entities - and their relationships - as a set of S7
+classes!
+
+```{r}
+library(S7)
+library(checkmate)
+```
+
+## Defining S7 classes
+
+An S7 class is defined with the `new_class` function, which defines its
+properties (e.g. corresponding to the _slots_ of an S4 class). 
+
+First, we define a basic `Entity` class with properties that are shared
+across all entities in our model. Specfically, we define the `accession` 
+and `name` properties, each a scalar character.
+
+```{r}
+Entity <- new_class(
+  "Entity",
+  properties = list(
+    accession = class_character,
+    name = class_character
+  )
+)
+```
+
+By convention, the output of the `new_class` calls is assigned to an object
+with the same name.
+
+### The Run class
+
+Let's start by defining the `Run` class as a container for metadata about each
+sequencing run. We also specify a validation functions to ensure that the
+`read_length` is a positive integers (if it is provided).
+
+
+```{r}
+Run <- new_class(
+  "Run",
+  parent = Entity,
+  properties = list(
+    paired_end = new_property(class_logical, default = FALSE),
+    read_length = class_integer,
+    qc_pass = class_logical
+  ),
+  validator = function(self) {
+    if (length(self@name) == 0) {
+      "@name must be set"
+    } else if (length(self@read_length) > 0 && 
+               !checkmate::test_count(self@read_length)) {
+      "@read_length must a positive integer"
+    }
+  }
+)
+```
+
+Calling the class name (without parentheses) provides basic information about
+its definition:
+
+```{r}
+Run
+```
+
+Calling the constructor method (with parentheses) creates a new instance of
+the class, and the default `print` method lists its properties.
+
+```{r}
+first_run <- Run(name = "first run", accession = "r123", read_length = 100L,
+                 qc_pass = TRUE)
+first_run
+```
+
+Getter and setter methods are defined automatically and can be accessed with the
+`@` operator:
+
+```{r}
+first_run@paired_end <- TRUE
+first_run
+```
+
+Let's create a second run, this time with paired-end reads:
+
+```{r}
+second_run <- Run(name = "second run", accession = "r234", paired_end = TRUE, 
+                  qc_pass = FALSE)
+second_run
+```
+
+### The Sample class
+
+Next up, a class to hold metadata about each biological sample.
+
+```{r}
+Sample <- new_class(
+  "Sample",
+  parent = Entity,
+  properties = list(
+    description = class_character,
+    species  = new_property(class_character, default = "Homo sapiens"),
+    attributes = class_list,
+    external_ids = class_list
+  )
+)
+```
+
+### The Experiment class
+
+Let's define a container for `Experiment` metadata in a similar way. In 
+addition to scalar properties, an `Experiment` also accepts a list of one or
+more `Run` objects, e.g. the sequencing runs associated with this experiment.
+Finally, we add the `sample` property to represent the biological samples of
+origin.
+
+```{r}
+Experiment <- new_class(
+  "Experiment",
+  parent = Entity,
+  properties = list(
+    library_strategy = class_character,
+    library_selection = class_character,
+    library_source = class_character,
+    platform = class_character,
+    model = class_character,
+    runs = class_list,
+    sample = Sample
+  ),
+  validator = function(self) {
+    if (length(self@name) == 0) {
+      "@name must be set"
+    } else if (length(self@sample) == 0) {
+      "@sample is required"
+    } else if (length(self@sample@name) == 0) {
+      "@sample@name is required"
+     } else if (!checkmate::test_list(self@runs, types = "Run")) {
+      "@runs must only contain instances of class `Run`"
+    }
+  }
+)
+```
+
+The `runs = class_list` property definition does not specify the types of
+elements the list can contain, so we add a custom validator that requires all
+elements of `runs` to be instances of our previously defined `Run` S7 class.[^2]
+
+::: {.callout-note collapse="true"}
+We could also have defined an additional calls, e.g. `RunList`, and
+delegate validating that only `Run` objects are included. That would keep
+the code more modular, especially if the list of validation rules for the
+`Experiment` class increases. But it would also come at the cost of increasing
+the number of classes and the complexity of the code base.
+:::
+
+[^2]: I am a big fan of the 
+[checkmate R package](https://cran.r-project.org/package=checkmate),
+which provides numerous useful functions to assert / check / test objects.
+
+We instantiate our first experiment and include our two Run objects:
+
+```{r}
+first_sample <- Sample(name = "first sample")
+first_exp <- Experiment(
+  name = "first experiment",
+  accession = "exp567",
+  platform = "Illumina",
+  model = "NovaSeq 6000",
+  runs = list(first_run, second_run),
+  sample = first_sample
+)
+first_exp
+```
+
+## Custom print methods
+
+At this point, the output default `print` method for our class becomes a little
+unwieldy, as displaying information about all properties for the `Experiment`,
+its `Sample` and each of the associated `Runs` returns a lot of information.
+Let's define a custom print method for the `Run` class that shows a concise
+summary instead.
+
+```{r}
+.run_message <- function(x) {
+  sprintf(
+    "%s Run%s%s %s", 
+    ifelse(x@paired_end, "Paired-end", "Single-end"),
+    ifelse(length(x@name) > 0, paste0(" '", x@name, "'"),""),
+    ifelse(length(x@accession) > 0, paste0(" (", x@accession, ")"), ""),
+    ifelse(length(x@qc_pass) == 0, "❓", ifelse(x@qc_pass, "✅","❌")
+    )
+  )
+}
+
+method(print, Run) <- function(x) {
+  cat(.run_message(x))
+}
+first_run
+```
+
+::: {.callout-note collapse="true"}
+Dynamically choosing between the three symbols with nested `ifelse` statements
+is confusing - the `dplyr::chase_when()` function offers a nicer interface.
+:::
+
+Great, that's much shorter. Now we need a `print` method for the `Experiment`
+class as well:
+
+```{r}
+.experiment_msg <- function(x) {
+  sprintf(
+    "Experiment%s%s with %s runs.", 
+    ifelse(length(x@name) > 0, paste0(" '", x@name, "'"),""),
+    ifelse(length(x@accession) > 0, paste0(" (", x@accession, ")"), ""),
+    length(x@runs)
+  )
+}
+
+method(print, Experiment) <- function(x) {
+  msg <- .experiment_msg(x)
+  for (run in x@runs) {
+    msg <- paste0(msg, "\n- ", .run_message(run))
+  }
+  cat(msg)
+}
+```
+
+Now our first experiment is summarized as
+
+```{r}
+first_exp
+```
+
+Let's create a second experiment before we move on:
+
+```{r}
+second_sample <- Sample(name = "second sample")
+second_exp <- Experiment(
+  name = "second experiment",
+  accession = "exp628",
+  platform = "Illumina",
+  model = "NovaSeq 6000",
+  runs = list(first_run),
+  sample = second_sample
+)
+```
+
+## The Study class
+
+Now that we have defined classes for all of the entities that constitute an
+NGS study, we finish by assembling them into a `Study` class. As before, we also
+define a custom `print` method to summarize it.
+
+```{r}
+Study <- new_class(
+  "Study",
+  parent = Entity,
+  properties = list(
+  primary_id = class_character,
+  secondary_id = class_character,
+  description = class_character,
+  abstract = class_character,
+  timestamp = new_property(class_POSIXct, default = as.POSIXct(Sys.time())),
+  experiments = class_list
+  ),
+  validator = function(self) {
+    if (length(self@name) == 0) {
+      "@name must be set"
+    } else if (!checkmate::test_list(self@experiments, types = "Experiment")) {
+      "@experiments must only contain instances of class `Experiment`"
+    }
+  }
+)
+
+.study_msg <- function(x) {
+  sprintf(
+    "Study%s%s with %s Experiment%s", 
+    ifelse(length(x@name) > 0, paste0(" '", x@name, "'"),""),
+    ifelse(length(x@accession) > 0, paste0(" (", x@accession, ")"), ""),
+    length(x@experiments),
+    ifelse(length(x@experiments) > 1, "s", "")
+  )
+}
+
+method(print, Study) <- function(x) {
+  msg <- .studyt_msg(x)
+  for (experiment in x@experiments) {
+    msg <- paste0(msg, "\n- ", .experiment_msg(experiment))
+  }
+  cat(msg)
+}
+```
+
+```{r}
+first_study <- Study(name = "first study", 
+                     experiments = list(first_exp, second_exp))
+first_study@experiments
+```
+
+## Dynamic methods
+
+Each study contains a nested set of `Experiment`, `Sample` and `Run`
+objects. To access their properties, we redefine the `Study` class by adding
+_computed properties_, e.g. the `runs` property that will return a list of
+`Runs` from all experiments:
+
+```{r}
+Study <- new_class(
+  "Study",
+  parent = Entity,
+  properties = list(
+  primary_id = class_character,
+  secondary_id = class_character,
+  description = class_character,
+  abstract = class_character,
+  timestamp = new_property(class_POSIXct, default = as.POSIXct(Sys.time())),
+  experiments = class_list,
+  runs = new_property(
+    getter = function(self) {
+      exp_runs <- setNames(
+        lapply(self@experiments, \(x) x@runs),
+        vapply(self@experiments, \(x) x@name, FUN.VALUE = character(1)))
+    }
+  )
+  ),
+  validator = function(self) {
+    if (length(self@name) == 0) {
+      "@name must be set"
+    } else if (!checkmate::test_list(self@experiments, types = "Experiment")) {
+      "@experiments must only contain instances of class `Experiment`"
+    }
+  }
+)
+```
+
+Now, the study's `@runs` property returns a nested list with one element for
+each experiment (and all runs for each experiment).
+
+```{r}
+second_study <- Study(name = "first study", 
+                     experiments = list(first_exp, second_exp))
+exp_runs <- second_study@runs
+str(exp_runs)
+```
+
+## Conclusions
+
+After working with the S4 OOP for a while, the new S7 package was a pleasent
+surprise. There was less boilerplate code to write, and the definition of
+classes and methods seems straightforward. I noticed a few issues, which had
+also been noted by other R users:
+
+- As pointed out by Kevin Kunzmann
+  [in this github issue](https://github.com/RConsortium/OOP-WG/issues/275)
+  the ability to define additional constraints for properties within e.g. 
+  `class_character` would be a welcome addition. I found myself writing custom
+  validators to check whether a property had been set
+  (e.g. `length(x@name) > 0`).
+- The `Entity` class defines the `@name` and `@accession` properties, along
+  with a validator for the former. Unfortunately, that validator is 
+  not inherited by the child classes, as noted by Jamie Lendrum
+  [in this github issue](https://github.com/RConsortium/OOP-WG/issues/329),
+  so I had to repeat the same code in each class definition.
+    
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info("attached")
+```
+
+</details>
+   

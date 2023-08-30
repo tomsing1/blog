@@ -575,7 +575,7 @@ volcano_gene_set_plot <- function(
 #' library(sparrow)
 #' vm <- sparrow::exampleExpressionSet()
 #' gdb <- sparrow::exampleGeneSetDb()
-#' mg <- sparrow::seas(vm, gdb, c('fry'), design = vm$design, 
+#' mg <- sparrow::seas(vm, gdb, c("camera"), design = vm$design, 
 #'                     contrast = 'tumor')
 #' gene_set_table(mg, max.results = 10)
 #' }
@@ -766,7 +766,7 @@ gene-set statistics and gene-level differential expression results.
 # gene set enrichment analysis with the sparrow Bioconductor package
 vm <- exampleExpressionSet()
 gdb <- exampleGeneSetDb()
-mg <- seas(vm, gdb, c('fry'), design = vm$design, contrast = 'tumor')
+mg <- seas(vm, gdb, methods = "camera", design = vm$design, contrast = 'tumor')
 ```
 
 Finally, we pass the `mg` object to our `gene_set_report()` function, together
@@ -779,7 +779,7 @@ of < 0.05 are included. We also pass the `.msigdb_url` helper function to the
 #| code-fold: false
 # create an interactive report
 htmltools::browsable(
-  gene_set_report(mg, method = "fry", max.pval = 0.05, max.results = Inf, 
+  gene_set_report(mg, method = "camera", max.pval = 0.05, max.results = Inf, 
                   name_url = .msigdb_url)
 )
 ```
@@ -798,7 +798,7 @@ as long as both set-level and gene-level differential expression statistics
 can be obtained.
 
 `sparrow` supports numerous GSEA and ORA methods. Here, I am using the 
-[fry algorithm](https://academic.oup.com/bioinformatics/article/26/17/2176/200022)
+[camera algorithm](https://academic.oup.com/nar/article/40/17/e133/2411151)
 from the 
 [limma Bioconductor package](https://bioconductor.org/packages/release/bioc/html/limma.html)
 for illustration.

@@ -1,4 +1,32 @@
-# reactable 0.4.1.9000 (Unreleased)
+# reactable 0.4.4.9000 (Unreleased)
+
+## New features
+
+* New [`Reactable.gotoPage()`](https://glin.github.io/reactable/articles/javascript-api.html#reactable-gotopage)
+  and [`Reactable.setPageSize()`](https://glin.github.io/reactable/articles/javascript-api.html#reactable-setpagesize)
+  methods in the JavaScript API to change the current page or set the current page size.
+  ([#322](https://github.com/glin/reactable/issues/322))
+
+# reactable 0.4.4
+
+[Documentation - reactable 0.4.4](https://v0-4-4--reactable-docs.netlify.app/)
+
+* Fixed a failing CRAN check.
+
+# reactable 0.4.3
+
+[Documentation - reactable 0.4.3](https://v0-4-3--reactable-docs.netlify.app/)
+
+* Fixed a failing CRAN check on the `r-devel-linux-x86_64-fedora-clang` platform. ([#308](https://github.com/glin/reactable/issues/308))
+
+# reactable 0.4.2
+
+[Documentation - reactable 0.4.2](https://v0-4-2--reactable-docs.netlify.app/)
+
+## Minor improvements and bug fixes
+
+* Fixed rendering of embedded HTML widgets when `htmlwidgets` 1.6.0 or later is installed.
+  In general, fixed rendering of any Shiny HTML tags with duplicate attributes. (@tomsing1, [#306](https://github.com/glin/reactable/issues/304))
 
 # reactable 0.4.1
 

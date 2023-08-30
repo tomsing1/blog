@@ -22,8 +22,14 @@ editor_options:
 ```{bash}
 #| echo: false
 #| results: hide
-rm -rf ~/drat-tutorial
+#| eval: false
 aws s3 rm --recursive s3://drat-tutorial/
+```
+
+```{bash}
+#| echo: false
+#| results: hide
+rm -rf ~/drat-tutorial
 ```
 
 ## tl;dr
@@ -385,12 +391,14 @@ within `drat-tutorial` bucket that I [created in the `us-west-1` AWS region](#cr
 
 ```{bash}
 #| results: hide
+#| eval: false
 aws s3 sync ~/drat-tutorial s3://drat-tutorial/repo
 ```
 
 We can use the `aws s3 ls` command to confirm the upload:
 
 ```{bash}
+#| eval: false
 aws s3 ls s3://drat-tutorial/repo/
 ```
 
@@ -420,6 +428,7 @@ S3 bucket [^8].
   ![S3 URL](s3_url.png)
 
 ```{r}
+#| eval: false
 drat::addRepo("S3repo", "http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/")
 getOption("repos")
 ```
@@ -427,6 +436,7 @@ getOption("repos")
 Let's try to install the `toy` package from our S3 drat repository:
 
 ```{r}
+#| eval: false
 install.packages("toy")
 ```
 

@@ -321,15 +321,25 @@ Omitted ‘LazyData’ from DESCRIPTION
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                         CRAN 
-"https://cloud.r-project.org" </code></pre>
+<pre><code>                                                BioCsoft 
+           "https://bioconductor.org/packages/3.17/bioc" 
+                                                 BioCann 
+"https://bioconductor.org/packages/3.17/data/annotation" 
+                                                 BioCexp 
+"https://bioconductor.org/packages/3.17/data/experiment" 
+                                           BioCworkflows 
+      "https://bioconductor.org/packages/3.17/workflows" 
+                                               BioCbooks 
+          "https://bioconductor.org/packages/3.17/books" 
+                                                    CRAN 
+                           "https://cloud.r-project.org" </code></pre>
 </div>
 </div>
 <p>If I try to install our example <code>toy</code> R package, I don’t succeed:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>, <span class="at">type =</span> <span class="st">"source"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
+<pre><code>Installing package into '/Users/sandmann/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20'
 (as 'lib' is unspecified)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
@@ -359,8 +369,20 @@ Installing from source
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">addRepo</span>(<span class="st">"LocalRepo"</span>, <span class="st">"file://Users/sandmann/drat-tutorial"</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                                 CRAN                             LocalRepo 
-        "https://cloud.r-project.org" "file://Users/sandmann/drat-tutorial" </code></pre>
+<pre><code>                                                BioCsoft 
+           "https://bioconductor.org/packages/3.17/bioc" 
+                                                 BioCann 
+"https://bioconductor.org/packages/3.17/data/annotation" 
+                                                 BioCexp 
+"https://bioconductor.org/packages/3.17/data/experiment" 
+                                           BioCworkflows 
+      "https://bioconductor.org/packages/3.17/workflows" 
+                                               BioCbooks 
+          "https://bioconductor.org/packages/3.17/books" 
+                                                    CRAN 
+                           "https://cloud.r-project.org" 
+                                               LocalRepo 
+                   "file://Users/sandmann/drat-tutorial" </code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-important callout-titled">
@@ -381,7 +403,7 @@ Specifying file:// paths
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>, <span class="at">type =</span> <span class="st">"source"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
+<pre><code>Installing package into '/Users/sandmann/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20'
 (as 'lib' is unspecified)</code></pre>
 </div>
 </div>
@@ -395,7 +417,7 @@ Specifying file:// paths
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Downloads</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL <span class="at">--build</span> toy_0.1.0.tar.gz</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>* installing to library ‘/Users/sandmann/Library/R/x86_64/4.2/library’
+<pre><code>* installing to library ‘/Users/sandmann/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20’
 * installing *source* package ‘toy’ ...
 ** using staged installation
 ** R
@@ -427,14 +449,25 @@ packaged installation of ‘toy’ as ‘toy_0.1.0.tgz’
 <p>At long last, now we can omit the <code>type="source"</code> argument from calls to <code>install.packages()</code>:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
-(as 'lib' is unspecified)</code></pre>
-</div>
 <div class="cell-output cell-output-stdout">
-<pre><code>
-The downloaded binary packages are in
-    /var/folders/wc/9tswmr4s74s0x90wqh2007300000gp/T//Rtmpg6tHJA/downloaded_packages</code></pre>
+<pre><code>renv was unable to query available packages from the following repositories:
+- # file://Users/sandmann/drat-tutorial/bin/macosx/big-sur-arm64/contrib/4.3 --------
+error downloading 'file://Users/sandmann/drat-tutorial/bin/macosx/big-sur-arm64/contrib/4.3/PACKAGES.rds' [curl: (3) URL rejected: Bad file:// URL]
+error downloading 'file://Users/sandmann/drat-tutorial/bin/macosx/big-sur-arm64/contrib/4.3/PACKAGES.gz' [curl: (3) URL rejected: Bad file:// URL]
+error downloading 'file://Users/sandmann/drat-tutorial/bin/macosx/big-sur-arm64/contrib/4.3/PACKAGES' [curl: (3) URL rejected: Bad file:// URL]
+
+
+# Downloading packages -------------------------------------------------------
+- Downloading toy from LocalRepo ...            OK [1.5 Kb]
+Successfully downloaded 1 package in 3.5 seconds.
+
+The following package(s) will be installed:
+- toy [0.1.0]
+These packages will be installed into "~/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20".
+
+# Installing packages --------------------------------------------------------
+- Installing toy ...                            OK [built from source and cached in 1.1s]
+Successfully installed 1 package in 1.1 seconds.</code></pre>
 </div>
 </div>
 </section>
@@ -503,16 +536,11 @@ Warning
 <p>To share our repository, we must first copy its folder to the S3 bucket, either via the AWS Console or (more conveniently) with the <a href="https://aws.amazon.com/cli/">aws command line interface</a><a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. (If you are adventurous, you can also mount an S3 bucket as a <em>filey</em> system with <a href="https://github.com/kahing/goofys">goofys</a>).</p>
 <p>Assuming you have set <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html">the necessary AWS credentials</a>, the following <code>aws s3 sync</code> command copies our repository to the <code>repo</code> folder within <code>drat-tutorial</code> bucket that I <a href="#creating-and-configuring-an-s3-bucket-to-host-static-files">created in the <code>us-west-1</code> AWS region</a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 sync ~/drat-tutorial s3://drat-tutorial/repo</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 sync ~/drat-tutorial s3://drat-tutorial/repo</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can use the <code>aws s3 ls</code> command to confirm the upload:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 ls s3://drat-tutorial/repo/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                           PRE bin/
-                           PRE src/
-2023-01-21 20:28:30         58 index.html</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 ls s3://drat-tutorial/repo/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -529,33 +557,18 @@ Note
 </div>
 <p>Now that the files are in place, we can add our remote repository to the the list of R repositories in our R session. First, we remove the <code>LocalRepo</code> repository that we had added earlier, which points to the folder on our local filesystem.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repos =</span> <span class="fu">getOption</span>(<span class="st">"repos"</span>)[</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setdiff</span>(<span class="fu">names</span>(<span class="fu">getOption</span>(<span class="st">"repos"</span>)), <span class="st">"LocalRepo"</span>)</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repos =</span> <span class="fu">getOption</span>(<span class="st">"repos"</span>)[</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setdiff</span>(<span class="fu">names</span>(<span class="fu">getOption</span>(<span class="st">"repos"</span>)), <span class="st">"LocalRepo"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The we add the remote repository instead, by pointing to the URL of the S3 bucket <a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">addRepo</span>(<span class="st">"S3repo"</span>, <span class="st">"http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/"</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                                   CRAN 
-                          "https://cloud.r-project.org" 
-                                                 S3repo 
-"http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/" </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">addRepo</span>(<span class="st">"S3repo"</span>, <span class="st">"http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Let’s try to install the <code>toy</code> package from our S3 drat repository:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Installing package into '/Users/sandmann/Library/R/x86_64/4.2/library'
-(as 'lib' is unspecified)</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-The downloaded binary packages are in
-    /var/folders/wc/9tswmr4s74s0x90wqh2007300000gp/T//Rtmpg6tHJA/downloaded_packages</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Success! R has successfully connected to the remote repository and installed the (binary) R package.</p>
 </section>
@@ -619,27 +632,27 @@ Warning
 </div>
 </div>
 <p>For example, the following policy grants read access to all files in the <code>s3://drat-tutorial/</code> bucket to requests originating (only) from the <code>192.0.2.0</code> IP address. (Your own configuration will be different, of course.)</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Version"</span><span class="fu">:</span> <span class="st">"2012-10-17"</span><span class="fu">,</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Statement"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"PublicReadGetObject"</span><span class="fu">,</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Principal"</span><span class="fu">:</span> <span class="st">"*"</span><span class="fu">,</span></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"s3:GetObject"</span></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"arn:aws:s3:::drat-tutorial/*"</span></span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Condition"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"IpAddress"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"aws:SourceIp"</span><span class="fu">:</span> <span class="st">"192.0.2.0/32"</span></span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
-<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
-<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
-<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb27"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Version"</span><span class="fu">:</span> <span class="st">"2012-10-17"</span><span class="fu">,</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Statement"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Sid"</span><span class="fu">:</span> <span class="st">"PublicReadGetObject"</span><span class="fu">,</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Effect"</span><span class="fu">:</span> <span class="st">"Allow"</span><span class="fu">,</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Principal"</span><span class="fu">:</span> <span class="st">"*"</span><span class="fu">,</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Action"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"s3:GetObject"</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Resource"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"arn:aws:s3:::drat-tutorial/*"</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"Condition"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"IpAddress"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>          <span class="dt">"aws:SourceIp"</span><span class="fu">:</span> <span class="st">"192.0.2.0/32"</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ol>
 
 
@@ -1063,531 +1076,541 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb33" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Distributing R packages with a drat repository hosted on AWS S3"</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-01-21"</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [R, AWS, TIL]</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
-<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
-<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
-<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
-<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
-<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
-<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
-<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
-<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
-<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
-<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> ~/drat-tutorial</span>
-<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 rm <span class="at">--recursive</span> s3://drat-tutorial/</span>
-<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a><span class="fu">## tl;dr</span></span>
-<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a>Today I learned how to</span>
-<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Build an R package into source and binary bundles for distribution.</span>
-<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Create a local drat repository.</span>
-<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Add an R package to the repository and install it from there.</span>
-<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Host the repository remotely in an AWS S3 bucket.</span>
-<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a>Many thanks to <span class="co">[</span><span class="ot">Dirk Eddelbuettel</span><span class="co">](https://dirk.eddelbuettel.com/)</span> for creating</span>
-<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a>and documenting the <span class="co">[</span><span class="ot">drat R package</span><span class="co">](https://cran.r-project.org/package=drat)</span>!</span>
-<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a>(As always, any mistakes are my own.)</span>
-<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-44"><a href="#cb33-44" aria-hidden="true" tabindex="-1"></a><span class="fu">### Motivation</span></span>
-<span id="cb33-45"><a href="#cb33-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-46"><a href="#cb33-46" aria-hidden="true" tabindex="-1"></a>There are multiple ways for developers to share R packages publicly,</span>
-<span id="cb33-47"><a href="#cb33-47" aria-hidden="true" tabindex="-1"></a>e.g.</span>
-<span id="cb33-48"><a href="#cb33-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-49"><a href="#cb33-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Submit them to the [The Comprehensive R Archive Network</span>
-<span id="cb33-50"><a href="#cb33-50" aria-hidden="true" tabindex="-1"></a>  (CRAN)](https://cran.r-project.org/),</span>
-<span id="cb33-51"><a href="#cb33-51" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Contribute them to the <span class="co">[</span><span class="ot">Bioconductor</span><span class="co">](https://www.bioconductor.org/)</span></span>
-<span id="cb33-52"><a href="#cb33-52" aria-hidden="true" tabindex="-1"></a>  project,</span>
-<span id="cb33-53"><a href="#cb33-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Publish them via [rOpenSci's</span>
-<span id="cb33-54"><a href="#cb33-54" aria-hidden="true" tabindex="-1"></a>  R-universe](https://ropensci.org/r-universe/)</span>
-<span id="cb33-55"><a href="#cb33-55" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-56"><a href="#cb33-56" aria-hidden="true" tabindex="-1"></a>User can then install these packages via the familiar <span class="in">`install.packages()`</span></span>
-<span id="cb33-57"><a href="#cb33-57" aria-hidden="true" tabindex="-1"></a>command.</span>
-<span id="cb33-58"><a href="#cb33-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-59"><a href="#cb33-59" aria-hidden="true" tabindex="-1"></a>Alternatively, authors can share their code through version control systems</span>
-<span id="cb33-60"><a href="#cb33-60" aria-hidden="true" tabindex="-1"></a>like <span class="co">[</span><span class="ot">github</span><span class="co">](https://github.com/)</span> or <span class="co">[</span><span class="ot">gitlab</span><span class="co">](https://about.gitlab.com/)</span>, </span>
-<span id="cb33-61"><a href="#cb33-61" aria-hidden="true" tabindex="-1"></a>and users can install them with third-party tools e.g.</span>
-<span id="cb33-62"><a href="#cb33-62" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the remotes R package</span><span class="co">](https://cran.r-project.org/package=remotes)</span>.</span>
-<span id="cb33-63"><a href="#cb33-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-64"><a href="#cb33-64" aria-hidden="true" tabindex="-1"></a>But **how can you make an R package available privately**, e.g. for use</span>
-<span id="cb33-65"><a href="#cb33-65" aria-hidden="true" tabindex="-1"></a>within an organization? </span>
-<span id="cb33-66"><a href="#cb33-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-67"><a href="#cb33-67" aria-hidden="true" tabindex="-1"></a>In this tutorial, I demonstrate how to set up your own package repository with</span>
-<span id="cb33-68"><a href="#cb33-68" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Dirk Eddelbuettel's</span><span class="co">](https://dirk.eddelbuettel.com/)</span> </span>
-<span id="cb33-69"><a href="#cb33-69" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">drat R package</span><span class="co">](https://cran.r-project.org/package=drat)</span>,</span>
-<span id="cb33-70"><a href="#cb33-70" aria-hidden="true" tabindex="-1"></a>add a package, make R aware of the new repo - and host it remotely on AWS S3.</span>
-<span id="cb33-71"><a href="#cb33-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-72"><a href="#cb33-72" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why drat?</span></span>
-<span id="cb33-73"><a href="#cb33-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-74"><a href="#cb33-74" aria-hidden="true" tabindex="-1"></a>Dirk Eddelbuettel [highlights two main</span>
-<span id="cb33-75"><a href="#cb33-75" aria-hidden="true" tabindex="-1"></a>advantages:](https://eddelbuettel.github.io/drat/vignettes/dratfaq/)</span>
-<span id="cb33-76"><a href="#cb33-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-77"><a href="#cb33-77" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A package installed from a drat repository will be supported by</span>
-<span id="cb33-78"><a href="#cb33-78" aria-hidden="true" tabindex="-1"></a>  <span class="in">`install.packages()`</span> and <span class="in">`update.packages()`</span>, so the user has easy</span>
-<span id="cb33-79"><a href="#cb33-79" aria-hidden="true" tabindex="-1"></a>  methods for keeping up-to-date.</span>
-<span id="cb33-80"><a href="#cb33-80" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The package author has better control over the package version users</span>
-<span id="cb33-81"><a href="#cb33-81" aria-hidden="true" tabindex="-1"></a>  install, because they actively push specific releases into the</span>
-<span id="cb33-82"><a href="#cb33-82" aria-hidden="true" tabindex="-1"></a>  repository.</span>
-<span id="cb33-83"><a href="#cb33-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-84"><a href="#cb33-84" aria-hidden="true" tabindex="-1"></a>[Please see Dirk's Drat</span>
-<span id="cb33-85"><a href="#cb33-85" aria-hidden="true" tabindex="-1"></a>FAQ's](https://eddelbuettel.github.io/drat/vignettes/dratfaq/) for</span>
-<span id="cb33-86"><a href="#cb33-86" aria-hidden="true" tabindex="-1"></a>additional points, e.g. ['Why could install_github be</span>
-<span id="cb33-87"><a href="#cb33-87" aria-hidden="true" tabindex="-1"></a>wrong?'](https://eddelbuettel.github.io/drat/vignettes/dratfaq/#why-could-install_github-be-wrong)</span>
-<span id="cb33-88"><a href="#cb33-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-89"><a href="#cb33-89" aria-hidden="true" tabindex="-1"></a><span class="fu">### Prequisites</span></span>
-<span id="cb33-90"><a href="#cb33-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-91"><a href="#cb33-91" aria-hidden="true" tabindex="-1"></a>Hadley Wickham and Jenny Bryan have documented how to author, document</span>
-<span id="cb33-92"><a href="#cb33-92" aria-hidden="true" tabindex="-1"></a>and build R packages in their freely-available [R Packages</span>
-<span id="cb33-93"><a href="#cb33-93" aria-hidden="true" tabindex="-1"></a>book](https://r-pkgs.org/). In this walkthrough I am using Mac OS X</span>
-<span id="cb33-94"><a href="#cb33-94" aria-hidden="true" tabindex="-1"></a>(v13.1), but you can find instructions to set up Windows or Linux build</span>
-<span id="cb33-95"><a href="#cb33-95" aria-hidden="true" tabindex="-1"></a>environments in their [R build</span>
-<span id="cb33-96"><a href="#cb33-96" aria-hidden="true" tabindex="-1"></a>toolchain](https://r-pkgs.org/setup.html#setup-tools) chapter.</span>
-<span id="cb33-97"><a href="#cb33-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-98"><a href="#cb33-98" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bundling an R package's source code for distribution</span></span>
-<span id="cb33-99"><a href="#cb33-99" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-100"><a href="#cb33-100" aria-hidden="true" tabindex="-1"></a>First, we need an R package that's ready for distribution. Here, I am using the</span>
-<span id="cb33-101"><a href="#cb33-101" aria-hidden="true" tabindex="-1"></a><span class="in">`toy`</span> R package </span>
-<span id="cb33-102"><a href="#cb33-102" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">that you can retrieve from github</span><span class="co">](https://github.com/tomsing1/toy)</span>, </span>
-<span id="cb33-103"><a href="#cb33-103" aria-hidden="true" tabindex="-1"></a>either via</span>
-<span id="cb33-104"><a href="#cb33-104" aria-hidden="true" tabindex="-1"></a><span class="in">`git clone https://github.com/tomsing1/toy`</span> or by downloading its source</span>
-<span id="cb33-105"><a href="#cb33-105" aria-hidden="true" tabindex="-1"></a>code as a </span>
-<span id="cb33-106"><a href="#cb33-106" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">zip file</span><span class="co">](https://github.com/tomsing1/toy/archive/refs/heads/main.zip)</span>.</span>
-<span id="cb33-107"><a href="#cb33-107" aria-hidden="true" tabindex="-1"></a>(Feel free to follow along with another R package instead - as long as</span>
-<span id="cb33-108"><a href="#cb33-108" aria-hidden="true" tabindex="-1"></a>you have the </span>
-<span id="cb33-109"><a href="#cb33-109" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">source package</span><span class="co">](https://r-pkgs.org/structure.html#sec-source-package)</span>,</span>
-<span id="cb33-110"><a href="#cb33-110" aria-hidden="true" tabindex="-1"></a>the following steps apply.)</span>
-<span id="cb33-111"><a href="#cb33-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-112"><a href="#cb33-112" aria-hidden="true" tabindex="-1"></a>Next, we </span>
-<span id="cb33-113"><a href="#cb33-113" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">bundle the package</span><span class="co">](https://r-pkgs.org/structure.html#sec-bundled-package)</span></span>
-<span id="cb33-114"><a href="#cb33-114" aria-hidden="true" tabindex="-1"></a>into a single compressed file with the <span class="in">`.tar.gz`</span> file extension. Let's</span>
-<span id="cb33-115"><a href="#cb33-115" aria-hidden="true" tabindex="-1"></a>download the <span class="in">`.zip`</span> file linked above into the <span class="in">`~/Downloads`</span> folder and use the</span>
-<span id="cb33-116"><a href="#cb33-116" aria-hidden="true" tabindex="-1"></a><span class="in">`R CMD build`</span> command to create a _source bundle_ <span class="ot">[^1]</span>:</span>
-<span id="cb33-117"><a href="#cb33-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-118"><a href="#cb33-118" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>Alternatively, you can also create the bundle from within R using</span>
-<span id="cb33-119"><a href="#cb33-119" aria-hidden="true" tabindex="-1"></a>    the</span>
-<span id="cb33-120"><a href="#cb33-120" aria-hidden="true" tabindex="-1"></a>    <span class="co">[</span><span class="ot">devtools::build()</span><span class="co">](https://devtools.r-lib.org/reference/build.html)</span></span>
-<span id="cb33-121"><a href="#cb33-121" aria-hidden="true" tabindex="-1"></a>    command.</span>
-<span id="cb33-122"><a href="#cb33-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-125"><a href="#cb33-125" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
-<span id="cb33-126"><a href="#cb33-126" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Downloads</span>
-<span id="cb33-127"><a href="#cb33-127" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-L</span> <span class="at">-O</span> https://github.com/tomsing1/toy/archive/refs/heads/main.zip</span>
-<span id="cb33-128"><a href="#cb33-128" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span> <span class="at">-o</span> <span class="at">-q</span> main.zip</span>
-<span id="cb33-129"><a href="#cb33-129" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> main.zip</span>
-<span id="cb33-130"><a href="#cb33-130" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD build <span class="at">--force</span> toy-main</span>
-<span id="cb33-131"><a href="#cb33-131" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-132"><a href="#cb33-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-133"><a href="#cb33-133" aria-hidden="true" tabindex="-1"></a>We now have the <span class="in">`toy_0.1.0.tar.gz`</span> file, ready to be inserted into a new</span>
-<span id="cb33-134"><a href="#cb33-134" aria-hidden="true" tabindex="-1"></a>(or existing) drat repository.</span>
-<span id="cb33-135"><a href="#cb33-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-136"><a href="#cb33-136" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating a local drat repository</span></span>
-<span id="cb33-137"><a href="#cb33-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-138"><a href="#cb33-138" aria-hidden="true" tabindex="-1"></a>To create a new repository, we start by installing the [drat R</span>
-<span id="cb33-139"><a href="#cb33-139" aria-hidden="true" tabindex="-1"></a>package](https://cran.r-project.org/package=drat) itself (if it's not</span>
-<span id="cb33-140"><a href="#cb33-140" aria-hidden="true" tabindex="-1"></a>available on your system already) with the following R commands:</span>
-<span id="cb33-141"><a href="#cb33-141" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-144"><a href="#cb33-144" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-145"><a href="#cb33-145" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"drat"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb33-146"><a href="#cb33-146" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"drat"</span>)</span>
-<span id="cb33-147"><a href="#cb33-147" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb33-148"><a href="#cb33-148" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(drat)</span>
-<span id="cb33-149"><a href="#cb33-149" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-150"><a href="#cb33-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-151"><a href="#cb33-151" aria-hidden="true" tabindex="-1"></a>You can specify the path of your drat repository either by setting the</span>
-<span id="cb33-152"><a href="#cb33-152" aria-hidden="true" tabindex="-1"></a><span class="in">`dratRepo`</span> option <span class="ot">[^2]</span>:</span>
-<span id="cb33-153"><a href="#cb33-153" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-154"><a href="#cb33-154" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>You might want to add this option to your</span>
-<span id="cb33-155"><a href="#cb33-155" aria-hidden="true" tabindex="-1"></a>    <span class="co">[</span><span class="ot">.Rprofile</span><span class="co">](https://rstats.wtf/r-startup.html#rprofile)</span> file.</span>
-<span id="cb33-156"><a href="#cb33-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-159"><a href="#cb33-159" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-160"><a href="#cb33-160" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">dratRepo =</span> <span class="st">"~/drat-tutorial"</span>)</span>
-<span id="cb33-161"><a href="#cb33-161" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"dratRepo"</span>)</span>
-<span id="cb33-162"><a href="#cb33-162" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-163"><a href="#cb33-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-164"><a href="#cb33-164" aria-hidden="true" tabindex="-1"></a>or by providing it as an argument to the <span class="in">`drat::insertPackage()`</span></span>
-<span id="cb33-165"><a href="#cb33-165" aria-hidden="true" tabindex="-1"></a>function (see below).</span>
-<span id="cb33-166"><a href="#cb33-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-167"><a href="#cb33-167" aria-hidden="true" tabindex="-1"></a>Let's create a new drat repository in our home directory <span class="ot">[^3]</span>, and</span>
-<span id="cb33-168"><a href="#cb33-168" aria-hidden="true" tabindex="-1"></a>populate it with a minimal <span class="in">`index.html`</span> file (to avoid</span>
-<span id="cb33-169"><a href="#cb33-169" aria-hidden="true" tabindex="-1"></a><span class="in">`HTTP 404 Not Found`</span> errors later).</span>
-<span id="cb33-170"><a href="#cb33-170" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-171"><a href="#cb33-171" aria-hidden="true" tabindex="-1"></a><span class="ot">[^3]: </span>Of course, you can place it anywhere you like, including e.g.</span>
-<span id="cb33-172"><a href="#cb33-172" aria-hidden="true" tabindex="-1"></a>    network drives, as long as you can write to the directory. If you</span>
-<span id="cb33-173"><a href="#cb33-173" aria-hidden="true" tabindex="-1"></a>    are using Windows, please remember to use backward instead of</span>
-<span id="cb33-174"><a href="#cb33-174" aria-hidden="true" tabindex="-1"></a>    forward slashes in your paths.</span>
-<span id="cb33-175"><a href="#cb33-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-178"><a href="#cb33-178" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-179"><a href="#cb33-179" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">"~/drat-tutorial"</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb33-180"><a href="#cb33-180" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(</span>
-<span id="cb33-181"><a href="#cb33-181" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="st">"&lt;!doctype html&gt;&lt;title&gt;My awesome drat repository!&lt;/title&gt;"</span>,</span>
-<span id="cb33-182"><a href="#cb33-182" aria-hidden="true" tabindex="-1"></a>  <span class="at">con =</span> <span class="st">"~/drat-tutorial/index.html"</span></span>
-<span id="cb33-183"><a href="#cb33-183" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb33-184"><a href="#cb33-184" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-185"><a href="#cb33-185" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-186"><a href="#cb33-186" aria-hidden="true" tabindex="-1"></a>Now we are ready to insert the <span class="in">`toy`</span> package bundle into the repository</span>
-<span id="cb33-187"><a href="#cb33-187" aria-hidden="true" tabindex="-1"></a>with drat's <span class="in">`insertPackage()`</span> command <span class="ot">[^4]</span>:</span>
-<span id="cb33-188"><a href="#cb33-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-189"><a href="#cb33-189" aria-hidden="true" tabindex="-1"></a><span class="ot">[^4]: </span>In this tutorial, I use the <span class="in">`::`</span> notation to highlight which</span>
-<span id="cb33-190"><a href="#cb33-190" aria-hidden="true" tabindex="-1"></a>    package a function originates from. Because we attached the package</span>
-<span id="cb33-191"><a href="#cb33-191" aria-hidden="true" tabindex="-1"></a>    with the <span class="in">`library(drat)`</span> command before, the <span class="in">`drat::`</span> prefix could</span>
-<span id="cb33-192"><a href="#cb33-192" aria-hidden="true" tabindex="-1"></a>    be omitted.</span>
-<span id="cb33-193"><a href="#cb33-193" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-196"><a href="#cb33-196" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-197"><a href="#cb33-197" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">insertPackage</span>(<span class="at">file =</span> <span class="st">"~/Downloads/toy_0.1.0.tar.gz"</span>,</span>
-<span id="cb33-198"><a href="#cb33-198" aria-hidden="true" tabindex="-1"></a>                    <span class="at">repodir =</span> <span class="st">"~/drat-tutorial"</span>)</span>
-<span id="cb33-199"><a href="#cb33-199" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-200"><a href="#cb33-200" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-201"><a href="#cb33-201" aria-hidden="true" tabindex="-1"></a>Now, the <span class="in">`~/drat-tutorial`</span> folder contains the following files:</span>
-<span id="cb33-202"><a href="#cb33-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-203"><a href="#cb33-203" aria-hidden="true" tabindex="-1"></a><span class="al">![drat repository](repository_source.png)</span></span>
-<span id="cb33-204"><a href="#cb33-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-205"><a href="#cb33-205" aria-hidden="true" tabindex="-1"></a><span class="fu">### Accessing the local drat repository</span></span>
-<span id="cb33-206"><a href="#cb33-206" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-207"><a href="#cb33-207" aria-hidden="true" tabindex="-1"></a>When you prompt your R installation to install or update R packages, it</span>
-<span id="cb33-208"><a href="#cb33-208" aria-hidden="true" tabindex="-1"></a>searches repositories specified in the <span class="in">`repos`</span> option. On my system,</span>
-<span id="cb33-209"><a href="#cb33-209" aria-hidden="true" tabindex="-1"></a>only the default repository is set in a fresh R session <span class="ot">[^5]</span>:</span>
-<span id="cb33-210"><a href="#cb33-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-211"><a href="#cb33-211" aria-hidden="true" tabindex="-1"></a><span class="ot">[^5]: </span>In this tutorial, I use the <span class="in">`::`</span> notation to highlight in which</span>
-<span id="cb33-212"><a href="#cb33-212" aria-hidden="true" tabindex="-1"></a>    package functions originate from. Because we attached the package</span>
-<span id="cb33-213"><a href="#cb33-213" aria-hidden="true" tabindex="-1"></a>    with the <span class="in">`library(drat)`</span> command before, the <span class="in">`drat::`</span> prefix could</span>
-<span id="cb33-214"><a href="#cb33-214" aria-hidden="true" tabindex="-1"></a>    be omitted.</span>
-<span id="cb33-215"><a href="#cb33-215" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-218"><a href="#cb33-218" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-219"><a href="#cb33-219" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span>
-<span id="cb33-220"><a href="#cb33-220" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-221"><a href="#cb33-221" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-222"><a href="#cb33-222" aria-hidden="true" tabindex="-1"></a>If I try to install our example <span class="in">`toy`</span> R package, I don't succeed:</span>
-<span id="cb33-223"><a href="#cb33-223" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-226"><a href="#cb33-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-227"><a href="#cb33-227" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>, <span class="at">type =</span> <span class="st">"source"</span>)</span>
-<span id="cb33-228"><a href="#cb33-228" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-229"><a href="#cb33-229" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-230"><a href="#cb33-230" aria-hidden="true" tabindex="-1"></a>because R is not aware of our new repository, yet.</span>
-<span id="cb33-231"><a href="#cb33-231" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-232"><a href="#cb33-232" aria-hidden="true" tabindex="-1"></a>::: callout-note</span>
-<span id="cb33-233"><a href="#cb33-233" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-234"><a href="#cb33-234" aria-hidden="true" tabindex="-1"></a><span class="fu">### Installing from source</span></span>
-<span id="cb33-235"><a href="#cb33-235" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-236"><a href="#cb33-236" aria-hidden="true" tabindex="-1"></a>At this point, we must add the <span class="in">`type="source"`</span> argument, because we have</span>
-<span id="cb33-237"><a href="#cb33-237" aria-hidden="true" tabindex="-1"></a>only added the *source* bundle to the repository. We will add a compiled</span>
-<span id="cb33-238"><a href="#cb33-238" aria-hidden="true" tabindex="-1"></a>version in a moment - read on!</span>
-<span id="cb33-239"><a href="#cb33-239" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb33-240"><a href="#cb33-240" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-241"><a href="#cb33-241" aria-hidden="true" tabindex="-1"></a>To test our local repository, we add its path to the list of known</span>
-<span id="cb33-242"><a href="#cb33-242" aria-hidden="true" tabindex="-1"></a>repositories.</span>
-<span id="cb33-243"><a href="#cb33-243" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-246"><a href="#cb33-246" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-247"><a href="#cb33-247" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">addRepo</span>(<span class="st">"LocalRepo"</span>, <span class="st">"file://Users/sandmann/drat-tutorial"</span>)</span>
-<span id="cb33-248"><a href="#cb33-248" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span>
-<span id="cb33-249"><a href="#cb33-249" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-250"><a href="#cb33-250" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-251"><a href="#cb33-251" aria-hidden="true" tabindex="-1"></a>::: callout-important</span>
-<span id="cb33-252"><a href="#cb33-252" aria-hidden="true" tabindex="-1"></a><span class="fu">### Specifying file:// paths</span></span>
-<span id="cb33-253"><a href="#cb33-253" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-254"><a href="#cb33-254" aria-hidden="true" tabindex="-1"></a>By default, drat's <span class="in">`addRepo()`</span> command assumes that repositories are</span>
-<span id="cb33-255"><a href="#cb33-255" aria-hidden="true" tabindex="-1"></a>hosted on <span class="co">[</span><span class="ot">github-pages</span><span class="co">](https://pages.github.com/)</span>. Because we want to</span>
-<span id="cb33-256"><a href="#cb33-256" aria-hidden="true" tabindex="-1"></a>access a repo via the filesystem (either locally or on a network drive),</span>
-<span id="cb33-257"><a href="#cb33-257" aria-hidden="true" tabindex="-1"></a>we need to explicitly add the <span class="in">`file:/`</span> prefix - and use the absolute</span>
-<span id="cb33-258"><a href="#cb33-258" aria-hidden="true" tabindex="-1"></a>file path (e.g. returned by <span class="in">`path.expand("~/drat-tutorial")`</span>) to specify its</span>
-<span id="cb33-259"><a href="#cb33-259" aria-hidden="true" tabindex="-1"></a>location.</span>
-<span id="cb33-260"><a href="#cb33-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-261"><a href="#cb33-261" aria-hidden="true" tabindex="-1"></a>In this case, concatenating <span class="in">`file:/`</span> with <span class="in">`/Users/sandmann/drat-tutorial`</span></span>
-<span id="cb33-262"><a href="#cb33-262" aria-hidden="true" tabindex="-1"></a>produces the final <span class="in">`file://Users/sandmann/drat-tutorial`</span> location (note the</span>
-<span id="cb33-263"><a href="#cb33-263" aria-hidden="true" tabindex="-1"></a>double forward slashes).</span>
-<span id="cb33-264"><a href="#cb33-264" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb33-265"><a href="#cb33-265" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-266"><a href="#cb33-266" aria-hidden="true" tabindex="-1"></a>Now, we can install it with the usual <span class="in">`install.packages()`</span> command <span class="ot">[^6]</span>:</span>
-<span id="cb33-267"><a href="#cb33-267" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-268"><a href="#cb33-268" aria-hidden="true" tabindex="-1"></a><span class="ot">[^6]: </span>If you use Bioconductor, the <span class="in">`BiocManager::repositories()`</span></span>
-<span id="cb33-269"><a href="#cb33-269" aria-hidden="true" tabindex="-1"></a>    specifies additional repositories that host its annotation and</span>
-<span id="cb33-270"><a href="#cb33-270" aria-hidden="true" tabindex="-1"></a>    software packages.</span>
-<span id="cb33-271"><a href="#cb33-271" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-274"><a href="#cb33-274" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-275"><a href="#cb33-275" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>, <span class="at">type =</span> <span class="st">"source"</span>)</span>
-<span id="cb33-276"><a href="#cb33-276" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-277"><a href="#cb33-277" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-278"><a href="#cb33-278" aria-hidden="true" tabindex="-1"></a>Great! We have successfully installed our <span class="in">`toy`</span> R package from our brand</span>
-<span id="cb33-279"><a href="#cb33-279" aria-hidden="true" tabindex="-1"></a>new repository. Now it is time to make it available to other users as</span>
-<span id="cb33-280"><a href="#cb33-280" aria-hidden="true" tabindex="-1"></a>well.</span>
-<span id="cb33-281"><a href="#cb33-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-282"><a href="#cb33-282" aria-hidden="true" tabindex="-1"></a><span class="fu">### Building binary packages</span></span>
-<span id="cb33-283"><a href="#cb33-283" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-284"><a href="#cb33-284" aria-hidden="true" tabindex="-1"></a>Windows and Mac users who install packages from </span>
-<span id="cb33-285"><a href="#cb33-285" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">CRAN</span><span class="co">](https://cran.r-project.org/)</span></span>
-<span id="cb33-286"><a href="#cb33-286" aria-hidden="true" tabindex="-1"></a>or any user installing files from the</span>
-<span id="cb33-287"><a href="#cb33-287" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Posit Public Package Manager (PPPM)</span><span class="co">](https://packagemanager.rstudio.com/client/#/)</span></span>
-<span id="cb33-288"><a href="#cb33-288" aria-hidden="true" tabindex="-1"></a>will usually receive </span>
-<span id="cb33-289"><a href="#cb33-289" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">a binary package</span><span class="co">](https://r-pkgs.org/Structure.html#sec-structure-binary)</span>.</span>
-<span id="cb33-290"><a href="#cb33-290" aria-hidden="true" tabindex="-1"></a>CRAN accepts package bundles and creates the platform-specific binary file for</span>
-<span id="cb33-291"><a href="#cb33-291" aria-hidden="true" tabindex="-1"></a>distribution. To offer the same service to users of our drat repository, we</span>
-<span id="cb33-292"><a href="#cb33-292" aria-hidden="true" tabindex="-1"></a>need to compile the binary package ourselves.</span>
-<span id="cb33-293"><a href="#cb33-293" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-294"><a href="#cb33-294" aria-hidden="true" tabindex="-1"></a>Here, I create the Mac OS binary package from the bundle we obtained above</span>
-<span id="cb33-295"><a href="#cb33-295" aria-hidden="true" tabindex="-1"></a>by executing the following command on my Mac OS operating system:</span>
-<span id="cb33-296"><a href="#cb33-296" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-299"><a href="#cb33-299" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
-<span id="cb33-300"><a href="#cb33-300" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Downloads</span>
-<span id="cb33-301"><a href="#cb33-301" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL <span class="at">--build</span> toy_0.1.0.tar.gz</span>
-<span id="cb33-302"><a href="#cb33-302" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-303"><a href="#cb33-303" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-304"><a href="#cb33-304" aria-hidden="true" tabindex="-1"></a>This command will first install the package into my default R library, and then</span>
-<span id="cb33-305"><a href="#cb33-305" aria-hidden="true" tabindex="-1"></a>create the binary <span class="in">`toy_0.1.0.tgz`</span> file.</span>
-<span id="cb33-306"><a href="#cb33-306" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-307"><a href="#cb33-307" aria-hidden="true" tabindex="-1"></a>Next, we add it to our local drat repository (note the <span class="in">`.tgz`</span> file suffix).</span>
-<span id="cb33-308"><a href="#cb33-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-311"><a href="#cb33-311" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-312"><a href="#cb33-312" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">insertPackage</span>(<span class="at">file =</span> <span class="st">"~/Downloads/toy_0.1.0.tgz"</span>,</span>
-<span id="cb33-313"><a href="#cb33-313" aria-hidden="true" tabindex="-1"></a>                    <span class="at">repodir =</span> <span class="st">"~/drat-tutorial"</span>)</span>
-<span id="cb33-314"><a href="#cb33-314" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-315"><a href="#cb33-315" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-316"><a href="#cb33-316" aria-hidden="true" tabindex="-1"></a>Now, the <span class="in">`~/drat-tutorial`</span> folder contains a new subdirectory (<span class="in">`bin`</span>) with the</span>
-<span id="cb33-317"><a href="#cb33-317" aria-hidden="true" tabindex="-1"></a>binary files for Mac OS X:</span>
-<span id="cb33-318"><a href="#cb33-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-319"><a href="#cb33-319" aria-hidden="true" tabindex="-1"></a><span class="al">![drat repository](repository_binary.png)</span></span>
-<span id="cb33-320"><a href="#cb33-320" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-321"><a href="#cb33-321" aria-hidden="true" tabindex="-1"></a>At long last, now we can omit the <span class="in">`type="source"`</span> argument from calls to </span>
-<span id="cb33-322"><a href="#cb33-322" aria-hidden="true" tabindex="-1"></a><span class="in">`install.packages()`</span>:</span>
-<span id="cb33-323"><a href="#cb33-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-326"><a href="#cb33-326" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-327"><a href="#cb33-327" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>)</span>
-<span id="cb33-328"><a href="#cb33-328" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-329"><a href="#cb33-329" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-330"><a href="#cb33-330" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hosting your drat repository on AWS S3</span></span>
-<span id="cb33-331"><a href="#cb33-331" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-332"><a href="#cb33-332" aria-hidden="true" tabindex="-1"></a>drat repositories can be hosted in any location</span>
-<span id="cb33-333"><a href="#cb33-333" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-334"><a href="#cb33-334" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>that you can write files to and</span>
-<span id="cb33-335"><a href="#cb33-335" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>that can serve files via http</span>
-<span id="cb33-336"><a href="#cb33-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-337"><a href="#cb33-337" aria-hidden="true" tabindex="-1"></a>But unless you placed your drat repository into a network drive that is</span>
-<span id="cb33-338"><a href="#cb33-338" aria-hidden="true" tabindex="-1"></a>accessible by multiple users, it is currently only useful to yourself.</span>
-<span id="cb33-339"><a href="#cb33-339" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-340"><a href="#cb33-340" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb33-341"><a href="#cb33-341" aria-hidden="true" tabindex="-1"></a><span class="fu">### Sharing repository over a local network</span></span>
-<span id="cb33-342"><a href="#cb33-342" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-343"><a href="#cb33-343" aria-hidden="true" tabindex="-1"></a>If you chose a network drive as the location of your drat repository,</span>
-<span id="cb33-344"><a href="#cb33-344" aria-hidden="true" tabindex="-1"></a>then other user can benefit from it right - as long as they can read from the</span>
-<span id="cb33-345"><a href="#cb33-345" aria-hidden="true" tabindex="-1"></a>shared directory. As before, the absolute path must be prefixed with the </span>
-<span id="cb33-346"><a href="#cb33-346" aria-hidden="true" tabindex="-1"></a><span class="in">`file:/`</span> prefix. For example, a repository that is available on *the user's* </span>
-<span id="cb33-347"><a href="#cb33-347" aria-hidden="true" tabindex="-1"></a>systems at <span class="in">`/nfs/groups/groupABC/R/drat`</span> would be added to the list of R</span>
-<span id="cb33-348"><a href="#cb33-348" aria-hidden="true" tabindex="-1"></a>repositories via </span>
-<span id="cb33-349"><a href="#cb33-349" aria-hidden="true" tabindex="-1"></a><span class="in">`drat::addRepo("workgroup", "file://nfs/groups/groupABC/R/drat")`</span>.</span>
-<span id="cb33-350"><a href="#cb33-350" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb33-351"><a href="#cb33-351" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-352"><a href="#cb33-352" aria-hidden="true" tabindex="-1"></a>The [drat</span>
-<span id="cb33-353"><a href="#cb33-353" aria-hidden="true" tabindex="-1"></a>documentation](https://eddelbuettel.github.io/drat/vignettes/dratforusers/#case-1-using-github)</span>
-<span id="cb33-354"><a href="#cb33-354" aria-hidden="true" tabindex="-1"></a>illustrates how you can use <span class="co">[</span><span class="ot">git</span><span class="co">](https://git-scm.com/)</span> and [github</span>
-<span id="cb33-355"><a href="#cb33-355" aria-hidden="true" tabindex="-1"></a>pages](https://pages.github.com/) to make your repository *publicly*</span>
-<span id="cb33-356"><a href="#cb33-356" aria-hidden="true" tabindex="-1"></a>available.</span>
-<span id="cb33-357"><a href="#cb33-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-358"><a href="#cb33-358" aria-hidden="true" tabindex="-1"></a>Here, we are interested in hosting a repository *privately* instead,</span>
-<span id="cb33-359"><a href="#cb33-359" aria-hidden="true" tabindex="-1"></a>e.g. in a location that is only accessible from within our own</span>
-<span id="cb33-360"><a href="#cb33-360" aria-hidden="true" tabindex="-1"></a>organization: </span>
-<span id="cb33-361"><a href="#cb33-361" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-362"><a href="#cb33-362" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If you already have access to a private server that serves files</span>
-<span id="cb33-363"><a href="#cb33-363" aria-hidden="true" tabindex="-1"></a>to your users (e.g. via HTTP), then you can simply copy your repository there.</span>
-<span id="cb33-364"><a href="#cb33-364" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If your organization uses Amazon Web Services (AWS), you can also use an</span>
-<span id="cb33-365"><a href="#cb33-365" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">S3 bucket to host your repository</span><span class="co">](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html)</span></span>
-<span id="cb33-366"><a href="#cb33-366" aria-hidden="true" tabindex="-1"></a>and take advantage of the access controls set by your organization.</span>
-<span id="cb33-367"><a href="#cb33-367" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-368"><a href="#cb33-368" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb33-369"><a href="#cb33-369" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-370"><a href="#cb33-370" aria-hidden="true" tabindex="-1"></a><span class="fu">### Public repositories in S3 buckets</span></span>
-<span id="cb33-371"><a href="#cb33-371" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-372"><a href="#cb33-372" aria-hidden="true" tabindex="-1"></a>Although this use case focuses on hosting private repositories, you can of </span>
-<span id="cb33-373"><a href="#cb33-373" aria-hidden="true" tabindex="-1"></a>course also make repositories in S3 buckets publicly available. Alas,</span>
-<span id="cb33-374"><a href="#cb33-374" aria-hidden="true" tabindex="-1"></a>data storage in S3 buckets incurs cost, while other options (e.g. github-pages,</span>
-<span id="cb33-375"><a href="#cb33-375" aria-hidden="true" tabindex="-1"></a>CRAN, Bioconductor, etc) are free, so this might not be your preferred option.</span>
-<span id="cb33-376"><a href="#cb33-376" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-377"><a href="#cb33-377" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb33-378"><a href="#cb33-378" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-379"><a href="#cb33-379" aria-hidden="true" tabindex="-1"></a>We will assume that you have write access to an S3 bucket that is</span>
-<span id="cb33-380"><a href="#cb33-380" aria-hidden="true" tabindex="-1"></a>configured to serve static files via HTTP. (For a brief outline of the</span>
-<span id="cb33-381"><a href="#cb33-381" aria-hidden="true" tabindex="-1"></a>necessary steps, please </span>
-<span id="cb33-382"><a href="#cb33-382" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">see the appendix</span><span class="co">]</span>((#creating-and-configuring-an-s3-bucket-to-host-static-files))</span>
-<span id="cb33-383"><a href="#cb33-383" aria-hidden="true" tabindex="-1"></a>).</span>
-<span id="cb33-384"><a href="#cb33-384" aria-hidden="true" tabindex="-1"></a>Here, I am using a bucket called <span class="in">`drat-tutorial`</span> - but you should create / </span>
-<span id="cb33-385"><a href="#cb33-385" aria-hidden="true" tabindex="-1"></a>access your own bucket to follow along.</span>
-<span id="cb33-386"><a href="#cb33-386" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-387"><a href="#cb33-387" aria-hidden="true" tabindex="-1"></a>::: callout-warning</span>
-<span id="cb33-388"><a href="#cb33-388" aria-hidden="true" tabindex="-1"></a>AWS S3 buckets can be configured to either be visible publicly, or</span>
-<span id="cb33-389"><a href="#cb33-389" aria-hidden="true" tabindex="-1"></a>access can be restricted to specific IP addresses, security groups or</span>
-<span id="cb33-390"><a href="#cb33-390" aria-hidden="true" tabindex="-1"></a>other AWS resources. Please make sure you have configured your bucket in</span>
-<span id="cb33-391"><a href="#cb33-391" aria-hidden="true" tabindex="-1"></a>a way that suits your needs.</span>
-<span id="cb33-392"><a href="#cb33-392" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-393"><a href="#cb33-393" aria-hidden="true" tabindex="-1"></a>S3 buckets do *not* support the [HTTPS</span>
-<span id="cb33-394"><a href="#cb33-394" aria-hidden="true" tabindex="-1"></a>protocol](https://en.wikipedia.org/wiki/HTTPS). If you require an</span>
-<span id="cb33-395"><a href="#cb33-395" aria-hidden="true" tabindex="-1"></a>encrypted file transfer, you might need a [different</span>
-<span id="cb33-396"><a href="#cb33-396" aria-hidden="true" tabindex="-1"></a>solution](https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-https-requests-s3/).</span>
-<span id="cb33-397"><a href="#cb33-397" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb33-398"><a href="#cb33-398" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-399"><a href="#cb33-399" aria-hidden="true" tabindex="-1"></a>To share our repository, we must first copy its folder to the S3 bucket, either</span>
-<span id="cb33-400"><a href="#cb33-400" aria-hidden="true" tabindex="-1"></a>via the AWS Console or (more conveniently) with the</span>
-<span id="cb33-401"><a href="#cb33-401" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">aws command line interface</span><span class="co">](https://aws.amazon.com/cli/)</span><span class="ot">[^7]</span>. (If you are </span>
-<span id="cb33-402"><a href="#cb33-402" aria-hidden="true" tabindex="-1"></a>adventurous, you can also mount an S3 bucket as a _filey_ system with</span>
-<span id="cb33-403"><a href="#cb33-403" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">goofys</span><span class="co">](https://github.com/kahing/goofys)</span>).</span>
-<span id="cb33-404"><a href="#cb33-404" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-405"><a href="#cb33-405" aria-hidden="true" tabindex="-1"></a><span class="ot">[^7]: </span><span class="co">[</span><span class="ot">Installation instructions</span><span class="co">](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)</span>.</span>
-<span id="cb33-406"><a href="#cb33-406" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-407"><a href="#cb33-407" aria-hidden="true" tabindex="-1"></a>Assuming you have set </span>
-<span id="cb33-408"><a href="#cb33-408" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the necessary AWS credentials</span><span class="co">](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)</span>,</span>
-<span id="cb33-409"><a href="#cb33-409" aria-hidden="true" tabindex="-1"></a>the following <span class="in">`aws s3 sync`</span> command copies our repository to the <span class="in">`repo`</span> folder</span>
-<span id="cb33-410"><a href="#cb33-410" aria-hidden="true" tabindex="-1"></a>within <span class="in">`drat-tutorial`</span> bucket that I <span class="co">[</span><span class="ot">created in the `us-west-1` AWS region</span><span class="co">](#creating-and-configuring-an-s3-bucket-to-host-static-files)</span>.</span>
-<span id="cb33-411"><a href="#cb33-411" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-414"><a href="#cb33-414" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
-<span id="cb33-415"><a href="#cb33-415" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
-<span id="cb33-416"><a href="#cb33-416" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 sync ~/drat-tutorial s3://drat-tutorial/repo</span>
-<span id="cb33-417"><a href="#cb33-417" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-418"><a href="#cb33-418" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-419"><a href="#cb33-419" aria-hidden="true" tabindex="-1"></a>We can use the <span class="in">`aws s3 ls`</span> command to confirm the upload:</span>
-<span id="cb33-420"><a href="#cb33-420" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-423"><a href="#cb33-423" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
-<span id="cb33-424"><a href="#cb33-424" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 ls s3://drat-tutorial/repo/</span>
-<span id="cb33-425"><a href="#cb33-425" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-426"><a href="#cb33-426" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-427"><a href="#cb33-427" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb33-428"><a href="#cb33-428" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-429"><a href="#cb33-429" aria-hidden="true" tabindex="-1"></a>Whenever we make changes to our local repository, e.g. after adding new packages</span>
-<span id="cb33-430"><a href="#cb33-430" aria-hidden="true" tabindex="-1"></a>or package versions, we have to rerun the <span class="in">`aws s3 sync`</span> command to copy the </span>
-<span id="cb33-431"><a href="#cb33-431" aria-hidden="true" tabindex="-1"></a>new files to the S3 bucket.</span>
-<span id="cb33-432"><a href="#cb33-432" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-433"><a href="#cb33-433" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb33-434"><a href="#cb33-434" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-435"><a href="#cb33-435" aria-hidden="true" tabindex="-1"></a>Now that the files are in place, we can add our remote repository to the the</span>
-<span id="cb33-436"><a href="#cb33-436" aria-hidden="true" tabindex="-1"></a>list of R repositories in our R session. First, we remove the <span class="in">`LocalRepo`</span> </span>
-<span id="cb33-437"><a href="#cb33-437" aria-hidden="true" tabindex="-1"></a>repository that we had added earlier, which points to the folder on our</span>
-<span id="cb33-438"><a href="#cb33-438" aria-hidden="true" tabindex="-1"></a>local filesystem.</span>
-<span id="cb33-439"><a href="#cb33-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-442"><a href="#cb33-442" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-443"><a href="#cb33-443" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repos =</span> <span class="fu">getOption</span>(<span class="st">"repos"</span>)[</span>
-<span id="cb33-444"><a href="#cb33-444" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setdiff</span>(<span class="fu">names</span>(<span class="fu">getOption</span>(<span class="st">"repos"</span>)), <span class="st">"LocalRepo"</span>)</span>
-<span id="cb33-445"><a href="#cb33-445" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb33-446"><a href="#cb33-446" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-447"><a href="#cb33-447" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-448"><a href="#cb33-448" aria-hidden="true" tabindex="-1"></a>The we add the remote repository instead, by pointing to the URL of the</span>
-<span id="cb33-449"><a href="#cb33-449" aria-hidden="true" tabindex="-1"></a>S3 bucket <span class="ot">[^8]</span>.</span>
-<span id="cb33-450"><a href="#cb33-450" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-451"><a href="#cb33-451" aria-hidden="true" tabindex="-1"></a><span class="ot">[^8]: </span>You can look up the URL for your bucket in the AWS S3 console: </span>
-<span id="cb33-452"><a href="#cb33-452" aria-hidden="true" tabindex="-1"></a>  <span class="al">![S3 URL](s3_url.png)</span></span>
-<span id="cb33-453"><a href="#cb33-453" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-456"><a href="#cb33-456" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-457"><a href="#cb33-457" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">addRepo</span>(<span class="st">"S3repo"</span>, <span class="st">"http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/"</span>)</span>
-<span id="cb33-458"><a href="#cb33-458" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span>
-<span id="cb33-459"><a href="#cb33-459" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-460"><a href="#cb33-460" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-461"><a href="#cb33-461" aria-hidden="true" tabindex="-1"></a>Let's try to install the <span class="in">`toy`</span> package from our S3 drat repository:</span>
-<span id="cb33-462"><a href="#cb33-462" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-465"><a href="#cb33-465" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb33-466"><a href="#cb33-466" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>)</span>
-<span id="cb33-467"><a href="#cb33-467" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb33-468"><a href="#cb33-468" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-469"><a href="#cb33-469" aria-hidden="true" tabindex="-1"></a>Success! R has successfully connected to the remote repository and installed</span>
-<span id="cb33-470"><a href="#cb33-470" aria-hidden="true" tabindex="-1"></a>the (binary) R package.</span>
-<span id="cb33-471"><a href="#cb33-471" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-472"><a href="#cb33-472" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusions</span></span>
-<span id="cb33-473"><a href="#cb33-473" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-474"><a href="#cb33-474" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The <span class="in">`drat`</span> R package makes it extremely simple to create a CRAN-like</span>
-<span id="cb33-475"><a href="#cb33-475" aria-hidden="true" tabindex="-1"></a>  repository. </span>
-<span id="cb33-476"><a href="#cb33-476" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The static files can be served via HTTP, making it straightforward to host</span>
-<span id="cb33-477"><a href="#cb33-477" aria-hidden="true" tabindex="-1"></a>  the repository e.g. in an AWS S3 bucket with a restrictive access policy.</span>
-<span id="cb33-478"><a href="#cb33-478" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-479"><a href="#cb33-479" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix</span></span>
-<span id="cb33-480"><a href="#cb33-480" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-481"><a href="#cb33-481" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating and configuring an S3 bucket to host static files</span></span>
-<span id="cb33-482"><a href="#cb33-482" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-483"><a href="#cb33-483" aria-hidden="true" tabindex="-1"></a>The following steps briefly outline how to create and configure an S3</span>
-<span id="cb33-484"><a href="#cb33-484" aria-hidden="true" tabindex="-1"></a>bucket to act as a static web server via the AWS web interface (e.g. the</span>
-<span id="cb33-485"><a href="#cb33-485" aria-hidden="true" tabindex="-1"></a>AWS Console). For more details, please read the [AWS S3</span>
-<span id="cb33-486"><a href="#cb33-486" aria-hidden="true" tabindex="-1"></a>documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html)</span>
-<span id="cb33-487"><a href="#cb33-487" aria-hidden="true" tabindex="-1"></a>and / or consult your local AWS expert.</span>
-<span id="cb33-488"><a href="#cb33-488" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-489"><a href="#cb33-489" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
-<span id="cb33-490"><a href="#cb33-490" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-491"><a href="#cb33-491" aria-hidden="true" tabindex="-1"></a>Storing files on AWS S3 is not free. In this tutorial, we only upload a limited</span>
-<span id="cb33-492"><a href="#cb33-492" aria-hidden="true" tabindex="-1"></a>number of small files, but please don't forget to purge them from your AWS</span>
-<span id="cb33-493"><a href="#cb33-493" aria-hidden="true" tabindex="-1"></a>account afterward. </span>
-<span id="cb33-494"><a href="#cb33-494" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-495"><a href="#cb33-495" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb33-496"><a href="#cb33-496" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-497"><a href="#cb33-497" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Create a new bucket (skip if you already have one)</span>
-<span id="cb33-498"><a href="#cb33-498" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-499"><a href="#cb33-499" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Make sure you create the bucket in the <span class="in">`region`</span> that works best for</span>
-<span id="cb33-500"><a href="#cb33-500" aria-hidden="true" tabindex="-1"></a>    your organization (e.g. <span class="in">`us-west-1`</span> if you want to host your files</span>
-<span id="cb33-501"><a href="#cb33-501" aria-hidden="true" tabindex="-1"></a>    in California).</span>
-<span id="cb33-502"><a href="#cb33-502" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-503"><a href="#cb33-503" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>You do *not* need to enable <span class="in">`public access`</span>, stick to the defaults</span>
-<span id="cb33-504"><a href="#cb33-504" aria-hidden="true" tabindex="-1"></a>    for your organization.</span>
-<span id="cb33-505"><a href="#cb33-505" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-506"><a href="#cb33-506" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Create an S3 bucket](create_bucket.png)</span></span>
-<span id="cb33-507"><a href="#cb33-507" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-508"><a href="#cb33-508" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Next, navigate to your bucket's properties,</span>
-<span id="cb33-509"><a href="#cb33-509" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-510"><a href="#cb33-510" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Bucket properties](bucket_properties.png)</span></span>
-<span id="cb33-511"><a href="#cb33-511" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb33-512"><a href="#cb33-512" aria-hidden="true" tabindex="-1"></a>    scroll all the way to the bottom of the page and </span>
-<span id="cb33-513"><a href="#cb33-513" aria-hidden="true" tabindex="-1"></a>    <span class="co">[</span><span class="ot">enable Static website hosting</span><span class="co">](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html#step2-create-bucket-config-as-website)</span>.</span>
-<span id="cb33-514"><a href="#cb33-514" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb33-515"><a href="#cb33-515" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Enable static hosting](static_hosting.png)</span></span>
-<span id="cb33-516"><a href="#cb33-516" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb33-517"><a href="#cb33-517" aria-hidden="true" tabindex="-1"></a>    (Typically) specify <span class="in">`index.html`</span> as the</span>
-<span id="cb33-518"><a href="#cb33-518" aria-hidden="true" tabindex="-1"></a>    <span class="in">`Index document`</span>.</span>
-<span id="cb33-519"><a href="#cb33-519" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb33-520"><a href="#cb33-520" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Define the index document](index_document.png)</span></span>
-<span id="cb33-521"><a href="#cb33-521" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-522"><a href="#cb33-522" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Under the <span class="in">`Permissions`</span> tab, add a bucket policy that makes your</span>
-<span id="cb33-523"><a href="#cb33-523" aria-hidden="true" tabindex="-1"></a>  content available _within_ your organization</span>
-<span id="cb33-524"><a href="#cb33-524" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb33-525"><a href="#cb33-525" aria-hidden="true" tabindex="-1"></a>   ::: {.callout-warning}</span>
-<span id="cb33-526"><a href="#cb33-526" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb33-527"><a href="#cb33-527" aria-hidden="true" tabindex="-1"></a>   These settings determine who can access your files. Proceed with</span>
-<span id="cb33-528"><a href="#cb33-528" aria-hidden="true" tabindex="-1"></a>   caution to </span>
-<span id="cb33-529"><a href="#cb33-529" aria-hidden="true" tabindex="-1"></a>   <span class="co">[</span><span class="ot">avoid inadvertently exposing your data to the world!</span><span class="co">](https://www.trendmicro.com/vinfo/pl/security/news/virtualization-and-cloud/data-on-123-million-us-households-exposed-due-to-misconfigured-aws-s3-bucket)</span></span>
-<span id="cb33-530"><a href="#cb33-530" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb33-531"><a href="#cb33-531" aria-hidden="true" tabindex="-1"></a>   :::</span>
-<span id="cb33-532"><a href="#cb33-532" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb33-533"><a href="#cb33-533" aria-hidden="true" tabindex="-1"></a>   For example, the following policy grants read access to all files in the</span>
-<span id="cb33-534"><a href="#cb33-534" aria-hidden="true" tabindex="-1"></a>   <span class="in">`s3://drat-tutorial/`</span> bucket to requests originating (only) from the </span>
-<span id="cb33-535"><a href="#cb33-535" aria-hidden="true" tabindex="-1"></a>   <span class="in">`192.0.2.0`</span> IP address. (Your own configuration will be different, of</span>
-<span id="cb33-536"><a href="#cb33-536" aria-hidden="true" tabindex="-1"></a>   course.)</span>
-<span id="cb33-537"><a href="#cb33-537" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb33-538"><a href="#cb33-538" aria-hidden="true" tabindex="-1"></a>   <span class="in">```json</span></span>
-<span id="cb33-539"><a href="#cb33-539" aria-hidden="true" tabindex="-1"></a>   {</span>
-<span id="cb33-540"><a href="#cb33-540" aria-hidden="true" tabindex="-1"></a>     <span class="st">"Version"</span><span class="op">:</span> <span class="st">"2012-10-17"</span><span class="op">,</span></span>
-<span id="cb33-541"><a href="#cb33-541" aria-hidden="true" tabindex="-1"></a>     <span class="st">"Statement"</span><span class="op">:</span> [</span>
-<span id="cb33-542"><a href="#cb33-542" aria-hidden="true" tabindex="-1"></a>       {</span>
-<span id="cb33-543"><a href="#cb33-543" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Sid"</span><span class="op">:</span> <span class="st">"PublicReadGetObject"</span><span class="op">,</span></span>
-<span id="cb33-544"><a href="#cb33-544" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Effect"</span><span class="op">:</span> <span class="st">"Allow"</span><span class="op">,</span></span>
-<span id="cb33-545"><a href="#cb33-545" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Principal"</span><span class="op">:</span> <span class="st">"*"</span><span class="op">,</span></span>
-<span id="cb33-546"><a href="#cb33-546" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Action"</span><span class="op">:</span> [</span>
-<span id="cb33-547"><a href="#cb33-547" aria-hidden="true" tabindex="-1"></a>           <span class="st">"s3:GetObject"</span></span>
-<span id="cb33-548"><a href="#cb33-548" aria-hidden="true" tabindex="-1"></a>         ]<span class="op">,</span></span>
-<span id="cb33-549"><a href="#cb33-549" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Resource"</span><span class="op">:</span> [</span>
-<span id="cb33-550"><a href="#cb33-550" aria-hidden="true" tabindex="-1"></a>           <span class="st">"arn:aws:s3:::drat-tutorial/*"</span></span>
-<span id="cb33-551"><a href="#cb33-551" aria-hidden="true" tabindex="-1"></a>         ]<span class="op">,</span></span>
-<span id="cb33-552"><a href="#cb33-552" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Condition"</span><span class="op">:</span> {</span>
-<span id="cb33-553"><a href="#cb33-553" aria-hidden="true" tabindex="-1"></a>           <span class="st">"IpAddress"</span><span class="op">:</span> {</span>
-<span id="cb33-554"><a href="#cb33-554" aria-hidden="true" tabindex="-1"></a>             <span class="st">"aws:SourceIp"</span><span class="op">:</span> <span class="st">"192.0.2.0/32"</span></span>
-<span id="cb33-555"><a href="#cb33-555" aria-hidden="true" tabindex="-1"></a>           }</span>
-<span id="cb33-556"><a href="#cb33-556" aria-hidden="true" tabindex="-1"></a>         }</span>
-<span id="cb33-557"><a href="#cb33-557" aria-hidden="true" tabindex="-1"></a>       }</span>
-<span id="cb33-558"><a href="#cb33-558" aria-hidden="true" tabindex="-1"></a>     ]</span>
-<span id="cb33-559"><a href="#cb33-559" aria-hidden="true" tabindex="-1"></a>   }</span>
-<span id="cb33-560"><a href="#cb33-560" aria-hidden="true" tabindex="-1"></a>   <span class="in">```</span></span>
-<span id="cb33-561"><a href="#cb33-561" aria-hidden="true" tabindex="-1"></a>   </span>
+<div class="sourceCode" id="cb28" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Distributing R packages with a drat repository hosted on AWS S3"</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-01-21"</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [R, AWS, TIL]</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 rm <span class="at">--recursive</span> s3://drat-tutorial/</span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-rf</span> ~/drat-tutorial</span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## tl;dr</span></span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a>Today I learned how to</span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Build an R package into source and binary bundles for distribution.</span>
+<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Create a local drat repository.</span>
+<span id="cb28-45"><a href="#cb28-45" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Add an R package to the repository and install it from there.</span>
+<span id="cb28-46"><a href="#cb28-46" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Host the repository remotely in an AWS S3 bucket.</span>
+<span id="cb28-47"><a href="#cb28-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-48"><a href="#cb28-48" aria-hidden="true" tabindex="-1"></a>Many thanks to <span class="co">[</span><span class="ot">Dirk Eddelbuettel</span><span class="co">](https://dirk.eddelbuettel.com/)</span> for creating</span>
+<span id="cb28-49"><a href="#cb28-49" aria-hidden="true" tabindex="-1"></a>and documenting the <span class="co">[</span><span class="ot">drat R package</span><span class="co">](https://cran.r-project.org/package=drat)</span>!</span>
+<span id="cb28-50"><a href="#cb28-50" aria-hidden="true" tabindex="-1"></a>(As always, any mistakes are my own.)</span>
+<span id="cb28-51"><a href="#cb28-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-52"><a href="#cb28-52" aria-hidden="true" tabindex="-1"></a><span class="fu">### Motivation</span></span>
+<span id="cb28-53"><a href="#cb28-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-54"><a href="#cb28-54" aria-hidden="true" tabindex="-1"></a>There are multiple ways for developers to share R packages publicly,</span>
+<span id="cb28-55"><a href="#cb28-55" aria-hidden="true" tabindex="-1"></a>e.g.</span>
+<span id="cb28-56"><a href="#cb28-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-57"><a href="#cb28-57" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Submit them to the [The Comprehensive R Archive Network</span>
+<span id="cb28-58"><a href="#cb28-58" aria-hidden="true" tabindex="-1"></a>  (CRAN)](https://cran.r-project.org/),</span>
+<span id="cb28-59"><a href="#cb28-59" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Contribute them to the <span class="co">[</span><span class="ot">Bioconductor</span><span class="co">](https://www.bioconductor.org/)</span></span>
+<span id="cb28-60"><a href="#cb28-60" aria-hidden="true" tabindex="-1"></a>  project,</span>
+<span id="cb28-61"><a href="#cb28-61" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Publish them via [rOpenSci's</span>
+<span id="cb28-62"><a href="#cb28-62" aria-hidden="true" tabindex="-1"></a>  R-universe](https://ropensci.org/r-universe/)</span>
+<span id="cb28-63"><a href="#cb28-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-64"><a href="#cb28-64" aria-hidden="true" tabindex="-1"></a>User can then install these packages via the familiar <span class="in">`install.packages()`</span></span>
+<span id="cb28-65"><a href="#cb28-65" aria-hidden="true" tabindex="-1"></a>command.</span>
+<span id="cb28-66"><a href="#cb28-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-67"><a href="#cb28-67" aria-hidden="true" tabindex="-1"></a>Alternatively, authors can share their code through version control systems</span>
+<span id="cb28-68"><a href="#cb28-68" aria-hidden="true" tabindex="-1"></a>like <span class="co">[</span><span class="ot">github</span><span class="co">](https://github.com/)</span> or <span class="co">[</span><span class="ot">gitlab</span><span class="co">](https://about.gitlab.com/)</span>, </span>
+<span id="cb28-69"><a href="#cb28-69" aria-hidden="true" tabindex="-1"></a>and users can install them with third-party tools e.g.</span>
+<span id="cb28-70"><a href="#cb28-70" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the remotes R package</span><span class="co">](https://cran.r-project.org/package=remotes)</span>.</span>
+<span id="cb28-71"><a href="#cb28-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-72"><a href="#cb28-72" aria-hidden="true" tabindex="-1"></a>But **how can you make an R package available privately**, e.g. for use</span>
+<span id="cb28-73"><a href="#cb28-73" aria-hidden="true" tabindex="-1"></a>within an organization? </span>
+<span id="cb28-74"><a href="#cb28-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-75"><a href="#cb28-75" aria-hidden="true" tabindex="-1"></a>In this tutorial, I demonstrate how to set up your own package repository with</span>
+<span id="cb28-76"><a href="#cb28-76" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Dirk Eddelbuettel's</span><span class="co">](https://dirk.eddelbuettel.com/)</span> </span>
+<span id="cb28-77"><a href="#cb28-77" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">drat R package</span><span class="co">](https://cran.r-project.org/package=drat)</span>,</span>
+<span id="cb28-78"><a href="#cb28-78" aria-hidden="true" tabindex="-1"></a>add a package, make R aware of the new repo - and host it remotely on AWS S3.</span>
+<span id="cb28-79"><a href="#cb28-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-80"><a href="#cb28-80" aria-hidden="true" tabindex="-1"></a><span class="fu">### Why drat?</span></span>
+<span id="cb28-81"><a href="#cb28-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-82"><a href="#cb28-82" aria-hidden="true" tabindex="-1"></a>Dirk Eddelbuettel [highlights two main</span>
+<span id="cb28-83"><a href="#cb28-83" aria-hidden="true" tabindex="-1"></a>advantages:](https://eddelbuettel.github.io/drat/vignettes/dratfaq/)</span>
+<span id="cb28-84"><a href="#cb28-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-85"><a href="#cb28-85" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A package installed from a drat repository will be supported by</span>
+<span id="cb28-86"><a href="#cb28-86" aria-hidden="true" tabindex="-1"></a>  <span class="in">`install.packages()`</span> and <span class="in">`update.packages()`</span>, so the user has easy</span>
+<span id="cb28-87"><a href="#cb28-87" aria-hidden="true" tabindex="-1"></a>  methods for keeping up-to-date.</span>
+<span id="cb28-88"><a href="#cb28-88" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The package author has better control over the package version users</span>
+<span id="cb28-89"><a href="#cb28-89" aria-hidden="true" tabindex="-1"></a>  install, because they actively push specific releases into the</span>
+<span id="cb28-90"><a href="#cb28-90" aria-hidden="true" tabindex="-1"></a>  repository.</span>
+<span id="cb28-91"><a href="#cb28-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-92"><a href="#cb28-92" aria-hidden="true" tabindex="-1"></a>[Please see Dirk's Drat</span>
+<span id="cb28-93"><a href="#cb28-93" aria-hidden="true" tabindex="-1"></a>FAQ's](https://eddelbuettel.github.io/drat/vignettes/dratfaq/) for</span>
+<span id="cb28-94"><a href="#cb28-94" aria-hidden="true" tabindex="-1"></a>additional points, e.g. ['Why could install_github be</span>
+<span id="cb28-95"><a href="#cb28-95" aria-hidden="true" tabindex="-1"></a>wrong?'](https://eddelbuettel.github.io/drat/vignettes/dratfaq/#why-could-install_github-be-wrong)</span>
+<span id="cb28-96"><a href="#cb28-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-97"><a href="#cb28-97" aria-hidden="true" tabindex="-1"></a><span class="fu">### Prequisites</span></span>
+<span id="cb28-98"><a href="#cb28-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-99"><a href="#cb28-99" aria-hidden="true" tabindex="-1"></a>Hadley Wickham and Jenny Bryan have documented how to author, document</span>
+<span id="cb28-100"><a href="#cb28-100" aria-hidden="true" tabindex="-1"></a>and build R packages in their freely-available [R Packages</span>
+<span id="cb28-101"><a href="#cb28-101" aria-hidden="true" tabindex="-1"></a>book](https://r-pkgs.org/). In this walkthrough I am using Mac OS X</span>
+<span id="cb28-102"><a href="#cb28-102" aria-hidden="true" tabindex="-1"></a>(v13.1), but you can find instructions to set up Windows or Linux build</span>
+<span id="cb28-103"><a href="#cb28-103" aria-hidden="true" tabindex="-1"></a>environments in their [R build</span>
+<span id="cb28-104"><a href="#cb28-104" aria-hidden="true" tabindex="-1"></a>toolchain](https://r-pkgs.org/setup.html#setup-tools) chapter.</span>
+<span id="cb28-105"><a href="#cb28-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-106"><a href="#cb28-106" aria-hidden="true" tabindex="-1"></a><span class="fu">### Bundling an R package's source code for distribution</span></span>
+<span id="cb28-107"><a href="#cb28-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-108"><a href="#cb28-108" aria-hidden="true" tabindex="-1"></a>First, we need an R package that's ready for distribution. Here, I am using the</span>
+<span id="cb28-109"><a href="#cb28-109" aria-hidden="true" tabindex="-1"></a><span class="in">`toy`</span> R package </span>
+<span id="cb28-110"><a href="#cb28-110" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">that you can retrieve from github</span><span class="co">](https://github.com/tomsing1/toy)</span>, </span>
+<span id="cb28-111"><a href="#cb28-111" aria-hidden="true" tabindex="-1"></a>either via</span>
+<span id="cb28-112"><a href="#cb28-112" aria-hidden="true" tabindex="-1"></a><span class="in">`git clone https://github.com/tomsing1/toy`</span> or by downloading its source</span>
+<span id="cb28-113"><a href="#cb28-113" aria-hidden="true" tabindex="-1"></a>code as a </span>
+<span id="cb28-114"><a href="#cb28-114" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">zip file</span><span class="co">](https://github.com/tomsing1/toy/archive/refs/heads/main.zip)</span>.</span>
+<span id="cb28-115"><a href="#cb28-115" aria-hidden="true" tabindex="-1"></a>(Feel free to follow along with another R package instead - as long as</span>
+<span id="cb28-116"><a href="#cb28-116" aria-hidden="true" tabindex="-1"></a>you have the </span>
+<span id="cb28-117"><a href="#cb28-117" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">source package</span><span class="co">](https://r-pkgs.org/structure.html#sec-source-package)</span>,</span>
+<span id="cb28-118"><a href="#cb28-118" aria-hidden="true" tabindex="-1"></a>the following steps apply.)</span>
+<span id="cb28-119"><a href="#cb28-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-120"><a href="#cb28-120" aria-hidden="true" tabindex="-1"></a>Next, we </span>
+<span id="cb28-121"><a href="#cb28-121" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">bundle the package</span><span class="co">](https://r-pkgs.org/structure.html#sec-bundled-package)</span></span>
+<span id="cb28-122"><a href="#cb28-122" aria-hidden="true" tabindex="-1"></a>into a single compressed file with the <span class="in">`.tar.gz`</span> file extension. Let's</span>
+<span id="cb28-123"><a href="#cb28-123" aria-hidden="true" tabindex="-1"></a>download the <span class="in">`.zip`</span> file linked above into the <span class="in">`~/Downloads`</span> folder and use the</span>
+<span id="cb28-124"><a href="#cb28-124" aria-hidden="true" tabindex="-1"></a><span class="in">`R CMD build`</span> command to create a _source bundle_ <span class="ot">[^1]</span>:</span>
+<span id="cb28-125"><a href="#cb28-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-126"><a href="#cb28-126" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>Alternatively, you can also create the bundle from within R using</span>
+<span id="cb28-127"><a href="#cb28-127" aria-hidden="true" tabindex="-1"></a>    the</span>
+<span id="cb28-128"><a href="#cb28-128" aria-hidden="true" tabindex="-1"></a>    <span class="co">[</span><span class="ot">devtools::build()</span><span class="co">](https://devtools.r-lib.org/reference/build.html)</span></span>
+<span id="cb28-129"><a href="#cb28-129" aria-hidden="true" tabindex="-1"></a>    command.</span>
+<span id="cb28-130"><a href="#cb28-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-133"><a href="#cb28-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
+<span id="cb28-134"><a href="#cb28-134" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Downloads</span>
+<span id="cb28-135"><a href="#cb28-135" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> <span class="at">-L</span> <span class="at">-O</span> https://github.com/tomsing1/toy/archive/refs/heads/main.zip</span>
+<span id="cb28-136"><a href="#cb28-136" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span> <span class="at">-o</span> <span class="at">-q</span> main.zip</span>
+<span id="cb28-137"><a href="#cb28-137" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> main.zip</span>
+<span id="cb28-138"><a href="#cb28-138" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD build <span class="at">--force</span> toy-main</span>
+<span id="cb28-139"><a href="#cb28-139" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-140"><a href="#cb28-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-141"><a href="#cb28-141" aria-hidden="true" tabindex="-1"></a>We now have the <span class="in">`toy_0.1.0.tar.gz`</span> file, ready to be inserted into a new</span>
+<span id="cb28-142"><a href="#cb28-142" aria-hidden="true" tabindex="-1"></a>(or existing) drat repository.</span>
+<span id="cb28-143"><a href="#cb28-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-144"><a href="#cb28-144" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating a local drat repository</span></span>
+<span id="cb28-145"><a href="#cb28-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-146"><a href="#cb28-146" aria-hidden="true" tabindex="-1"></a>To create a new repository, we start by installing the [drat R</span>
+<span id="cb28-147"><a href="#cb28-147" aria-hidden="true" tabindex="-1"></a>package](https://cran.r-project.org/package=drat) itself (if it's not</span>
+<span id="cb28-148"><a href="#cb28-148" aria-hidden="true" tabindex="-1"></a>available on your system already) with the following R commands:</span>
+<span id="cb28-149"><a href="#cb28-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-152"><a href="#cb28-152" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-153"><a href="#cb28-153" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"drat"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb28-154"><a href="#cb28-154" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">"drat"</span>)</span>
+<span id="cb28-155"><a href="#cb28-155" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb28-156"><a href="#cb28-156" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(drat)</span>
+<span id="cb28-157"><a href="#cb28-157" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-158"><a href="#cb28-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-159"><a href="#cb28-159" aria-hidden="true" tabindex="-1"></a>You can specify the path of your drat repository either by setting the</span>
+<span id="cb28-160"><a href="#cb28-160" aria-hidden="true" tabindex="-1"></a><span class="in">`dratRepo`</span> option <span class="ot">[^2]</span>:</span>
+<span id="cb28-161"><a href="#cb28-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-162"><a href="#cb28-162" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>You might want to add this option to your</span>
+<span id="cb28-163"><a href="#cb28-163" aria-hidden="true" tabindex="-1"></a>    <span class="co">[</span><span class="ot">.Rprofile</span><span class="co">](https://rstats.wtf/r-startup.html#rprofile)</span> file.</span>
+<span id="cb28-164"><a href="#cb28-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-167"><a href="#cb28-167" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-168"><a href="#cb28-168" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">dratRepo =</span> <span class="st">"~/drat-tutorial"</span>)</span>
+<span id="cb28-169"><a href="#cb28-169" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"dratRepo"</span>)</span>
+<span id="cb28-170"><a href="#cb28-170" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-171"><a href="#cb28-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-172"><a href="#cb28-172" aria-hidden="true" tabindex="-1"></a>or by providing it as an argument to the <span class="in">`drat::insertPackage()`</span></span>
+<span id="cb28-173"><a href="#cb28-173" aria-hidden="true" tabindex="-1"></a>function (see below).</span>
+<span id="cb28-174"><a href="#cb28-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-175"><a href="#cb28-175" aria-hidden="true" tabindex="-1"></a>Let's create a new drat repository in our home directory <span class="ot">[^3]</span>, and</span>
+<span id="cb28-176"><a href="#cb28-176" aria-hidden="true" tabindex="-1"></a>populate it with a minimal <span class="in">`index.html`</span> file (to avoid</span>
+<span id="cb28-177"><a href="#cb28-177" aria-hidden="true" tabindex="-1"></a><span class="in">`HTTP 404 Not Found`</span> errors later).</span>
+<span id="cb28-178"><a href="#cb28-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-179"><a href="#cb28-179" aria-hidden="true" tabindex="-1"></a><span class="ot">[^3]: </span>Of course, you can place it anywhere you like, including e.g.</span>
+<span id="cb28-180"><a href="#cb28-180" aria-hidden="true" tabindex="-1"></a>    network drives, as long as you can write to the directory. If you</span>
+<span id="cb28-181"><a href="#cb28-181" aria-hidden="true" tabindex="-1"></a>    are using Windows, please remember to use backward instead of</span>
+<span id="cb28-182"><a href="#cb28-182" aria-hidden="true" tabindex="-1"></a>    forward slashes in your paths.</span>
+<span id="cb28-183"><a href="#cb28-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-186"><a href="#cb28-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-187"><a href="#cb28-187" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">"~/drat-tutorial"</span>, <span class="at">showWarnings =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb28-188"><a href="#cb28-188" aria-hidden="true" tabindex="-1"></a><span class="fu">writeLines</span>(</span>
+<span id="cb28-189"><a href="#cb28-189" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="st">"&lt;!doctype html&gt;&lt;title&gt;My awesome drat repository!&lt;/title&gt;"</span>,</span>
+<span id="cb28-190"><a href="#cb28-190" aria-hidden="true" tabindex="-1"></a>  <span class="at">con =</span> <span class="st">"~/drat-tutorial/index.html"</span></span>
+<span id="cb28-191"><a href="#cb28-191" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-192"><a href="#cb28-192" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-193"><a href="#cb28-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-194"><a href="#cb28-194" aria-hidden="true" tabindex="-1"></a>Now we are ready to insert the <span class="in">`toy`</span> package bundle into the repository</span>
+<span id="cb28-195"><a href="#cb28-195" aria-hidden="true" tabindex="-1"></a>with drat's <span class="in">`insertPackage()`</span> command <span class="ot">[^4]</span>:</span>
+<span id="cb28-196"><a href="#cb28-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-197"><a href="#cb28-197" aria-hidden="true" tabindex="-1"></a><span class="ot">[^4]: </span>In this tutorial, I use the <span class="in">`::`</span> notation to highlight which</span>
+<span id="cb28-198"><a href="#cb28-198" aria-hidden="true" tabindex="-1"></a>    package a function originates from. Because we attached the package</span>
+<span id="cb28-199"><a href="#cb28-199" aria-hidden="true" tabindex="-1"></a>    with the <span class="in">`library(drat)`</span> command before, the <span class="in">`drat::`</span> prefix could</span>
+<span id="cb28-200"><a href="#cb28-200" aria-hidden="true" tabindex="-1"></a>    be omitted.</span>
+<span id="cb28-201"><a href="#cb28-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-204"><a href="#cb28-204" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-205"><a href="#cb28-205" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">insertPackage</span>(<span class="at">file =</span> <span class="st">"~/Downloads/toy_0.1.0.tar.gz"</span>,</span>
+<span id="cb28-206"><a href="#cb28-206" aria-hidden="true" tabindex="-1"></a>                    <span class="at">repodir =</span> <span class="st">"~/drat-tutorial"</span>)</span>
+<span id="cb28-207"><a href="#cb28-207" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-208"><a href="#cb28-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-209"><a href="#cb28-209" aria-hidden="true" tabindex="-1"></a>Now, the <span class="in">`~/drat-tutorial`</span> folder contains the following files:</span>
+<span id="cb28-210"><a href="#cb28-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-211"><a href="#cb28-211" aria-hidden="true" tabindex="-1"></a><span class="al">![drat repository](repository_source.png)</span></span>
+<span id="cb28-212"><a href="#cb28-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-213"><a href="#cb28-213" aria-hidden="true" tabindex="-1"></a><span class="fu">### Accessing the local drat repository</span></span>
+<span id="cb28-214"><a href="#cb28-214" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-215"><a href="#cb28-215" aria-hidden="true" tabindex="-1"></a>When you prompt your R installation to install or update R packages, it</span>
+<span id="cb28-216"><a href="#cb28-216" aria-hidden="true" tabindex="-1"></a>searches repositories specified in the <span class="in">`repos`</span> option. On my system,</span>
+<span id="cb28-217"><a href="#cb28-217" aria-hidden="true" tabindex="-1"></a>only the default repository is set in a fresh R session <span class="ot">[^5]</span>:</span>
+<span id="cb28-218"><a href="#cb28-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-219"><a href="#cb28-219" aria-hidden="true" tabindex="-1"></a><span class="ot">[^5]: </span>In this tutorial, I use the <span class="in">`::`</span> notation to highlight in which</span>
+<span id="cb28-220"><a href="#cb28-220" aria-hidden="true" tabindex="-1"></a>    package functions originate from. Because we attached the package</span>
+<span id="cb28-221"><a href="#cb28-221" aria-hidden="true" tabindex="-1"></a>    with the <span class="in">`library(drat)`</span> command before, the <span class="in">`drat::`</span> prefix could</span>
+<span id="cb28-222"><a href="#cb28-222" aria-hidden="true" tabindex="-1"></a>    be omitted.</span>
+<span id="cb28-223"><a href="#cb28-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-226"><a href="#cb28-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-227"><a href="#cb28-227" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span>
+<span id="cb28-228"><a href="#cb28-228" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-229"><a href="#cb28-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-230"><a href="#cb28-230" aria-hidden="true" tabindex="-1"></a>If I try to install our example <span class="in">`toy`</span> R package, I don't succeed:</span>
+<span id="cb28-231"><a href="#cb28-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-234"><a href="#cb28-234" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-235"><a href="#cb28-235" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>, <span class="at">type =</span> <span class="st">"source"</span>)</span>
+<span id="cb28-236"><a href="#cb28-236" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-237"><a href="#cb28-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-238"><a href="#cb28-238" aria-hidden="true" tabindex="-1"></a>because R is not aware of our new repository, yet.</span>
+<span id="cb28-239"><a href="#cb28-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-240"><a href="#cb28-240" aria-hidden="true" tabindex="-1"></a>::: callout-note</span>
+<span id="cb28-241"><a href="#cb28-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-242"><a href="#cb28-242" aria-hidden="true" tabindex="-1"></a><span class="fu">### Installing from source</span></span>
+<span id="cb28-243"><a href="#cb28-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-244"><a href="#cb28-244" aria-hidden="true" tabindex="-1"></a>At this point, we must add the <span class="in">`type="source"`</span> argument, because we have</span>
+<span id="cb28-245"><a href="#cb28-245" aria-hidden="true" tabindex="-1"></a>only added the *source* bundle to the repository. We will add a compiled</span>
+<span id="cb28-246"><a href="#cb28-246" aria-hidden="true" tabindex="-1"></a>version in a moment - read on!</span>
+<span id="cb28-247"><a href="#cb28-247" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb28-248"><a href="#cb28-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-249"><a href="#cb28-249" aria-hidden="true" tabindex="-1"></a>To test our local repository, we add its path to the list of known</span>
+<span id="cb28-250"><a href="#cb28-250" aria-hidden="true" tabindex="-1"></a>repositories.</span>
+<span id="cb28-251"><a href="#cb28-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-254"><a href="#cb28-254" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-255"><a href="#cb28-255" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">addRepo</span>(<span class="st">"LocalRepo"</span>, <span class="st">"file://Users/sandmann/drat-tutorial"</span>)</span>
+<span id="cb28-256"><a href="#cb28-256" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span>
+<span id="cb28-257"><a href="#cb28-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-258"><a href="#cb28-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-259"><a href="#cb28-259" aria-hidden="true" tabindex="-1"></a>::: callout-important</span>
+<span id="cb28-260"><a href="#cb28-260" aria-hidden="true" tabindex="-1"></a><span class="fu">### Specifying file:// paths</span></span>
+<span id="cb28-261"><a href="#cb28-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-262"><a href="#cb28-262" aria-hidden="true" tabindex="-1"></a>By default, drat's <span class="in">`addRepo()`</span> command assumes that repositories are</span>
+<span id="cb28-263"><a href="#cb28-263" aria-hidden="true" tabindex="-1"></a>hosted on <span class="co">[</span><span class="ot">github-pages</span><span class="co">](https://pages.github.com/)</span>. Because we want to</span>
+<span id="cb28-264"><a href="#cb28-264" aria-hidden="true" tabindex="-1"></a>access a repo via the filesystem (either locally or on a network drive),</span>
+<span id="cb28-265"><a href="#cb28-265" aria-hidden="true" tabindex="-1"></a>we need to explicitly add the <span class="in">`file:/`</span> prefix - and use the absolute</span>
+<span id="cb28-266"><a href="#cb28-266" aria-hidden="true" tabindex="-1"></a>file path (e.g. returned by <span class="in">`path.expand("~/drat-tutorial")`</span>) to specify its</span>
+<span id="cb28-267"><a href="#cb28-267" aria-hidden="true" tabindex="-1"></a>location.</span>
+<span id="cb28-268"><a href="#cb28-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-269"><a href="#cb28-269" aria-hidden="true" tabindex="-1"></a>In this case, concatenating <span class="in">`file:/`</span> with <span class="in">`/Users/sandmann/drat-tutorial`</span></span>
+<span id="cb28-270"><a href="#cb28-270" aria-hidden="true" tabindex="-1"></a>produces the final <span class="in">`file://Users/sandmann/drat-tutorial`</span> location (note the</span>
+<span id="cb28-271"><a href="#cb28-271" aria-hidden="true" tabindex="-1"></a>double forward slashes).</span>
+<span id="cb28-272"><a href="#cb28-272" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb28-273"><a href="#cb28-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-274"><a href="#cb28-274" aria-hidden="true" tabindex="-1"></a>Now, we can install it with the usual <span class="in">`install.packages()`</span> command <span class="ot">[^6]</span>:</span>
+<span id="cb28-275"><a href="#cb28-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-276"><a href="#cb28-276" aria-hidden="true" tabindex="-1"></a><span class="ot">[^6]: </span>If you use Bioconductor, the <span class="in">`BiocManager::repositories()`</span></span>
+<span id="cb28-277"><a href="#cb28-277" aria-hidden="true" tabindex="-1"></a>    specifies additional repositories that host its annotation and</span>
+<span id="cb28-278"><a href="#cb28-278" aria-hidden="true" tabindex="-1"></a>    software packages.</span>
+<span id="cb28-279"><a href="#cb28-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-282"><a href="#cb28-282" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-283"><a href="#cb28-283" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>, <span class="at">type =</span> <span class="st">"source"</span>)</span>
+<span id="cb28-284"><a href="#cb28-284" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-285"><a href="#cb28-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-286"><a href="#cb28-286" aria-hidden="true" tabindex="-1"></a>Great! We have successfully installed our <span class="in">`toy`</span> R package from our brand</span>
+<span id="cb28-287"><a href="#cb28-287" aria-hidden="true" tabindex="-1"></a>new repository. Now it is time to make it available to other users as</span>
+<span id="cb28-288"><a href="#cb28-288" aria-hidden="true" tabindex="-1"></a>well.</span>
+<span id="cb28-289"><a href="#cb28-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-290"><a href="#cb28-290" aria-hidden="true" tabindex="-1"></a><span class="fu">### Building binary packages</span></span>
+<span id="cb28-291"><a href="#cb28-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-292"><a href="#cb28-292" aria-hidden="true" tabindex="-1"></a>Windows and Mac users who install packages from </span>
+<span id="cb28-293"><a href="#cb28-293" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">CRAN</span><span class="co">](https://cran.r-project.org/)</span></span>
+<span id="cb28-294"><a href="#cb28-294" aria-hidden="true" tabindex="-1"></a>or any user installing files from the</span>
+<span id="cb28-295"><a href="#cb28-295" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Posit Public Package Manager (PPPM)</span><span class="co">](https://packagemanager.rstudio.com/client/#/)</span></span>
+<span id="cb28-296"><a href="#cb28-296" aria-hidden="true" tabindex="-1"></a>will usually receive </span>
+<span id="cb28-297"><a href="#cb28-297" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">a binary package</span><span class="co">](https://r-pkgs.org/Structure.html#sec-structure-binary)</span>.</span>
+<span id="cb28-298"><a href="#cb28-298" aria-hidden="true" tabindex="-1"></a>CRAN accepts package bundles and creates the platform-specific binary file for</span>
+<span id="cb28-299"><a href="#cb28-299" aria-hidden="true" tabindex="-1"></a>distribution. To offer the same service to users of our drat repository, we</span>
+<span id="cb28-300"><a href="#cb28-300" aria-hidden="true" tabindex="-1"></a>need to compile the binary package ourselves.</span>
+<span id="cb28-301"><a href="#cb28-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-302"><a href="#cb28-302" aria-hidden="true" tabindex="-1"></a>Here, I create the Mac OS binary package from the bundle we obtained above</span>
+<span id="cb28-303"><a href="#cb28-303" aria-hidden="true" tabindex="-1"></a>by executing the following command on my Mac OS operating system:</span>
+<span id="cb28-304"><a href="#cb28-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-307"><a href="#cb28-307" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
+<span id="cb28-308"><a href="#cb28-308" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ~/Downloads</span>
+<span id="cb28-309"><a href="#cb28-309" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> CMD INSTALL <span class="at">--build</span> toy_0.1.0.tar.gz</span>
+<span id="cb28-310"><a href="#cb28-310" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-311"><a href="#cb28-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-312"><a href="#cb28-312" aria-hidden="true" tabindex="-1"></a>This command will first install the package into my default R library, and then</span>
+<span id="cb28-313"><a href="#cb28-313" aria-hidden="true" tabindex="-1"></a>create the binary <span class="in">`toy_0.1.0.tgz`</span> file.</span>
+<span id="cb28-314"><a href="#cb28-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-315"><a href="#cb28-315" aria-hidden="true" tabindex="-1"></a>Next, we add it to our local drat repository (note the <span class="in">`.tgz`</span> file suffix).</span>
+<span id="cb28-316"><a href="#cb28-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-319"><a href="#cb28-319" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-320"><a href="#cb28-320" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">insertPackage</span>(<span class="at">file =</span> <span class="st">"~/Downloads/toy_0.1.0.tgz"</span>,</span>
+<span id="cb28-321"><a href="#cb28-321" aria-hidden="true" tabindex="-1"></a>                    <span class="at">repodir =</span> <span class="st">"~/drat-tutorial"</span>)</span>
+<span id="cb28-322"><a href="#cb28-322" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-323"><a href="#cb28-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-324"><a href="#cb28-324" aria-hidden="true" tabindex="-1"></a>Now, the <span class="in">`~/drat-tutorial`</span> folder contains a new subdirectory (<span class="in">`bin`</span>) with the</span>
+<span id="cb28-325"><a href="#cb28-325" aria-hidden="true" tabindex="-1"></a>binary files for Mac OS X:</span>
+<span id="cb28-326"><a href="#cb28-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-327"><a href="#cb28-327" aria-hidden="true" tabindex="-1"></a><span class="al">![drat repository](repository_binary.png)</span></span>
+<span id="cb28-328"><a href="#cb28-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-329"><a href="#cb28-329" aria-hidden="true" tabindex="-1"></a>At long last, now we can omit the <span class="in">`type="source"`</span> argument from calls to </span>
+<span id="cb28-330"><a href="#cb28-330" aria-hidden="true" tabindex="-1"></a><span class="in">`install.packages()`</span>:</span>
+<span id="cb28-331"><a href="#cb28-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-334"><a href="#cb28-334" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-335"><a href="#cb28-335" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>)</span>
+<span id="cb28-336"><a href="#cb28-336" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-337"><a href="#cb28-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-338"><a href="#cb28-338" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hosting your drat repository on AWS S3</span></span>
+<span id="cb28-339"><a href="#cb28-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-340"><a href="#cb28-340" aria-hidden="true" tabindex="-1"></a>drat repositories can be hosted in any location</span>
+<span id="cb28-341"><a href="#cb28-341" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-342"><a href="#cb28-342" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>that you can write files to and</span>
+<span id="cb28-343"><a href="#cb28-343" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>that can serve files via http</span>
+<span id="cb28-344"><a href="#cb28-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-345"><a href="#cb28-345" aria-hidden="true" tabindex="-1"></a>But unless you placed your drat repository into a network drive that is</span>
+<span id="cb28-346"><a href="#cb28-346" aria-hidden="true" tabindex="-1"></a>accessible by multiple users, it is currently only useful to yourself.</span>
+<span id="cb28-347"><a href="#cb28-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-348"><a href="#cb28-348" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb28-349"><a href="#cb28-349" aria-hidden="true" tabindex="-1"></a><span class="fu">### Sharing repository over a local network</span></span>
+<span id="cb28-350"><a href="#cb28-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-351"><a href="#cb28-351" aria-hidden="true" tabindex="-1"></a>If you chose a network drive as the location of your drat repository,</span>
+<span id="cb28-352"><a href="#cb28-352" aria-hidden="true" tabindex="-1"></a>then other user can benefit from it right - as long as they can read from the</span>
+<span id="cb28-353"><a href="#cb28-353" aria-hidden="true" tabindex="-1"></a>shared directory. As before, the absolute path must be prefixed with the </span>
+<span id="cb28-354"><a href="#cb28-354" aria-hidden="true" tabindex="-1"></a><span class="in">`file:/`</span> prefix. For example, a repository that is available on *the user's* </span>
+<span id="cb28-355"><a href="#cb28-355" aria-hidden="true" tabindex="-1"></a>systems at <span class="in">`/nfs/groups/groupABC/R/drat`</span> would be added to the list of R</span>
+<span id="cb28-356"><a href="#cb28-356" aria-hidden="true" tabindex="-1"></a>repositories via </span>
+<span id="cb28-357"><a href="#cb28-357" aria-hidden="true" tabindex="-1"></a><span class="in">`drat::addRepo("workgroup", "file://nfs/groups/groupABC/R/drat")`</span>.</span>
+<span id="cb28-358"><a href="#cb28-358" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb28-359"><a href="#cb28-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-360"><a href="#cb28-360" aria-hidden="true" tabindex="-1"></a>The [drat</span>
+<span id="cb28-361"><a href="#cb28-361" aria-hidden="true" tabindex="-1"></a>documentation](https://eddelbuettel.github.io/drat/vignettes/dratforusers/#case-1-using-github)</span>
+<span id="cb28-362"><a href="#cb28-362" aria-hidden="true" tabindex="-1"></a>illustrates how you can use <span class="co">[</span><span class="ot">git</span><span class="co">](https://git-scm.com/)</span> and [github</span>
+<span id="cb28-363"><a href="#cb28-363" aria-hidden="true" tabindex="-1"></a>pages](https://pages.github.com/) to make your repository *publicly*</span>
+<span id="cb28-364"><a href="#cb28-364" aria-hidden="true" tabindex="-1"></a>available.</span>
+<span id="cb28-365"><a href="#cb28-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-366"><a href="#cb28-366" aria-hidden="true" tabindex="-1"></a>Here, we are interested in hosting a repository *privately* instead,</span>
+<span id="cb28-367"><a href="#cb28-367" aria-hidden="true" tabindex="-1"></a>e.g. in a location that is only accessible from within our own</span>
+<span id="cb28-368"><a href="#cb28-368" aria-hidden="true" tabindex="-1"></a>organization: </span>
+<span id="cb28-369"><a href="#cb28-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-370"><a href="#cb28-370" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If you already have access to a private server that serves files</span>
+<span id="cb28-371"><a href="#cb28-371" aria-hidden="true" tabindex="-1"></a>to your users (e.g. via HTTP), then you can simply copy your repository there.</span>
+<span id="cb28-372"><a href="#cb28-372" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>If your organization uses Amazon Web Services (AWS), you can also use an</span>
+<span id="cb28-373"><a href="#cb28-373" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">S3 bucket to host your repository</span><span class="co">](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html)</span></span>
+<span id="cb28-374"><a href="#cb28-374" aria-hidden="true" tabindex="-1"></a>and take advantage of the access controls set by your organization.</span>
+<span id="cb28-375"><a href="#cb28-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-376"><a href="#cb28-376" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb28-377"><a href="#cb28-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-378"><a href="#cb28-378" aria-hidden="true" tabindex="-1"></a><span class="fu">### Public repositories in S3 buckets</span></span>
+<span id="cb28-379"><a href="#cb28-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-380"><a href="#cb28-380" aria-hidden="true" tabindex="-1"></a>Although this use case focuses on hosting private repositories, you can of </span>
+<span id="cb28-381"><a href="#cb28-381" aria-hidden="true" tabindex="-1"></a>course also make repositories in S3 buckets publicly available. Alas,</span>
+<span id="cb28-382"><a href="#cb28-382" aria-hidden="true" tabindex="-1"></a>data storage in S3 buckets incurs cost, while other options (e.g. github-pages,</span>
+<span id="cb28-383"><a href="#cb28-383" aria-hidden="true" tabindex="-1"></a>CRAN, Bioconductor, etc) are free, so this might not be your preferred option.</span>
+<span id="cb28-384"><a href="#cb28-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-385"><a href="#cb28-385" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb28-386"><a href="#cb28-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-387"><a href="#cb28-387" aria-hidden="true" tabindex="-1"></a>We will assume that you have write access to an S3 bucket that is</span>
+<span id="cb28-388"><a href="#cb28-388" aria-hidden="true" tabindex="-1"></a>configured to serve static files via HTTP. (For a brief outline of the</span>
+<span id="cb28-389"><a href="#cb28-389" aria-hidden="true" tabindex="-1"></a>necessary steps, please </span>
+<span id="cb28-390"><a href="#cb28-390" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">see the appendix</span><span class="co">]</span>((#creating-and-configuring-an-s3-bucket-to-host-static-files))</span>
+<span id="cb28-391"><a href="#cb28-391" aria-hidden="true" tabindex="-1"></a>).</span>
+<span id="cb28-392"><a href="#cb28-392" aria-hidden="true" tabindex="-1"></a>Here, I am using a bucket called <span class="in">`drat-tutorial`</span> - but you should create / </span>
+<span id="cb28-393"><a href="#cb28-393" aria-hidden="true" tabindex="-1"></a>access your own bucket to follow along.</span>
+<span id="cb28-394"><a href="#cb28-394" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-395"><a href="#cb28-395" aria-hidden="true" tabindex="-1"></a>::: callout-warning</span>
+<span id="cb28-396"><a href="#cb28-396" aria-hidden="true" tabindex="-1"></a>AWS S3 buckets can be configured to either be visible publicly, or</span>
+<span id="cb28-397"><a href="#cb28-397" aria-hidden="true" tabindex="-1"></a>access can be restricted to specific IP addresses, security groups or</span>
+<span id="cb28-398"><a href="#cb28-398" aria-hidden="true" tabindex="-1"></a>other AWS resources. Please make sure you have configured your bucket in</span>
+<span id="cb28-399"><a href="#cb28-399" aria-hidden="true" tabindex="-1"></a>a way that suits your needs.</span>
+<span id="cb28-400"><a href="#cb28-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-401"><a href="#cb28-401" aria-hidden="true" tabindex="-1"></a>S3 buckets do *not* support the [HTTPS</span>
+<span id="cb28-402"><a href="#cb28-402" aria-hidden="true" tabindex="-1"></a>protocol](https://en.wikipedia.org/wiki/HTTPS). If you require an</span>
+<span id="cb28-403"><a href="#cb28-403" aria-hidden="true" tabindex="-1"></a>encrypted file transfer, you might need a [different</span>
+<span id="cb28-404"><a href="#cb28-404" aria-hidden="true" tabindex="-1"></a>solution](https://aws.amazon.com/premiumsupport/knowledge-center/cloudfront-https-requests-s3/).</span>
+<span id="cb28-405"><a href="#cb28-405" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb28-406"><a href="#cb28-406" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-407"><a href="#cb28-407" aria-hidden="true" tabindex="-1"></a>To share our repository, we must first copy its folder to the S3 bucket, either</span>
+<span id="cb28-408"><a href="#cb28-408" aria-hidden="true" tabindex="-1"></a>via the AWS Console or (more conveniently) with the</span>
+<span id="cb28-409"><a href="#cb28-409" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">aws command line interface</span><span class="co">](https://aws.amazon.com/cli/)</span><span class="ot">[^7]</span>. (If you are </span>
+<span id="cb28-410"><a href="#cb28-410" aria-hidden="true" tabindex="-1"></a>adventurous, you can also mount an S3 bucket as a _filey_ system with</span>
+<span id="cb28-411"><a href="#cb28-411" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">goofys</span><span class="co">](https://github.com/kahing/goofys)</span>).</span>
+<span id="cb28-412"><a href="#cb28-412" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-413"><a href="#cb28-413" aria-hidden="true" tabindex="-1"></a><span class="ot">[^7]: </span><span class="co">[</span><span class="ot">Installation instructions</span><span class="co">](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)</span>.</span>
+<span id="cb28-414"><a href="#cb28-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-415"><a href="#cb28-415" aria-hidden="true" tabindex="-1"></a>Assuming you have set </span>
+<span id="cb28-416"><a href="#cb28-416" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the necessary AWS credentials</span><span class="co">](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)</span>,</span>
+<span id="cb28-417"><a href="#cb28-417" aria-hidden="true" tabindex="-1"></a>the following <span class="in">`aws s3 sync`</span> command copies our repository to the <span class="in">`repo`</span> folder</span>
+<span id="cb28-418"><a href="#cb28-418" aria-hidden="true" tabindex="-1"></a>within <span class="in">`drat-tutorial`</span> bucket that I <span class="co">[</span><span class="ot">created in the `us-west-1` AWS region</span><span class="co">](#creating-and-configuring-an-s3-bucket-to-host-static-files)</span>.</span>
+<span id="cb28-419"><a href="#cb28-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-422"><a href="#cb28-422" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
+<span id="cb28-423"><a href="#cb28-423" aria-hidden="true" tabindex="-1"></a><span class="co">#| results: hide</span></span>
+<span id="cb28-424"><a href="#cb28-424" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb28-425"><a href="#cb28-425" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 sync ~/drat-tutorial s3://drat-tutorial/repo</span>
+<span id="cb28-426"><a href="#cb28-426" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-427"><a href="#cb28-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-428"><a href="#cb28-428" aria-hidden="true" tabindex="-1"></a>We can use the <span class="in">`aws s3 ls`</span> command to confirm the upload:</span>
+<span id="cb28-429"><a href="#cb28-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-432"><a href="#cb28-432" aria-hidden="true" tabindex="-1"></a><span class="in">```{bash}</span></span>
+<span id="cb28-433"><a href="#cb28-433" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb28-434"><a href="#cb28-434" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3 ls s3://drat-tutorial/repo/</span>
+<span id="cb28-435"><a href="#cb28-435" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-436"><a href="#cb28-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-437"><a href="#cb28-437" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb28-438"><a href="#cb28-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-439"><a href="#cb28-439" aria-hidden="true" tabindex="-1"></a>Whenever we make changes to our local repository, e.g. after adding new packages</span>
+<span id="cb28-440"><a href="#cb28-440" aria-hidden="true" tabindex="-1"></a>or package versions, we have to rerun the <span class="in">`aws s3 sync`</span> command to copy the </span>
+<span id="cb28-441"><a href="#cb28-441" aria-hidden="true" tabindex="-1"></a>new files to the S3 bucket.</span>
+<span id="cb28-442"><a href="#cb28-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-443"><a href="#cb28-443" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb28-444"><a href="#cb28-444" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-445"><a href="#cb28-445" aria-hidden="true" tabindex="-1"></a>Now that the files are in place, we can add our remote repository to the the</span>
+<span id="cb28-446"><a href="#cb28-446" aria-hidden="true" tabindex="-1"></a>list of R repositories in our R session. First, we remove the <span class="in">`LocalRepo`</span> </span>
+<span id="cb28-447"><a href="#cb28-447" aria-hidden="true" tabindex="-1"></a>repository that we had added earlier, which points to the folder on our</span>
+<span id="cb28-448"><a href="#cb28-448" aria-hidden="true" tabindex="-1"></a>local filesystem.</span>
+<span id="cb28-449"><a href="#cb28-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-452"><a href="#cb28-452" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-453"><a href="#cb28-453" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">repos =</span> <span class="fu">getOption</span>(<span class="st">"repos"</span>)[</span>
+<span id="cb28-454"><a href="#cb28-454" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setdiff</span>(<span class="fu">names</span>(<span class="fu">getOption</span>(<span class="st">"repos"</span>)), <span class="st">"LocalRepo"</span>)</span>
+<span id="cb28-455"><a href="#cb28-455" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb28-456"><a href="#cb28-456" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-457"><a href="#cb28-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-458"><a href="#cb28-458" aria-hidden="true" tabindex="-1"></a>The we add the remote repository instead, by pointing to the URL of the</span>
+<span id="cb28-459"><a href="#cb28-459" aria-hidden="true" tabindex="-1"></a>S3 bucket <span class="ot">[^8]</span>.</span>
+<span id="cb28-460"><a href="#cb28-460" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-461"><a href="#cb28-461" aria-hidden="true" tabindex="-1"></a><span class="ot">[^8]: </span>You can look up the URL for your bucket in the AWS S3 console: </span>
+<span id="cb28-462"><a href="#cb28-462" aria-hidden="true" tabindex="-1"></a>  <span class="al">![S3 URL](s3_url.png)</span></span>
+<span id="cb28-463"><a href="#cb28-463" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-466"><a href="#cb28-466" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-467"><a href="#cb28-467" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb28-468"><a href="#cb28-468" aria-hidden="true" tabindex="-1"></a>drat<span class="sc">::</span><span class="fu">addRepo</span>(<span class="st">"S3repo"</span>, <span class="st">"http://drat-tutorial.s3.us-west-1.amazonaws.com/repo/"</span>)</span>
+<span id="cb28-469"><a href="#cb28-469" aria-hidden="true" tabindex="-1"></a><span class="fu">getOption</span>(<span class="st">"repos"</span>)</span>
+<span id="cb28-470"><a href="#cb28-470" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-471"><a href="#cb28-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-472"><a href="#cb28-472" aria-hidden="true" tabindex="-1"></a>Let's try to install the <span class="in">`toy`</span> package from our S3 drat repository:</span>
+<span id="cb28-473"><a href="#cb28-473" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-476"><a href="#cb28-476" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb28-477"><a href="#cb28-477" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb28-478"><a href="#cb28-478" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"toy"</span>)</span>
+<span id="cb28-479"><a href="#cb28-479" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb28-480"><a href="#cb28-480" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-481"><a href="#cb28-481" aria-hidden="true" tabindex="-1"></a>Success! R has successfully connected to the remote repository and installed</span>
+<span id="cb28-482"><a href="#cb28-482" aria-hidden="true" tabindex="-1"></a>the (binary) R package.</span>
+<span id="cb28-483"><a href="#cb28-483" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-484"><a href="#cb28-484" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusions</span></span>
+<span id="cb28-485"><a href="#cb28-485" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-486"><a href="#cb28-486" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The <span class="in">`drat`</span> R package makes it extremely simple to create a CRAN-like</span>
+<span id="cb28-487"><a href="#cb28-487" aria-hidden="true" tabindex="-1"></a>  repository. </span>
+<span id="cb28-488"><a href="#cb28-488" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The static files can be served via HTTP, making it straightforward to host</span>
+<span id="cb28-489"><a href="#cb28-489" aria-hidden="true" tabindex="-1"></a>  the repository e.g. in an AWS S3 bucket with a restrictive access policy.</span>
+<span id="cb28-490"><a href="#cb28-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-491"><a href="#cb28-491" aria-hidden="true" tabindex="-1"></a><span class="fu">## Appendix</span></span>
+<span id="cb28-492"><a href="#cb28-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-493"><a href="#cb28-493" aria-hidden="true" tabindex="-1"></a><span class="fu">### Creating and configuring an S3 bucket to host static files</span></span>
+<span id="cb28-494"><a href="#cb28-494" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-495"><a href="#cb28-495" aria-hidden="true" tabindex="-1"></a>The following steps briefly outline how to create and configure an S3</span>
+<span id="cb28-496"><a href="#cb28-496" aria-hidden="true" tabindex="-1"></a>bucket to act as a static web server via the AWS web interface (e.g. the</span>
+<span id="cb28-497"><a href="#cb28-497" aria-hidden="true" tabindex="-1"></a>AWS Console). For more details, please read the [AWS S3</span>
+<span id="cb28-498"><a href="#cb28-498" aria-hidden="true" tabindex="-1"></a>documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html)</span>
+<span id="cb28-499"><a href="#cb28-499" aria-hidden="true" tabindex="-1"></a>and / or consult your local AWS expert.</span>
+<span id="cb28-500"><a href="#cb28-500" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-501"><a href="#cb28-501" aria-hidden="true" tabindex="-1"></a>::: {.callout-warning}</span>
+<span id="cb28-502"><a href="#cb28-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-503"><a href="#cb28-503" aria-hidden="true" tabindex="-1"></a>Storing files on AWS S3 is not free. In this tutorial, we only upload a limited</span>
+<span id="cb28-504"><a href="#cb28-504" aria-hidden="true" tabindex="-1"></a>number of small files, but please don't forget to purge them from your AWS</span>
+<span id="cb28-505"><a href="#cb28-505" aria-hidden="true" tabindex="-1"></a>account afterward. </span>
+<span id="cb28-506"><a href="#cb28-506" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-507"><a href="#cb28-507" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb28-508"><a href="#cb28-508" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-509"><a href="#cb28-509" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Create a new bucket (skip if you already have one)</span>
+<span id="cb28-510"><a href="#cb28-510" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-511"><a href="#cb28-511" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>Make sure you create the bucket in the <span class="in">`region`</span> that works best for</span>
+<span id="cb28-512"><a href="#cb28-512" aria-hidden="true" tabindex="-1"></a>    your organization (e.g. <span class="in">`us-west-1`</span> if you want to host your files</span>
+<span id="cb28-513"><a href="#cb28-513" aria-hidden="true" tabindex="-1"></a>    in California).</span>
+<span id="cb28-514"><a href="#cb28-514" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-515"><a href="#cb28-515" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>You do *not* need to enable <span class="in">`public access`</span>, stick to the defaults</span>
+<span id="cb28-516"><a href="#cb28-516" aria-hidden="true" tabindex="-1"></a>    for your organization.</span>
+<span id="cb28-517"><a href="#cb28-517" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-518"><a href="#cb28-518" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Create an S3 bucket](create_bucket.png)</span></span>
+<span id="cb28-519"><a href="#cb28-519" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-520"><a href="#cb28-520" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Next, navigate to your bucket's properties,</span>
+<span id="cb28-521"><a href="#cb28-521" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-522"><a href="#cb28-522" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Bucket properties](bucket_properties.png)</span></span>
+<span id="cb28-523"><a href="#cb28-523" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-524"><a href="#cb28-524" aria-hidden="true" tabindex="-1"></a>    scroll all the way to the bottom of the page and </span>
+<span id="cb28-525"><a href="#cb28-525" aria-hidden="true" tabindex="-1"></a>    <span class="co">[</span><span class="ot">enable Static website hosting</span><span class="co">](https://docs.aws.amazon.com/AmazonS3/latest/userguide/HostingWebsiteOnS3Setup.html#step2-create-bucket-config-as-website)</span>.</span>
+<span id="cb28-526"><a href="#cb28-526" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-527"><a href="#cb28-527" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Enable static hosting](static_hosting.png)</span></span>
+<span id="cb28-528"><a href="#cb28-528" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-529"><a href="#cb28-529" aria-hidden="true" tabindex="-1"></a>    (Typically) specify <span class="in">`index.html`</span> as the</span>
+<span id="cb28-530"><a href="#cb28-530" aria-hidden="true" tabindex="-1"></a>    <span class="in">`Index document`</span>.</span>
+<span id="cb28-531"><a href="#cb28-531" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-532"><a href="#cb28-532" aria-hidden="true" tabindex="-1"></a>    <span class="al">![Define the index document](index_document.png)</span></span>
+<span id="cb28-533"><a href="#cb28-533" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-534"><a href="#cb28-534" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Under the <span class="in">`Permissions`</span> tab, add a bucket policy that makes your</span>
+<span id="cb28-535"><a href="#cb28-535" aria-hidden="true" tabindex="-1"></a>  content available _within_ your organization</span>
+<span id="cb28-536"><a href="#cb28-536" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb28-537"><a href="#cb28-537" aria-hidden="true" tabindex="-1"></a>   ::: {.callout-warning}</span>
+<span id="cb28-538"><a href="#cb28-538" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb28-539"><a href="#cb28-539" aria-hidden="true" tabindex="-1"></a>   These settings determine who can access your files. Proceed with</span>
+<span id="cb28-540"><a href="#cb28-540" aria-hidden="true" tabindex="-1"></a>   caution to </span>
+<span id="cb28-541"><a href="#cb28-541" aria-hidden="true" tabindex="-1"></a>   <span class="co">[</span><span class="ot">avoid inadvertently exposing your data to the world!</span><span class="co">](https://www.trendmicro.com/vinfo/pl/security/news/virtualization-and-cloud/data-on-123-million-us-households-exposed-due-to-misconfigured-aws-s3-bucket)</span></span>
+<span id="cb28-542"><a href="#cb28-542" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb28-543"><a href="#cb28-543" aria-hidden="true" tabindex="-1"></a>   :::</span>
+<span id="cb28-544"><a href="#cb28-544" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb28-545"><a href="#cb28-545" aria-hidden="true" tabindex="-1"></a>   For example, the following policy grants read access to all files in the</span>
+<span id="cb28-546"><a href="#cb28-546" aria-hidden="true" tabindex="-1"></a>   <span class="in">`s3://drat-tutorial/`</span> bucket to requests originating (only) from the </span>
+<span id="cb28-547"><a href="#cb28-547" aria-hidden="true" tabindex="-1"></a>   <span class="in">`192.0.2.0`</span> IP address. (Your own configuration will be different, of</span>
+<span id="cb28-548"><a href="#cb28-548" aria-hidden="true" tabindex="-1"></a>   course.)</span>
+<span id="cb28-549"><a href="#cb28-549" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb28-550"><a href="#cb28-550" aria-hidden="true" tabindex="-1"></a>   <span class="in">```json</span></span>
+<span id="cb28-551"><a href="#cb28-551" aria-hidden="true" tabindex="-1"></a>   {</span>
+<span id="cb28-552"><a href="#cb28-552" aria-hidden="true" tabindex="-1"></a>     <span class="st">"Version"</span><span class="op">:</span> <span class="st">"2012-10-17"</span><span class="op">,</span></span>
+<span id="cb28-553"><a href="#cb28-553" aria-hidden="true" tabindex="-1"></a>     <span class="st">"Statement"</span><span class="op">:</span> [</span>
+<span id="cb28-554"><a href="#cb28-554" aria-hidden="true" tabindex="-1"></a>       {</span>
+<span id="cb28-555"><a href="#cb28-555" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Sid"</span><span class="op">:</span> <span class="st">"PublicReadGetObject"</span><span class="op">,</span></span>
+<span id="cb28-556"><a href="#cb28-556" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Effect"</span><span class="op">:</span> <span class="st">"Allow"</span><span class="op">,</span></span>
+<span id="cb28-557"><a href="#cb28-557" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Principal"</span><span class="op">:</span> <span class="st">"*"</span><span class="op">,</span></span>
+<span id="cb28-558"><a href="#cb28-558" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Action"</span><span class="op">:</span> [</span>
+<span id="cb28-559"><a href="#cb28-559" aria-hidden="true" tabindex="-1"></a>           <span class="st">"s3:GetObject"</span></span>
+<span id="cb28-560"><a href="#cb28-560" aria-hidden="true" tabindex="-1"></a>         ]<span class="op">,</span></span>
+<span id="cb28-561"><a href="#cb28-561" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Resource"</span><span class="op">:</span> [</span>
+<span id="cb28-562"><a href="#cb28-562" aria-hidden="true" tabindex="-1"></a>           <span class="st">"arn:aws:s3:::drat-tutorial/*"</span></span>
+<span id="cb28-563"><a href="#cb28-563" aria-hidden="true" tabindex="-1"></a>         ]<span class="op">,</span></span>
+<span id="cb28-564"><a href="#cb28-564" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Condition"</span><span class="op">:</span> {</span>
+<span id="cb28-565"><a href="#cb28-565" aria-hidden="true" tabindex="-1"></a>           <span class="st">"IpAddress"</span><span class="op">:</span> {</span>
+<span id="cb28-566"><a href="#cb28-566" aria-hidden="true" tabindex="-1"></a>             <span class="st">"aws:SourceIp"</span><span class="op">:</span> <span class="st">"192.0.2.0/32"</span></span>
+<span id="cb28-567"><a href="#cb28-567" aria-hidden="true" tabindex="-1"></a>           }</span>
+<span id="cb28-568"><a href="#cb28-568" aria-hidden="true" tabindex="-1"></a>         }</span>
+<span id="cb28-569"><a href="#cb28-569" aria-hidden="true" tabindex="-1"></a>       }</span>
+<span id="cb28-570"><a href="#cb28-570" aria-hidden="true" tabindex="-1"></a>     ]</span>
+<span id="cb28-571"><a href="#cb28-571" aria-hidden="true" tabindex="-1"></a>   }</span>
+<span id="cb28-572"><a href="#cb28-572" aria-hidden="true" tabindex="-1"></a>   <span class="in">```</span></span>
+<span id="cb28-573"><a href="#cb28-573" aria-hidden="true" tabindex="-1"></a>   </span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

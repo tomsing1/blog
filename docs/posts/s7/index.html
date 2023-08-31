@@ -1125,7 +1125,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>This week I learned about R's new S7 object oriented programming (OOP) system</span>
-<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>by experimenting with classes represent the major metadata entities of a</span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>by experimenting with classes that represent the main metadata entities of a</span>
 <span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>next-generation sequencing experiment.</span>
 <span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Introduction</span></span>
@@ -1149,7 +1149,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-47"><a href="#cb30-47" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-48"><a href="#cb30-48" aria-hidden="true" tabindex="-1"></a><span class="al">![ENA metadata model](metadata_model_reads.png)</span></span>
 <span id="cb30-49"><a href="#cb30-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-50"><a href="#cb30-50" aria-hidden="true" tabindex="-1"></a>Understanding the relationship between these entities is critical for</span>
+<span id="cb30-50"><a href="#cb30-50" aria-hidden="true" tabindex="-1"></a>Understanding the relationships between these entities is critical for</span>
 <span id="cb30-51"><a href="#cb30-51" aria-hidden="true" tabindex="-1"></a>interpreting and (re-)using the sequencing data. In short:</span>
 <span id="cb30-52"><a href="#cb30-52" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-53"><a href="#cb30-53" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>One or more runs are part of an experiment.</span>
@@ -1172,8 +1172,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-72"><a href="#cb30-72" aria-hidden="true" tabindex="-1"></a>properties (e.g. corresponding to the _slots_ of an S4 class). </span>
 <span id="cb30-73"><a href="#cb30-73" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-74"><a href="#cb30-74" aria-hidden="true" tabindex="-1"></a>First, we define a basic <span class="in">`Entity`</span> class with properties that are shared</span>
-<span id="cb30-75"><a href="#cb30-75" aria-hidden="true" tabindex="-1"></a>across all entities in our model. Specfically, we define the <span class="in">`accession`</span> </span>
-<span id="cb30-76"><a href="#cb30-76" aria-hidden="true" tabindex="-1"></a>and <span class="in">`name`</span> properties, each a scalar character.</span>
+<span id="cb30-75"><a href="#cb30-75" aria-hidden="true" tabindex="-1"></a>across all entities in our model. Specifically, we define the <span class="in">`accession`</span> </span>
+<span id="cb30-76"><a href="#cb30-76" aria-hidden="true" tabindex="-1"></a>and <span class="in">`name`</span> properties, each as a scalar character.</span>
 <span id="cb30-77"><a href="#cb30-77" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-80"><a href="#cb30-80" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb30-81"><a href="#cb30-81" aria-hidden="true" tabindex="-1"></a>Entity <span class="ot">&lt;-</span> <span class="fu">new_class</span>(</span>
@@ -1191,7 +1191,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-93"><a href="#cb30-93" aria-hidden="true" tabindex="-1"></a><span class="fu">### The Run class</span></span>
 <span id="cb30-94"><a href="#cb30-94" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-95"><a href="#cb30-95" aria-hidden="true" tabindex="-1"></a>Let's start by defining the <span class="in">`Run`</span> class as a container for metadata about each</span>
-<span id="cb30-96"><a href="#cb30-96" aria-hidden="true" tabindex="-1"></a>sequencing run. We also specify a validation functions to ensure that the</span>
+<span id="cb30-96"><a href="#cb30-96" aria-hidden="true" tabindex="-1"></a>sequencing run. We also specify a validation function to ensure that the</span>
 <span id="cb30-97"><a href="#cb30-97" aria-hidden="true" tabindex="-1"></a><span class="in">`read_length`</span> is a positive integers (if it is provided).</span>
 <span id="cb30-98"><a href="#cb30-98" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-99"><a href="#cb30-99" aria-hidden="true" tabindex="-1"></a></span>
@@ -1269,7 +1269,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-183"><a href="#cb30-183" aria-hidden="true" tabindex="-1"></a>Let's define a container for <span class="in">`Experiment`</span> metadata in a similar way. In </span>
 <span id="cb30-184"><a href="#cb30-184" aria-hidden="true" tabindex="-1"></a>addition to scalar properties, an <span class="in">`Experiment`</span> also accepts a list of one or</span>
 <span id="cb30-185"><a href="#cb30-185" aria-hidden="true" tabindex="-1"></a>more <span class="in">`Run`</span> objects, e.g. the sequencing runs associated with this experiment.</span>
-<span id="cb30-186"><a href="#cb30-186" aria-hidden="true" tabindex="-1"></a>Finally, we add the <span class="in">`sample`</span> property to represent the biological samples of</span>
+<span id="cb30-186"><a href="#cb30-186" aria-hidden="true" tabindex="-1"></a>Finally, we add the <span class="in">`sample`</span> property to represent the biological sample of</span>
 <span id="cb30-187"><a href="#cb30-187" aria-hidden="true" tabindex="-1"></a>origin.</span>
 <span id="cb30-188"><a href="#cb30-188" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-191"><a href="#cb30-191" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
@@ -1333,7 +1333,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-251"><a href="#cb30-251" aria-hidden="true" tabindex="-1"></a><span class="fu">## Custom print methods</span></span>
 <span id="cb30-252"><a href="#cb30-252" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-253"><a href="#cb30-253" aria-hidden="true" tabindex="-1"></a>At this point, the output default <span class="in">`print`</span> method for our class becomes a little</span>
-<span id="cb30-254"><a href="#cb30-254" aria-hidden="true" tabindex="-1"></a>unwieldy, as displaying information about all properties for the <span class="in">`Experiment`</span>,</span>
+<span id="cb30-254"><a href="#cb30-254" aria-hidden="true" tabindex="-1"></a>unwieldy, as displaying information about all properties of the <span class="in">`Experiment`</span>,</span>
 <span id="cb30-255"><a href="#cb30-255" aria-hidden="true" tabindex="-1"></a>its <span class="in">`Sample`</span> and each of the associated <span class="in">`Runs`</span> returns a lot of information.</span>
 <span id="cb30-256"><a href="#cb30-256" aria-hidden="true" tabindex="-1"></a>Let's define a custom print method for the <span class="in">`Run`</span> class that shows a concise</span>
 <span id="cb30-257"><a href="#cb30-257" aria-hidden="true" tabindex="-1"></a>summary instead.</span>
@@ -1459,7 +1459,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-389"><a href="#cb30-389" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-390"><a href="#cb30-390" aria-hidden="true" tabindex="-1"></a>Each study contains a nested set of <span class="in">`Experiment`</span>, <span class="in">`Sample`</span> and <span class="in">`Run`</span></span>
 <span id="cb30-391"><a href="#cb30-391" aria-hidden="true" tabindex="-1"></a>objects. To access their properties, we redefine the <span class="in">`Study`</span> class by adding</span>
-<span id="cb30-392"><a href="#cb30-392" aria-hidden="true" tabindex="-1"></a>_computed properties_, e.g. the <span class="in">`runs`</span> property that will return a list of</span>
+<span id="cb30-392"><a href="#cb30-392" aria-hidden="true" tabindex="-1"></a>_computed properties_, e.g. a <span class="in">`runs`</span> property that will return a list of</span>
 <span id="cb30-393"><a href="#cb30-393" aria-hidden="true" tabindex="-1"></a><span class="in">`Runs`</span> from all experiments:</span>
 <span id="cb30-394"><a href="#cb30-394" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-397"><a href="#cb30-397" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
@@ -1503,7 +1503,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-437"><a href="#cb30-437" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-438"><a href="#cb30-438" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusions</span></span>
 <span id="cb30-439"><a href="#cb30-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-440"><a href="#cb30-440" aria-hidden="true" tabindex="-1"></a>After working with the S4 OOP for a while, the new S7 package was a pleasent</span>
+<span id="cb30-440"><a href="#cb30-440" aria-hidden="true" tabindex="-1"></a>After working with the S4 OOP for a while, the new S7 package was a pleasant</span>
 <span id="cb30-441"><a href="#cb30-441" aria-hidden="true" tabindex="-1"></a>surprise. There was less boilerplate code to write, and the definition of</span>
 <span id="cb30-442"><a href="#cb30-442" aria-hidden="true" tabindex="-1"></a>classes and methods seems straightforward. I noticed a few issues, which had</span>
 <span id="cb30-443"><a href="#cb30-443" aria-hidden="true" tabindex="-1"></a>also been noted by other R users:</span>

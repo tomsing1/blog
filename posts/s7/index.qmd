@@ -23,7 +23,7 @@ editor_options:
 
 
 This week I learned about R's new S7 object oriented programming (OOP) system
-by experimenting with classes represent the major metadata entities of a
+by experimenting with classes that represent the main metadata entities of a
 next-generation sequencing experiment.
 
 ## Introduction
@@ -47,7 +47,7 @@ Each dataset contains information about the overall `study`, the analyzed
 
 ![ENA metadata model](metadata_model_reads.png)
 
-Understanding the relationship between these entities is critical for
+Understanding the relationships between these entities is critical for
 interpreting and (re-)using the sequencing data. In short:
 
 - One or more runs are part of an experiment.
@@ -70,8 +70,8 @@ An S7 class is defined with the `new_class` function, which defines its
 properties (e.g. corresponding to the _slots_ of an S4 class). 
 
 First, we define a basic `Entity` class with properties that are shared
-across all entities in our model. Specfically, we define the `accession` 
-and `name` properties, each a scalar character.
+across all entities in our model. Specifically, we define the `accession` 
+and `name` properties, each as a scalar character.
 
 ```{r}
 Entity <- new_class(
@@ -89,7 +89,7 @@ with the same name.
 ### The Run class
 
 Let's start by defining the `Run` class as a container for metadata about each
-sequencing run. We also specify a validation functions to ensure that the
+sequencing run. We also specify a validation function to ensure that the
 `read_length` is a positive integers (if it is provided).
 
 
@@ -167,7 +167,7 @@ Sample <- new_class(
 Let's define a container for `Experiment` metadata in a similar way. In 
 addition to scalar properties, an `Experiment` also accepts a list of one or
 more `Run` objects, e.g. the sequencing runs associated with this experiment.
-Finally, we add the `sample` property to represent the biological samples of
+Finally, we add the `sample` property to represent the biological sample of
 origin.
 
 ```{r}
@@ -231,7 +231,7 @@ first_exp
 ## Custom print methods
 
 At this point, the output default `print` method for our class becomes a little
-unwieldy, as displaying information about all properties for the `Experiment`,
+unwieldy, as displaying information about all properties of the `Experiment`,
 its `Sample` and each of the associated `Runs` returns a lot of information.
 Let's define a custom print method for the `Run` class that shows a concise
 summary instead.
@@ -357,7 +357,7 @@ first_study@experiments
 
 Each study contains a nested set of `Experiment`, `Sample` and `Run`
 objects. To access their properties, we redefine the `Study` class by adding
-_computed properties_, e.g. the `runs` property that will return a list of
+_computed properties_, e.g. a `runs` property that will return a list of
 `Runs` from all experiments:
 
 ```{r}
@@ -401,7 +401,7 @@ str(exp_runs)
 
 ## Conclusions
 
-After working with the S4 OOP for a while, the new S7 package was a pleasent
+After working with the S4 OOP for a while, the new S7 package was a pleasant
 surprise. There was less boilerplate code to write, and the definition of
 classes and methods seems straightforward. I noticed a few issues, which had
 also been noted by other R users:

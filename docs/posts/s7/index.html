@@ -217,7 +217,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="tldr" class="level2">
 <h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
-<p>This week I learned about R’s new S7 object oriented programming (OOP) system by experimenting with classes represent the major metadata entities of a next-generation sequencing experiment.</p>
+<p>This week I learned about R’s new S7 object oriented programming (OOP) system by experimenting with classes that represent the main metadata entities of a next-generation sequencing experiment.</p>
 </section>
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
@@ -232,7 +232,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figcaption class="figure-caption">ENA metadata model</figcaption>
 </figure>
 </div>
-<p>Understanding the relationship between these entities is critical for interpreting and (re-)using the sequencing data. In short:</p>
+<p>Understanding the relationships between these entities is critical for interpreting and (re-)using the sequencing data. In short:</p>
 <ul>
 <li>One or more runs are part of an experiment.</li>
 <li>One or more experiments are part of a study.</li>
@@ -247,7 +247,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="defining-s7-classes" class="level2">
 <h2 class="anchored" data-anchor-id="defining-s7-classes">Defining S7 classes</h2>
 <p>An S7 class is defined with the <code>new_class</code> function, which defines its properties (e.g.&nbsp;corresponding to the <em>slots</em> of an S4 class).</p>
-<p>First, we define a basic <code>Entity</code> class with properties that are shared across all entities in our model. Specfically, we define the <code>accession</code> and <code>name</code> properties, each a scalar character.</p>
+<p>First, we define a basic <code>Entity</code> class with properties that are shared across all entities in our model. Specifically, we define the <code>accession</code> and <code>name</code> properties, each as a scalar character.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Entity <span class="ot">&lt;-</span> <span class="fu">new_class</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Entity"</span>,</span>
@@ -260,23 +260,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>By convention, the output of the <code>new_class</code> calls is assigned to an object with the same name.</p>
 <section id="the-run-class" class="level3">
 <h3 class="anchored" data-anchor-id="the-run-class">The Run class</h3>
-<p>Let’s start by defining the <code>Run</code> class as a container for metadata about each sequencing run. We also specify a validation functions to ensure that the <code>read_length</code> is a positive integers (if it is provided).</p>
+<p>Let’s start by defining the <code>Run</code> class as a container for metadata about each sequencing run. We also specify a validation function to ensure that the <code>read_length</code> is a positive integers (if it is provided).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Run <span class="ot">&lt;-</span> <span class="fu">new_class</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Run"</span>,</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">parent =</span> Entity,</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">properties =</span> <span class="fu">list</span>(</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">paired_end =</span> <span class="fu">new_property</span>(class_logical, <span class="at">default =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">read_length =</span> class_integer,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">qc_pass =</span> class_logical</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">paired_end =</span> <span class="fu">new_property</span>(class_logical, <span class="at">default =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">read_length =</span> class_integer,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">qc_pass =</span> class_logical</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">validator =</span> <span class="cf">function</span>(self) {</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>     <span class="cf">if</span> (<span class="fu">length</span>(self<span class="sc">@</span>name) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(self<span class="sc">@</span>name) <span class="sc">==</span> <span class="dv">0</span>) {</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"@name must be set"</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>     } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">length</span>(self<span class="sc">@</span>read_length) <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> </span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                <span class="sc">!</span>checkmate<span class="sc">::</span><span class="fu">test_count</span>(self<span class="sc">@</span>read_length)) {</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>       <span class="st">"@read_length must a positive integer"</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>     }</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">length</span>(self<span class="sc">@</span>read_length) <span class="sc">&gt;</span> <span class="dv">0</span> <span class="sc">&amp;&amp;</span> </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>               <span class="sc">!</span>checkmate<span class="sc">::</span><span class="fu">test_count</span>(self<span class="sc">@</span>read_length)) {</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="st">"@read_length must a positive integer"</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    }</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -355,7 +355,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="the-experiment-class" class="level3">
 <h3 class="anchored" data-anchor-id="the-experiment-class">The Experiment class</h3>
-<p>Let’s define a container for <code>Experiment</code> metadata in a similar way. In addition to scalar properties, an <code>Experiment</code> also accepts a list of one or more <code>Run</code> objects, e.g.&nbsp;the sequencing runs associated with this experiment. Finally, we add the <code>sample</code> property to represent the biological samples of origin.</p>
+<p>Let’s define a container for <code>Experiment</code> metadata in a similar way. In addition to scalar properties, an <code>Experiment</code> also accepts a list of one or more <code>Run</code> objects, e.g.&nbsp;the sequencing runs associated with this experiment. Finally, we add the <code>sample</code> property to represent the biological sample of origin.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>Experiment <span class="ot">&lt;-</span> <span class="fu">new_class</span>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Experiment"</span>,</span>
@@ -446,7 +446,7 @@ Note
 </section>
 <section id="custom-print-methods" class="level2">
 <h2 class="anchored" data-anchor-id="custom-print-methods">Custom print methods</h2>
-<p>At this point, the output default <code>print</code> method for our class becomes a little unwieldy, as displaying information about all properties for the <code>Experiment</code>, its <code>Sample</code> and each of the associated <code>Runs</code> returns a lot of information. Let’s define a custom print method for the <code>Run</code> class that shows a concise summary instead.</p>
+<p>At this point, the output default <code>print</code> method for our class becomes a little unwieldy, as displaying information about all properties of the <code>Experiment</code>, its <code>Sample</code> and each of the associated <code>Runs</code> returns a lot of information. Let’s define a custom print method for the <code>Run</code> class that shows a concise summary instead.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>.run_message <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sprintf</span>(</span>
@@ -583,7 +583,7 @@ Experiment 'second experiment' (exp628) with 1 runs.
 </section>
 <section id="dynamic-methods" class="level2">
 <h2 class="anchored" data-anchor-id="dynamic-methods">Dynamic methods</h2>
-<p>Each study contains a nested set of <code>Experiment</code>, <code>Sample</code> and <code>Run</code> objects. To access their properties, we redefine the <code>Study</code> class by adding <em>computed properties</em>, e.g.&nbsp;the <code>runs</code> property that will return a list of <code>Runs</code> from all experiments:</p>
+<p>Each study contains a nested set of <code>Experiment</code>, <code>Sample</code> and <code>Run</code> objects. To access their properties, we redefine the <code>Study</code> class by adding <em>computed properties</em>, e.g.&nbsp;a <code>runs</code> property that will return a list of <code>Runs</code> from all experiments:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Study <span class="ot">&lt;-</span> <span class="fu">new_class</span>(</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Study"</span>,</span>
@@ -645,7 +645,7 @@ Experiment 'second experiment' (exp628) with 1 runs.
 </section>
 <section id="conclusions" class="level2">
 <h2 class="anchored" data-anchor-id="conclusions">Conclusions</h2>
-<p>After working with the S4 OOP for a while, the new S7 package was a pleasent surprise. There was less boilerplate code to write, and the definition of classes and methods seems straightforward. I noticed a few issues, which had also been noted by other R users:</p>
+<p>After working with the S4 OOP for a while, the new S7 package was a pleasant surprise. There was less boilerplate code to write, and the definition of classes and methods seems straightforward. I noticed a few issues, which had also been noted by other R users:</p>
 <ul>
 <li>As pointed out by Kevin Kunzmann <a href="https://github.com/RConsortium/OOP-WG/issues/275">in this github issue</a> the ability to define additional constraints for properties within e.g.&nbsp; <code>class_character</code> would be a welcome addition. I found myself writing custom validators to check whether a property had been set (e.g.&nbsp;<code>length(x@name) &gt; 0</code>).</li>
 <li>The <code>Entity</code> class defines the <code>@name</code> and <code>@accession</code> properties, along with a validator for the former. Unfortunately, that validator is not inherited by the child classes, as noted by Jamie Lendrum <a href="https://github.com/RConsortium/OOP-WG/issues/329">in this github issue</a>, so I had to repeat the same code in each class definition.</li>
@@ -674,12 +674,14 @@ Session Information
  pandoc   3.1.1 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────
- package   * version date (UTC) lib source
- checkmate * 2.2.0   2023-04-27 [1] CRAN (R 4.3.0)
- S7        * 0.1.0   2023-08-24 [1] CRAN (R 4.3.0)
+ ! package   * version date (UTC) lib source
+ P checkmate * 2.2.0   2023-04-27 [?] CRAN (R 4.3.0)
+ P S7        * 0.1.0   2023-08-24 [?] CRAN (R 4.3.0)
 
- [1] /Users/sandmann/Library/R/arm64/4.3/library
- [2] /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/library
+ [1] /Users/sandmann/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20
+ [2] /Users/sandmann/Library/Caches/org.R-project.R/R/renv/sandbox/R-4.3/aarch64-apple-darwin20/ac5c2659
+
+ P ── Loaded and on-disk path mismatch.
 
 ──────────────────────────────────────────────────────────────────────────────</code></pre>
 </div>

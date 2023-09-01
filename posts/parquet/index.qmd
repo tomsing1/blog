@@ -1,0 +1,391 @@
+---
+title: "Adventures with parquet: Storing & querying gene expression data"
+author: "Thomas Sandmann"
+date: "2023-08-31"
+freeze: true
+categories: [R, parquet, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+Today I explored storing gene expression data in
+[parquet files](https://parquet.apache.org/),
+and querying them with the `arrow`, `duckdb` or `sparklyr` R packages.
+
+## Introduction
+
+```{r}
+for (lib in c("arrow", "dplyr", "duckdb", "edgeR", "fs", "glue", "memoise",
+              "rnaseqExamples", "sparklyr", "tictoc", "tidyr", "DESeq2", 
+              "Homo.sapiens", "Mus.musculus")) {
+  suppressPackageStartupMessages(
+    library(lib, character.only = TRUE, quietly = TRUE, warn.conflicts = FALSE)
+  )
+}
+```
+
+A while back, I created the
+[rnaseq-examples](https://tomsing1.github.io/rnaseq-examples/index.html)
+R package with serialized `SummarizedExperiment` objects for three
+published RNA-seq experiments [^1]. Here, I will 
+
+1. Load the data from all three experiments into my R session,
+2. Extract the raw counts and TMM-normalized gene expression measurements
+   (counts per million) into (tidy) R data.frames,
+3. Store the data in separate parquet files, one for each experiment and
+4. Query the parquet files with the
+  - [arrow](https://arrow.apache.org/docs/r/),
+  - [duckdb](https://duckdb.org/docs/archive/0.8.1/api/r) and
+  - [sparklyr](https://spark.rstudio.com/)
+  R packages.
+
+I was amazed by the speed of `duckdb` on my local system, and am looking forward
+to distributing large datasets across nodes of a Spark cluster in the future. 
+Either way, parquet files are a highly portable and language-agnostic file 
+format that I am happy to add to my toolkit.
+
+[^1]: If you are curious, please consult the 
+[vignettes](https://tomsing1.github.io/rnaseq-examples/articles/index.html)
+to see examples of differential expression analyses for each dataset.
+
+## Loading gene expression datasets
+
+The `rnaseqExamplesR` package is 
+[available from github](https://github.com/tomsing1/rnaseq-examples) and 
+can be installed via 
+
+```{r}
+#| eval: false
+remotes::install_github("tomsing1/rnaseq-examples")
+```
+
+Once installed, we can load the three `SummarizedExperiment` objects it contains
+into our R session.
+
+```{r}
+datasets <- data(package = "rnaseqExamples")
+knitr::kable(data.frame(datasets$results[, c("Item", "Title")]))
+```
+
+```{r}
+data("tau")
+```
+
+Next, I define the `tidy()` helper function to calculate `sizeFactors`
+for normalization with 
+[Robinson's and Oshlack's TMM method](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-3-r25)
+and export raw counts alongside (normalized) counts per million (CPM) in a
+data.frame.
+
+::: {.callout-note collapse="true"}
+
+- Note that I am not exporting sample annotations in this example. This
+  information could be added to the data.frame (with a join operation) or 
+  stored in a different format, e.g. for efficient row-wise queries.
+- The helper function is wrapped in a to `memoise::memoise()`, which caches
+  the outputs in memory. That way, repeated calling of the same function avoids
+  additional computations / joins. This functionality is not really required
+  here, but I will try to remember it for future reference!
+
+:::
+
+```{r}
+#| code-fold: true
+#| code-summary: "A helper function to coerce a SummarizedExperiment into a tibbbe"
+
+#' Coerce a DGEList or a SummarizedExperiment into a tibble
+#' 
+#' @param x Either a `DGEList` or a `SummarizedExperiment`
+#' @return A tibble
+.tidy <- function(x) {
+  
+  # remove non-ensembl feature identifiers (e.g. spike-ins)
+  x <- x[grepl("^ENS", row.names(x)), ]
+  annotation <- dplyr::case_when(
+    all(grepl("^ENSG", row.names(x))) ~ "Homo.sapiens",
+    all(grepl("^ENSMUS", row.names(x))) ~ "Mus.musculus"
+  )
+  stopifnot(!is.na(annotation))
+  require(annotation, character.only = TRUE)
+  
+  # extract raw counts
+  y <- edgeR::calcNormFactors(x)
+  counts <- y$counts %>%
+    as.data.frame() %>%
+    tibble::rownames_to_column("feature_id") %>%
+    tidyr::pivot_longer(cols = colnames(y), 
+                        names_to = "sample_id", values_to = "count")
+  
+  # extract cpms
+  cpms <- edgeR::cpm(y, normalized.lib.sizes = TRUE, log = FALSE) %>%
+    as.data.frame() %>%
+    tibble::rownames_to_column("feature_id") %>%
+    tidyr::pivot_longer(cols = colnames(y), 
+                        names_to = "sample_id", values_to = "cpm")
+  
+  # add gene annotations & alternative identifiers
+  dplyr::inner_join(
+    counts, cpms, by = c("feature_id", "sample_id")
+  ) %>%
+    dplyr::left_join(
+      tibble::rownames_to_column(y$genes, "feature_id"),
+      by = "feature_id") %>%
+    dplyr::rename(ensembl = "gene_id") %>%
+    dplyr::mutate(
+      entrez = suppressMessages({
+        mapIds(get(annotation), keys = .data$ensembl, 
+               column = "ENTREZID", keytype = "ENSEMBL",
+               multiVals = "first")
+      })
+    ) %>%
+    dplyr::select(-any_of("spikein"))
+}
+
+tidy <- memoise(.tidy)
+```
+
+## Write parquet files
+
+Now we extract the gene expression measurements from each of our 
+`SummarizedExperiment` objects and then write it to a parquet file in a 
+temporary directory on the local file system. Alternatively, I could store
+the files on a cloud system, e.g. AWS S3, and access them remotely.
+
+```{r}
+# create a temporary directory
+out_dir <- file.path(tempdir(), "parquet")
+fs::dir_create(out_dir)
+
+for (dataset in c("tau", "rnai", "sarm1")) {
+  df <- tidy(get(dataset))
+  df$study <- dataset  # add a columsn with the name of the experiment
+  arrow::write_parquet(
+    x = df, 
+    sink = file.path(out_dir, paste0(dataset, ".parquet"))
+  )
+}
+
+# list the contents of the temporary directory
+fs::dir_info(out_dir) %>%
+  dplyr::select(path, size) %>%
+  dplyr::mutate(path = basename(path))
+```
+
+## Querying
+
+### Arrow
+
+Even though we created three separate files, the
+[arrow R package](https://arrow.apache.org/docs/r/)
+can abstract them into a single `Dataset`. We simply point the `open_dataset()`
+function at the directory containing the `.parquet` files.
+
+```{r}
+ds <- arrow::open_dataset(out_dir)
+ds
+```
+
+We can use `dbplr` verbs to query this `FileSystemDataset`:
+
+```{r}
+#| warning: false
+tic("arrow")
+ds %>%
+  filter(symbol %in% c("GAPDH", "Gapdh")) %>%
+  group_by(symbol, study) %>%
+  tally() %>%
+  collect()
+toc()
+```
+
+On my system, it takes ~ 1 second to retrieve the results, and about the
+same amount of time is needed to retrieve the full `rnai` dataset:
+
+```{r}
+#| warning: false
+tic()
+ds %>%
+  filter(study == "rnai") %>%
+  collect()
+toc()
+```
+
+### Duckdb
+
+Alternatively, we can use 
+[duckdb](https://duckdb.org/)
+to query our parquet files. The
+[duckdb R API](https://duckdb.org/docs/api/r)
+supports both dbplyr verbs and raw SQL queries.
+
+First, we establish a connection to the `duckdb` backend:
+
+```{r}
+con <- dbConnect(duckdb::duckdb())
+```
+
+#### Using dbplyr
+
+First, we execute the same dbplyr query we used above, which translates it
+into SQL for us and passes it on to duckdb.
+
+```{r}
+tic("duckdb")
+tbl(con, sprintf("read_parquet('%s/*.parquet')", out_dir)) %>%
+  filter(symbol %in% c("GAPDH", "Gapdh")) %>%
+  group_by(symbol, study) %>%
+  tally() %>%
+  collect()
+toc()
+```
+
+On my system, `duckdb` returns results more than 10x faster than arrow's
+implementation (see above).
+
+Retrieval of the full dataset for the `rnai` study is also completed in less
+than half a second:
+
+```{r}
+tic()
+tbl(con, glue("read_parquet('{out_dir}/*.parquet')")) %>%
+  filter(study == "rnai") %>%
+  collect()
+toc()
+```
+
+#### Using SQL
+
+Because `duckdb` is a SQL database, we can also query the parquet files directly
+with raw SQL, realizing another gain in execution speed:
+
+```{r}
+tic()
+dbGetQuery(
+  con = con,
+  glue_sql(
+    "SELECT symbol, study, COUNT(*) AS n 
+     FROM read_parquet({paste0(out_dir, '/*.parquet')}) 
+     WHERE UPPER(symbol) = 'GAPDH' 
+     GROUP BY symbol, study", 
+    .con = con)
+)
+toc()
+```
+
+Similarly, reading all data for the `rnai` dataset into memory is faster than
+with arrow's implementation as well:
+
+```{r}
+tic()
+dbGetQuery(
+  con = con,
+  glue_sql(
+    "SELECT * 
+     FROM read_parquet({paste0(out_dir, '/*.parquet')}) 
+     WHERE study = 'rnai'", 
+    .con = con)
+) %>%
+  head()
+toc()
+```
+
+## Spark
+
+Finally, and mainly just for future reference, the
+[sparklyr R package](https://spark.rstudio.com/)
+provides an R interface to leverage a Spark cluster and its
+distributed analysis libraries.
+
+First, we establish a connection to the Spark cluster. Here am running a local
+Spark cluster (e.g. a single local node) on my laptop:
+
+```{r}
+sc <- spark_connect(master = "local")
+```
+
+Next, we import the datasets into the cluster by creating a new 
+`Spark DataFrame` with the name `gene_expression`. 
+
+```{r}
+sdf <- spark_read_parquet(sc = sc, name = "gene_expression",
+                          path = paste0(out_dir, '/*.parquet'))
+```
+
+### dbplyr
+
+The `tbl_spark` object returned by `sparklyr::spark_read_parquet()`
+can be queried with `dbplyr` verbs, e.g. to translate our now familiar queries
+into `Spark SQL` statements on the fly:
+
+```{r}
+tic()
+sdf %>%
+  filter(symbol %in% c("GAPDH", "Gapdh")) %>%
+  group_by(symbol, study) %>%
+  tally() %>%
+  collect()
+toc()
+```
+
+```{r}
+tic()
+sdf %>%
+  filter(study == "rnai") %>%
+  collect()
+toc()
+```
+
+### SQL
+
+Alternatively, we can use SQL queries to query the cluster's `gene_expression`
+table directly:
+
+```{r}
+tic()
+dbGetQuery(
+  con = sc,
+  glue(
+    "SELECT symbol, study, COUNT(*) AS n 
+     FROM gene_expression 
+     WHERE UPPER(symbol) = 'GAPDH' 
+     GROUP BY symbol, study")
+)
+toc()
+```
+
+My local Spark instance performs these queries more slowly than e.g. duckdb.
+But Spark's _real power_ is in deploying 
+[Machine learning models](https://spark.rstudio.com/guides/mlib.html)
+across a (potentially large) cluster, enabling parallel processing of very
+large datasets by distributing both data and computation across nodes.
+
+```{r}
+spark_disconnect(sc)
+```
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info("attached")
+```
+
+</details>
+   

@@ -4,9 +4,9 @@ image: profile.jpg
 about:
   template: jolla
   links:
-    - icon: twitter
-      text: Twitter
-      href: https://twitter.com/thomas_sandmann
+    - icon: mastodon
+      text: Mastodon
+      href: https://genomic.social/@thomas_sandmann
     - icon: linkedin
       text: LinkedIn
       href: https://www.linkedin.com/in/thomas-sandmann/

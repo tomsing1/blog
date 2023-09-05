@@ -104,7 +104,7 @@ data.frame.
 
 ```{r}
 #| code-fold: true
-#| code-summary: "A helper function to coerce a SummarizedExperiment into a tibbbe"
+#| code-summary: "A helper function to coerce a SummarizedExperiment into a tibble"
 
 #' Coerce a DGEList or a SummarizedExperiment into a tibble
 #' 
@@ -171,7 +171,7 @@ fs::dir_create(out_dir)
 
 for (dataset in c("tau", "rnai", "sarm1")) {
   df <- tidy(get(dataset))
-  df$study <- dataset  # add a columsn with the name of the experiment
+  df$study <- dataset  # add a columns with the name of the experiment
   arrow::write_parquet(
     x = df, 
     sink = file.path(out_dir, paste0(dataset, ".parquet"))

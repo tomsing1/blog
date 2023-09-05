@@ -1,0 +1,293 @@
+---
+title: "Adventures with parquet II: Implementing the parquetArray S4 class"
+author: "Thomas Sandmann"
+date: "2023-09-04"
+freeze: true
+categories: [R, TIL, parquet, Bioconductor]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+```{r}
+#| warning: false
+#| message: false
+suppressPackageStartupMessages({
+  library("arrow")
+  library("dplyr")
+  library("duckdb")
+  library("edgeR")
+  library("glue")
+  library("rnaseqExamples")
+  library("tibble")
+  library("tidyr")
+  library("DelayedArray")
+  library("DESeq2")
+  library("Mus.musculus")
+})
+```
+
+```{r}
+# Coerce a DGEList or a SummarizedExperiment into a tibble
+tidy <- function(x) {
+  # extract raw counts
+  edgeR::calcNormFactors(x)$counts %>%
+    as.data.frame() %>%
+    tibble::rownames_to_column("feature_id") %>%
+    tidyr::pivot_longer(cols = colnames(x), names_to = "sample_id", 
+                        values_to = "count")
+}
+
+# Store gene expression data for two mouse RNA-seq studies as parquet files"
+out_dir <- file.path(tempdir(), "parquet")
+dir.create(out_dir, showWarnings = FALSE)
+for (dataset in c("tau", "sarm1")) {
+  df <- tidy(get(dataset))
+  df$study <- dataset  # add a columns with the name of the experiment
+  arrow::write_parquet(
+    x = df,
+    sink = file.path(out_dir, paste0(dataset, ".parquet"))
+  )
+}
+```
+
+```{r seed-class-definition}
+setClass("ParquetArraySeed",
+    contains = "Array",
+    slots = c(
+        filepath = "character"
+    )
+)
+```
+
+```{r constructor}
+#' @importFrom tools file_path_as_absolute
+ParquetArraySeed <- function(filepath) {
+  filepath <- tools::file_path_as_absolute(filepath)
+  new("ParquetArraySeed", filepath = filepath)
+}
+```
+
+```{r dim-dimnames}
+.unique_values <- function(x, column, con = NULL, suffix = ".parquet") {
+  if (is.null(con)) {
+    con <- duckdb::dbConnect(duckdb::duckdb())
+    on.exit(duckdb::dbDisconnect(con, shutdown=TRUE))
+  }
+  data_dir <- file.path(x@filepath, paste0("*", suffix))
+  dbGetQuery(
+    con = con,
+    glue_sql(
+      "SELECT DISTINCT {`column`} 
+       FROM read_parquet({data_dir}) 
+       ORDER BY {`column`}", 
+     .con = con)
+  )[, 1]
+}
+unique_values <- memoise::memoise(.unique_values)
+
+setMethod("dimnames", "ParquetArraySeed", function(x) {
+  samples <- unique_values(x, column = "sample_id")
+  features <- unique_values(x, column = "feature_id")
+  list(features, samples)
+})
+
+setMethod("dim", "ParquetArraySeed", function(x) {
+  lengths(dimnames(x))
+})
+```
+
+```{r extractarray}
+.get_data <- function(x, index, con = NULL, suffix = ".parquet") {
+  if (is.null(con)) {
+    con <- duckdb::dbConnect(duckdb::duckdb())
+    on.exit(duckdb::dbDisconnect(con, shutdown=TRUE))
+  }
+  data_dir <- file.path(x@filepath, paste0("*", suffix))
+  
+  # match indices to feature and sample identifiers
+  dims <- dimnames(x)
+  keep_features <- dims[[1]][index[[1]]]
+  
+  # no indices => return the full dataset
+  if (is.null(index[[1]]) & is.null(index[[2]])) {
+   dataset <- dbGetQuery(
+      con = con,
+      glue_sql(
+        "SELECT feature_id, sample_id, count
+       FROM read_parquet({data_dir})", 
+       .con = con)
+   )
+   keep_features <- unique(dataset$feature_id)
+   keep_samples <- unique(dataset$sample_id)
+   # no sample index => return all samples
+  } else if (!is.null(index[[1]]) && is.null(index[[2]])) {
+    keep_features <- dims[[1]][index[[1]]]
+    dataset <- dbGetQuery(
+      con = con,
+      glue_sql(
+        "SELECT feature_id, sample_id, count
+       FROM read_parquet({data_dir}) 
+       WHERE feature_id IN ({keep_features*})", 
+       .con = con)
+    )
+    keep_samples <- unique(dataset$sample_id)
+    # no feature index => return all features
+  } else if (is.null(index[[1]]) && !is.null(index[[2]])) {
+    keep_samples <- dims[[2]][index[[2]]]
+    dataset <- dbGetQuery(
+      con = con,
+      glue_sql(
+        "SELECT feature_id, sample_id, count
+       FROM read_parquet({data_dir}) 
+       WHERE sample_id IN ({keep_samples*})", 
+       .con = con)
+    )
+    keep_features <- unique(dataset$feature_id)
+  } else {
+    keep_features <- dims[[1]][index[[1]]]
+    keep_samples <- dims[[2]][index[[2]]]
+    dataset <- dbGetQuery(
+      con = con,
+      glue_sql(
+        "SELECT feature_id, sample_id, count
+       FROM read_parquet({data_dir}) 
+       WHERE feature_id IN ({keep_features*})AND sample_id IN ({keep_samples*})
+       ORDER BY sample_id, feature_id", 
+       .con = con)
+    ) 
+  }
+  # pivot the count data into a regular matrix
+  m <- matrix(
+    data = NA_integer_, 
+    nrow = length(keep_features),
+    ncol = length(keep_samples),
+    dimnames = list(keep_features, keep_samples))
+  matrix_index <- cbind(
+    match(dataset$feature_id, row.names(m)), 
+    match(dataset$sample_id, colnames(m))
+  )
+  m[matrix_index] <- dataset$count
+  return(m)
+}
+
+.extract_array_from_ParquetArraySeed <- function(x, index) {
+  .get_data(x = x, index = index)
+}
+
+setMethod("extract_array", "ParquetArraySeed", .extract_array_from_ParquetArraySeed)
+```
+
+```{r}
+seed <- ParquetArraySeed(out_dir)
+da <- DelayedArray(seed)
+da
+```
+
+```{r}
+setClass("ParquetArray",
+    contains="DelayedArray",
+    representation(seed="ParquetArraySeed")
+)
+setMethod("DelayedArray", "ParquetArraySeed",
+    function(seed) new_DelayedArray(seed, Class="ParquetArray")
+)
+ParquetArray <- function(filepath) {
+    DelayedArray(ParquetArraySeed(filepath))
+}
+```
+
+```{r}
+setClass("ParquetMatrix", contains=c("ParquetArray", "DelayedMatrix"))
+setMethod("matrixClass", "ParquetArray", function(x) "ParquetMatrix")
+setAs("ParquetArray", "ParquetMatrix", function(from) new("ParquetMatrix", from))
+setAs("ParquetMatrix", "ParquetArray", function(from) from)  # no-op
+```
+
+```{r}
+# subset to one dataset - using gene and sample identifiers
+da[row.names(tau), colnames(tau)]
+```
+
+```{r}
+pdata <- lapply(c("tau", "sarm1"), \(x) {
+  col_data <- colData(get(x))
+  col_data$study <- x
+  return(col_data)
+  })
+pdata <- Reduce(rbind, pdata)
+```
+
+```{r}
+#| message: false
+#| warning: false
+# add Entrez identifiers and gene symbols for both human and mouse genes
+fdata <- DataFrame(
+    ensembl = row.names(da),
+    entrez = mapIds(Mus.musculus, 
+                    row.names(da), 
+                    column = "ENTREZID", 
+                    keytype = "ENSEMBL", 
+                    multiVals = "first"),
+    symbol = mapIds(Mus.musculus, 
+                    row.names(da), 
+                    column = "SYMBOL", 
+                    keytype = "ENSEMBL", 
+                    multiVals = "first"),
+    row.names = row.names(da)
+)
+```
+
+```{r}
+se <- SummarizedExperiment(
+  assays = list(counts = da), 
+  rowData = fdata[row.names(da), ],
+  colData = pdata[colnames(da),,drop=FALSE ]
+)
+se
+
+table(se$study)
+```
+
+```{r}
+#|fig-height: 4
+#|fig-width: 4
+#|message: false
+y <- edgeR::calcNormFactors(se[, se$study == "tau"])
+y$samples$genotype <- factor(
+  ifelse(grepl("WT_", y$samples$group), "WT", "Transgenic")
+)
+colors <- palette.colors(n = nlevels(y$samples$genotype), 
+                         palette = "Set1")[as.integer(y$samples$genotype)]
+limma::plotMDS(y, col = colors, pch = 19)
+legend("topright", legend = levels(y$samples$genotype), bty = "n", pch = 19, 
+       col = palette.colors(n = nlevels(y$samples$genotype), palette = "Set1"),
+       y.intersp=2)
+
+```
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info("attached")
+```
+
+</details>
+   

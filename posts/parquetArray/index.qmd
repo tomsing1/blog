@@ -1,5 +1,5 @@
 ---
-title: "Adventures with parquet II: Implementing the parquetArray S4 class"
+title: "Adventures with parquet II: Implementing the parquetArraySeed S4 class"
 author: "Thomas Sandmann"
 date: "2023-09-05"
 freeze: true

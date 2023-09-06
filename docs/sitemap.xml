@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-09-04T01:38:48.155Z</lastmod>
+    <lastmod>2023-09-06T04:34:47.890Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
@@ -131,5 +131,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/nextflow-blast-tutorial/index.html</loc>
     <lastmod>2023-09-04T01:39:26.199Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/parquetArray/index.html</loc>
+    <lastmod>2023-09-06T04:34:46.286Z</lastmod>
   </url>
 </urlset>

@@ -1,7 +1,7 @@
 ---
 title: "Adventures with parquet II: Implementing the parquetArray S4 class"
 author: "Thomas Sandmann"
-date: "2023-09-04"
+date: "2023-09-05"
 freeze: true
 categories: [R, TIL, parquet, Bioconductor]
 editor:
@@ -21,6 +21,13 @@ editor_options:
 
 ## tl;dr
 
+[Previously](../parquet/), 
+I learned how to export gene expression data from Bioconductor/R
+objects as parquet files. Today, I am exploring Hervé Pagès's awesome
+[DelayedArray Bioconductor package](https://bioconductor.org/packages/release/bioc/html/DelayedArray.html)
+to represent data stored in parquet files as R matrices - retrieving only those
+subsets needed for downstream analysis.
+
 ```{r}
 #| warning: false
 #| message: false
@@ -38,6 +45,25 @@ suppressPackageStartupMessages({
   library("Mus.musculus")
 })
 ```
+
+## Exporting gene expression data to parquet files
+
+To get some example RNA-seq data, I am loading two `SummarizedExperiments`
+(`tau` and `sarm1`)with bulk RNA-seq data from my
+[rnaseqExamples R package](https://github.com/tomsing1/rnaseq-examples). 
+
+First, I extract the raw counts into data.frames with a short `tidy()` 
+helper function. Afterward, I store this data in parquet files in a temporary
+directory.
+
+::: {.callout-note collapse="true"}
+
+Note that I am not including sample annotations in the parquet files, as I
+found it useful to keep this (relatively small) set of metadata in a
+separate object, file or (e.g. SQLite) database.
+
+:::
+
 
 ```{r}
 # Coerce a DGEList or a SummarizedExperiment into a tibble
@@ -61,7 +87,18 @@ for (dataset in c("tau", "sarm1")) {
     sink = file.path(out_dir, paste0(dataset, ".parquet"))
   )
 }
+dir(out_dir)
 ```
+
+## Creating the `ParquetArraySeed` S4 class
+
+Now, with the two parquet files in place, I am ready to follow 
+[Hervé's excellent instructions](https://bioconductor.org/packages/release/bioc/vignettes/DelayedArray/inst/doc/02-Implementing_a_backend.html)
+to define my very own `ParquetArraySeed` S4 class, which can then be passed
+into the `DelayedArray()` constructor function (see below).
+
+To keep things simple, my `ParquetArraySeed` class will only store a single
+attribute: the path to the directory containing the parquet files.
 
 ```{r seed-class-definition}
 setClass("ParquetArraySeed",
@@ -72,6 +109,9 @@ setClass("ParquetArraySeed",
 )
 ```
 
+To simplify the instantiation of new objects, I also define a constructor
+function, which also ensures that the absolute file path is stored.
+
 ```{r constructor}
 #' @importFrom tools file_path_as_absolute
 ParquetArraySeed <- function(filepath) {
@@ -79,6 +119,27 @@ ParquetArraySeed <- function(filepath) {
   new("ParquetArraySeed", filepath = filepath)
 }
 ```
+
+## Essential methods
+
+To power a `DelayedArray` object, I need to define at least three different
+S4 methods for my new class:
+
+- `dim()` - returning an integer vector with the dimensions
+- `dimnames()` - returning a list of character vectors with the dimension names
+  (if any), e.g. the row and column names of a matrix.
+- `extract_array()` - returning an _ordinary array_ for a set of indices (see
+  below), e.g. a subset of the dataset to realize in memory.
+
+### `dim` and `dimnames` methods
+
+To query the set of parquet files, I am using 
+[duckdb](https://duckdb.org/docs/api/r.html)
+to retrieve the unique sample and feature identifiers. In case this information
+is useful later, I am caching the return values with 
+[memoise](https://memoise.r-lib.org/). 
+That's handy because I can simply return the lengths of the dimensions names via
+the `dim()` method - without accessing the same files again.
 
 ```{r dim-dimnames}
 .unique_values <- function(x, column, con = NULL, suffix = ".parquet") {
@@ -108,6 +169,20 @@ setMethod("dim", "ParquetArraySeed", function(x) {
   lengths(dimnames(x))
 })
 ```
+
+### The `extract_array` method
+
+I also use `duckdb()` to retrieve the actual data for a subset of 
+features, a subset of samples - or both. In case users only specify one _or_
+the other, e.g. by passing an index with `NULL` values, I explicitely define
+four different SQL queries returning:
+
+1. The full dataset (when `index = list(NULL, NULL)`),
+2. All features for a subset of samples,
+3. Selected features for all samples, or
+4. Selected features for selected samples.
+
+Finally, I pivot the data into a feature x sample matrix.
 
 ```{r extractarray}
 .get_data <- function(x, index, con = NULL, suffix = ".parquet") {
@@ -187,8 +262,15 @@ setMethod("dim", "ParquetArraySeed", function(x) {
   .get_data(x = x, index = index)
 }
 
-setMethod("extract_array", "ParquetArraySeed", .extract_array_from_ParquetArraySeed)
+setMethod("extract_array", "ParquetArraySeed", 
+          .extract_array_from_ParquetArraySeed)
 ```
+
+## Creating a first `ParquetArraySeed` object
+
+With these three methods in place, I can instantiate my first `ParquetArraySeed`
+object, which is suitable as input to the `DelayedArray` constructor from
+the eponymous R package:
 
 ```{r}
 seed <- ParquetArraySeed(out_dir)
@@ -196,30 +278,25 @@ da <- DelayedArray(seed)
 da
 ```
 
-```{r}
-setClass("ParquetArray",
-    contains="DelayedArray",
-    representation(seed="ParquetArraySeed")
-)
-setMethod("DelayedArray", "ParquetArraySeed",
-    function(seed) new_DelayedArray(seed, Class="ParquetArray")
-)
-ParquetArray <- function(filepath) {
-    DelayedArray(ParquetArraySeed(filepath))
-}
-```
+When the object is printed, we are presented with the first couple of rows
+and columns, but most of the data remains on disk (e.g. has not been retrieved
+from the parquet files).
 
-```{r}
-setClass("ParquetMatrix", contains=c("ParquetArray", "DelayedMatrix"))
-setMethod("matrixClass", "ParquetArray", function(x) "ParquetMatrix")
-setAs("ParquetArray", "ParquetMatrix", function(from) new("ParquetMatrix", from))
-setAs("ParquetMatrix", "ParquetArray", function(from) from)  # no-op
-```
+Subsetting the `DelayedArray` works as expected, e.g. to retain only samples
+from the `tau` study:
 
 ```{r}
 # subset to one dataset - using gene and sample identifiers
 da[row.names(tau), colnames(tau)]
 ```
+
+## Creating a parquet-backed SummarizedExperiment
+
+For downstream analyses, it is useful to combine sample- and feature-annotations
+with the gene expression counts in a single `SummarizedExperiment`.
+
+Let's extract the sample metadata from the original data objects and add a
+`study` column.
 
 ```{r}
 pdata <- lapply(c("tau", "sarm1"), \(x) {
@@ -229,6 +306,10 @@ pdata <- lapply(c("tau", "sarm1"), \(x) {
   })
 pdata <- Reduce(rbind, pdata)
 ```
+
+The original datasets only provide ensembl gene identifiers, so let's retrieve
+the corresponding gene symbols and entrez identifiers from the
+[Mus.musculus Bioconductor annotation package](https://bioconductor.org/packages/release/data/annotation/html/Mus.musculus.html).
 
 ```{r}
 #| message: false
@@ -250,6 +331,9 @@ fdata <- DataFrame(
 )
 ```
 
+Now we are ready to compose meta- and gene expression data into a single
+object:
+
 ```{r}
 se <- SummarizedExperiment(
   assays = list(counts = da), 
@@ -261,10 +345,18 @@ se
 table(se$study)
 ```
 
+At this point, we still haven't retrieved the actual counts from the parquet
+files, e.g. they information is still on disk. It will automatically be
+retrieved when downstream functions coerce the `DelayedArray` into a regular
+matrix. For example, 
+[edgeR's calcNormFactors function](https://rdrr.io/bioc/edgeR/man/calcNormFactors.html)
+accepts a SummarizedExperiment and returns a `DGEList`, ready for exploratory
+analysis e.g. multi-dimensional scaling.
+
 ```{r}
-#|fig-height: 4
-#|fig-width: 4
-#|message: false
+#| fig-height: 4
+#| fig-width: 4
+#| message: false
 y <- edgeR::calcNormFactors(se[, se$study == "tau"])
 y$samples$genotype <- factor(
   ifelse(grepl("WT_", y$samples$group), "WT", "Transgenic")
@@ -277,6 +369,48 @@ legend("topright", legend = levels(y$samples$genotype), bty = "n", pch = 19,
        y.intersp=2)
 
 ```
+
+## Summary
+
+Because the `DelayedArray` package is so thoughtfully designed, it was
+surprisingly straightforward to represent data stored in parquet files as a
+matrix. This way, I can leverage familiar Bioconductor tools _and_ take
+advantage of the language-agnostic file format.
+
+A few directions and caveats that I haven't explored, yet:
+
+- In this example, I am generating one parquet file for each of the studies,
+  e.g. I am manually partitioning the data by `study`. When I want to
+  retrieve all data for one of the studies, I could simply parse _only_ the
+  corresponding parquet file, instead of querying & filtering all files in
+  the directory (as a 
+  [Dataset](https://arrow.apache.org/docs/r/articles/dataset.html#opening-datasets)
+  ).
+- My parquet files are stored on the local system. Accessing them in a cloud
+  storage location (e.g. on AWS S3) is supported by `duckdb` as well, but
+  network speed will likely become limiting. I will explore the use of
+  `AWS Athena`, a cloud-based SQL database, in a future post, as shown e.g. in 
+  [this AWS blog post](https://aws.amazon.com/blogs/industries/fast-queries-of-scrnaseq-datasets-with-amazon-athena/).
+- The parquet files I generated here are relatively small, e.g. ~ 5 Mb,
+  reflecting the relatively small size of the example bulk RNA-seq datasets.
+  The
+  [arrow project recommends](https://arrow.apache.org/docs/r/articles/dataset.html#partitioning-performance-considerations)
+  avoiding accessing many files smaller than 20MB, but that's likely not a
+  problem until I need to handle thousands of studies.
+- Disk-backed arrays are great if computations can be performed on small chunks
+  of data, e.g. to visualize a subset of feature and / or samples. When it is 
+  necessary to realize the full dataset in memory, the `DelayedArray` returns
+  a conventional matrix - e.g. sparse representations don't seem to be supported
+  right now (as far as I can tell).
+- Finally, I have only implemented three essential methods, but have not touched
+  on any optimized backend-specific methods. For example, we could issue a SQL
+  query to calculate `max` or `colSums` values instead of loading the full
+  data matrix into our R session. (This might be especially interesting if
+  the database engine is running on a remote server.)
+
+Lots more to learn - and a big thank you to
+[Hervé Pagès](https://www.linkedin.com/in/herv%C3%A9-pag%C3%A8s-5038527)
+and the entire Bioconductor team!
 
 ## Reproducibility
 

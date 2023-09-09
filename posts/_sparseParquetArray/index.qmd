@@ -1,0 +1,164 @@
+---
+title: "Adventures with parquet III: sparse data"
+author: "Thomas Sandmann"
+date: "2023-09-08"
+freeze: true
+categories: [R, TIL, parquet, Bioconductor]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+[Previously](../parquetArray/), 
+I learned how to create Bioconductor S4 objects based on parquet files. Today,
+I am exploring how to represent sparse data - without coercing them into dense
+arrays. Again, Hervé Pagès's great
+[DelayedArray Bioconductor package](https://bioconductor.org/packages/release/bioc/html/DelayedArray.html)
+provides everything I need, and his 
+[HDF5Array package](https://bioconductor.org/packages/release/bioc/html/HDF5Array.html)
+serves as an example implementation.
+
+```{r}
+#| warning: false
+#| message: false
+suppressPackageStartupMessages({
+  library("arrow")
+  library("dplyr")
+  library("fs")
+  library("tibble")
+  library("tidyr")
+  library("DelayedArray")
+  library("Matrix")
+  library("Mus.musculus")
+  library("SingleCellExperiment")
+  library("TENxPBMCData")
+})
+```
+
+## Storing single-cell RNA-seq data in a parquet file
+
+As an example dataset, I am using single-cell RNA-seq included as the `pbmc4k` 
+dataset in the 
+[TENxPBMCData Bioconductor package](https://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html), with counts from 
+[Peripheral Blood Mononuclear Cells (PBMCs)](https://www.ncbi.nlm.nih.gov/books/NBK500157/#top)
+collected from a single donor [^1].
+
+[^1]: The data is retrieved from 
+[ExperimentHub](https://bioconductor.org/packages/release/bioc/html/ExperimentHub.html)
+and cached on the local system the first time the object is loaded.
+
+This `SingleCellExperiment` includes counts for `r nrow(tenx_pbmc4k)` genes
+in `r ncol(tenx_pbmc4k)` cells.
+
+```{r}
+tenx_pbmc4k <- TENxPBMCData(dataset = "pbmc4k")
+tenx_pbmc4k
+```
+
+The counts are stored as in an HDF5 file on disk, and are represented as a 
+`DelayedMatrix` in the `counts` slot of the `SingleCellExperiment`:
+
+```{r}
+class(counts(tenx_pbmc4k))
+HDF5Array::path(counts(tenx_pbmc4k))  # path to the HDF5 file
+```
+
+Like most single-cell RNA-seq datasets, the data is very sparse:
+For example, `r round(mean(counts(tenx_pbmc4k[, 1:4]) == 0) * 100, 1)`% of the
+genes in the first four samples have zero counts. 
+
+```{r}
+no_counts <- rowSums(counts(tenx_pbmc4k)) == 0
+```
+
+And `r sum(no_counts)` were not detected in any of the `r ncol(tenx_pbmc4k)`
+cells. Let's extract all non-zero counts as a sparse matrix first, and then 
+store them measurements in a data.frame. 
+
+The data.frame contains three columns:
+
+- `i`: the row index, mapping to `row.names(tenx_pbmc4k)`
+- `j`: the column index, mapping to `colnames(tenx_pbmc4k)`
+- `x`: the raw counts, extracted from `counts(tenx_pbmc4k)`
+
+```{r}
+# Matrix::summary returns a data.frame of the non-zero entries of a Matrix
+df <- as.data.frame(
+  Matrix::summary(
+    as(counts(tenx_pbmc4k), "dgCMatrix")
+  )
+)
+head(df)
+```
+
+For easy access, we store the index-name mappings as factors in the `dim_names`
+list.
+
+```{r}
+dim_names <- list(
+  rows = factor(row.names(tenx_pbmc4k)),
+  columns = factor(colnames(tenx_pbmc4k))
+)
+```
+
+Let's store the `df` data.frame in a (single) parquet file on the local filesystem
+and remove the original data.frame from our R session.
+
+```{r}
+parquet_file <- tempfile(fileext = ".parquet")
+arrow::write_parquet(x = df, sink = parquet_file)
+rm(df)
+```
+
+This yields a parquet file that's `r fs::file_info(parquet_file)$size` in size.
+(For comparison, the original HDF5 file was only
+`r fs::file_info(path(counts(tenx_pbmc4k)))$size` in size - and that included
+row- and column metadata as well.)
+
+## Representing parquet-based data as a sparse DelayedMatrix
+
+The original `tenx_pbmc4k` object represents the counts as a 
+`sparse DelayedMatrix object of type "integer"`, e.g. it
+
+- copies the data from the HDF5 file into memory only when it is necessary
+- represents it to R as a sparse matrix, e.g. without explicitely storing
+  zeros
+  
+Next, we will create a basic S4 class that accesses our parquet file (instead
+of the original HDF5 file) and represents it in the same way.
+
+Under the hood, the `DelayedMatrix` object contains a sparse `HDF5ArraySeed`
+object:
+
+```{r}
+seed <- seed(counts(tenx_pbmc4k))
+class(seed)
+is_sparse(seed)
+```
+
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info("attached")
+```
+
+</details>
+   

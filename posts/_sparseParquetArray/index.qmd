@@ -22,13 +22,24 @@ editor_options:
 ## tl;dr
 
 [Previously](../parquetArray/), 
-I learned how to create Bioconductor S4 objects based on parquet files. Today,
-I am exploring how to represent sparse data - without coercing them into dense
-arrays. Again, Hervé Pagès's great
-[DelayedArray Bioconductor package](https://bioconductor.org/packages/release/bioc/html/DelayedArray.html)
-provides everything I need, and his 
+I learned how to create Bioconductor S4 objects based on parquet files. As
+[Aaron Lun pointed out](https://support.bioconductor.org/p/9154160/#9154171)
+Parquet format is similar to 10X Genomics' HDF5 format for sparse matrices:
+
+> Each matrix column would constitute a Parquet row group, containing the usual
+i/j/x sparse triplet (maybe the j column can be omitted as it is redundant with
+the row group ID for the matrix column). If i is used as the sort column within
+the row group, then you've got a CSC layout inside the Parquet file. At that
+point, the performance can be expected to be similar to the HDF5 format, i.e.
+great for column access, pretty bad for row access. 
+
+## Introduction
+
+Today, I am experimenting with coercing data from parquet files into sparse
+matrices and using them as a back-end for Hervé Pagès's great
+[DelayedArray S4 class](https://bioconductor.org/packages/release/bioc/html/DelayedArray.html). I will use the `TENxMatrixSeed` class defined in the
 [HDF5Array package](https://bioconductor.org/packages/release/bioc/html/HDF5Array.html)
-serves as an example implementation.
+serves as an example implementation to guide me.
 
 ```{r}
 #| warning: false
@@ -37,117 +48,320 @@ suppressPackageStartupMessages({
   library("arrow")
   library("dplyr")
   library("fs")
+  library("rhdf5")
   library("tibble")
   library("tidyr")
   library("DelayedArray")
   library("Matrix")
-  library("Mus.musculus")
   library("SingleCellExperiment")
   library("TENxPBMCData")
 })
 ```
 
-## Storing single-cell RNA-seq data in a parquet file
+## Retrieving an example Single-cell RNA-seq dataset
 
 As an example dataset, I am using single-cell RNA-seq included as the `pbmc4k` 
 dataset in the 
 [TENxPBMCData Bioconductor package](https://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html), with counts from 
 [Peripheral Blood Mononuclear Cells (PBMCs)](https://www.ncbi.nlm.nih.gov/books/NBK500157/#top)
-collected from a single donor [^1].
+collected from a single donor. 
 
-[^1]: The data is retrieved from 
+The `TENxPBMCData()` function retrieves them from 
 [ExperimentHub](https://bioconductor.org/packages/release/bioc/html/ExperimentHub.html)
-and cached on the local system the first time the object is loaded.
+and caches them on the local system the first time the object is loaded [^1].
 
-This `SingleCellExperiment` includes counts for `r nrow(tenx_pbmc4k)` genes
-in `r ncol(tenx_pbmc4k)` cells.
+It downloads three files:
+
+- An HDF5 file with counts (dense assay)
+- An RDS file with row (= gene) annotations
+- An RDS file with column (= cell) annotations
 
 ```{r}
-tenx_pbmc4k <- TENxPBMCData(dataset = "pbmc4k")
+tenx_pbmc4k <- suppressMessages(TENxPBMCData(dataset = "pbmc4k"))
 tenx_pbmc4k
 ```
 
-The counts are stored as in an HDF5 file on disk, and are represented as a 
-`DelayedMatrix` in the `counts` slot of the `SingleCellExperiment`:
+The `TENxPBMCData()` function combines counts with annotations, and returns
+a `SingleCellExperiment` with a sparse HDF5-backed `DelayedMatrix` in
+the `counts` slot and gene and cell annotations as `rowData` and `colData`
+DataFrames, respectively. It contains counts for `r nrow(tenx_pbmc4k)` genes
+in `r ncol(tenx_pbmc4k)` cells. 
+
+[^1]: By default, the location of the cache is set via 
+`ExperimentHub::getExperimentHubOption("CACHE")`. For example, on my system the
+data is located at `r ExperimentHub::getExperimentHubOption("CACHE")`.
+
+The counts are retrieved from the HDF5 file on demand, and the full matrix
+only uses `r format(object.size(counts(tenx_pbmc4k)), units = "MB")` of
+memory.
 
 ```{r}
-class(counts(tenx_pbmc4k))
-HDF5Array::path(counts(tenx_pbmc4k))  # path to the HDF5 file
+counts(tenx_pbmc4k)[1:10, 1:10]
 ```
+
+::: {.callout-note collapse="true"}
+
+The underlying HDF5 file only contains the gene x cell count matrix.
+
+```{r}
+rhdf5::h5ls(path(counts(tenx_pbmc4k)))
+```
+
+The 
+
+:::
 
 Like most single-cell RNA-seq datasets, the data is very sparse:
 For example, `r round(mean(counts(tenx_pbmc4k[, 1:4]) == 0) * 100, 1)`% of the
 genes in the first four samples have zero counts. 
 
+## Handling sparse count data in memory
+
+Let's load all counts into memory as a sparse `dgCMatrix` defined in the
+[Matrix R package](https://cran.r-project.org/package=Matrix).
+
 ```{r}
-no_counts <- rowSums(counts(tenx_pbmc4k)) == 0
+m <- as(counts(tenx_pbmc4k), "dgCMatrix")
+dim(m)
 ```
 
-And `r sum(no_counts)` were not detected in any of the `r ncol(tenx_pbmc4k)`
-cells. Let's extract all non-zero counts as a sparse matrix first, and then 
-store them measurements in a data.frame. 
+Because only non-zero counts need to be represented, the sparse `dgCMatrix`
+matrix `m` is still relatively small, occupying 
+`r format(object.size(m), units = "MB")` of memory.
 
-The data.frame contains three columns:
+::: {.callout-note}
 
-- `i`: the row index, mapping to `row.names(tenx_pbmc4k)`
-- `j`: the column index, mapping to `colnames(tenx_pbmc4k)`
-- `x`: the raw counts, extracted from `counts(tenx_pbmc4k)`
+Internally, a `dgCMatrix` is represented in the (sorted) 
+[compressed sparse column format (CSC)](https://en.wikipedia.org/wiki/Sparse_matrix).
+Each non-zero value is stored as three numbers:
+
+- `i`: the row index
+- `j`: the column pointer
+- `x`: the value (= count)
+
+:::
+
+We can extract this internal representation into a tall, thin data.frame with
+the `Matrix::summary()` function. 
 
 ```{r}
-# Matrix::summary returns a data.frame of the non-zero entries of a Matrix
 df <- as.data.frame(
   Matrix::summary(
     as(counts(tenx_pbmc4k), "dgCMatrix")
   )
 )
-head(df)
 ```
 
-For easy access, we store the index-name mappings as factors in the `dim_names`
-list.
+This data.frame _only_ contains non-zero values, e.g. `r length(unique(df$i))` 
+of the original `r nrow(tenx_pbmc4k)` genes and `r `length(unique(df$j))` 
+of the original `r ncol(tenx_pbmc4k)` cells. No counts were detected for the
+remaining (e.g. missing) genes and cells. 
+
+The data.frame requires `r format(object.size(df), units = "MB")` of memory.
+
+::: {.callout-note collapse="true"}
+
+### Introducing arrow Tables
+
+Instead of a regular data.frame we can also work with `arrow::Table` objects.
+Here, I explicitly create a `Table` with three 32 bit integers. 
+(Because single-cell RNA-seq counts are always positive and we have a good idea
+of their upper bound, I am using an unsigned 32 bit integer type for the `x`
+column, allowing values between 0 and 4,294,967,295.)
+
 
 ```{r}
-dim_names <- list(
-  rows = factor(row.names(tenx_pbmc4k)),
-  columns = factor(colnames(tenx_pbmc4k))
+a_tbl <- arrow::as_arrow_table(
+  df, 
+  schema = arrow::schema(
+    i = int32(),
+    j = int32(),
+    x = uint32()
+  ))
+a_tbl
+```
+
+Creating an `arrow::Table` object appears to consume little additional memory
+(`r format(object.size(a_tbl), units = "KB")`) as it is managed by `arrow` and
+not R. 
+:::
+
+Alternatively, I can also include the row-names (= gene identifiers) and
+column-names (= cell barcodes) in the data.frame. Because each of the 
+identifiers appears multiple times, I encode them as factors. Parquet files can
+store factors efficiently as type `dictionary`.
+
+To ensure that all of the original gene and barcode identifiers are recorded
+(even if they did not receive any counts), I provide the full list of row and
+column names as levels. 
+
+```{r}
+df <- (
+  data.frame(
+    i = factor(row.names(tenx_pbmc4k)[df$i], levels = row.names(tenx_pbmc4k)),
+    j = factor(tenx_pbmc4k$Barcode[df$j], levels = tenx_pbmc4k$Barcode),
+    x = df$x
+  )
 )
 ```
 
-Let's store the `df` data.frame in a (single) parquet file on the local filesystem
-and remove the original data.frame from our R session.
+The updated data.frame requires `r format(object.size(df2), units = "MB")`, just
+a little bit more than the version without the row- and column name factors.
+
+## Writing parquet files
+
+Next, let's store the `df` data.frame in a (single) parquet file on the
+local filesystem.
 
 ```{r}
 parquet_file <- tempfile(fileext = ".parquet")
-arrow::write_parquet(x = df, sink = parquet_file)
-rm(df)
+arrow::write_parquet(x = df, sink = parquet_file, use_dictionary = TRUE)
 ```
 
-This yields a parquet file that's `r fs::file_info(parquet_file)$size` in size.
-(For comparison, the original HDF5 file was only
-`r fs::file_info(path(counts(tenx_pbmc4k)))$size` in size - and that included
-row- and column metadata as well.)
+This yields a parquet file that's `r format(fs::file_info(parquet_file)$size)`
+in size. (For comparison, the original HDF5 file was
+`r format(fs::file_info(path(counts(tenx_pbmc4k)))$size)` in size, but did not
+include the row- and column names.)
 
-## Representing parquet-based data as a sparse DelayedMatrix
+```{r}
+head(arrow::read_parquet(parquet_file))
+```
+
+## Parquet-file based sparse DelayedArrays 
 
 The original `tenx_pbmc4k` object represents the counts as a 
 `sparse DelayedMatrix object of type "integer"`, e.g. it
 
 - copies the data from the HDF5 file into memory only when it is necessary
-- represents it to R as a sparse matrix, e.g. without explicitely storing
+- represents it to R as a sparse matrix, e.g. without explicitly storing
   zeros
   
-Next, we will create a basic S4 class that accesses our parquet file (instead
-of the original HDF5 file) and represents it in the same way.
+Next, I will reproduce this behavior with my parquet file.
 
-Under the hood, the `DelayedMatrix` object contains a sparse `HDF5ArraySeed`
-object:
+Under the hood, each `DelayedMatrix` object contains a _seed_ object. For
+example, the `tenx_pbmc4k` object contains a `HDF5ArraySeed` seed:
 
-```{r}
+```{r eval=FALSE}
 seed <- seed(counts(tenx_pbmc4k))
 class(seed)
 is_sparse(seed)
 ```
 
+So I create a similar `ParquetArraySeed` class first:
+
+```{r seed-class-definition}
+setClass("ParquetArraySeed",
+    contains = "Array",
+    slots = c(
+        filepath = "character",
+        dim = "integer"
+    )
+)
+
+setMethod("dimnames", "ParquetArraySeed", function(x) {
+  lapply(read_parquet(x@filepath, col_select = c(1, 2)), levels)
+})
+
+setMethod("dim", "ParquetArraySeed", function(x) x@dim)
+
+ParquetArraySeed <- function(filepath) {
+  x <- new("ParquetArraySeed", filepath = filepath)
+  x@dim <- unname(lengths(dimnames(x)))
+  return(x)
+}
+```
+
+To power a `DelayedArray` object, I need to define at least three different
+S4 methods for my new class:
+
+- `dim()` - returning an integer vector with the dimensions
+- `dimnames()` - returning a list of character vectors with the dimension names
+  (if any), e.g. the row and column names of a matrix.
+- `extract_array()` - returning an _ordinary array_ for a set of indices (see
+  below), e.g. a subset of the dataset to realize in memory.
+
+### `dim` and `dimnames` methods
+
+```{r dim-dimnames}
+.extract_array_from_ParquetArraySeed <- function(x, index) {
+  # match indices to feature and sample identifiers
+  dims <- dimnames(x)
+  
+  # zero indices => return empty matrix
+  if (identical(index, list(integer(0), integer(0)))) {
+    return(matrix(0L, nrow = 0, ncol = 0))
+  # NULL indices => return the full dataset
+  } else if (is.null(index[[1]]) & is.null(index[[2]])) {
+    keep_i <- dims[[1]]
+    keep_j <- dims[[2]]
+    dataset <- read_parquet(x@filepath) %>%
+      collect()
+    # no sample index => return all samples
+  } else if (!is.null(index[[1]]) && is.null(index[[2]])) {
+    keep_i <- dims[[1]][index[[1]]]
+    keep_j <- dims[[2]]
+    dataset <- read_parquet(x@filepath) %>%
+      filter(i %in% keep_i) %>%
+      collect()
+    # no feature index => return all features
+  } else if (is.null(index[[1]]) && !is.null(index[[2]])) {
+    keep_i <- dims[[1]]
+    keep_j <- dims[[2]][index[[2]]]
+    dataset <- read_parquet(x@filepath) %>%
+      filter(j %in% keep_j) %>%
+      collect()
+  } else {
+    keep_i <- dims[[1]][index[[1]]]
+    keep_j <- dims[[2]][index[[2]]]
+    dataset <- read_parquet(x@filepath) %>%
+      filter(i %in% keep_i, j %in% keep_j) %>%
+      collect()
+  }
+  # pivot the count data into a regular matrix
+  m <- matrix(
+    data = 0L, 
+    nrow = length(keep_i),
+    ncol = length(keep_j),
+    dimnames = list(keep_i, keep_j))
+  matrix_index <- cbind(
+    match(dataset$i, row.names(m)), 
+    match(dataset$j, colnames(m))
+  )
+  m[matrix_index] <- dataset$x
+  return(m)
+}
+
+setMethod("extract_array", "ParquetArraySeed", 
+          .extract_array_from_ParquetArraySeed)
+```
+
+## Creating a first `ParquetArraySeed` object
+
+With these three methods in place, I can instantiate my first `ParquetArraySeed`
+object, which is suitable as input to the `DelayedArray` constructor from
+the eponymous R package:
+
+```{r}
+seed <- ParquetArraySeed(parquet_file)
+da <- DelayedArray(seed)
+da[1:10,1:100]
+da[1:10, ]
+da[, 1:10]
+da["ENSG00000243485", 1:10, drop = FALSE]
+```
+
+```{r}
+o <- as(counts(tenx_pbmc4k), "dgCMatrix")
+dim(o)
+colnames(o) <- tenx_pbmc4k$Barcode
+format(object.size(o), unit = "MB")
+```
+
+```{r}
+n <- as(da, "dgCMatrix")
+dim(n)
+format(object.size(n), unit = "MB")
+```
 
 ## Reproducibility
 

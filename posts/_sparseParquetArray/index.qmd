@@ -50,6 +50,7 @@ suppressPackageStartupMessages({
   library("fs")
   library("rhdf5")
   library("tibble")
+  library("tictoc")
   library("tidyr")
   library("DelayedArray")
   library("Matrix")
@@ -295,47 +296,40 @@ the full dataset.
 
 ```{r}
 .extract_array_from_ParquetArraySeed <- function(x, index) {
-  # match indices to feature and sample identifiers
-  dims <- dimnames(x)
-  
-  # zero indices => return empty matrix
   if (identical(index, list(integer(0), integer(0)))) {
+  # zero indices => return empty matrix
     return(matrix(0L, nrow = 0, ncol = 0))
+  } 
+  dims <- dimnames(x)
+  keep_i <- dims[[1]]
+  keep_j <- dims[[2]]
+  arrow_tbl <- read_parquet(x@filepath, as_data_frame = FALSE)
+  if (is.null(index[[1]]) & is.null(index[[2]])) {
   # NULL indices => return the full dataset
-  } else if (is.null(index[[1]]) & is.null(index[[2]])) {
-    keep_i <- dims[[1]]
-    keep_j <- dims[[2]]
-    dataset <- read_parquet(x@filepath) %>%
-      collect()
-    # no sample index => return all samples
+    dataset <- arrow_tbl
   } else if (!is.null(index[[1]]) && is.null(index[[2]])) {
+    # no column index => return all columns
     keep_i <- dims[[1]][index[[1]]]
-    keep_j <- dims[[2]]
-    dataset <- read_parquet(x@filepath) %>%
-      filter(i %in% keep_i) %>%
-      collect()
-    # no feature index => return all features
+    dataset <- filter(arrow_tbl, i %in% keep_i)
   } else if (is.null(index[[1]]) && !is.null(index[[2]])) {
-    keep_i <- dims[[1]]
+    # no row index => return all rows
     keep_j <- dims[[2]][index[[2]]]
-    dataset <- read_parquet(x@filepath) %>%
-      filter(j %in% keep_j) %>%
-      collect()
+    dataset <- filter(arrow_tbl, j %in% keep_j)
   } else {
+    # return requested rows and requested columns
     keep_i <- dims[[1]][index[[1]]]
     keep_j <- dims[[2]][index[[2]]]
-    dataset <- read_parquet(x@filepath) %>%
-      filter(i %in% keep_i, j %in% keep_j) %>%
-      collect()
+    dataset <- filter(arrow_tbl, i %in% keep_i, j %in% keep_j)
   }
   # pivot the count data into a regular matrix
+  dataset <- collect(dataset)
   m <- matrix(
-    data = 0L, 
+    data = 0L,
     nrow = length(keep_i),
     ncol = length(keep_j),
     dimnames = list(keep_i, keep_j))
   matrix_index <- cbind(
-    match(dataset$i, row.names(m)), 
+    match(dataset$i, row.names(m)),
     match(dataset$j, colnames(m))
   )
   m[matrix_index] <- dataset$x
@@ -355,10 +349,17 @@ the eponymous R package:
 ```{r}
 seed <- ParquetArraySeed(parquet_file)
 da <- DelayedArray(seed)
-da[1:10,1:100]
+```
+
+Now we test different ways of subsetting our DelayedArray to make sure
+it works as expected:
+
+```{r}
+da[1:10, 1:100]
 da[1:10, ]
 da[, 1:10]
 da["ENSG00000243485", 1:10, drop = FALSE]
+da[c(1, 1, 2, 98), c("AACTCAGTCCAACCAA-1", "AACTCCCAGAAACCTA-1")]
 ```
 
 As a sanity check, let's coerce both the counts from the original 

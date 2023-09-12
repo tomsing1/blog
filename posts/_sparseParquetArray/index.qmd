@@ -153,7 +153,7 @@ df <- as.data.frame(
 ```
 
 This data.frame _only_ contains non-zero values, e.g. `r length(unique(df$i))` 
-of the original `r nrow(tenx_pbmc4k)` genes and `r `length(unique(df$j))` 
+of the original `r nrow(tenx_pbmc4k)` genes and `r length(unique(df$j))` 
 of the original `r ncol(tenx_pbmc4k)` cells. No counts were detected for the
 remaining (e.g. missing) genes and cells. 
 
@@ -205,7 +205,7 @@ df <- (
 )
 ```
 
-The updated data.frame requires `r format(object.size(df2), units = "MB")`, just
+The updated data.frame requires `r format(object.size(df), units = "MB")`, just
 a little bit more than the version without the row- and column name factors.
 
 ## Writing parquet files
@@ -257,18 +257,6 @@ setClass("ParquetArraySeed",
         dim = "integer"
     )
 )
-
-setMethod("dimnames", "ParquetArraySeed", function(x) {
-  lapply(read_parquet(x@filepath, col_select = c(1, 2)), levels)
-})
-
-setMethod("dim", "ParquetArraySeed", function(x) x@dim)
-
-ParquetArraySeed <- function(filepath) {
-  x <- new("ParquetArraySeed", filepath = filepath)
-  x@dim <- unname(lengths(dimnames(x)))
-  return(x)
-}
 ```
 
 To power a `DelayedArray` object, I need to define at least three different
@@ -280,9 +268,32 @@ S4 methods for my new class:
 - `extract_array()` - returning an _ordinary array_ for a set of indices (see
   below), e.g. a subset of the dataset to realize in memory.
 
-### `dim` and `dimnames` methods
+Let's start with the `dim()` and `dimnames()` methods.
 
-```{r dim-dimnames}
+```{r}
+setMethod("dimnames", "ParquetArraySeed", function(x) {
+  lapply(read_parquet(x@filepath, col_select = c(1, 2)), levels)
+})
+
+setMethod("dim", "ParquetArraySeed", function(x) x@dim)
+```
+
+I also create a constructor function, which precalculates the dimensions of the
+dataset and populates the `x@dim` slot:
+
+```{r}
+ParquetArraySeed <- function(filepath) {
+  x <- new("ParquetArraySeed", filepath = filepath)
+  x@dim <- unname(lengths(dimnames(x)))
+  return(x)
+}
+```
+
+Finally, I need a function that subsets the dataset to a user-specified set of
+genes and / or cells. I also need to ensure that passing an empty query returns
+the full dataset.
+
+```{r}
 .extract_array_from_ParquetArraySeed <- function(x, index) {
   # match indices to feature and sample identifiers
   dims <- dimnames(x)
@@ -350,17 +361,32 @@ da[, 1:10]
 da["ENSG00000243485", 1:10, drop = FALSE]
 ```
 
-```{r}
-o <- as(counts(tenx_pbmc4k), "dgCMatrix")
-dim(o)
-colnames(o) <- tenx_pbmc4k$Barcode
-format(object.size(o), unit = "MB")
-```
+As a sanity check, let's coerce both the counts from the original 
+`SingleCellExperiment` (backed by an HDF5 file) and my new `ParquetArray`
+(backed by a Parquet file) into sparse matrices in memory.
 
 ```{r}
-n <- as(da, "dgCMatrix")
-dim(n)
-format(object.size(n), unit = "MB")
+original <- as(counts(tenx_pbmc4k), "dgCMatrix")
+colnames(original) <- tenx_pbmc4k$Barcode
+parquet_array <- as(da, "dgCMatrix")
+stopifnot(all.equal(object.size(original), object.size(parquet_array), 
+                    tolerance = 500))
+```
+
+Both sparse matrices occupy `r format(object.size(original), unit = "MB")` 
+of memory.
+
+Finally, let's retrieve the (raw) counts for the GAPDH gene (`ENSG00000111640`)
+and ensure that the same results are retrieved from both objects:
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+plot(
+  counts(tenx_pbmc4k[ "ENSG00000111640", ]), 
+  da[ "ENSG00000111640", tenx_pbmc4k$Barcode],
+  xlab = "GAPDH (ParquetArray)", ylab = "GAPDH (SingleCellExperiment)")
+abline(0, 1)
 ```
 
 ## Reproducibility

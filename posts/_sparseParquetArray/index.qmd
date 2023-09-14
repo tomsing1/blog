@@ -54,6 +54,7 @@ suppressPackageStartupMessages({
   library("tidyr")
   library("DelayedArray")
   library("Matrix")
+  library("S4Vectors")
   library("SingleCellExperiment")
   library("TENxPBMCData")
 })
@@ -149,8 +150,9 @@ the `Matrix::summary()` function.
 df <- as.data.frame(
   Matrix::summary(
     as(counts(tenx_pbmc4k), "dgCMatrix")
-  )
+  ), row.names = NULL
 )
+df$x <- as.integer(df$x)
 ```
 
 This data.frame _only_ contains non-zero values, e.g. `r length(unique(df$i))` 
@@ -161,8 +163,6 @@ remaining (e.g. missing) genes and cells.
 The data.frame requires `r format(object.size(df), units = "MB")` of memory.
 
 ::: {.callout-note collapse="true"}
-
-### Introducing arrow Tables
 
 Instead of a regular data.frame we can also work with `arrow::Table` objects.
 Here, I explicitly create a `Table` with three 32 bit integers. 
@@ -185,29 +185,34 @@ a_tbl
 Creating an `arrow::Table` object appears to consume little additional memory
 (`r format(object.size(a_tbl), units = "KB")`) as it is managed by `arrow` and
 not R. 
+
 :::
 
-Alternatively, I can also include the row-names (= gene identifiers) and
+Alternatively, I can also encode the row-names (= gene identifiers) and
 column-names (= cell barcodes) in the data.frame. Because each of the 
-identifiers appears multiple times, I encode them as factors. Parquet files can
-store factors efficiently as type `dictionary`.
+identifiers appears multiple times, they are best represented as factors. 
 
-To ensure that all of the original gene and barcode identifiers are recorded
-(even if they did not receive any counts), I provide the full list of row and
-column names as levels. 
+By including _all_ of the gene- and barcode identifiers as factor levels,
+including those genes / barcodes that were not detected (e.g. had a total
+of zero counts), I retain information about them as well.
 
 ```{r}
-df <- (
-  data.frame(
-    i = factor(row.names(tenx_pbmc4k)[df$i], levels = row.names(tenx_pbmc4k)),
-    j = factor(tenx_pbmc4k$Barcode[df$j], levels = tenx_pbmc4k$Barcode),
-    x = df$x
-  )
+df$i <- factor(row.names(tenx_pbmc4k)[df$i], levels = row.names(tenx_pbmc4k))
+df$j = factor(tenx_pbmc4k$Barcode[df$j], levels = tenx_pbmc4k$Barcode)
+```
+
+::: {.callout-note collapse="true"}
+
+By the way, arrow tables (and parquet files) have an equivalent data type
+and R factors stored as type `dictionary`.
+
+```{r}
+arrow::as_arrow_table(
+  df
 )
 ```
 
-The updated data.frame requires `r format(object.size(df), units = "MB")`, just
-a little bit more than the version without the row- and column name factors.
+:::
 
 ## Writing parquet files
 
@@ -221,23 +226,22 @@ arrow::write_parquet(x = df, sink = parquet_file, use_dictionary = TRUE)
 
 This yields a parquet file that's `r format(fs::file_info(parquet_file)$size)`
 in size. (For comparison, the original HDF5 file was
-`r format(fs::file_info(path(counts(tenx_pbmc4k)))$size)` in size, but did not
-include the row- and column names.)
+`r format(fs::file_info(path(counts(tenx_pbmc4k)))$size)` in size.)
 
 ```{r}
 head(arrow::read_parquet(parquet_file))
 ```
 
-## Parquet-file based sparse DelayedArrays 
+## A parquet-file backed DelayedArray
 
 The original `tenx_pbmc4k` object represents the counts as a 
-`sparse DelayedMatrix object of type "integer"`, e.g. it
+`sparse DelayedMatrix object of type "integer"`, e.g. it copies the data from
+the HDF5 file into memory only when it is necessary.
 
-- copies the data from the HDF5 file into memory only when it is necessary
-- represents it to R as a sparse matrix, e.g. without explicitly storing
-  zeros
-  
-Next, I will reproduce this behavior with my parquet file.
+Here, I will reproduce this behavior with my parquet file by implementing a
+minimal seed for the `DelayedArray` S4 class.
+
+### The ParquetArraySeed S4 class 
 
 Under the hood, each `DelayedMatrix` object contains a _seed_ object. For
 example, the `tenx_pbmc4k` object contains a `HDF5ArraySeed` seed:
@@ -248,14 +252,16 @@ class(seed)
 is_sparse(seed)
 ```
 
-So I create a similar `ParquetArraySeed` class first:
+Let's create a similar `ParquetArraySeed` class that inherits from the `Array`
+class.
 
 ```{r seed-class-definition}
 setClass("ParquetArraySeed",
     contains = "Array",
     slots = c(
         filepath = "character",
-        dim = "integer"
+        dim = "integer",
+        dimnames = "list"
     )
 )
 ```
@@ -265,17 +271,17 @@ S4 methods for my new class:
 
 - `dim()` - returning an integer vector with the dimensions
 - `dimnames()` - returning a list of character vectors with the dimension names
-  (if any), e.g. the row and column names of a matrix.
+  (if any), e.g. the row and column names of the matrix.
 - `extract_array()` - returning an _ordinary array_ for a set of indices (see
   below), e.g. a subset of the dataset to realize in memory.
 
-Let's start with the `dim()` and `dimnames()` methods.
+Let's start with the `dim()` and `dimnames()` methods. We will rely on the
+constructor function (see below) to retrieve the unique row and column names
+from the parquet files, and then populate the `@dimnames` and `@dim` slots
+for future reference.
 
 ```{r}
-setMethod("dimnames", "ParquetArraySeed", function(x) {
-  lapply(read_parquet(x@filepath, col_select = c(1, 2)), levels)
-})
-
+setMethod("dimnames", "ParquetArraySeed", function(x) x@dimnames)
 setMethod("dim", "ParquetArraySeed", function(x) x@dim)
 ```
 
@@ -283,9 +289,21 @@ I also create a constructor function, which precalculates the dimensions of the
 dataset and populates the `x@dim` slot:
 
 ```{r}
-ParquetArraySeed <- function(filepath) {
-  x <- new("ParquetArraySeed", filepath = filepath)
-  x@dim <- unname(lengths(dimnames(x)))
+.get_dim <- function(filepath) {
+  n_i <- read_parquet(filepath, col_select = "i") %>%
+    collect() %>%
+    pull(i) %>%
+    nlevels()
+  n_j <- read_parquet(filepath, col_select = "j") %>%
+    collect() %>%
+    pull(j) %>%
+    nlevels()
+  c(n_i, n_j)
+}
+ParquetArraySeed <- function(filepath, dim = c(0L,0L), 
+                             dimnames = list(NULL, NULL)) {
+  x <- new("ParquetArraySeed", filepath = filepath, dim = .get_dim(filepath), 
+           dimnames = dimnames)
   return(x)
 }
 ```
@@ -297,40 +315,44 @@ the full dataset.
 ```{r}
 .extract_array_from_ParquetArraySeed <- function(x, index) {
   if (identical(index, list(integer(0), integer(0)))) {
-  # zero indices => return empty matrix
+    # zero indices => return empty matrix
     return(matrix(0L, nrow = 0, ncol = 0))
   } 
-  dims <- dimnames(x)
-  keep_i <- dims[[1]]
-  keep_j <- dims[[2]]
-  arrow_tbl <- read_parquet(x@filepath, as_data_frame = FALSE)
+  keep_i <- seq.int(dim(x)[1])
+  keep_j <- seq.int(dim(x)[2])
+  # FIXME: how to convert an arrow dictionary to integers?
+  arrow_tbl <- read_parquet(x@filepath, as_data_frame = TRUE) %>%
+    mutate(i = as.integer(i),
+           j = as.integer(j))
   if (is.null(index[[1]]) & is.null(index[[2]])) {
   # NULL indices => return the full dataset
     dataset <- arrow_tbl
   } else if (!is.null(index[[1]]) && is.null(index[[2]])) {
     # no column index => return all columns
-    keep_i <- dims[[1]][index[[1]]]
+    keep_i <- index[[1]]
     dataset <- filter(arrow_tbl, i %in% keep_i)
   } else if (is.null(index[[1]]) && !is.null(index[[2]])) {
     # no row index => return all rows
-    keep_j <- dims[[2]][index[[2]]]
+    keep_j <- index[[2]]
     dataset <- filter(arrow_tbl, j %in% keep_j)
   } else {
     # return requested rows and requested columns
-    keep_i <- dims[[1]][index[[1]]]
-    keep_j <- dims[[2]][index[[2]]]
+    keep_i <-index[[1]]
+    keep_j <- index[[2]]
     dataset <- filter(arrow_tbl, i %in% keep_i, j %in% keep_j)
   }
-  # pivot the count data into a regular matrix
+  # pivot the count data into a matrix
   dataset <- collect(dataset)
   m <- matrix(
     data = 0L,
     nrow = length(keep_i),
     ncol = length(keep_j),
-    dimnames = list(keep_i, keep_j))
+    dimnames = list(dimnames(x)[[1]][keep_i], 
+                    dimnames(x)[[2]][keep_j])
+  )
   matrix_index <- cbind(
-    match(dataset$i, row.names(m)),
-    match(dataset$j, colnames(m))
+    match(dataset[["i"]], keep_i),
+    match(dataset[["j"]], keep_j)
   )
   m[matrix_index] <- dataset$x
   return(m)
@@ -340,42 +362,33 @@ setMethod("extract_array", "ParquetArraySeed",
           .extract_array_from_ParquetArraySeed)
 ```
 
-## Creating a first `ParquetArraySeed` object
+## Creating a first parquet-backed DelayedArray object
 
 With these three methods in place, I can instantiate my first `ParquetArraySeed`
 object, which is suitable as input to the `DelayedArray` constructor from
 the eponymous R package:
 
 ```{r}
-seed <- ParquetArraySeed(parquet_file)
+seed <- ParquetArraySeed(
+  parquet_file,
+  dimnames = list(row.names(tenx_pbmc4k), tenx_pbmc4k$Barcode))
 da <- DelayedArray(seed)
+class(da)
 ```
 
 Now we test different ways of subsetting our DelayedArray to make sure
 it works as expected:
 
 ```{r}
-da[1:10, 1:100]
-da[1:10, ]
-da[, 1:10]
-da["ENSG00000243485", 1:10, drop = FALSE]
-da[c(1, 1, 2, 98), c("AACTCAGTCCAACCAA-1", "AACTCCCAGAAACCTA-1")]
+
+identical(dim(da[1:10, 1:100]), c(10L, 100L))
+identical(dim(da[1:10, ]), c(10L, ncol(da)))
+identical(dim(da[, 1:10]), c(nrow(da), 10L))
+identical(dim(da["ENSG00000243485", 1:10, drop = FALSE]), c(1L, 10L))
+identical(
+  dim(da[c(1, 1, 2, 98), c("AACTCAGTCCAACCAA-1", "AACTCCCAGAAACCTA-1")]),
+  c(4L, 2L))
 ```
-
-As a sanity check, let's coerce both the counts from the original 
-`SingleCellExperiment` (backed by an HDF5 file) and my new `ParquetArray`
-(backed by a Parquet file) into sparse matrices in memory.
-
-```{r}
-original <- as(counts(tenx_pbmc4k), "dgCMatrix")
-colnames(original) <- tenx_pbmc4k$Barcode
-parquet_array <- as(da, "dgCMatrix")
-stopifnot(all.equal(object.size(original), object.size(parquet_array), 
-                    tolerance = 500))
-```
-
-Both sparse matrices occupy `r format(object.size(original), unit = "MB")` 
-of memory.
 
 Finally, let's retrieve the (raw) counts for the GAPDH gene (`ENSG00000111640`)
 and ensure that the same results are retrieved from both objects:
@@ -388,6 +401,148 @@ plot(
   da[ "ENSG00000111640", tenx_pbmc4k$Barcode],
   xlab = "GAPDH (ParquetArray)", ylab = "GAPDH (SingleCellExperiment)")
 abline(0, 1)
+```
+
+### The ParquetMatrix class
+
+Now that we have defined a _seed_, we can add a higher level class to facilitate
+working with parquet-backed matrices. The `ParquetMatrix` inherits from the
+`DelayedMatrix` class, and accepts our `ParquetArraySeed` object as its only
+input.
+
+```{r}
+setClass("ParquetMatrix",
+    contains = "DelayedMatrix",
+    representation(seed = "ParquetArraySeed")
+)
+
+setMethod("DelayedArray", "ParquetArraySeed",
+    function(seed) new_DelayedArray(seed, Class="ParquetMatrix")
+)
+
+ParquetMatrix <- function(filepath, ...) {
+  seed <- ParquetArraySeed(filepath = filepath, ...)
+  new("ParquetMatrix", seed = seed)
+}
+```
+
+```{r}
+ParquetMatrix(parquet_file)
+```
+
+### The SparseArraySeed class
+
+So far, we the `ParquetArraySeed` class was based on the `S4Arrays::Array`
+class, a virtual class that supports the representation of different array-like
+objects [^2]. 
+
+[^2]: The
+[S4Arrays](https://bioconductor.org/packages/release/bioc/html/S4Arrays.html)
+also defined methods that enable basic operations like `type()`, `as.array()`
+or `as.matrix()`.
+
+As described above, parquet file resemble the _compressed sparse column format_,
+used e.g. to represent sparse matrices in the 
+[Matrix package](https://cran.r-project.org/package=Matrix).
+The `DelayedArray` package provides a special seed for sparse arrays: the
+`SparseArraySeed` S4 class. Next, I explore whether this class would be a
+useful alternative to power my `ParquetArraySeed` class instead.
+
+Each `SparseArraySeed` objects contains the following slots:
+
+- `dim`: An integer vector with the dimensions of the array
+- `nzindex`: A matrix pinpointing the positions of the nonzero data, e.g. the
+  row- and column indices `i` and `j` mentioned above.
+- `nzdata`: A vector with the the nonzero data, equivalent to the `x` column
+  I used above.
+- `dimnames`: A list with one element per dimension, e.g. the row- and column
+  names.
+
+🚨: The `DelayedArray` package recommends avoiding the use of `dimnames` for
+retrieval of data. So here, I store the `i` and `j` indices of the count
+array as integers, not as a factor.
+
+```{r}
+dim_names <- list(
+  levels(df$i),
+  levels(df$j)
+)
+df$i <- as.integer(df$i)
+df$j <- as.integer(df$j)
+df$x <- as.integer(df$x)
+
+parquet_file <- tempfile(fileext = ".parquet")
+arrow::write_parquet(x = df, sink = parquet_file)
+```
+
+As for all _seed_ classes, the `dim()`, `dimnames()` and `extract_array()`
+methods have been defined, along with other useful helper methods (e.g.
+`sparsity()`). Let's create a new `sparseParquetArraySeed` subclass for
+accessing parquet files. (I will borrow heavily from the
+`DelayedArray::SparseArraySeed` constructor function but omit the many useful
+assertions its code contains.) For the `extract_array()` method, I will reuse
+the same helper function I used above, as it must return an ordinary (= dense)
+matrix.
+
+```{r}
+setClass("sparseParquetArraySeed",
+    contains = "SparseArraySeed",
+    slots = c(
+        filepath = "character"
+    )
+)
+
+setMethod("nzindex", "sparseParquetArraySeed", function(x) x@nzindex)
+setMethod("nzdata", "sparseParquetArraySeed", function(x) x@nzdata)
+setMethod("extract_array", "sparseParquetArraySeed", 
+          .extract_array_from_ParquetArraySeed)
+setMethod("dimnames", "sparseParquetArraySeed", function(x) x@dimnames)
+setReplaceMethod("dimnames", "sparseParquetArraySeed",function(x, value){
+        x@dimnames <- value; x})
+
+sparseParquetArraySeed <- function(filepath, dim, nzindex = NULL, nzdata = NULL,
+                                   dimnames = list(NULL, NULL), check = TRUE) {
+   if (is.null(nzindex)) {
+     if (is.null(nzdata)) {
+       nzdata <- logical(0)
+     }
+     nzindex <- matrix(integer(0), ncol=length(dim))
+   } else {
+     if (!is.null(dimnames(nzindex)))
+       dimnames(nzindex) <- NULL
+   }
+  new2("sparseParquetArraySeed", filepath=filepath, dim=dim, nzindex=nzindex,
+       nzdata=nzdata, dimnames=dimnames, check=check)
+}
+```
+
+Next, we define a custom `extract_array()` method that _never_ expands the
+sparse data into a dense array but returns another `sparseParquetArraySeed`
+instead. (In contrast, the  `.extract_array_from_ParquetArraySeed()` helper
+function generates and returns an ordinary matrix via the `matrix()` command.)
+
+```{r}
+```
+
+```{r}
+seed <- sparseParquetArraySeed(
+  filepath = parquet_file,
+  dim = c(max(df$i), max(df$j))
+)
+da <- DelayedArray(seed)
+da
+```
+
+## Comparison to HDF5-backed DelayedArrays
+
+```{r}
+tic()
+invisible(as.matrix(da))
+toc()
+
+tic()
+invisible(as.matrix(counts(tenx_pbmc4k)))
+toc()
 ```
 
 ## Reproducibility

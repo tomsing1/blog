@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Sandmann">
+<meta name="dcterms.date" content="2023-09-13">
+
+<title>Thomas Sandmann’s blog - Adventures with parquet III: single-cell RNA-seq data and comparison with HDF5-backed arrays</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Thomas Sandmann’s blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/tomsing1" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann" rel="" target=""><i class="bi bi-mastodon" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Adventures with parquet III: single-cell RNA-seq data and comparison with HDF5-backed arrays</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">TIL</div>
+                <div class="quarto-category">parquet</div>
+                <div class="quarto-category">Bioconductor</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Thomas Sandmann </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 13, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">tl;dr</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#retrieving-an-example-single-cell-rna-seq-dataset" id="toc-retrieving-an-example-single-cell-rna-seq-dataset" class="nav-link" data-scroll-target="#retrieving-an-example-single-cell-rna-seq-dataset">Retrieving an example Single-cell RNA-seq dataset</a></li>
+  <li><a href="#handling-sparse-count-data-in-memory" id="toc-handling-sparse-count-data-in-memory" class="nav-link" data-scroll-target="#handling-sparse-count-data-in-memory">Handling sparse count data in memory</a></li>
+  <li><a href="#writing-parquet-files" id="toc-writing-parquet-files" class="nav-link" data-scroll-target="#writing-parquet-files">Writing parquet files</a></li>
+  <li><a href="#a-parquet-file-backed-delayedarray" id="toc-a-parquet-file-backed-delayedarray" class="nav-link" data-scroll-target="#a-parquet-file-backed-delayedarray">A parquet-file backed DelayedArray</a>
+  <ul>
+  <li><a href="#the-parquetarrayseed-s4-class" id="toc-the-parquetarrayseed-s4-class" class="nav-link" data-scroll-target="#the-parquetarrayseed-s4-class">The ParquetArraySeed S4 class</a></li>
+  </ul></li>
+  <li><a href="#creating-a-first-parquet-backed-delayedarray-object" id="toc-creating-a-first-parquet-backed-delayedarray-object" class="nav-link" data-scroll-target="#creating-a-first-parquet-backed-delayedarray-object">Creating a first parquet-backed DelayedArray object</a>
+  <ul>
+  <li><a href="#the-parquetmatrix-class" id="toc-the-parquetmatrix-class" class="nav-link" data-scroll-target="#the-parquetmatrix-class">The ParquetMatrix class</a></li>
+  </ul></li>
+  <li><a href="#comparison-to-hdf5-backed-delayedarrays" id="toc-comparison-to-hdf5-backed-delayedarrays" class="nav-link" data-scroll-target="#comparison-to-hdf5-backed-delayedarrays">Comparison to HDF5-backed DelayedArrays</a>
+  <ul>
+  <li><a href="#reading-the-full-dataset-into-memory" id="toc-reading-the-full-dataset-into-memory" class="nav-link" data-scroll-target="#reading-the-full-dataset-into-memory">Reading the full dataset into memory</a></li>
+  <li><a href="#subsetting-to-50-random-rows-and-columns" id="toc-subsetting-to-50-random-rows-and-columns" class="nav-link" data-scroll-target="#subsetting-to-50-random-rows-and-columns">Subsetting to 50 random rows and columns</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<p>Today, I learned how to store single-cell RNA-seq data in a parquet file, created the <code>ParquetMatrix</code> class to retrieve them, and I started to compare the performance of reading from parquet and HDF5 files.</p>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p><a href="../parquetArray/">Previously</a>, I learned how to create Bioconductor S4 objects based on parquet files. As <a href="https://support.bioconductor.org/p/9154160/#9154171">Aaron Lun pointed out</a> Parquet format is similar to 10X Genomics’ HDF5 format for sparse matrices. This motivated me to look into storing single-cell RNA-seq data, which is very sparse as most genes are not detected in any given cell.</p>
+<p>Today, I am experimenting with coercing data from parquet files into sparse matrices and using them as a back-end for Hervé Pagès’s great <a href="https://bioconductor.org/packages/release/bioc/html/DelayedArray.html">DelayedArray S4 class</a>. I used the awesome <a href="https://bioconductor.org/packages/release/bioc/html/HDF5Array.html">HDF5Array package</a> to guide me, and learned more about arrow’s <code>dictionary</code> type.</p>
+<p>In the end, I was positively surprised that my crude <code>ParquetMatrix</code> class was able to read either the full data matrix or a random subset of counts from a parquet file even a little faster than from HDF5-backed original dataset.</p>
+<p>As a bonus, <code>ParquetMatrix</code> objects can be instantiated from local parquet files or from cloud storage (S3).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"arrow"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"dplyr"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"fs"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"microbenchmark"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"rhdf5"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"tibble"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"tidyr"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"DelayedArray"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"Matrix"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"S4Vectors"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"SingleCellExperiment"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"TENxPBMCData"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="retrieving-an-example-single-cell-rna-seq-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="retrieving-an-example-single-cell-rna-seq-dataset">Retrieving an example Single-cell RNA-seq dataset</h2>
+<p>As an example dataset, I am using single-cell RNA-seq included as the <code>pbmc4k</code> dataset in the <a href="https://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html">TENxPBMCData Bioconductor package</a>, with counts from <a href="https://www.ncbi.nlm.nih.gov/books/NBK500157/#top">Peripheral Blood Mononuclear Cells (PBMCs)</a> collected from a single donor.</p>
+<p>The <code>TENxPBMCData()</code> function retrieves them from <a href="https://bioconductor.org/packages/release/bioc/html/ExperimentHub.html">ExperimentHub</a> and caches them on the local system the first time the object is loaded <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>It downloads three files:</p>
+<ul>
+<li>An HDF5 file with counts (dense assay)</li>
+<li>An RDS file with row (= gene) annotations</li>
+<li>An RDS file with column (= cell) annotations</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tenx_pbmc4k <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(<span class="fu">TENxPBMCData</span>(<span class="at">dataset =</span> <span class="st">"pbmc4k"</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>tenx_pbmc4k</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: SingleCellExperiment 
+dim: 33694 4340 
+metadata(0):
+assays(1): counts
+rownames(33694): ENSG00000243485 ENSG00000237613 ... ENSG00000277475
+  ENSG00000268674
+rowData names(3): ENSEMBL_ID Symbol_TENx Symbol
+colnames: NULL
+colData names(11): Sample Barcode ... Individual Date_published
+reducedDimNames(0):
+mainExpName: NULL
+altExpNames(0):</code></pre>
+</div>
+</div>
+<p>The <code>TENxPBMCData()</code> function combines counts with annotations, and returns a <code>SingleCellExperiment</code> with a sparse HDF5-backed <code>DelayedMatrix</code> in the <code>counts</code> slot and gene and cell annotations as <code>rowData</code> and <code>colData</code> DataFrames, respectively. It contains counts for 33694 genes in 4340 cells.</p>
+<p>The counts are retrieved from the HDF5 file on demand, and the full matrix only uses 2.3 Mb of memory.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">counts</span>(tenx_pbmc4k)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;10 x 10&gt; sparse DelayedMatrix object of type "integer":
+                 [,1]  [,2]  [,3]  [,4] ...  [,7]  [,8]  [,9] [,10]
+ENSG00000243485     0     0     0     0   .     0     0     0     0
+ENSG00000237613     0     0     0     0   .     0     0     0     0
+ENSG00000186092     0     0     0     0   .     0     0     0     0
+ENSG00000238009     0     0     0     0   .     0     0     0     0
+ENSG00000239945     0     0     0     0   .     0     0     0     0
+ENSG00000239906     0     0     0     0   .     0     0     0     0
+ENSG00000241599     0     0     0     0   .     0     0     0     0
+ENSG00000279928     0     0     0     0   .     0     0     0     0
+ENSG00000279457     0     0     0     0   .     0     0     0     1
+ENSG00000228463     0     0     0     0   .     0     0     0     0</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The underlying HDF5 file only contains the gene x cell count matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rhdf5<span class="sc">::</span><span class="fu">h5ls</span>(<span class="fu">path</span>(<span class="fu">counts</span>(tenx_pbmc4k)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  group   name       otype  dclass          dim
+0     / counts H5I_DATASET INTEGER 33694 x 4340</code></pre>
+</div>
+</div>
+<p>The</p>
+</div>
+</div>
+</div>
+<p>Like most single-cell RNA-seq datasets, the data is very sparse: For example, 97.5% of the genes in the first four samples have zero counts.</p>
+</section>
+<section id="handling-sparse-count-data-in-memory" class="level2">
+<h2 class="anchored" data-anchor-id="handling-sparse-count-data-in-memory">Handling sparse count data in memory</h2>
+<p>Let’s load all counts into memory as a sparse <code>dgCMatrix</code> defined in the <a href="https://cran.r-project.org/package=Matrix">Matrix R package</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">as</span>(<span class="fu">counts</span>(tenx_pbmc4k), <span class="st">"dgCMatrix"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 33694  4340</code></pre>
+</div>
+</div>
+<p>Because only non-zero counts need to be represented, the sparse <code>dgCMatrix</code> matrix <code>m</code> is still relatively small, occupying 67.9 Mb of memory.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Internally, a <code>dgCMatrix</code> is represented in the (sorted) <a href="https://en.wikipedia.org/wiki/Sparse_matrix">compressed sparse column format (CSC)</a>. Each non-zero value is stored as three numbers:</p>
+<ul>
+<li><code>i</code>: the row index</li>
+<li><code>j</code>: the column pointer</li>
+<li><code>x</code>: the value (= count)</li>
+</ul>
+</div>
+</div>
+<p>We can extract this internal representation into a tall, thin data.frame with the <code>Matrix::summary()</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  Matrix<span class="sc">::</span><span class="fu">summary</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as</span>(<span class="fu">counts</span>(tenx_pbmc4k), <span class="st">"dgCMatrix"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  ), <span class="at">row.names =</span> <span class="cn">NULL</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>x <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(df<span class="sc">$</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This data.frame <em>only</em> contains non-zero values, e.g.&nbsp;19773 of the original 33694 genes and 4340 of the original 4340 cells. No counts were detected for the remaining (e.g.&nbsp;missing) genes and cells.</p>
+<p>The data.frame requires 65.5 Mb of memory.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Instead of a regular data.frame we can also work with <code>arrow::Table</code> objects. Here, I explicitly create a <code>Table</code> with three 32 bit integers. (Because single-cell RNA-seq counts are always positive and we have a good idea of their upper bound, I am using an unsigned 32 bit integer type for the <code>x</code> column, allowing values between 0 and 4,294,967,295.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>a_tbl <span class="ot">&lt;-</span> arrow<span class="sc">::</span><span class="fu">as_arrow_table</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  df, </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">schema =</span> arrow<span class="sc">::</span><span class="fu">schema</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">i =</span> <span class="fu">int32</span>(),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">j =</span> <span class="fu">int32</span>(),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">uint32</span>()</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>a_tbl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Table
+5727695 rows x 3 columns
+$i &lt;int32&gt;
+$j &lt;int32&gt;
+$x &lt;uint32&gt;
+
+See $metadata for additional Schema metadata</code></pre>
+</div>
+</div>
+<p>Creating an <code>arrow::Table</code> object appears to consume little additional memory (0.5 Kb) as it is managed by <code>arrow</code> and not R.</p>
+</div>
+</div>
+</div>
+<p>Alternatively, I can also encode the row-names (= gene identifiers) and column-names (= cell barcodes) in the data.frame. Because each of the identifiers appears multiple times, they are best represented as factors.</p>
+<p>By including <em>all</em> of the gene- and barcode identifiers as factor levels, including those genes / barcodes that were not detected (e.g.&nbsp;had a total of zero counts), I retain information about them as well.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>i <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">row.names</span>(tenx_pbmc4k)[df<span class="sc">$</span>i], <span class="at">levels =</span> <span class="fu">row.names</span>(tenx_pbmc4k))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>j <span class="ot">=</span> <span class="fu">factor</span>(tenx_pbmc4k<span class="sc">$</span>Barcode[df<span class="sc">$</span>j], <span class="at">levels =</span> tenx_pbmc4k<span class="sc">$</span>Barcode)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>By the way, arrow tables (and parquet files) have an equivalent data type and R factors stored as type <code>dictionary</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>arrow<span class="sc">::</span><span class="fu">as_arrow_table</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  df</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Table
+5727695 rows x 3 columns
+$i &lt;dictionary&lt;values=string, indices=int32&gt;&gt;
+$j &lt;dictionary&lt;values=string, indices=int16&gt;&gt;
+$x &lt;int32&gt;
+
+See $metadata for additional Schema metadata</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="writing-parquet-files" class="level2">
+<h2 class="anchored" data-anchor-id="writing-parquet-files">Writing parquet files</h2>
+<p>Next, let’s store the <code>df</code> data.frame in a (single) parquet file on the local filesystem.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>parquet_file <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".parquet"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>arrow<span class="sc">::</span><span class="fu">write_parquet</span>(<span class="at">x =</span> df, <span class="at">sink =</span> parquet_file, <span class="at">use_dictionary =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This yields a parquet file that’s 15.6M in size. (For comparison, the original HDF5 file was 12.8M in size, but did contained neither the gene- nor cel (=barcode) identifiers.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(arrow<span class="sc">::</span><span class="fu">read_parquet</span>(parquet_file))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  i               j                      x
+  &lt;fct&gt;           &lt;fct&gt;              &lt;int&gt;
+1 ENSG00000187608 AAACCTGAGAAGGCCT-1     1
+2 ENSG00000116251 AAACCTGAGAAGGCCT-1     4
+3 ENSG00000177674 AAACCTGAGAAGGCCT-1     1
+4 ENSG00000117118 AAACCTGAGAAGGCCT-1     1
+5 ENSG00000179051 AAACCTGAGAAGGCCT-1     1
+6 ENSG00000053371 AAACCTGAGAAGGCCT-1     1</code></pre>
+</div>
+</div>
+</section>
+<section id="a-parquet-file-backed-delayedarray" class="level2">
+<h2 class="anchored" data-anchor-id="a-parquet-file-backed-delayedarray">A parquet-file backed DelayedArray</h2>
+<p>The original <code>tenx_pbmc4k</code> object represents the counts as a <code>sparse DelayedMatrix object of type "integer"</code>, e.g.&nbsp;it copies the data from the HDF5 file into memory only when it is necessary.</p>
+<p>Here, I will reproduce this behavior with my parquet file by implementing a minimal seed for the <code>DelayedArray</code> S4 class.</p>
+<section id="the-parquetarrayseed-s4-class" class="level3">
+<h3 class="anchored" data-anchor-id="the-parquetarrayseed-s4-class">The ParquetArraySeed S4 class</h3>
+<p>Under the hood, each <code>DelayedMatrix</code> object contains a <em>seed</em> object. For example, the <code>tenx_pbmc4k</code> object contains a <code>HDF5ArraySeed</code> seed:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>seed <span class="ot">&lt;-</span> <span class="fu">seed</span>(<span class="fu">counts</span>(tenx_pbmc4k))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seed)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">is_sparse</span>(seed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s create a similar <code>ParquetArraySeed</code> class that inherits from the <code>Array</code> class.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setClass</span>(<span class="st">"ParquetArraySeed"</span>,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">contains =</span> <span class="st">"Array"</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">slots =</span> <span class="fu">c</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">filepath =</span> <span class="st">"character"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">dim =</span> <span class="st">"integer"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">dimnames =</span> <span class="st">"list"</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To power a <code>DelayedArray</code> object, I need to define at least three different S4 methods for my new class:</p>
+<ul>
+<li><code>dim()</code> - returning an integer vector with the dimensions</li>
+<li><code>dimnames()</code> - returning a list of character vectors with the dimension names (if any), e.g.&nbsp;the row and column names of the matrix.</li>
+<li><code>extract_array()</code> - returning an <em>ordinary array</em> for a set of indices (see below), e.g.&nbsp;a subset of the dataset to realize in memory.</li>
+</ul>
+<p>Let’s start with the <code>dim()</code> and <code>dimnames()</code> methods. We will rely on the constructor function (see below) to retrieve the unique row and column names from the parquet files, and then populate the <code>@dimnames</code> and <code>@dim</code> slots for future reference.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"dimnames"</span>, <span class="st">"ParquetArraySeed"</span>, <span class="cf">function</span>(x) x<span class="sc">@</span>dimnames)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"dim"</span>, <span class="st">"ParquetArraySeed"</span>, <span class="cf">function</span>(x) x<span class="sc">@</span>dim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I also create a constructor function, which precalculates the dimensions of the dataset and populates the <code>@dim</code> and <code>@dimnames</code> slots.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>.get_dimnames <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">levels</span>(<span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"i"</span>)[[<span class="dv">1</span>]]),</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">levels</span>(<span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"j"</span>)[[<span class="dv">1</span>]])</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>.get_dim <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath) {</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  n_i <span class="ot">&lt;-</span> <span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"i"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(i) <span class="sc">%&gt;%</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nlevels</span>()</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  n_j <span class="ot">&lt;-</span> <span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"j"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(j) <span class="sc">%&gt;%</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nlevels</span>()</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(n_i, n_j)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>ParquetArraySeed <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath, <span class="at">dim =</span> <span class="cn">NULL</span>, <span class="at">dimnames =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(dimnames)) {</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    dimnames <span class="ot">&lt;-</span> <span class="fu">.get_dimnames</span>(filepath)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(dim)) {</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(dimnames)) {</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>      dim <span class="ot">&lt;-</span> <span class="fu">.get.dim</span>(filepath)</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>      dim <span class="ot">&lt;-</span> <span class="fu">lengths</span>(dimnames)</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">new</span>(<span class="st">"ParquetArraySeed"</span>, <span class="at">filepath =</span> filepath, <span class="at">dim =</span> <span class="fu">.get_dim</span>(filepath), </span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>           <span class="at">dimnames =</span> dimnames)</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(x)</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, I need a function that subsets the dataset to a user-specified set of genes and / or cells. I also need to ensure that passing an empty query returns the full dataset. (In a <a href="../parquetArray/">previous post</a> I used <code>duckdb</code> to queries parquet files; here I am using arrow’s <code>dplyr</code> bindings instead.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>.extract_array_from_ParquetArraySeed <span class="ot">&lt;-</span> <span class="cf">function</span>(x, index) {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(index, <span class="fu">list</span>(<span class="fu">integer</span>(<span class="dv">0</span>), <span class="fu">integer</span>(<span class="dv">0</span>)))) {</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># zero indices =&gt; return empty matrix</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">matrix</span>(0L, <span class="at">nrow =</span> <span class="dv">0</span>, <span class="at">ncol =</span> <span class="dv">0</span>))</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  keep_i <span class="ot">&lt;-</span> <span class="fu">seq.int</span>(<span class="fu">dim</span>(x)[<span class="dv">1</span>])</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  keep_j <span class="ot">&lt;-</span> <span class="fu">seq.int</span>(<span class="fu">dim</span>(x)[<span class="dv">2</span>])</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># to simplify lookups, I convert the arrow dictionary to integer indices </span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  arrow_tbl <span class="ot">&lt;-</span> <span class="fu">read_parquet</span>(x<span class="sc">@</span>filepath, <span class="at">as_data_frame =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  arrow_tbl<span class="sc">$</span>i <span class="ot">&lt;-</span> Array<span class="sc">$</span><span class="fu">create</span>(arrow_tbl<span class="sc">$</span>i)<span class="sc">$</span><span class="fu">indices</span>() <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  arrow_tbl<span class="sc">$</span>j <span class="ot">&lt;-</span> Array<span class="sc">$</span><span class="fu">create</span>(arrow_tbl<span class="sc">$</span>j)<span class="sc">$</span><span class="fu">indices</span>() <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(index[[<span class="dv">1</span>]]) <span class="sc">&amp;</span> <span class="fu">is.null</span>(index[[<span class="dv">2</span>]])) {</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NULL indices =&gt; return the full dataset</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> arrow_tbl</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(index[[<span class="dv">1</span>]]) <span class="sc">&amp;&amp;</span> <span class="fu">is.null</span>(index[[<span class="dv">2</span>]])) {</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># no column index =&gt; return all columns</span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    keep_i <span class="ot">&lt;-</span> index[[<span class="dv">1</span>]]</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> <span class="fu">filter</span>(arrow_tbl, i <span class="sc">%in%</span> keep_i)</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.null</span>(index[[<span class="dv">1</span>]]) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(index[[<span class="dv">2</span>]])) {</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># no row index =&gt; return all rows</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    keep_j <span class="ot">&lt;-</span> index[[<span class="dv">2</span>]]</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> <span class="fu">filter</span>(arrow_tbl, j <span class="sc">%in%</span> keep_j)</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return requested rows and requested columns</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>    keep_i <span class="ot">&lt;-</span>index[[<span class="dv">1</span>]]</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>    keep_j <span class="ot">&lt;-</span> index[[<span class="dv">2</span>]]</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> <span class="fu">filter</span>(arrow_tbl, i <span class="sc">%in%</span> keep_i, j <span class="sc">%in%</span> keep_j)</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot the count data into a matrix</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>  dataset <span class="ot">&lt;-</span> <span class="fu">collect</span>(dataset)</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> 0L,</span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="fu">length</span>(keep_i),</span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="fu">length</span>(keep_j),</span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">dimnames</span>(x)[[<span class="dv">1</span>]][keep_i], </span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">dimnames</span>(x)[[<span class="dv">2</span>]][keep_j])</span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>  matrix_index <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">match</span>(dataset[[<span class="st">"i"</span>]], keep_i),</span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">match</span>(dataset[[<span class="st">"j"</span>]], keep_j)</span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>  m[matrix_index] <span class="ot">&lt;-</span> dataset<span class="sc">$</span>x</span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(m)</span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"extract_array"</span>, <span class="st">"ParquetArraySeed"</span>, </span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a>          .extract_array_from_ParquetArraySeed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="creating-a-first-parquet-backed-delayedarray-object" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-first-parquet-backed-delayedarray-object">Creating a first parquet-backed DelayedArray object</h2>
+<p>With these three methods in place, I can instantiate my first <code>ParquetArraySeed</code> object, which is suitable as input to the <code>DelayedArray</code> constructor from the eponymous R package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>seed <span class="ot">&lt;-</span> <span class="fu">ParquetArraySeed</span>(parquet_file)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>da <span class="ot">&lt;-</span> <span class="fu">DelayedArray</span>(seed)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(da)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "DelayedMatrix"
+attr(,"package")
+[1] "DelayedArray"</code></pre>
+</div>
+</div>
+<p>Next, let’s test different ways of subsetting our DelayedArray and make sure the returned dimensions match those of the requested indices:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>]), <span class="fu">c</span>(10L, 100L)),</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, ]), <span class="fu">c</span>(10L, <span class="fu">ncol</span>(da))),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]), <span class="fu">c</span>(<span class="fu">nrow</span>(da), 10L)),</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[<span class="st">"ENSG00000243485"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>]), <span class="fu">c</span>(1L, 10L)),</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dim</span>(da[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">98</span>), <span class="fu">c</span>(<span class="st">"AACTCAGTCCAACCAA-1"</span>, <span class="st">"AACTCCCAGAAACCTA-1"</span>)]),</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(4L, 2L))</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, let’s retrieve the (raw) counts for the GAPDH gene (<code>ENSG00000111640</code>) and ensure that the same results are retrieved from both objects:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">counts</span>(tenx_pbmc4k[ <span class="st">"ENSG00000111640"</span>, ]), </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  da[ <span class="st">"ENSG00000111640"</span>, tenx_pbmc4k<span class="sc">$</span>Barcode],</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"GAPDH (ParquetArray)"</span>, <span class="at">ylab =</span> <span class="st">"GAPDH (SingleCellExperiment)"</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="384"></p>
+</div>
+</div>
+<section id="the-parquetmatrix-class" class="level3">
+<h3 class="anchored" data-anchor-id="the-parquetmatrix-class">The ParquetMatrix class</h3>
+<p>Now that I have defined a <em>seed</em>, I can add a higher level class to facilitate working with parquet-backed matrices. The <code>ParquetMatrix</code> inherits from the <code>DelayedMatrix</code> class. It will automatically create the necessary <em>seed</em>, so all I have to provide is the path to the parquet file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setClass</span>(<span class="st">"ParquetMatrix"</span>,</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">contains =</span> <span class="st">"DelayedMatrix"</span>,</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">representation</span>(<span class="at">seed =</span> <span class="st">"ParquetArraySeed"</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"DelayedArray"</span>, <span class="st">"ParquetArraySeed"</span>,</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(seed) <span class="fu">new_DelayedArray</span>(seed, <span class="at">Class=</span><span class="st">"ParquetMatrix"</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>ParquetMatrix <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath, ...) {</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>  seed <span class="ot">&lt;-</span> <span class="fu">ParquetArraySeed</span>(<span class="at">filepath =</span> filepath, ...)</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">new</span>(<span class="st">"ParquetMatrix"</span>, <span class="at">seed =</span> seed)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">ParquetMatrix</span>(parquet_file)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(pm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 33694  4340</code></pre>
+</div>
+</div>
+<p>As I learned <a href="../parquetArray/#creating-a-parquet-backed-summarizedexperiment">in a previous post</a> gene and cell annotations can be combined with the <code>ParquetMatrix</code> into a <code>SingleCellExperiment</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>sce <span class="ot">&lt;-</span> <span class="fu">SingleCellExperiment</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">assays =</span> <span class="fu">list</span>(<span class="at">counts =</span> pm),</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">colData =</span> <span class="fu">colData</span>(tenx_pbmc4k)[<span class="fu">match</span>(<span class="fu">colnames</span>(pm), tenx_pbmc4k<span class="sc">$</span>Barcode), ],</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">rowData =</span> <span class="fu">rowData</span>(tenx_pbmc4k)[<span class="fu">row.names</span>(pm), ]</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>sce</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class: SingleCellExperiment 
+dim: 33694 4340 
+metadata(0):
+assays(1): counts
+rownames(33694): ENSG00000243485 ENSG00000237613 ... ENSG00000277475
+  ENSG00000268674
+rowData names(3): ENSEMBL_ID Symbol_TENx Symbol
+colnames(4340): AAACCTGAGAAGGCCT-1 AAACCTGAGACAGACC-1 ...
+  TTTGTCAGTTAAGACA-1 TTTGTCATCCCAAGAT-1
+colData names(11): Sample Barcode ... Individual Date_published
+reducedDimNames(0):
+mainExpName: NULL
+altExpNames(0):</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="comparison-to-hdf5-backed-delayedarrays" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-to-hdf5-backed-delayedarrays">Comparison to HDF5-backed DelayedArrays</h2>
+<p>Let’s finish this example of a minimal implementation of the <code>ParquetMatrix</code> class by comparing its performance with the original hdf5-backed object.</p>
+<section id="reading-the-full-dataset-into-memory" class="level3">
+<h3 class="anchored" data-anchor-id="reading-the-full-dataset-into-memory">Reading the full dataset into memory</h3>
+<p>First, let’s read the full matrix into memory from either our parquet or the original HDF5 files. (We read each file ten times to get an idea of the average time it takes on my system.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">parquet =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(sce)),</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">hdf5 =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(tenx_pbmc4k)),</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span>, <span class="at">unit =</span> <span class="st">"s"</span>)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mb, <span class="at">signif =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: seconds
+    expr  min   lq mean median   uq  max neval
+ parquet 0.54 0.57 0.59   0.58 0.61 0.65    10
+    hdf5 0.81 0.82 0.85   0.83 0.86 0.94    10</code></pre>
+</div>
+</div>
+<p>Not too bad! Loading the count matrix into memory from the parquet file is slightly faster than from the HDF5 file on average.</p>
+</section>
+<section id="subsetting-to-50-random-rows-and-columns" class="level3">
+<h3 class="anchored" data-anchor-id="subsetting-to-50-random-rows-and-columns">Subsetting to 50 random rows and columns</h3>
+<p>Both parquet and HDF5 formats are optimized for column-oriented data. Let’s try to retrieve a random subset of counts to see how they fare:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rows <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(pm), <span class="dv">50</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">ncol</span>(pm), <span class="dv">50</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">parquet =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(sce)[rows, cols]),</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">hdf5 =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(tenx_pbmc4k)[rows, cols]),</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span>, <span class="at">unit =</span> <span class="st">"s"</span>)</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mb, <span class="at">signif =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: seconds
+    expr   min    lq mean median   uq  max neval
+ parquet 0.093 0.095 0.11   0.11 0.12 0.14    10
+    hdf5 0.120 0.120 0.12   0.12 0.12 0.12    10</code></pre>
+</div>
+</div>
+<p>Extracting the 50 x 50 sub-matrix takes roughly the same amount of time with both file types.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Today, I learned a lot about working with arrow objects in R, and got the chance to explore the <code>DelayedArray</code> infrastructure further. I am certain that the methods I wrote can be improved - but even my crude implementation of the <code>ParquetMatrix</code> class seems to be about as performant as the HDF5-backed version when reading from a local file.</p>
+<p>The arrow project supports reading parquet files from cloud storage (S3), something I found challenging (e.g.&nbsp;slow) with HDF5 files. All I need to do is pass an S3 URL as the <code>filepath</code> argument to the <code>ParquetMatrix()</code> function, and (assuming I have set up the right access credentials) I can work with remote files in the same way.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
+<details>
+<summary>
+Session Information
+</summary>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>(<span class="st">"attached"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.3.1 (2023-06-16)
+ os       macOS Ventura 13.5.2
+ system   aarch64, darwin20
+ ui       X11
+ language (EN)
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       America/Los_Angeles
+ date     2023-09-13
+ pandoc   3.1.1 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ ! package              * version date (UTC) lib source
+ P abind                * 1.4-5   2016-07-21 [?] CRAN (R 4.3.0)
+ P arrow                * 13.0.0  2023-08-30 [?] CRAN (R 4.3.0)
+ P Biobase              * 2.60.0  2023-05-08 [?] Bioconductor
+ P BiocGenerics         * 0.46.0  2023-06-04 [?] Bioconductor
+ P DelayedArray         * 0.26.7  2023-07-30 [?] Bioconductor
+ P dplyr                * 1.1.2   2023-04-20 [?] CRAN (R 4.3.0)
+ P fs                   * 1.6.3   2023-07-20 [?] CRAN (R 4.3.0)
+ P GenomeInfoDb         * 1.36.1  2023-07-02 [?] Bioconductor
+ P GenomicRanges        * 1.52.0  2023-05-08 [?] Bioconductor
+ P HDF5Array            * 1.28.1  2023-05-08 [?] Bioconductor
+ P IRanges              * 2.34.1  2023-07-02 [?] Bioconductor
+ P Matrix               * 1.5-4.1 2023-05-18 [?] CRAN (R 4.3.1)
+ P MatrixGenerics       * 1.12.3  2023-07-30 [?] Bioconductor
+ P matrixStats          * 1.0.0   2023-06-02 [?] CRAN (R 4.3.0)
+ P microbenchmark       * 1.4.10  2023-04-28 [?] CRAN (R 4.3.0)
+ P rhdf5                * 2.44.0  2023-05-08 [?] Bioconductor
+ P S4Arrays             * 1.0.6   2023-08-30 [?] Bioconductor
+ P S4Vectors            * 0.38.1  2023-05-08 [?] Bioconductor
+ P SingleCellExperiment * 1.22.0  2023-05-08 [?] Bioconductor
+ P SummarizedExperiment * 1.30.2  2023-06-11 [?] Bioconductor
+ P TENxPBMCData         * 1.18.0  2023-04-27 [?] Bioconductor
+ P tibble               * 3.2.1   2023-03-20 [?] CRAN (R 4.3.0)
+ P tidyr                * 1.3.0   2023-01-24 [?] CRAN (R 4.3.0)
+
+ [1] /Users/sandmann/repositories/blog/renv/library/R-4.3/aarch64-apple-darwin20
+ [2] /Users/sandmann/Library/Caches/org.R-project.R/R/renv/sandbox/R-4.3/aarch64-apple-darwin20/ac5c2659
+
+ P ── Loaded and on-disk path mismatch.
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</details>
+
+
+<!-- -->
+
+</section>
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>By default, the location of the cache is set via <code>ExperimentHub::getExperimentHubOption("CACHE")</code>. For example, on my system the data is located at /Users/sandmann/Library/Caches/org.R-project.R/R/ExperimentHub.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The performance will depend on the network connection. With my home internet connection, I was able to read the full dataset from the parquet file into memory or extract counts for 50 random genes x cells in 1.8 seconds on average.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb40" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Adventures with parquet III: single-cell RNA-seq data and comparison with HDF5-backed arrays"</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2023-09-13"</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [R, TIL, parquet, Bioconductor]</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## tl;dr</span></span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>Today, I learned how to store single-cell RNA-seq data in a parquet file,</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>created the <span class="in">`ParquetMatrix`</span> class to retrieve them, and I started to compare</span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>the performance of reading from parquet and HDF5 files.</span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## Introduction</span></span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Previously</span><span class="co">](../parquetArray/)</span>, </span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>I learned how to create Bioconductor S4 objects based on parquet files. As</span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Aaron Lun pointed out</span><span class="co">](https://support.bioconductor.org/p/9154160/#9154171)</span></span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>Parquet format is similar to 10X Genomics' HDF5 format for sparse matrices. This</span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>motivated me to look into storing single-cell RNA-seq data, which is very sparse</span>
+<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a>as most genes are not detected in any given cell.</span>
+<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a>Today, I am experimenting with coercing data from parquet files into sparse</span>
+<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a>matrices and using them as a back-end for Hervé Pagès's great</span>
+<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">DelayedArray S4 class</span><span class="co">](https://bioconductor.org/packages/release/bioc/html/DelayedArray.html)</span>.</span>
+<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a>I used the awesome</span>
+<span id="cb40-41"><a href="#cb40-41" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">HDF5Array package</span><span class="co">](https://bioconductor.org/packages/release/bioc/html/HDF5Array.html)</span></span>
+<span id="cb40-42"><a href="#cb40-42" aria-hidden="true" tabindex="-1"></a>to guide me, and learned more about arrow's <span class="in">`dictionary`</span> type.</span>
+<span id="cb40-43"><a href="#cb40-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-44"><a href="#cb40-44" aria-hidden="true" tabindex="-1"></a>In the end, I was positively surprised that my crude <span class="in">`ParquetMatrix`</span> class </span>
+<span id="cb40-45"><a href="#cb40-45" aria-hidden="true" tabindex="-1"></a>was able to read either the full data matrix or a random subset of counts from</span>
+<span id="cb40-46"><a href="#cb40-46" aria-hidden="true" tabindex="-1"></a>a parquet file even a little faster than from HDF5-backed original dataset.</span>
+<span id="cb40-47"><a href="#cb40-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-48"><a href="#cb40-48" aria-hidden="true" tabindex="-1"></a>As a bonus, <span class="in">`ParquetMatrix`</span> objects can be instantiated from local parquet files</span>
+<span id="cb40-49"><a href="#cb40-49" aria-hidden="true" tabindex="-1"></a>or from cloud storage (S3).</span>
+<span id="cb40-50"><a href="#cb40-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-53"><a href="#cb40-53" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-54"><a href="#cb40-54" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb40-55"><a href="#cb40-55" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb40-56"><a href="#cb40-56" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb40-57"><a href="#cb40-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"arrow"</span>)</span>
+<span id="cb40-58"><a href="#cb40-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"dplyr"</span>)</span>
+<span id="cb40-59"><a href="#cb40-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"fs"</span>)</span>
+<span id="cb40-60"><a href="#cb40-60" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"microbenchmark"</span>)</span>
+<span id="cb40-61"><a href="#cb40-61" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"rhdf5"</span>)</span>
+<span id="cb40-62"><a href="#cb40-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"tibble"</span>)</span>
+<span id="cb40-63"><a href="#cb40-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"tidyr"</span>)</span>
+<span id="cb40-64"><a href="#cb40-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"DelayedArray"</span>)</span>
+<span id="cb40-65"><a href="#cb40-65" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"Matrix"</span>)</span>
+<span id="cb40-66"><a href="#cb40-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"S4Vectors"</span>)</span>
+<span id="cb40-67"><a href="#cb40-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"SingleCellExperiment"</span>)</span>
+<span id="cb40-68"><a href="#cb40-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(<span class="st">"TENxPBMCData"</span>)</span>
+<span id="cb40-69"><a href="#cb40-69" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb40-70"><a href="#cb40-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-71"><a href="#cb40-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-72"><a href="#cb40-72" aria-hidden="true" tabindex="-1"></a><span class="fu">## Retrieving an example Single-cell RNA-seq dataset</span></span>
+<span id="cb40-73"><a href="#cb40-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-74"><a href="#cb40-74" aria-hidden="true" tabindex="-1"></a>As an example dataset, I am using single-cell RNA-seq included as the <span class="in">`pbmc4k`</span> </span>
+<span id="cb40-75"><a href="#cb40-75" aria-hidden="true" tabindex="-1"></a>dataset in the </span>
+<span id="cb40-76"><a href="#cb40-76" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">TENxPBMCData Bioconductor package</span><span class="co">](https://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html)</span>, with counts from </span>
+<span id="cb40-77"><a href="#cb40-77" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Peripheral Blood Mononuclear Cells (PBMCs)</span><span class="co">](https://www.ncbi.nlm.nih.gov/books/NBK500157/#top)</span></span>
+<span id="cb40-78"><a href="#cb40-78" aria-hidden="true" tabindex="-1"></a>collected from a single donor. </span>
+<span id="cb40-79"><a href="#cb40-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-80"><a href="#cb40-80" aria-hidden="true" tabindex="-1"></a>The <span class="in">`TENxPBMCData()`</span> function retrieves them from </span>
+<span id="cb40-81"><a href="#cb40-81" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">ExperimentHub</span><span class="co">](https://bioconductor.org/packages/release/bioc/html/ExperimentHub.html)</span></span>
+<span id="cb40-82"><a href="#cb40-82" aria-hidden="true" tabindex="-1"></a>and caches them on the local system the first time the object is loaded <span class="ot">[^1]</span>.</span>
+<span id="cb40-83"><a href="#cb40-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-84"><a href="#cb40-84" aria-hidden="true" tabindex="-1"></a>It downloads three files:</span>
+<span id="cb40-85"><a href="#cb40-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-86"><a href="#cb40-86" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>An HDF5 file with counts (dense assay)</span>
+<span id="cb40-87"><a href="#cb40-87" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>An RDS file with row (= gene) annotations</span>
+<span id="cb40-88"><a href="#cb40-88" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>An RDS file with column (= cell) annotations</span>
+<span id="cb40-89"><a href="#cb40-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-92"><a href="#cb40-92" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-93"><a href="#cb40-93" aria-hidden="true" tabindex="-1"></a>tenx_pbmc4k <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(<span class="fu">TENxPBMCData</span>(<span class="at">dataset =</span> <span class="st">"pbmc4k"</span>))</span>
+<span id="cb40-94"><a href="#cb40-94" aria-hidden="true" tabindex="-1"></a>tenx_pbmc4k</span>
+<span id="cb40-95"><a href="#cb40-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-96"><a href="#cb40-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-97"><a href="#cb40-97" aria-hidden="true" tabindex="-1"></a>The <span class="in">`TENxPBMCData()`</span> function combines counts with annotations, and returns</span>
+<span id="cb40-98"><a href="#cb40-98" aria-hidden="true" tabindex="-1"></a>a <span class="in">`SingleCellExperiment`</span> with a sparse HDF5-backed <span class="in">`DelayedMatrix`</span> in</span>
+<span id="cb40-99"><a href="#cb40-99" aria-hidden="true" tabindex="-1"></a>the <span class="in">`counts`</span> slot and gene and cell annotations as <span class="in">`rowData`</span> and <span class="in">`colData`</span></span>
+<span id="cb40-100"><a href="#cb40-100" aria-hidden="true" tabindex="-1"></a>DataFrames, respectively. It contains counts for <span class="in">`r nrow(tenx_pbmc4k)`</span> genes</span>
+<span id="cb40-101"><a href="#cb40-101" aria-hidden="true" tabindex="-1"></a>in <span class="in">`r ncol(tenx_pbmc4k)`</span> cells. </span>
+<span id="cb40-102"><a href="#cb40-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-103"><a href="#cb40-103" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>By default, the location of the cache is set via </span>
+<span id="cb40-104"><a href="#cb40-104" aria-hidden="true" tabindex="-1"></a><span class="in">`ExperimentHub::getExperimentHubOption("CACHE")`</span>. For example, on my system the</span>
+<span id="cb40-105"><a href="#cb40-105" aria-hidden="true" tabindex="-1"></a>data is located at <span class="in">`r ExperimentHub::getExperimentHubOption("CACHE")`</span>.</span>
+<span id="cb40-106"><a href="#cb40-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-107"><a href="#cb40-107" aria-hidden="true" tabindex="-1"></a>The counts are retrieved from the HDF5 file on demand, and the full matrix</span>
+<span id="cb40-108"><a href="#cb40-108" aria-hidden="true" tabindex="-1"></a>only uses <span class="in">`r format(object.size(counts(tenx_pbmc4k)), units = "MB")`</span> of</span>
+<span id="cb40-109"><a href="#cb40-109" aria-hidden="true" tabindex="-1"></a>memory.</span>
+<span id="cb40-110"><a href="#cb40-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-113"><a href="#cb40-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-114"><a href="#cb40-114" aria-hidden="true" tabindex="-1"></a><span class="fu">counts</span>(tenx_pbmc4k)[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]</span>
+<span id="cb40-115"><a href="#cb40-115" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-116"><a href="#cb40-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-117"><a href="#cb40-117" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb40-118"><a href="#cb40-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-119"><a href="#cb40-119" aria-hidden="true" tabindex="-1"></a>The underlying HDF5 file only contains the gene x cell count matrix.</span>
+<span id="cb40-120"><a href="#cb40-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-123"><a href="#cb40-123" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-124"><a href="#cb40-124" aria-hidden="true" tabindex="-1"></a>rhdf5<span class="sc">::</span><span class="fu">h5ls</span>(<span class="fu">path</span>(<span class="fu">counts</span>(tenx_pbmc4k)))</span>
+<span id="cb40-125"><a href="#cb40-125" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-126"><a href="#cb40-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-127"><a href="#cb40-127" aria-hidden="true" tabindex="-1"></a>The </span>
+<span id="cb40-128"><a href="#cb40-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-129"><a href="#cb40-129" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb40-130"><a href="#cb40-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-131"><a href="#cb40-131" aria-hidden="true" tabindex="-1"></a>Like most single-cell RNA-seq datasets, the data is very sparse:</span>
+<span id="cb40-132"><a href="#cb40-132" aria-hidden="true" tabindex="-1"></a>For example, <span class="in">`r round(mean(counts(tenx_pbmc4k[, 1:4]) == 0) * 100, 1)`</span>% of the</span>
+<span id="cb40-133"><a href="#cb40-133" aria-hidden="true" tabindex="-1"></a>genes in the first four samples have zero counts. </span>
+<span id="cb40-134"><a href="#cb40-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-135"><a href="#cb40-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## Handling sparse count data in memory</span></span>
+<span id="cb40-136"><a href="#cb40-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-137"><a href="#cb40-137" aria-hidden="true" tabindex="-1"></a>Let's load all counts into memory as a sparse <span class="in">`dgCMatrix`</span> defined in the</span>
+<span id="cb40-138"><a href="#cb40-138" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Matrix R package</span><span class="co">](https://cran.r-project.org/package=Matrix)</span>.</span>
+<span id="cb40-139"><a href="#cb40-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-142"><a href="#cb40-142" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-143"><a href="#cb40-143" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">as</span>(<span class="fu">counts</span>(tenx_pbmc4k), <span class="st">"dgCMatrix"</span>)</span>
+<span id="cb40-144"><a href="#cb40-144" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(m)</span>
+<span id="cb40-145"><a href="#cb40-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-146"><a href="#cb40-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-147"><a href="#cb40-147" aria-hidden="true" tabindex="-1"></a>Because only non-zero counts need to be represented, the sparse <span class="in">`dgCMatrix`</span></span>
+<span id="cb40-148"><a href="#cb40-148" aria-hidden="true" tabindex="-1"></a>matrix <span class="in">`m`</span> is still relatively small, occupying </span>
+<span id="cb40-149"><a href="#cb40-149" aria-hidden="true" tabindex="-1"></a><span class="in">`r format(object.size(m), units = "MB")`</span> of memory.</span>
+<span id="cb40-150"><a href="#cb40-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-151"><a href="#cb40-151" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb40-152"><a href="#cb40-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-153"><a href="#cb40-153" aria-hidden="true" tabindex="-1"></a>Internally, a <span class="in">`dgCMatrix`</span> is represented in the (sorted) </span>
+<span id="cb40-154"><a href="#cb40-154" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">compressed sparse column format (CSC)</span><span class="co">](https://en.wikipedia.org/wiki/Sparse_matrix)</span>.</span>
+<span id="cb40-155"><a href="#cb40-155" aria-hidden="true" tabindex="-1"></a>Each non-zero value is stored as three numbers:</span>
+<span id="cb40-156"><a href="#cb40-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-157"><a href="#cb40-157" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`i`</span>: the row index</span>
+<span id="cb40-158"><a href="#cb40-158" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`j`</span>: the column pointer</span>
+<span id="cb40-159"><a href="#cb40-159" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`x`</span>: the value (= count)</span>
+<span id="cb40-160"><a href="#cb40-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-161"><a href="#cb40-161" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb40-162"><a href="#cb40-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-163"><a href="#cb40-163" aria-hidden="true" tabindex="-1"></a>We can extract this internal representation into a tall, thin data.frame with</span>
+<span id="cb40-164"><a href="#cb40-164" aria-hidden="true" tabindex="-1"></a>the <span class="in">`Matrix::summary()`</span> function. </span>
+<span id="cb40-165"><a href="#cb40-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-168"><a href="#cb40-168" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-169"><a href="#cb40-169" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(</span>
+<span id="cb40-170"><a href="#cb40-170" aria-hidden="true" tabindex="-1"></a>  Matrix<span class="sc">::</span><span class="fu">summary</span>(</span>
+<span id="cb40-171"><a href="#cb40-171" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as</span>(<span class="fu">counts</span>(tenx_pbmc4k), <span class="st">"dgCMatrix"</span>)</span>
+<span id="cb40-172"><a href="#cb40-172" aria-hidden="true" tabindex="-1"></a>  ), <span class="at">row.names =</span> <span class="cn">NULL</span></span>
+<span id="cb40-173"><a href="#cb40-173" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-174"><a href="#cb40-174" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>x <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(df<span class="sc">$</span>x)</span>
+<span id="cb40-175"><a href="#cb40-175" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-176"><a href="#cb40-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-177"><a href="#cb40-177" aria-hidden="true" tabindex="-1"></a>This data.frame _only_ contains non-zero values, e.g. <span class="in">`r length(unique(df$i))`</span> </span>
+<span id="cb40-178"><a href="#cb40-178" aria-hidden="true" tabindex="-1"></a>of the original <span class="in">`r nrow(tenx_pbmc4k)`</span> genes and <span class="in">`r length(unique(df$j))`</span> </span>
+<span id="cb40-179"><a href="#cb40-179" aria-hidden="true" tabindex="-1"></a>of the original <span class="in">`r ncol(tenx_pbmc4k)`</span> cells. No counts were detected for the</span>
+<span id="cb40-180"><a href="#cb40-180" aria-hidden="true" tabindex="-1"></a>remaining (e.g. missing) genes and cells. </span>
+<span id="cb40-181"><a href="#cb40-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-182"><a href="#cb40-182" aria-hidden="true" tabindex="-1"></a>The data.frame requires <span class="in">`r format(object.size(df), units = "MB")`</span> of memory.</span>
+<span id="cb40-183"><a href="#cb40-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-184"><a href="#cb40-184" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb40-185"><a href="#cb40-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-186"><a href="#cb40-186" aria-hidden="true" tabindex="-1"></a>Instead of a regular data.frame we can also work with <span class="in">`arrow::Table`</span> objects.</span>
+<span id="cb40-187"><a href="#cb40-187" aria-hidden="true" tabindex="-1"></a>Here, I explicitly create a <span class="in">`Table`</span> with three 32 bit integers. </span>
+<span id="cb40-188"><a href="#cb40-188" aria-hidden="true" tabindex="-1"></a>(Because single-cell RNA-seq counts are always positive and we have a good idea</span>
+<span id="cb40-189"><a href="#cb40-189" aria-hidden="true" tabindex="-1"></a>of their upper bound, I am using an unsigned 32 bit integer type for the <span class="in">`x`</span></span>
+<span id="cb40-190"><a href="#cb40-190" aria-hidden="true" tabindex="-1"></a>column, allowing values between 0 and 4,294,967,295.)</span>
+<span id="cb40-191"><a href="#cb40-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-192"><a href="#cb40-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-195"><a href="#cb40-195" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-196"><a href="#cb40-196" aria-hidden="true" tabindex="-1"></a>a_tbl <span class="ot">&lt;-</span> arrow<span class="sc">::</span><span class="fu">as_arrow_table</span>(</span>
+<span id="cb40-197"><a href="#cb40-197" aria-hidden="true" tabindex="-1"></a>  df, </span>
+<span id="cb40-198"><a href="#cb40-198" aria-hidden="true" tabindex="-1"></a>  <span class="at">schema =</span> arrow<span class="sc">::</span><span class="fu">schema</span>(</span>
+<span id="cb40-199"><a href="#cb40-199" aria-hidden="true" tabindex="-1"></a>    <span class="at">i =</span> <span class="fu">int32</span>(),</span>
+<span id="cb40-200"><a href="#cb40-200" aria-hidden="true" tabindex="-1"></a>    <span class="at">j =</span> <span class="fu">int32</span>(),</span>
+<span id="cb40-201"><a href="#cb40-201" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="fu">uint32</span>()</span>
+<span id="cb40-202"><a href="#cb40-202" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb40-203"><a href="#cb40-203" aria-hidden="true" tabindex="-1"></a>a_tbl</span>
+<span id="cb40-204"><a href="#cb40-204" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-205"><a href="#cb40-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-206"><a href="#cb40-206" aria-hidden="true" tabindex="-1"></a>Creating an <span class="in">`arrow::Table`</span> object appears to consume little additional memory</span>
+<span id="cb40-207"><a href="#cb40-207" aria-hidden="true" tabindex="-1"></a>(<span class="in">`r format(object.size(a_tbl), units = "KB")`</span>) as it is managed by <span class="in">`arrow`</span> and</span>
+<span id="cb40-208"><a href="#cb40-208" aria-hidden="true" tabindex="-1"></a>not R. </span>
+<span id="cb40-209"><a href="#cb40-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-210"><a href="#cb40-210" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb40-211"><a href="#cb40-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-212"><a href="#cb40-212" aria-hidden="true" tabindex="-1"></a>Alternatively, I can also encode the row-names (= gene identifiers) and</span>
+<span id="cb40-213"><a href="#cb40-213" aria-hidden="true" tabindex="-1"></a>column-names (= cell barcodes) in the data.frame. Because each of the </span>
+<span id="cb40-214"><a href="#cb40-214" aria-hidden="true" tabindex="-1"></a>identifiers appears multiple times, they are best represented as factors. </span>
+<span id="cb40-215"><a href="#cb40-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-216"><a href="#cb40-216" aria-hidden="true" tabindex="-1"></a>By including _all_ of the gene- and barcode identifiers as factor levels,</span>
+<span id="cb40-217"><a href="#cb40-217" aria-hidden="true" tabindex="-1"></a>including those genes / barcodes that were not detected (e.g. had a total</span>
+<span id="cb40-218"><a href="#cb40-218" aria-hidden="true" tabindex="-1"></a>of zero counts), I retain information about them as well.</span>
+<span id="cb40-219"><a href="#cb40-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-222"><a href="#cb40-222" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-223"><a href="#cb40-223" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>i <span class="ot">&lt;-</span> <span class="fu">factor</span>(<span class="fu">row.names</span>(tenx_pbmc4k)[df<span class="sc">$</span>i], <span class="at">levels =</span> <span class="fu">row.names</span>(tenx_pbmc4k))</span>
+<span id="cb40-224"><a href="#cb40-224" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>j <span class="ot">=</span> <span class="fu">factor</span>(tenx_pbmc4k<span class="sc">$</span>Barcode[df<span class="sc">$</span>j], <span class="at">levels =</span> tenx_pbmc4k<span class="sc">$</span>Barcode)</span>
+<span id="cb40-225"><a href="#cb40-225" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-226"><a href="#cb40-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-227"><a href="#cb40-227" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb40-228"><a href="#cb40-228" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-229"><a href="#cb40-229" aria-hidden="true" tabindex="-1"></a>By the way, arrow tables (and parquet files) have an equivalent data type</span>
+<span id="cb40-230"><a href="#cb40-230" aria-hidden="true" tabindex="-1"></a>and R factors stored as type <span class="in">`dictionary`</span>.</span>
+<span id="cb40-231"><a href="#cb40-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-234"><a href="#cb40-234" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-235"><a href="#cb40-235" aria-hidden="true" tabindex="-1"></a>arrow<span class="sc">::</span><span class="fu">as_arrow_table</span>(</span>
+<span id="cb40-236"><a href="#cb40-236" aria-hidden="true" tabindex="-1"></a>  df</span>
+<span id="cb40-237"><a href="#cb40-237" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-238"><a href="#cb40-238" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-239"><a href="#cb40-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-240"><a href="#cb40-240" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb40-241"><a href="#cb40-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-242"><a href="#cb40-242" aria-hidden="true" tabindex="-1"></a><span class="fu">## Writing parquet files</span></span>
+<span id="cb40-243"><a href="#cb40-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-244"><a href="#cb40-244" aria-hidden="true" tabindex="-1"></a>Next, let's store the <span class="in">`df`</span> data.frame in a (single) parquet file on the</span>
+<span id="cb40-245"><a href="#cb40-245" aria-hidden="true" tabindex="-1"></a>local filesystem.</span>
+<span id="cb40-246"><a href="#cb40-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-249"><a href="#cb40-249" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-250"><a href="#cb40-250" aria-hidden="true" tabindex="-1"></a>parquet_file <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".parquet"</span>)</span>
+<span id="cb40-251"><a href="#cb40-251" aria-hidden="true" tabindex="-1"></a>arrow<span class="sc">::</span><span class="fu">write_parquet</span>(<span class="at">x =</span> df, <span class="at">sink =</span> parquet_file, <span class="at">use_dictionary =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb40-252"><a href="#cb40-252" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-253"><a href="#cb40-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-254"><a href="#cb40-254" aria-hidden="true" tabindex="-1"></a>This yields a parquet file that's <span class="in">`r format(fs::file_info(parquet_file)$size)`</span></span>
+<span id="cb40-255"><a href="#cb40-255" aria-hidden="true" tabindex="-1"></a>in size. (For comparison, the original HDF5 file was</span>
+<span id="cb40-256"><a href="#cb40-256" aria-hidden="true" tabindex="-1"></a><span class="in">`r format(fs::file_info(path(counts(tenx_pbmc4k)))$size)`</span> in size, but did</span>
+<span id="cb40-257"><a href="#cb40-257" aria-hidden="true" tabindex="-1"></a>contained neither the gene- nor cel (=barcode) identifiers.)</span>
+<span id="cb40-258"><a href="#cb40-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-261"><a href="#cb40-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-262"><a href="#cb40-262" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(arrow<span class="sc">::</span><span class="fu">read_parquet</span>(parquet_file))</span>
+<span id="cb40-263"><a href="#cb40-263" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-264"><a href="#cb40-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-265"><a href="#cb40-265" aria-hidden="true" tabindex="-1"></a><span class="fu">## A parquet-file backed DelayedArray</span></span>
+<span id="cb40-266"><a href="#cb40-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-267"><a href="#cb40-267" aria-hidden="true" tabindex="-1"></a>The original <span class="in">`tenx_pbmc4k`</span> object represents the counts as a </span>
+<span id="cb40-268"><a href="#cb40-268" aria-hidden="true" tabindex="-1"></a><span class="in">`sparse DelayedMatrix object of type "integer"`</span>, e.g. it copies the data from</span>
+<span id="cb40-269"><a href="#cb40-269" aria-hidden="true" tabindex="-1"></a>the HDF5 file into memory only when it is necessary.</span>
+<span id="cb40-270"><a href="#cb40-270" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-271"><a href="#cb40-271" aria-hidden="true" tabindex="-1"></a>Here, I will reproduce this behavior with my parquet file by implementing a</span>
+<span id="cb40-272"><a href="#cb40-272" aria-hidden="true" tabindex="-1"></a>minimal seed for the <span class="in">`DelayedArray`</span> S4 class.</span>
+<span id="cb40-273"><a href="#cb40-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-274"><a href="#cb40-274" aria-hidden="true" tabindex="-1"></a><span class="fu">### The ParquetArraySeed S4 class </span></span>
+<span id="cb40-275"><a href="#cb40-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-276"><a href="#cb40-276" aria-hidden="true" tabindex="-1"></a>Under the hood, each <span class="in">`DelayedMatrix`</span> object contains a _seed_ object. For</span>
+<span id="cb40-277"><a href="#cb40-277" aria-hidden="true" tabindex="-1"></a>example, the <span class="in">`tenx_pbmc4k`</span> object contains a <span class="in">`HDF5ArraySeed`</span> seed:</span>
+<span id="cb40-278"><a href="#cb40-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-279"><a href="#cb40-279" aria-hidden="true" tabindex="-1"></a><span class="in">```{r eval=FALSE}</span></span>
+<span id="cb40-280"><a href="#cb40-280" aria-hidden="true" tabindex="-1"></a>seed <span class="ot">&lt;-</span> <span class="fu">seed</span>(<span class="fu">counts</span>(tenx_pbmc4k))</span>
+<span id="cb40-281"><a href="#cb40-281" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seed)</span>
+<span id="cb40-282"><a href="#cb40-282" aria-hidden="true" tabindex="-1"></a><span class="fu">is_sparse</span>(seed)</span>
+<span id="cb40-283"><a href="#cb40-283" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-284"><a href="#cb40-284" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-285"><a href="#cb40-285" aria-hidden="true" tabindex="-1"></a>Let's create a similar <span class="in">`ParquetArraySeed`</span> class that inherits from the <span class="in">`Array`</span></span>
+<span id="cb40-286"><a href="#cb40-286" aria-hidden="true" tabindex="-1"></a>class.</span>
+<span id="cb40-287"><a href="#cb40-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-288"><a href="#cb40-288" aria-hidden="true" tabindex="-1"></a><span class="in">```{r seed-class-definition}</span></span>
+<span id="cb40-289"><a href="#cb40-289" aria-hidden="true" tabindex="-1"></a><span class="fu">setClass</span>(<span class="st">"ParquetArraySeed"</span>,</span>
+<span id="cb40-290"><a href="#cb40-290" aria-hidden="true" tabindex="-1"></a>    <span class="at">contains =</span> <span class="st">"Array"</span>,</span>
+<span id="cb40-291"><a href="#cb40-291" aria-hidden="true" tabindex="-1"></a>    <span class="at">slots =</span> <span class="fu">c</span>(</span>
+<span id="cb40-292"><a href="#cb40-292" aria-hidden="true" tabindex="-1"></a>        <span class="at">filepath =</span> <span class="st">"character"</span>,</span>
+<span id="cb40-293"><a href="#cb40-293" aria-hidden="true" tabindex="-1"></a>        <span class="at">dim =</span> <span class="st">"integer"</span>,</span>
+<span id="cb40-294"><a href="#cb40-294" aria-hidden="true" tabindex="-1"></a>        <span class="at">dimnames =</span> <span class="st">"list"</span></span>
+<span id="cb40-295"><a href="#cb40-295" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb40-296"><a href="#cb40-296" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-297"><a href="#cb40-297" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-298"><a href="#cb40-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-299"><a href="#cb40-299" aria-hidden="true" tabindex="-1"></a>To power a <span class="in">`DelayedArray`</span> object, I need to define at least three different</span>
+<span id="cb40-300"><a href="#cb40-300" aria-hidden="true" tabindex="-1"></a>S4 methods for my new class:</span>
+<span id="cb40-301"><a href="#cb40-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-302"><a href="#cb40-302" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`dim()`</span> - returning an integer vector with the dimensions</span>
+<span id="cb40-303"><a href="#cb40-303" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`dimnames()`</span> - returning a list of character vectors with the dimension names</span>
+<span id="cb40-304"><a href="#cb40-304" aria-hidden="true" tabindex="-1"></a>  (if any), e.g. the row and column names of the matrix.</span>
+<span id="cb40-305"><a href="#cb40-305" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`extract_array()`</span> - returning an _ordinary array_ for a set of indices (see</span>
+<span id="cb40-306"><a href="#cb40-306" aria-hidden="true" tabindex="-1"></a>  below), e.g. a subset of the dataset to realize in memory.</span>
+<span id="cb40-307"><a href="#cb40-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-308"><a href="#cb40-308" aria-hidden="true" tabindex="-1"></a>Let's start with the <span class="in">`dim()`</span> and <span class="in">`dimnames()`</span> methods. We will rely on the</span>
+<span id="cb40-309"><a href="#cb40-309" aria-hidden="true" tabindex="-1"></a>constructor function (see below) to retrieve the unique row and column names</span>
+<span id="cb40-310"><a href="#cb40-310" aria-hidden="true" tabindex="-1"></a>from the parquet files, and then populate the <span class="in">`@dimnames`</span> and <span class="in">`@dim`</span> slots</span>
+<span id="cb40-311"><a href="#cb40-311" aria-hidden="true" tabindex="-1"></a>for future reference.</span>
+<span id="cb40-312"><a href="#cb40-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-315"><a href="#cb40-315" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-316"><a href="#cb40-316" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"dimnames"</span>, <span class="st">"ParquetArraySeed"</span>, <span class="cf">function</span>(x) x<span class="sc">@</span>dimnames)</span>
+<span id="cb40-317"><a href="#cb40-317" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"dim"</span>, <span class="st">"ParquetArraySeed"</span>, <span class="cf">function</span>(x) x<span class="sc">@</span>dim)</span>
+<span id="cb40-318"><a href="#cb40-318" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-319"><a href="#cb40-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-320"><a href="#cb40-320" aria-hidden="true" tabindex="-1"></a>I also create a constructor function, which precalculates the dimensions of the</span>
+<span id="cb40-321"><a href="#cb40-321" aria-hidden="true" tabindex="-1"></a>dataset and populates the <span class="in">`@dim`</span> and <span class="in">`@dimnames`</span> slots.</span>
+<span id="cb40-322"><a href="#cb40-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-325"><a href="#cb40-325" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-326"><a href="#cb40-326" aria-hidden="true" tabindex="-1"></a>.get_dimnames <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath) {</span>
+<span id="cb40-327"><a href="#cb40-327" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb40-328"><a href="#cb40-328" aria-hidden="true" tabindex="-1"></a>    <span class="fu">levels</span>(<span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"i"</span>)[[<span class="dv">1</span>]]),</span>
+<span id="cb40-329"><a href="#cb40-329" aria-hidden="true" tabindex="-1"></a>    <span class="fu">levels</span>(<span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"j"</span>)[[<span class="dv">1</span>]])</span>
+<span id="cb40-330"><a href="#cb40-330" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb40-331"><a href="#cb40-331" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-332"><a href="#cb40-332" aria-hidden="true" tabindex="-1"></a>.get_dim <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath) {</span>
+<span id="cb40-333"><a href="#cb40-333" aria-hidden="true" tabindex="-1"></a>  n_i <span class="ot">&lt;-</span> <span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"i"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-334"><a href="#cb40-334" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb40-335"><a href="#cb40-335" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(i) <span class="sc">%&gt;%</span></span>
+<span id="cb40-336"><a href="#cb40-336" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nlevels</span>()</span>
+<span id="cb40-337"><a href="#cb40-337" aria-hidden="true" tabindex="-1"></a>  n_j <span class="ot">&lt;-</span> <span class="fu">read_parquet</span>(filepath, <span class="at">col_select =</span> <span class="st">"j"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-338"><a href="#cb40-338" aria-hidden="true" tabindex="-1"></a>    <span class="fu">collect</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb40-339"><a href="#cb40-339" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(j) <span class="sc">%&gt;%</span></span>
+<span id="cb40-340"><a href="#cb40-340" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nlevels</span>()</span>
+<span id="cb40-341"><a href="#cb40-341" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(n_i, n_j)</span>
+<span id="cb40-342"><a href="#cb40-342" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-343"><a href="#cb40-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-344"><a href="#cb40-344" aria-hidden="true" tabindex="-1"></a>ParquetArraySeed <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath, <span class="at">dim =</span> <span class="cn">NULL</span>, <span class="at">dimnames =</span> <span class="cn">NULL</span>) {</span>
+<span id="cb40-345"><a href="#cb40-345" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(dimnames)) {</span>
+<span id="cb40-346"><a href="#cb40-346" aria-hidden="true" tabindex="-1"></a>    dimnames <span class="ot">&lt;-</span> <span class="fu">.get_dimnames</span>(filepath)</span>
+<span id="cb40-347"><a href="#cb40-347" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb40-348"><a href="#cb40-348" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(dim)) {</span>
+<span id="cb40-349"><a href="#cb40-349" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(dimnames)) {</span>
+<span id="cb40-350"><a href="#cb40-350" aria-hidden="true" tabindex="-1"></a>      dim <span class="ot">&lt;-</span> <span class="fu">.get.dim</span>(filepath)</span>
+<span id="cb40-351"><a href="#cb40-351" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-352"><a href="#cb40-352" aria-hidden="true" tabindex="-1"></a>      dim <span class="ot">&lt;-</span> <span class="fu">lengths</span>(dimnames)</span>
+<span id="cb40-353"><a href="#cb40-353" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-354"><a href="#cb40-354" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb40-355"><a href="#cb40-355" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">new</span>(<span class="st">"ParquetArraySeed"</span>, <span class="at">filepath =</span> filepath, <span class="at">dim =</span> <span class="fu">.get_dim</span>(filepath), </span>
+<span id="cb40-356"><a href="#cb40-356" aria-hidden="true" tabindex="-1"></a>           <span class="at">dimnames =</span> dimnames)</span>
+<span id="cb40-357"><a href="#cb40-357" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(x)</span>
+<span id="cb40-358"><a href="#cb40-358" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-359"><a href="#cb40-359" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-360"><a href="#cb40-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-361"><a href="#cb40-361" aria-hidden="true" tabindex="-1"></a>Finally, I need a function that subsets the dataset to a user-specified set of</span>
+<span id="cb40-362"><a href="#cb40-362" aria-hidden="true" tabindex="-1"></a>genes and / or cells. I also need to ensure that passing an empty query returns</span>
+<span id="cb40-363"><a href="#cb40-363" aria-hidden="true" tabindex="-1"></a>the full dataset. (In a <span class="co">[</span><span class="ot">previous post</span><span class="co">](../parquetArray/)</span> I used <span class="in">`duckdb`</span> to</span>
+<span id="cb40-364"><a href="#cb40-364" aria-hidden="true" tabindex="-1"></a>queries parquet files; here I am using arrow's <span class="in">`dplyr`</span> bindings instead.)</span>
+<span id="cb40-365"><a href="#cb40-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-368"><a href="#cb40-368" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-369"><a href="#cb40-369" aria-hidden="true" tabindex="-1"></a>.extract_array_from_ParquetArraySeed <span class="ot">&lt;-</span> <span class="cf">function</span>(x, index) {</span>
+<span id="cb40-370"><a href="#cb40-370" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">identical</span>(index, <span class="fu">list</span>(<span class="fu">integer</span>(<span class="dv">0</span>), <span class="fu">integer</span>(<span class="dv">0</span>)))) {</span>
+<span id="cb40-371"><a href="#cb40-371" aria-hidden="true" tabindex="-1"></a>    <span class="co"># zero indices =&gt; return empty matrix</span></span>
+<span id="cb40-372"><a href="#cb40-372" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">matrix</span>(0L, <span class="at">nrow =</span> <span class="dv">0</span>, <span class="at">ncol =</span> <span class="dv">0</span>))</span>
+<span id="cb40-373"><a href="#cb40-373" aria-hidden="true" tabindex="-1"></a>  } </span>
+<span id="cb40-374"><a href="#cb40-374" aria-hidden="true" tabindex="-1"></a>  keep_i <span class="ot">&lt;-</span> <span class="fu">seq.int</span>(<span class="fu">dim</span>(x)[<span class="dv">1</span>])</span>
+<span id="cb40-375"><a href="#cb40-375" aria-hidden="true" tabindex="-1"></a>  keep_j <span class="ot">&lt;-</span> <span class="fu">seq.int</span>(<span class="fu">dim</span>(x)[<span class="dv">2</span>])</span>
+<span id="cb40-376"><a href="#cb40-376" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-377"><a href="#cb40-377" aria-hidden="true" tabindex="-1"></a>  <span class="co"># to simplify lookups, I convert the arrow dictionary to integer indices </span></span>
+<span id="cb40-378"><a href="#cb40-378" aria-hidden="true" tabindex="-1"></a>  arrow_tbl <span class="ot">&lt;-</span> <span class="fu">read_parquet</span>(x<span class="sc">@</span>filepath, <span class="at">as_data_frame =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb40-379"><a href="#cb40-379" aria-hidden="true" tabindex="-1"></a>  arrow_tbl<span class="sc">$</span>i <span class="ot">&lt;-</span> Array<span class="sc">$</span><span class="fu">create</span>(arrow_tbl<span class="sc">$</span>i)<span class="sc">$</span><span class="fu">indices</span>() <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb40-380"><a href="#cb40-380" aria-hidden="true" tabindex="-1"></a>  arrow_tbl<span class="sc">$</span>j <span class="ot">&lt;-</span> Array<span class="sc">$</span><span class="fu">create</span>(arrow_tbl<span class="sc">$</span>j)<span class="sc">$</span><span class="fu">indices</span>() <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb40-381"><a href="#cb40-381" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-382"><a href="#cb40-382" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(index[[<span class="dv">1</span>]]) <span class="sc">&amp;</span> <span class="fu">is.null</span>(index[[<span class="dv">2</span>]])) {</span>
+<span id="cb40-383"><a href="#cb40-383" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NULL indices =&gt; return the full dataset</span></span>
+<span id="cb40-384"><a href="#cb40-384" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> arrow_tbl</span>
+<span id="cb40-385"><a href="#cb40-385" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(index[[<span class="dv">1</span>]]) <span class="sc">&amp;&amp;</span> <span class="fu">is.null</span>(index[[<span class="dv">2</span>]])) {</span>
+<span id="cb40-386"><a href="#cb40-386" aria-hidden="true" tabindex="-1"></a>    <span class="co"># no column index =&gt; return all columns</span></span>
+<span id="cb40-387"><a href="#cb40-387" aria-hidden="true" tabindex="-1"></a>    keep_i <span class="ot">&lt;-</span> index[[<span class="dv">1</span>]]</span>
+<span id="cb40-388"><a href="#cb40-388" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> <span class="fu">filter</span>(arrow_tbl, i <span class="sc">%in%</span> keep_i)</span>
+<span id="cb40-389"><a href="#cb40-389" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">is.null</span>(index[[<span class="dv">1</span>]]) <span class="sc">&amp;&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(index[[<span class="dv">2</span>]])) {</span>
+<span id="cb40-390"><a href="#cb40-390" aria-hidden="true" tabindex="-1"></a>    <span class="co"># no row index =&gt; return all rows</span></span>
+<span id="cb40-391"><a href="#cb40-391" aria-hidden="true" tabindex="-1"></a>    keep_j <span class="ot">&lt;-</span> index[[<span class="dv">2</span>]]</span>
+<span id="cb40-392"><a href="#cb40-392" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> <span class="fu">filter</span>(arrow_tbl, j <span class="sc">%in%</span> keep_j)</span>
+<span id="cb40-393"><a href="#cb40-393" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb40-394"><a href="#cb40-394" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return requested rows and requested columns</span></span>
+<span id="cb40-395"><a href="#cb40-395" aria-hidden="true" tabindex="-1"></a>    keep_i <span class="ot">&lt;-</span>index[[<span class="dv">1</span>]]</span>
+<span id="cb40-396"><a href="#cb40-396" aria-hidden="true" tabindex="-1"></a>    keep_j <span class="ot">&lt;-</span> index[[<span class="dv">2</span>]]</span>
+<span id="cb40-397"><a href="#cb40-397" aria-hidden="true" tabindex="-1"></a>    dataset <span class="ot">&lt;-</span> <span class="fu">filter</span>(arrow_tbl, i <span class="sc">%in%</span> keep_i, j <span class="sc">%in%</span> keep_j)</span>
+<span id="cb40-398"><a href="#cb40-398" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb40-399"><a href="#cb40-399" aria-hidden="true" tabindex="-1"></a>  <span class="co"># pivot the count data into a matrix</span></span>
+<span id="cb40-400"><a href="#cb40-400" aria-hidden="true" tabindex="-1"></a>  dataset <span class="ot">&lt;-</span> <span class="fu">collect</span>(dataset)</span>
+<span id="cb40-401"><a href="#cb40-401" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb40-402"><a href="#cb40-402" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> 0L,</span>
+<span id="cb40-403"><a href="#cb40-403" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="fu">length</span>(keep_i),</span>
+<span id="cb40-404"><a href="#cb40-404" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="fu">length</span>(keep_j),</span>
+<span id="cb40-405"><a href="#cb40-405" aria-hidden="true" tabindex="-1"></a>    <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">dimnames</span>(x)[[<span class="dv">1</span>]][keep_i], </span>
+<span id="cb40-406"><a href="#cb40-406" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">dimnames</span>(x)[[<span class="dv">2</span>]][keep_j])</span>
+<span id="cb40-407"><a href="#cb40-407" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb40-408"><a href="#cb40-408" aria-hidden="true" tabindex="-1"></a>  matrix_index <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb40-409"><a href="#cb40-409" aria-hidden="true" tabindex="-1"></a>    <span class="fu">match</span>(dataset[[<span class="st">"i"</span>]], keep_i),</span>
+<span id="cb40-410"><a href="#cb40-410" aria-hidden="true" tabindex="-1"></a>    <span class="fu">match</span>(dataset[[<span class="st">"j"</span>]], keep_j)</span>
+<span id="cb40-411"><a href="#cb40-411" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb40-412"><a href="#cb40-412" aria-hidden="true" tabindex="-1"></a>  m[matrix_index] <span class="ot">&lt;-</span> dataset<span class="sc">$</span>x</span>
+<span id="cb40-413"><a href="#cb40-413" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(m)</span>
+<span id="cb40-414"><a href="#cb40-414" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-415"><a href="#cb40-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-416"><a href="#cb40-416" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"extract_array"</span>, <span class="st">"ParquetArraySeed"</span>, </span>
+<span id="cb40-417"><a href="#cb40-417" aria-hidden="true" tabindex="-1"></a>          .extract_array_from_ParquetArraySeed)</span>
+<span id="cb40-418"><a href="#cb40-418" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-419"><a href="#cb40-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-420"><a href="#cb40-420" aria-hidden="true" tabindex="-1"></a><span class="fu">## Creating a first parquet-backed DelayedArray object</span></span>
+<span id="cb40-421"><a href="#cb40-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-422"><a href="#cb40-422" aria-hidden="true" tabindex="-1"></a>With these three methods in place, I can instantiate my first <span class="in">`ParquetArraySeed`</span></span>
+<span id="cb40-423"><a href="#cb40-423" aria-hidden="true" tabindex="-1"></a>object, which is suitable as input to the <span class="in">`DelayedArray`</span> constructor from</span>
+<span id="cb40-424"><a href="#cb40-424" aria-hidden="true" tabindex="-1"></a>the eponymous R package. </span>
+<span id="cb40-425"><a href="#cb40-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-428"><a href="#cb40-428" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-429"><a href="#cb40-429" aria-hidden="true" tabindex="-1"></a>seed <span class="ot">&lt;-</span> <span class="fu">ParquetArraySeed</span>(parquet_file)</span>
+<span id="cb40-430"><a href="#cb40-430" aria-hidden="true" tabindex="-1"></a>da <span class="ot">&lt;-</span> <span class="fu">DelayedArray</span>(seed)</span>
+<span id="cb40-431"><a href="#cb40-431" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(da)</span>
+<span id="cb40-432"><a href="#cb40-432" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-433"><a href="#cb40-433" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-434"><a href="#cb40-434" aria-hidden="true" tabindex="-1"></a>Next, let's test different ways of subsetting our DelayedArray and make sure</span>
+<span id="cb40-435"><a href="#cb40-435" aria-hidden="true" tabindex="-1"></a>the returned dimensions match those of the requested indices:</span>
+<span id="cb40-436"><a href="#cb40-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-439"><a href="#cb40-439" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-440"><a href="#cb40-440" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
+<span id="cb40-441"><a href="#cb40-441" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>]), <span class="fu">c</span>(10L, 100L)),</span>
+<span id="cb40-442"><a href="#cb40-442" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, ]), <span class="fu">c</span>(10L, <span class="fu">ncol</span>(da))),</span>
+<span id="cb40-443"><a href="#cb40-443" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>]), <span class="fu">c</span>(<span class="fu">nrow</span>(da), 10L)),</span>
+<span id="cb40-444"><a href="#cb40-444" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(<span class="fu">dim</span>(da[<span class="st">"ENSG00000243485"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">drop =</span> <span class="cn">FALSE</span>]), <span class="fu">c</span>(1L, 10L)),</span>
+<span id="cb40-445"><a href="#cb40-445" aria-hidden="true" tabindex="-1"></a>  <span class="fu">identical</span>(</span>
+<span id="cb40-446"><a href="#cb40-446" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dim</span>(da[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">98</span>), <span class="fu">c</span>(<span class="st">"AACTCAGTCCAACCAA-1"</span>, <span class="st">"AACTCCCAGAAACCTA-1"</span>)]),</span>
+<span id="cb40-447"><a href="#cb40-447" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(4L, 2L))</span>
+<span id="cb40-448"><a href="#cb40-448" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-449"><a href="#cb40-449" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-450"><a href="#cb40-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-451"><a href="#cb40-451" aria-hidden="true" tabindex="-1"></a>Finally, let's retrieve the (raw) counts for the GAPDH gene (<span class="in">`ENSG00000111640`</span>)</span>
+<span id="cb40-452"><a href="#cb40-452" aria-hidden="true" tabindex="-1"></a>and ensure that the same results are retrieved from both objects:</span>
+<span id="cb40-453"><a href="#cb40-453" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-456"><a href="#cb40-456" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-457"><a href="#cb40-457" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 4</span></span>
+<span id="cb40-458"><a href="#cb40-458" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb40-459"><a href="#cb40-459" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(</span>
+<span id="cb40-460"><a href="#cb40-460" aria-hidden="true" tabindex="-1"></a>  <span class="fu">counts</span>(tenx_pbmc4k[ <span class="st">"ENSG00000111640"</span>, ]), </span>
+<span id="cb40-461"><a href="#cb40-461" aria-hidden="true" tabindex="-1"></a>  da[ <span class="st">"ENSG00000111640"</span>, tenx_pbmc4k<span class="sc">$</span>Barcode],</span>
+<span id="cb40-462"><a href="#cb40-462" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">"GAPDH (ParquetArray)"</span>, <span class="at">ylab =</span> <span class="st">"GAPDH (SingleCellExperiment)"</span>)</span>
+<span id="cb40-463"><a href="#cb40-463" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb40-464"><a href="#cb40-464" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-465"><a href="#cb40-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-466"><a href="#cb40-466" aria-hidden="true" tabindex="-1"></a><span class="fu">### The ParquetMatrix class</span></span>
+<span id="cb40-467"><a href="#cb40-467" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-468"><a href="#cb40-468" aria-hidden="true" tabindex="-1"></a>Now that I have defined a _seed_, I can add a higher level class to</span>
+<span id="cb40-469"><a href="#cb40-469" aria-hidden="true" tabindex="-1"></a>facilitate working with parquet-backed matrices. The <span class="in">`ParquetMatrix`</span> inherits</span>
+<span id="cb40-470"><a href="#cb40-470" aria-hidden="true" tabindex="-1"></a>from the <span class="in">`DelayedMatrix`</span> class. It will automatically create the necessary</span>
+<span id="cb40-471"><a href="#cb40-471" aria-hidden="true" tabindex="-1"></a>_seed_, so all I have to provide is the path to the parquet file.</span>
+<span id="cb40-472"><a href="#cb40-472" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-475"><a href="#cb40-475" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-476"><a href="#cb40-476" aria-hidden="true" tabindex="-1"></a><span class="fu">setClass</span>(<span class="st">"ParquetMatrix"</span>,</span>
+<span id="cb40-477"><a href="#cb40-477" aria-hidden="true" tabindex="-1"></a>    <span class="at">contains =</span> <span class="st">"DelayedMatrix"</span>,</span>
+<span id="cb40-478"><a href="#cb40-478" aria-hidden="true" tabindex="-1"></a>    <span class="fu">representation</span>(<span class="at">seed =</span> <span class="st">"ParquetArraySeed"</span>)</span>
+<span id="cb40-479"><a href="#cb40-479" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-480"><a href="#cb40-480" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-481"><a href="#cb40-481" aria-hidden="true" tabindex="-1"></a><span class="fu">setMethod</span>(<span class="st">"DelayedArray"</span>, <span class="st">"ParquetArraySeed"</span>,</span>
+<span id="cb40-482"><a href="#cb40-482" aria-hidden="true" tabindex="-1"></a>    <span class="cf">function</span>(seed) <span class="fu">new_DelayedArray</span>(seed, <span class="at">Class=</span><span class="st">"ParquetMatrix"</span>)</span>
+<span id="cb40-483"><a href="#cb40-483" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-484"><a href="#cb40-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-485"><a href="#cb40-485" aria-hidden="true" tabindex="-1"></a>ParquetMatrix <span class="ot">&lt;-</span> <span class="cf">function</span>(filepath, ...) {</span>
+<span id="cb40-486"><a href="#cb40-486" aria-hidden="true" tabindex="-1"></a>  seed <span class="ot">&lt;-</span> <span class="fu">ParquetArraySeed</span>(<span class="at">filepath =</span> filepath, ...)</span>
+<span id="cb40-487"><a href="#cb40-487" aria-hidden="true" tabindex="-1"></a>  <span class="fu">new</span>(<span class="st">"ParquetMatrix"</span>, <span class="at">seed =</span> seed)</span>
+<span id="cb40-488"><a href="#cb40-488" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb40-489"><a href="#cb40-489" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-490"><a href="#cb40-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-493"><a href="#cb40-493" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-494"><a href="#cb40-494" aria-hidden="true" tabindex="-1"></a>pm <span class="ot">&lt;-</span> <span class="fu">ParquetMatrix</span>(parquet_file)</span>
+<span id="cb40-495"><a href="#cb40-495" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(pm)</span>
+<span id="cb40-496"><a href="#cb40-496" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-497"><a href="#cb40-497" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-498"><a href="#cb40-498" aria-hidden="true" tabindex="-1"></a>As I learned </span>
+<span id="cb40-499"><a href="#cb40-499" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">in a previous post</span><span class="co">](../parquetArray/#creating-a-parquet-backed-summarizedexperiment)</span></span>
+<span id="cb40-500"><a href="#cb40-500" aria-hidden="true" tabindex="-1"></a>gene and cell annotations can be combined with the <span class="in">`ParquetMatrix`</span></span>
+<span id="cb40-501"><a href="#cb40-501" aria-hidden="true" tabindex="-1"></a>into a <span class="in">`SingleCellExperiment`</span>.</span>
+<span id="cb40-502"><a href="#cb40-502" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-505"><a href="#cb40-505" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-506"><a href="#cb40-506" aria-hidden="true" tabindex="-1"></a>sce <span class="ot">&lt;-</span> <span class="fu">SingleCellExperiment</span>(</span>
+<span id="cb40-507"><a href="#cb40-507" aria-hidden="true" tabindex="-1"></a>  <span class="at">assays =</span> <span class="fu">list</span>(<span class="at">counts =</span> pm),</span>
+<span id="cb40-508"><a href="#cb40-508" aria-hidden="true" tabindex="-1"></a>  <span class="at">colData =</span> <span class="fu">colData</span>(tenx_pbmc4k)[<span class="fu">match</span>(<span class="fu">colnames</span>(pm), tenx_pbmc4k<span class="sc">$</span>Barcode), ],</span>
+<span id="cb40-509"><a href="#cb40-509" aria-hidden="true" tabindex="-1"></a>  <span class="at">rowData =</span> <span class="fu">rowData</span>(tenx_pbmc4k)[<span class="fu">row.names</span>(pm), ]</span>
+<span id="cb40-510"><a href="#cb40-510" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb40-511"><a href="#cb40-511" aria-hidden="true" tabindex="-1"></a>sce</span>
+<span id="cb40-512"><a href="#cb40-512" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-513"><a href="#cb40-513" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-514"><a href="#cb40-514" aria-hidden="true" tabindex="-1"></a><span class="fu">## Comparison to HDF5-backed DelayedArrays</span></span>
+<span id="cb40-515"><a href="#cb40-515" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-516"><a href="#cb40-516" aria-hidden="true" tabindex="-1"></a>Let's finish this example of a minimal implementation of the <span class="in">`ParquetMatrix`</span></span>
+<span id="cb40-517"><a href="#cb40-517" aria-hidden="true" tabindex="-1"></a>class by comparing its performance with the original hdf5-backed object.</span>
+<span id="cb40-518"><a href="#cb40-518" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-519"><a href="#cb40-519" aria-hidden="true" tabindex="-1"></a><span class="fu">### Reading the full dataset into memory</span></span>
+<span id="cb40-520"><a href="#cb40-520" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-521"><a href="#cb40-521" aria-hidden="true" tabindex="-1"></a>First, let's read the full matrix into memory from either our parquet or the</span>
+<span id="cb40-522"><a href="#cb40-522" aria-hidden="true" tabindex="-1"></a>original HDF5 files. (We read each file ten times to get an idea of the </span>
+<span id="cb40-523"><a href="#cb40-523" aria-hidden="true" tabindex="-1"></a>average time it takes on my system.)</span>
+<span id="cb40-524"><a href="#cb40-524" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-527"><a href="#cb40-527" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-528"><a href="#cb40-528" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb40-529"><a href="#cb40-529" aria-hidden="true" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb40-530"><a href="#cb40-530" aria-hidden="true" tabindex="-1"></a>    <span class="at">parquet =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(sce)),</span>
+<span id="cb40-531"><a href="#cb40-531" aria-hidden="true" tabindex="-1"></a>    <span class="at">hdf5 =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(tenx_pbmc4k)),</span>
+<span id="cb40-532"><a href="#cb40-532" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span>, <span class="at">unit =</span> <span class="st">"s"</span>)</span>
+<span id="cb40-533"><a href="#cb40-533" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mb, <span class="at">signif =</span> <span class="dv">2</span>)</span>
+<span id="cb40-534"><a href="#cb40-534" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-535"><a href="#cb40-535" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-536"><a href="#cb40-536" aria-hidden="true" tabindex="-1"></a>Not too bad! Loading the count matrix into memory from the parquet file is</span>
+<span id="cb40-537"><a href="#cb40-537" aria-hidden="true" tabindex="-1"></a>slightly faster than from the HDF5 file on average.</span>
+<span id="cb40-538"><a href="#cb40-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-539"><a href="#cb40-539" aria-hidden="true" tabindex="-1"></a><span class="fu">### Subsetting to 50 random rows and columns</span></span>
+<span id="cb40-540"><a href="#cb40-540" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-541"><a href="#cb40-541" aria-hidden="true" tabindex="-1"></a>Both parquet and HDF5 formats are optimized for column-oriented data. Let's try</span>
+<span id="cb40-542"><a href="#cb40-542" aria-hidden="true" tabindex="-1"></a>to retrieve a random subset of counts to see how they fare:</span>
+<span id="cb40-543"><a href="#cb40-543" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-546"><a href="#cb40-546" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-547"><a href="#cb40-547" aria-hidden="true" tabindex="-1"></a>rows <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(pm), <span class="dv">50</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb40-548"><a href="#cb40-548" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">ncol</span>(pm), <span class="dv">50</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb40-549"><a href="#cb40-549" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-550"><a href="#cb40-550" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-553"><a href="#cb40-553" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-554"><a href="#cb40-554" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb40-555"><a href="#cb40-555" aria-hidden="true" tabindex="-1"></a>mb <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb40-556"><a href="#cb40-556" aria-hidden="true" tabindex="-1"></a>    <span class="at">parquet =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(sce)[rows, cols]),</span>
+<span id="cb40-557"><a href="#cb40-557" aria-hidden="true" tabindex="-1"></a>    <span class="at">hdf5 =</span> <span class="fu">as.matrix</span>(<span class="fu">counts</span>(tenx_pbmc4k)[rows, cols]),</span>
+<span id="cb40-558"><a href="#cb40-558" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span>, <span class="at">unit =</span> <span class="st">"s"</span>)</span>
+<span id="cb40-559"><a href="#cb40-559" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mb, <span class="at">signif =</span> <span class="dv">2</span>)</span>
+<span id="cb40-560"><a href="#cb40-560" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-561"><a href="#cb40-561" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-562"><a href="#cb40-562" aria-hidden="true" tabindex="-1"></a>Extracting the 50 x 50 sub-matrix takes roughly the same amount of time with</span>
+<span id="cb40-563"><a href="#cb40-563" aria-hidden="true" tabindex="-1"></a>both file types.</span>
+<span id="cb40-564"><a href="#cb40-564" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-565"><a href="#cb40-565" aria-hidden="true" tabindex="-1"></a><span class="fu">## Conclusion</span></span>
+<span id="cb40-566"><a href="#cb40-566" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-567"><a href="#cb40-567" aria-hidden="true" tabindex="-1"></a>Today, I learned a lot about working with arrow objects in R, and got the</span>
+<span id="cb40-568"><a href="#cb40-568" aria-hidden="true" tabindex="-1"></a>chance to explore the <span class="in">`DelayedArray`</span> infrastructure further. I am certain that</span>
+<span id="cb40-569"><a href="#cb40-569" aria-hidden="true" tabindex="-1"></a>the methods I wrote can be improved - but even my crude implementation of the </span>
+<span id="cb40-570"><a href="#cb40-570" aria-hidden="true" tabindex="-1"></a><span class="in">`ParquetMatrix`</span> class seems to be about  as performant as the HDF5-backed</span>
+<span id="cb40-571"><a href="#cb40-571" aria-hidden="true" tabindex="-1"></a>version when reading from a local file.</span>
+<span id="cb40-572"><a href="#cb40-572" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-573"><a href="#cb40-573" aria-hidden="true" tabindex="-1"></a>The arrow project supports reading parquet files from cloud storage (S3),</span>
+<span id="cb40-574"><a href="#cb40-574" aria-hidden="true" tabindex="-1"></a>something I found challenging (e.g. slow) with HDF5 files. All I need to do</span>
+<span id="cb40-575"><a href="#cb40-575" aria-hidden="true" tabindex="-1"></a>is pass an S3 URL as the <span class="in">`filepath`</span> argument to the <span class="in">`ParquetMatrix()`</span></span>
+<span id="cb40-576"><a href="#cb40-576" aria-hidden="true" tabindex="-1"></a>function, and (assuming I have set up the right access credentials) I can work</span>
+<span id="cb40-577"><a href="#cb40-577" aria-hidden="true" tabindex="-1"></a>with remote files in the same way.<span class="ot">[^2]</span></span>
+<span id="cb40-578"><a href="#cb40-578" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-579"><a href="#cb40-579" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>The performance will depend on the network connection. With my home</span>
+<span id="cb40-580"><a href="#cb40-580" aria-hidden="true" tabindex="-1"></a>internet connection, I was able to read the full dataset from the parquet file </span>
+<span id="cb40-581"><a href="#cb40-581" aria-hidden="true" tabindex="-1"></a>into memory or extract counts for 50 random genes x cells in 1.8 seconds on</span>
+<span id="cb40-582"><a href="#cb40-582" aria-hidden="true" tabindex="-1"></a>average.</span>
+<span id="cb40-583"><a href="#cb40-583" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-584"><a href="#cb40-584" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducibility</span></span>
+<span id="cb40-585"><a href="#cb40-585" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-586"><a href="#cb40-586" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
+<span id="cb40-587"><a href="#cb40-587" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb40-588"><a href="#cb40-588" aria-hidden="true" tabindex="-1"></a>Session Information</span>
+<span id="cb40-589"><a href="#cb40-589" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb40-590"><a href="#cb40-590" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-593"><a href="#cb40-593" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb40-594"><a href="#cb40-594" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>(<span class="st">"attached"</span>)</span>
+<span id="cb40-595"><a href="#cb40-595" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb40-596"><a href="#cb40-596" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-597"><a href="#cb40-597" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
+<span id="cb40-598"><a href="#cb40-598" aria-hidden="true" tabindex="-1"></a>   </span>
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+</body></html>

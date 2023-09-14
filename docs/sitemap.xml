@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-09-06T05:06:47.863Z</lastmod>
+    <lastmod>2023-09-14T03:44:36.887Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
@@ -135,5 +135,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/parquetArray/index.html</loc>
     <lastmod>2023-09-06T05:06:45.964Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/ParquetMatrix/index.html</loc>
+    <lastmod>2023-09-14T03:44:36.189Z</lastmod>
   </url>
 </urlset>

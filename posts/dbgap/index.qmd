@@ -1,0 +1,255 @@
+---
+title: "Retrieving access-controlled data from NCBI's dbGAP repository"
+author: "Thomas Sandmann"
+date: "2023-09-17"
+freeze: true
+categories: [NCBI, dbGAP, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr:
+
+Today I learned about different ways to retrieve access-controlled short read
+data from
+[NCBI's dbGAP repository](https://www.ncbi.nlm.nih.gov/gap/).
+dbGAP hosts both publicly available and _Access Controlled_ data. The latter is
+usually used to disseminate data from individual human participants and requires
+a data access application. 
+
+After the data access request has been granted, it is time to retrieve the
+actual data from dbGAP and - in case of short read data - its sister repository
+[the Short Read Archive](https://www.ncbi.nlm.nih.gov/sra).
+
+## Authenticating with JWT or NGC files
+
+The path to authenticating and downloading dbGAP data differs depending on
+whether you are using the AWS or GCP cloud proviers, or a local compute
+infrastructure (or another, unsupported cloud provider) instead.
+
+### Authentication within AWS or GCP cloud environments
+
+On these two platforms, you have two paths to access the data:
+
+1. With a `JWT` file: A JWT[^1] file, 
+[introduced with `sra-tools` version 2.10](https://github.com/ncbi/sra-tools/wiki/First-help-on-decryption-dbGaP-data#using-jwt-tokens), 
+allows users to transfer data from dbGAP's
+cloud buckets into your own cloud instance. (Because both your and dbGAP's
+system's share the same cloud environment, this is faster than a regular 
+transfer e.g. via https or ftp) [^2] 
+
+[^1]: [JSON Web Token](https://jwt.io/)
+[^2]: [dbGAP's official JWT instructions are here.](https://www.ncbi.nlm.nih.gov/sra/docs/sra-dbGAP-cloud-download/)
+
+2. Via `fusera`: Alternatively, you can mount dbGAP's buckets as
+read-only volumes on your cloud instances via
+[fusera](https://github.com/mitre/fusera)[^3]
+
+[^3]: [dbGAP's official fusera instructions are here.](https://www.ncbi.nlm.nih.gov/sra/docs/dbgap-cloud-access/#access-by-fusera)
+
+::: {.callout-note collapse=true}
+
+### The nf-core/fetchngs workflow
+
+The
+[nf-core/fetchngs](https://nf-co.re/fetchngs)
+workflow supports the retrieval of dbGAP data via `JWT` file authentication,
+e.g. when it is executed on AWS or GCP compute instances (see above). As all
+nf-core workflows, it is easily parallelized, e.g. across an HPC or via an AWS
+Batch queue. (Highly recommended when you need to retrieve large amounts of 
+data.) 
+
+:::
+### Authenticating outside AWS / GCP
+
+On all other compute platforms, including your laptop or your local high-
+performance cluster (HPC), you need to authenticate with an `NGC` file 
+(containing your _repository key_) instead[^4][^5].
+
+[^4]: [dbGAP's official NGC instructions are here.](https://www.ncbi.nlm.nih.gov/sra/docs/sra-dbgap-download/)
+
+[^5]: `NGC` file authentication also works on cloud instances, e.g. an AWS EC2
+instance, but it is slower as it doesn't take advantage of the fact that your
+instance and dbGAP's data bucket are co-located.
+
+In this blog post, I will outline how to use `NGC` authentication, but make
+sure to read 
+[dbGAP's official documentation](https://www.ncbi.nlm.nih.gov/sra/docs/sra-dbgap-download/)
+as well.
+
+### Retrieving dbGAP data with NGC authentication
+
+If you are _not_ working on AWS or GCP, and need to rely on `NGC`
+authentication, the following steps might be useful. 
+
+#### 1. Log into dbGAP
+
+- Navigate to 
+  [the dbGAP login page for controlled access](https://dbgap.ncbi.nlm.nih.gov/aa/wga.cgi?page=login)
+  and log in with your eRA credentials.
+
+#### 2. Install sra-tools from github
+
+I usually download the latest binary of the `sra-tools` suite for my operating
+system from
+[github]https://github.com/ncbi/sra-tools/wiki/01.-Downloading-SRA-Toolkit).
+Alternatively, you can also install it using 
+[Bioconda](https://anaconda.org/bioconda/sra-tools)
+
+::: {.callout-note}
+
+Please note that the `sra-tools` package is frequently updated, so make sure
+you have the latest version).
+
+:::
+
+For example, this code snipped retrieves and decompresses the latest version
+for Ubuntu Linux into the `~/bin` directory:
+
+```bash
+mkdir -p ~/bin
+pushd ~/bin
+wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.7/sratoolkit.3.0.7-ubuntu64.tar.gz
+tar xfz sratoolkit.3.0.7-ubuntu64.tar.gz
+rm sratoolkit.3.0.7-ubuntu64.tar.gz
+popd
+```
+
+Afterward, I add the sra directory to my `PATH` and verify that it's the version
+I expected:
+
+```bash
+export PATH=~/bin/sratoolkit.3.0.7-ubuntu64/bin:$PATH
+prefetch --version  # verify that it's the version you downloaded
+```
+
+::: {.callout-note}
+
+The best source of information about using the various tools included in the `sra-tools`
+is the
+[sra-tools wiki](https://github.com/ncbi/sra-tools/wiki).
+
+:::
+
+#### 3. Configure the sra toolkit
+
+Next, I configure the toolkit, especially the location of the `cache` directory.
+The `prefetch` command stores all `SRA` files it downloads in this location, so
+I make sure it is on a volume that is large enough to hold the expected amount
+of data.
+
+```bash
+./vdb-config -i
+```
+
+- In the `Cache` section, O specify an existing directory as the 
+  `public user-repository`. This is where `prefetch ` will be download files
+  to (and they will be kept until the cache is cleared!)
+
+My settings are stored in the `${HOME}/.ncbi/user-settings.mkfg` file. For more
+information and other ways to configure the toolkit, please see
+[its wiki page](https://github.com/ncbi/sra-tools/wiki/08.-prefetch-and-fasterq-dump).
+
+#### 4. Log into dbGAP to retrieve the repository key
+
+- Back in on the dbGAP website, navigate to the  “My Projects” tab
+- Choose “get dbGaP repository key” in the “Actions” column. 
+- Download the _repository key_ file with the `.ngc` extension to your system.
+
+#### 5. Choose the files to download from SRA
+
+- In your dbGAP account, next navigate to the "My requests" tab.
+- Click on "Request files" on the right side of the table.
+- Navigate to the `SRA data (reads and reference alignments)` tab.
+- Click on SRA Run Selector
+- Select all of the files you would like to download in the table at the bottom
+  of the page.
+- Toggle the `Selected` radio button.
+
+#### 6. Download the `.krt` file that specifies which files to retrieve
+
+- Download the `.krt` file by clicking on the green `Cart file` button.
+
+#### 7. Initiate the download of the files in `SRA` format
+
+- Now, with both the `.ngc` and `.krt` files in hand, we can trigger the
+  download with the sra-tool's `prefetch` command. We need to provide 
+  _both_ paths to
+  - the repository key (via `--ngc`) and 
+  - the cart file (via `--cart`)
+  
+For example, this code snipped assumes the two files are are in my home 
+directory. (The exact names of your `.ngc` and `.krt` files will be different.)
+  
+```bash
+mkdir -p ~/dbgap
+pushd ~/dbgap
+prefetch \
+  --max-size u \
+  --ngc ~/prj_123456.ngc \
+  --cart ~/cart_DAR12345_2023081212345.krt
+popd
+```
+
+Note: The files are downloaded (and cached) in SRA format into the directory I
+specified when configuring the sra-toolkit (e.g. the `public user-repository`).
+Extracting reads and generating FASTQ files is a separate step.
+
+#### 8. Decrypt SRA files and extract reads in FASTQ format
+
+🚨 The final fastq-files will be approximately 7 times the size of the accession. 
+The fasterq-dump-tool needs temporary space (scratch space) of about 1.5 times the
+amount of the final fastq-files during the conversion. Overall, the space you need
+during the conversion is approximately 17 times the size of the accession. 
+
+🚨 The extraction and recompression steps are very CPU intensive, and it is
+recommended to use multiple cores. (The code below uses _all_ available cores,
+as determined via the `nproc --all` command.)
+
+The `fasterq-dump` tool extracts the reads into FASTQ files. It only accepts a
+single accession at a time, and expects to find the corresponding SRA file in
+the cache directory. Like the `prefetch` command above, it requires the `.ngc`
+file to verify that I am permitted to decrypt the data.
+
+To save disk space I only extract a single SRA file at a time and then compress
+the FASTQ files with `pigz`. Afterward I copy the compressed FASTQ files to
+an AWS S3 bucket and delete the local files before processing the next
+accession.
+
+```bash
+#!/usr/bin/env bash
+set -e
+set -o nounset
+
+declare -r CACHEDIR="~/cache/sra/"  # the cache directory with .sra files
+declare -r BUCKET="s3://my-s3-bucket-for-storing-dbGAP-data"
+
+for SRA_FILE in ${CACHEDIR}/*.sra
+do
+  fasterq-dump -p \
+    --threads $(nproc --all) \
+    --ngc ~/prj_123456.ngc \
+    $(basename $SRA_FILE .sra)
+  pigz \
+    --processes $(nproc --all) \
+    *.fastq
+  aws s3 sync \
+    --exclude "*" \
+    --include "*.fastq.gz" \
+    . \
+    ${BUCKET}
+  rm *.fastq.gz
+done
+```
+

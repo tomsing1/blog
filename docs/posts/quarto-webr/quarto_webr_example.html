@@ -383,6 +383,7 @@ await globalThis.webR.init();
 
 // Run R code without focusing on storing data.
 await globalThis.webR.evalRVoid(`
+require("readr", quietly = TRUE)
 kUrlRoot <- paste0(
   "https://tomsing1.github.io/blog/posts/quarto-webr"
 )
@@ -392,7 +393,7 @@ kResults <- c(
   "Day3" = "day3_results"
   )
 results <- lapply(kResults, \\(result) {
-  url <- paste(kUrlRoot, paste0(result, ".csv"), sep = "/")
+  url <- paste(kUrlRoot, paste0(result, ".csv.gz"), sep = "/")
   read_csv(url)[, c("gene_name", "adj.P.Val", "logFC")]
 })
 names(results) <- names(kResults)
@@ -404,7 +405,7 @@ results <- lapply(results, \\(result) result[result$symbol %in% keep, ])
 # Helper function to apply an FDR cutoff to a list of dataframes
 apply_fdr <- function(x, fdr_cutoff = 0.01){
   lapply(x, function(df){
-    df[df$adj.P.Val < fdr_cutoff, ]$symbol
+    df[df$adj.P.Val < fdr_cutoff, ]$gene_name
   })
 }
 `)

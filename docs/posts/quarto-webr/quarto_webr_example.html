@@ -399,7 +399,7 @@ results <- lapply(kResults, \\(result) {
 names(results) <- names(kResults)
 
 # keep only genes present in all results
-keep <- Reduce(intersect, sapply(results, "[[", "gene_name"))
+keep <- Reduce(intersect, lapply(results, \\(x) x$gene_name))
 results <- lapply(results, \\(result) result[result$gene_name %in% keep, ])
 
 # Helper function to apply an FDR cutoff to a list of dataframes
@@ -1031,7 +1031,7 @@ selected <- sort(Reduce(intersect, filtered))`,
   let editor;
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(editorDiv, {
-      value: `results[["Day1"]][match(selected, results[["Day1"]]$symbol), ] |>
+      value: `results[["Day1"]][match(selected, results[["Day1"]]$gene_name), ] |>
   huxtable::hux()`,
       language: 'r',
       theme: 'vs-light',
@@ -1313,7 +1313,7 @@ selected <- sort(Reduce(intersect, filtered))`,
   let editor;
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(editorDiv, {
-      value: `results[["Day2"]][match(selected, results[["Day2"]]$symbol), ] |>
+      value: `results[["Day2"]][match(selected, results[["Day2"]]$gene_name), ] |>
   huxtable::hux()`,
       language: 'r',
       theme: 'vs-light',
@@ -1596,7 +1596,7 @@ selected <- sort(Reduce(intersect, filtered))`,
   let editor;
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(editorDiv, {
-      value: `results[["Day3"]][match(selected, results[["Day3"]]$symbol), ] |>
+      value: `results[["Day3"]][match(selected, results[["Day3"]]$gene_name), ] |>
   huxtable::hux()`,
       language: 'r',
       theme: 'vs-light',

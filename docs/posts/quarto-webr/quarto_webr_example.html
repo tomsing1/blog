@@ -383,7 +383,6 @@ await globalThis.webR.init();
 
 // Run R code without focusing on storing data.
 await globalThis.webR.evalRVoid(`
-require("readr", quietly = TRUE)
 kUrlRoot <- paste0(
   "https://tomsing1.github.io/blog/posts/quarto-webr"
 )
@@ -394,7 +393,7 @@ kResults <- c(
   )
 results <- lapply(kResults, \\(result) {
   url <- paste(kUrlRoot, paste0(result, ".csv.gz"), sep = "/")
-  read_csv(url)[, c("gene_name", "adj.P.Val", "logFC")]
+  readr::read_csv(url)[, c("gene_name", "adj.P.Val", "logFC")]
 })
 names(results) <- names(kResults)
 

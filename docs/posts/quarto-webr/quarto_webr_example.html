@@ -400,7 +400,7 @@ names(results) <- names(kResults)
 
 # keep only genes present in all results
 keep <- Reduce(intersect, sapply(results, "[[", "gene_name"))
-results <- lapply(results, \\(result) result[result$symbol %in% keep, ])
+results <- lapply(results, \\(result) result[result$gene_name %in% keep, ])
 
 # Helper function to apply an FDR cutoff to a list of dataframes
 apply_fdr <- function(x, fdr_cutoff = 0.01){

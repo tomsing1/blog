@@ -156,7 +156,7 @@ ul.task-list li input[type="checkbox"] {
   var autoloadRPackages = true;
 
   // Display a startup message?
-  var showStartupMessage = false;
+  var showStartupMessage = true;
   var showHeaderMessage = false;
   if (showStartupMessage) {
 
@@ -229,7 +229,7 @@ ul.task-list li input[type="checkbox"] {
     "baseURL": "https://webr.r-wasm.org/v0.2.2/",
     "serviceWorkerUrl": "",
     "homedir": "/home/web_user", 
-    "channelType": ChannelType.Automatic
+    "channelType": ChannelType.PostMessage
   });
 
   // Initialization WebR
@@ -412,8 +412,8 @@ apply_fdr <- function(x, fdr_cutoff = 0.01){
 </script>	
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>This interactive website allows users to intersect differential expression results of three different comparisons from an experiment published by <a href="https://www.biorxiv.org/content/10.1101/2021.01.19.426731v1">Xia et al</a></p>
-<p>The experiment was performed in three different batches (e.g.&nbsp;samples were collected on three different days). For this report, the differences between samples from homozygous APP-SAA and wiltdype animals were estimated <em>separately</em> for each batch/day.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>This interactive website allows users to intersect differential expression results of three different comparisons from an experiment published by <a href="https://www.biorxiv.org/content/10.1101/2021.01.19.426731v1">Xia et al</a>.</p>
+<p>The experiment was performed in three different batches (e.g.&nbsp;samples were collected on three different days). For this report, the differences between samples from homozygous APP-SAA and wiltdype animals were estimated <em>separately</em> for each batch/day: <code>Day 1</code>, <code>Day 2</code> and <code>Day 3</code>.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
 <p>By manipulating the code cells include in this website, you can select a set of genes that passes a user-defined FDR threshold on all three days.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 </section>
 <section id="step-1-choose-a-false-discovery-fdr-threshold" class="level2">

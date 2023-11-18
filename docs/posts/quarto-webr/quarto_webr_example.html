@@ -457,7 +457,7 @@ apply_fdr <- function(x, fdr_cutoff = 0.01){
   let editor;
   require(['vs/editor/editor.main'], function () {
     editor = monaco.editor.create(editorDiv, {
-      value: `FDR_threshold <- 0.05
+      value: `FDR_threshold <- 0.1
 filtered <- apply_fdr(results, FDR_threshold)
 ggvenn(filtered)
 selected <- sort(Reduce(intersect, filtered))`,

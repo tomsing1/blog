@@ -1,0 +1,149 @@
+---
+title: "Embedding R into Quarto documents with quarto-webr"
+subtitle: "Example: intersecting differential expression results"
+author: "Thomas Sandmann"
+date: '2023/11/18'
+format: html
+engine: knitr
+webr: 
+  show-startup-message: false
+  packages: ['ggvenn', 'huxtable', 'readr']
+filters:
+  - webr
+editor_options: 
+  chunk_output_type: console
+---
+
+```{webr-r}
+#| context: interactive
+require("ggvenn", quietly = TRUE)
+require("readr", quietly = TRUE)
+require("huxtable", quietly = TRUE)
+kUrlRoot <- paste0(
+  "https://tomsing1.github.io/blog/posts/quarto-webr"
+)
+kResults <- c(
+  "Day1" = "day1_results",
+  "Day2" = "day2_results",
+  "Day3" = "day3_results"
+  )
+results <- lapply(kResults, \(result) {
+  url <- paste(kUrlRoot, paste0(result, ".csv"), sep = "/")
+  read_csv(url)[, c("gene_name", "adj.P.Val", "logFC")]
+})
+names(results) <- names(kResults)
+
+# keep only genes present in all results
+keep <- Reduce(intersect, sapply(results, "[[", "gene_name"))
+results <- lapply(results, \(result) result[result$symbol %in% keep, ])
+
+# Helper function to apply an FDR cutoff to a list of dataframes
+apply_fdr <- function(x, fdr_cutoff = 0.01){
+  lapply(x, function(df){
+    df[df$adj.P.Val < fdr_cutoff, ]$symbol
+  })
+}
+```
+  
+## Introduction
+
+This interactive website allows users to intersect differential expression
+results of three different comparisons from an experiment published by 
+[Xia et al](https://www.biorxiv.org/content/10.1101/2021.01.19.426731v1)
+
+The experiment was performed in three different batches (e.g. samples were
+collected on three different days). For this report, the differences
+between samples from homozygous APP-SAA and wiltdype animals were estimated
+_separately_ for each batch/day.[^1]
+
+[^1]: Analyzing each batch separately is _not_ the best way to estimate genotype
+effects across the full experiment. For this exercise, I just want to obtain
+three different contrasts to compare in a Venn diagram. You can find more
+details about a more realistic analysis of this experiment in 
+[this blog post](https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/).
+
+By manipulating the code cells include in this website, you can select
+a set of genes that passes a user-defined FDR threshold on all three days.[^2]
+
+[^2]: The FDR does not reveal the direction of differential expression. So it
+is possible that we will pick up genes that are statistically significantly
+differentially expressed in _opposite directions_.
+
+## Step 1: Choose a false-discovery (FDR) threshold 
+
+1. Please choose an FDR threshold by changing the `FDR_threshold` the code
+  box below.
+  
+  - It will be applied to results from all three comparisons.
+  - For example, setting `FDR_threshold < 0.1` will retain all genes with a
+    false-discovery rate < 10% in _all three experiments_.
+
+2. Press the "Run Code" button to create a Venn diagram.
+
+  - You can save the plot by right-clicking and selecting `Save image as`.
+  
+3. Repeat until you like the results.
+
+```{webr-r}
+#| context: interactive
+FDR_threshold <- 0.05
+filtered <- apply_fdr(results, FDR_threshold)
+ggvenn(filtered)
+selected <- sort(Reduce(intersect, filtered))
+```
+
+## Step 2: List the genes that pass the FDR threshold in all three comparisons
+
+Next, press the `Run Code` button to see the list of genes that pass your 
+selected FDR threshold.
+
+- If you triple-click on the list of gene symbols, you can copy them into
+  another document.
+
+```{webr-r}
+#| context: interactive
+paste(selected, collapse = ", ")
+```
+
+### Step 3: See the differential expression results for the selected genes
+
+For more context, the following sections show you tables with the results
+from your three experiments for the genes you selected in Step 1.
+
+## Day 1
+
+Hit `Run Code` button to see the expression of the selected genes 
+or download [results for all genes](https://tomsing1.github.io/blog/posts/quarto-webr/day1_results.csv.gz)
+
+```{webr-r}
+#| context: interactive
+results[["Day1"]][match(selected, results[["Day1"]]$symbol), ] |>
+  huxtable::hux()
+```
+
+### Day 2
+
+Hit `Run Code` button to see the expression of the selected genes 
+or download [results for all genes](https://tomsing1.github.io/blog/posts/quarto-webr/day2_results.csv.gz)
+
+```{webr-r}
+#| context: interactive
+results[["Day2"]][match(selected, results[["Day2"]]$symbol), ] |>
+  huxtable::hux()
+```
+
+### Day 3
+
+Hit `Run Code` button to see the expression of the selected genes 
+or download [results for all genes](https://tomsing1.github.io/blog/posts/quarto-webr/day3_results.csv.gz)
+
+```{webr-r}
+#| context: interactive
+results[["Day3"]][match(selected, results[["Day3"]]$symbol), ] |>
+  huxtable::hux()
+```
+
+```{webr-r}
+#| context: interactive
+sessionInfo()
+```

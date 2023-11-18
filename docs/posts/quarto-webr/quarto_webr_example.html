@@ -150,7 +150,7 @@ ul.task-list li input[type="checkbox"] {
   const initializeWebRTimerStart = performance.now();
 
   // Determine if we need to install R packages
-  var installRPackagesList = ['ggvenn', 'huxtable', 'readr'];
+  var installRPackagesList = ['ggvenn', 'huxtable'];
   // Check to see if we have an empty array, if we do set to skip the installation.
   var setupRPackages = !(installRPackagesList.indexOf("") !== -1);
   var autoloadRPackages = true;
@@ -383,6 +383,7 @@ await globalThis.webR.init();
 
 // Run R code without focusing on storing data.
 await globalThis.webR.evalRVoid(`
+webr::install("ggplot2")
 kUrlRoot <- paste0(
   "https://tomsing1.github.io/blog/posts/quarto-webr"
 )

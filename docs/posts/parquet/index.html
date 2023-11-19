@@ -1270,7 +1270,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb52-112"><a href="#cb52-112" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-115"><a href="#cb52-115" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb52-116"><a href="#cb52-116" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: true</span></span>
-<span id="cb52-117"><a href="#cb52-117" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "A helper function to coerce a SummarizedExperiment into a tibbbe"</span></span>
+<span id="cb52-117"><a href="#cb52-117" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-summary: "A helper function to coerce a SummarizedExperiment into a tibble"</span></span>
 <span id="cb52-118"><a href="#cb52-118" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-119"><a href="#cb52-119" aria-hidden="true" tabindex="-1"></a><span class="co">#' Coerce a DGEList or a SummarizedExperiment into a tibble</span></span>
 <span id="cb52-120"><a href="#cb52-120" aria-hidden="true" tabindex="-1"></a><span class="co">#' </span></span>
@@ -1337,7 +1337,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb52-183"><a href="#cb52-183" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-184"><a href="#cb52-184" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (dataset <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"tau"</span>, <span class="st">"rnai"</span>, <span class="st">"sarm1"</span>)) {</span>
 <span id="cb52-185"><a href="#cb52-185" aria-hidden="true" tabindex="-1"></a>  df <span class="ot">&lt;-</span> <span class="fu">tidy</span>(<span class="fu">get</span>(dataset))</span>
-<span id="cb52-186"><a href="#cb52-186" aria-hidden="true" tabindex="-1"></a>  df<span class="sc">$</span>study <span class="ot">&lt;-</span> dataset  <span class="co"># add a columsn with the name of the experiment</span></span>
+<span id="cb52-186"><a href="#cb52-186" aria-hidden="true" tabindex="-1"></a>  df<span class="sc">$</span>study <span class="ot">&lt;-</span> dataset  <span class="co"># add a columns with the name of the experiment</span></span>
 <span id="cb52-187"><a href="#cb52-187" aria-hidden="true" tabindex="-1"></a>  arrow<span class="sc">::</span><span class="fu">write_parquet</span>(</span>
 <span id="cb52-188"><a href="#cb52-188" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> df, </span>
 <span id="cb52-189"><a href="#cb52-189" aria-hidden="true" tabindex="-1"></a>    <span class="at">sink =</span> <span class="fu">file.path</span>(out_dir, <span class="fu">paste0</span>(dataset, <span class="st">".parquet"</span>))</span>

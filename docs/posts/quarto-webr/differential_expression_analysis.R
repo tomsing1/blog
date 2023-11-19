@@ -83,7 +83,7 @@ for (contr in colnames(fit2)) {
   tt$logFC <- signif(tt$logFC, 2)
   tt$adj.P.Val <- signif(tt$adj.P.Val, 3)
   write_csv(tt[, c("gene_name", "logFC", "adj.P.Val")], 
-            here("posts", "quarto-webr", sprintf("%s_results.csv.gz", contr)))
+            here("posts", "quarto-webr", sprintf("%s_results.csv", contr)))
 }
 
   

@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/quarto-webr/index.html",
       "/posts/dbgap/index.html",
       "/posts/ParquetMatrix/index.html",
       "/posts/parquetArray/index.html",

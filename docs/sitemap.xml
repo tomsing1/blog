@@ -26,7 +26,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/parquet/index.html</loc>
-    <lastmod>2023-09-04T01:39:13.988Z</lastmod>
+    <lastmod>2023-11-18T19:56:34.151Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/custom-badges/index.html</loc>
@@ -66,11 +66,11 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/about.html</loc>
-    <lastmod>2023-09-04T01:38:46.323Z</lastmod>
+    <lastmod>2023-11-19T18:00:54.097Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-09-17T23:09:50.717Z</lastmod>
+    <lastmod>2023-11-19T18:10:55.772Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
@@ -138,10 +138,22 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/ParquetMatrix/index.html</loc>
-    <lastmod>2023-09-14T03:44:36.189Z</lastmod>
+    <lastmod>2023-11-18T19:56:37.596Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/dbgap/index.html</loc>
-    <lastmod>2023-09-17T23:09:50.020Z</lastmod>
+    <lastmod>2023-11-18T19:56:35.386Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/web-r/index.html</loc>
+    <lastmod>2023-11-18T19:59:50.655Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/quarto-webr/index.html</loc>
+    <lastmod>2023-11-19T18:10:54.155Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/quarto-webr/quarto_webr_example.html</loc>
+    <lastmod>2023-11-18T21:03:22.702Z</lastmod>
   </url>
 </urlset>

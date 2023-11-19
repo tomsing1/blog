@@ -6,8 +6,9 @@ date: '2023/11/18'
 format: html
 engine: knitr
 webr: 
-  show-startup-message: false
-  packages: ['ggvenn', 'huxtable', 'readr']
+  show-startup-message: true
+  packages: ['ggvenn', 'huxtable']
+  channel-type: "post-message"
 filters:
   - webr
 editor_options: 
@@ -15,10 +16,7 @@ editor_options:
 ---
 
 ```{webr-r}
-#| context: interactive
-require("ggvenn", quietly = TRUE)
-require("readr", quietly = TRUE)
-require("huxtable", quietly = TRUE)
+#| context: setup
 kUrlRoot <- paste0(
   "https://tomsing1.github.io/blog/posts/quarto-webr"
 )
@@ -29,18 +27,19 @@ kResults <- c(
   )
 results <- lapply(kResults, \(result) {
   url <- paste(kUrlRoot, paste0(result, ".csv"), sep = "/")
-  read_csv(url)[, c("gene_name", "adj.P.Val", "logFC")]
+  download.file(url, basename(url))
+  read.csv(basename(url))[, c("gene_name", "adj.P.Val", "logFC")]
 })
 names(results) <- names(kResults)
 
 # keep only genes present in all results
-keep <- Reduce(intersect, sapply(results, "[[", "gene_name"))
-results <- lapply(results, \(result) result[result$symbol %in% keep, ])
+keep <- Reduce(intersect, lapply(results, \(x) x$gene_name))
+results <- lapply(results, \(result) result[result$gene_name %in% keep, ])
 
 # Helper function to apply an FDR cutoff to a list of dataframes
 apply_fdr <- function(x, fdr_cutoff = 0.01){
   lapply(x, function(df){
-    df[df$adj.P.Val < fdr_cutoff, ]$symbol
+    df[df$adj.P.Val < fdr_cutoff, ]$gene_name
   })
 }
 ```
@@ -49,12 +48,12 @@ apply_fdr <- function(x, fdr_cutoff = 0.01){
 
 This interactive website allows users to intersect differential expression
 results of three different comparisons from an experiment published by 
-[Xia et al](https://www.biorxiv.org/content/10.1101/2021.01.19.426731v1)
+[Xia et al](https://www.biorxiv.org/content/10.1101/2021.01.19.426731v1).
 
 The experiment was performed in three different batches (e.g. samples were
 collected on three different days). For this report, the differences
 between samples from homozygous APP-SAA and wiltdype animals were estimated
-_separately_ for each batch/day.[^1]
+_separately_ for each batch/day: `Day 1`, `Day 2` and `Day 3`.[^1]
 
 [^1]: Analyzing each batch separately is _not_ the best way to estimate genotype
 effects across the full experiment. For this exercise, I just want to obtain
@@ -86,7 +85,7 @@ differentially expressed in _opposite directions_.
 
 ```{webr-r}
 #| context: interactive
-FDR_threshold <- 0.05
+FDR_threshold <- 0.1
 filtered <- apply_fdr(results, FDR_threshold)
 ggvenn(filtered)
 selected <- sort(Reduce(intersect, filtered))
@@ -117,7 +116,7 @@ or download [results for all genes](https://tomsing1.github.io/blog/posts/quarto
 
 ```{webr-r}
 #| context: interactive
-results[["Day1"]][match(selected, results[["Day1"]]$symbol), ] |>
+results[["Day1"]][match(selected, results[["Day1"]]$gene_name), ] |>
   huxtable::hux()
 ```
 
@@ -128,7 +127,7 @@ or download [results for all genes](https://tomsing1.github.io/blog/posts/quarto
 
 ```{webr-r}
 #| context: interactive
-results[["Day2"]][match(selected, results[["Day2"]]$symbol), ] |>
+results[["Day2"]][match(selected, results[["Day2"]]$gene_name), ] |>
   huxtable::hux()
 ```
 
@@ -139,7 +138,7 @@ or download [results for all genes](https://tomsing1.github.io/blog/posts/quarto
 
 ```{webr-r}
 #| context: interactive
-results[["Day3"]][match(selected, results[["Day3"]]$symbol), ] |>
+results[["Day3"]][match(selected, results[["Day3"]]$gene_name), ] |>
   huxtable::hux()
 ```
 

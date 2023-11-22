@@ -56,12 +56,16 @@ are static - e.g. they don't allow users to change parameters on the fly.
 
 That's why I am excited to learn about James J Balamuta's 
 [quarto-webr](https://github.com/coatless/quarto-webr)
-extension, which embeds webR into quarto documents.
+extension, which embeds webR into quarto documents.[^1]
+
+[^1]: `quarto-webr` would not be possible without the help of George W Stagg,
+the lead developer of the
+[webR project](https://docs.r-wasm.org/webr/latest/).
 
 Today I am making my first steps, with the goal of creating an HTML report that
 
 1. Reads differential gene expression results from multiple experiments from
-   CSV files.[^1]
+   CSV files.[^2]
 2. Applies a user-specified false discovery (FDR) threshold to each experiment.
 3. Creates a Venn diagram to visualize the overlap between the results.
 4. Shows the results for the genes deemed significantly differentially expressed
@@ -70,7 +74,7 @@ Today I am making my first steps, with the goal of creating an HTML report that
 Specifically, I would like users to be able to modify the FDR threshold
 themselves and to trigger a refresh of the plot & tables.
 
-[^1]: The details of the experiment are not important, as I am just looking for
+[^2]: The details of the experiment are not important, as I am just looking for
 a convenient example to test the `quarto-webr` extension. If you would like to 
 learn more please check out 
 [this previous post](https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/).
@@ -79,14 +83,14 @@ An R script that generates the CSV files using the limma/voom framework
 
 ## Installation & configuration
 
-I already have quarto installed on my system[^2], and first add the 
+I already have quarto installed on my system[^3], and first add the 
 `quarto-webr` extension:
 
 ```bash
 quarto add coatless/quarto-webr
 ```
 
-[^2]: You can download the version for your operation system 
+[^3]: You can download the version for your operation system 
   [here](https://quarto.org/docs/get-started/index.html)
 
 ### Enabling `webr-r` code cells
@@ -347,7 +351,8 @@ over the last 6-9 months is any indication, then there will be lots of features
 to look forward to soon!
 
 Many thanks to James J Balamuta for creating the `quarto-webr` extension and
-to the `webR` team for opening so many opportunities for the R community!
+to the `webR` team - especially George Stagg - for opening so many opportunities
+for the R community!
 
 ## Reproducibility
 

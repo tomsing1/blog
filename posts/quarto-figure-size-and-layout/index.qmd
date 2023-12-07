@@ -53,14 +53,14 @@ image is displayed in the rendered HTML page.
 
 ```
 #| fig-width: 4
-#| figh-height: 5
+#| fig-height: 5
 #| out-width: "50%"
 #| fig-align: "center"
 ```
 
 ```{r}
 #| fig-width: 4
-#| figh-height: 5
+#| fig-height: 5
 #| out-width: "50%"
 #| fig-align: "center"
 p
@@ -71,14 +71,14 @@ width of the enclosing `<div>`.
 
 ```
 #| fig-width: 4
-#| figh-height: 5
+#| fig-height: 5
 #| out-width: "25%"
 #| fig-align: "center"
 ```
 
 ```{r}
 #| fig-width: 4
-#| figh-height: 5
+#| fig-height: 5
 #| out-width: "25%"
 #| fig-align: "center"
 p

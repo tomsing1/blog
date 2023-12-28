@@ -1,5 +1,5 @@
 ---
-title: "Creating virtual environment with pyenv"
+title: "Creating virtual environments with pyenv"
 author: "Thomas Sandmann"
 date: "2023-12-27"
 freeze: true

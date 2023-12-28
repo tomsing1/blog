@@ -64,6 +64,14 @@ echo 'eval "$(pyenv init -)"' >> ~/.bashrc
 Next, I used `pyenv` to install the latest release version
 of python, version `3.12.1` (at the time of writing).
 
+### Prerequisites
+
+To install successfully, python 3.12.1 required the following system tools
+to be available (installed via `sudo apt install`):
+
+- `libsqlite3-dev`
+- `tk-dev`
+
 ### Troubleshooting
 
 I ran into the [issue reported here](https://github.com/pyenv/pyenv/issues/2823),

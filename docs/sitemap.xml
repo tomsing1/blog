@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-12-07T15:24:33.594Z</lastmod>
+    <lastmod>2023-12-28T00:45:37.607Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
@@ -155,5 +155,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/quarto-webr/quarto_webr_example.html</loc>
     <lastmod>2023-11-18T21:03:22.702Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/pyenv/index.html</loc>
+    <lastmod>2023-12-28T00:45:36.080Z</lastmod>
   </url>
 </urlset>

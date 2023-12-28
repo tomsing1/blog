@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/pyenv/index.html",
       "/posts/quarto-webr/index.html",
       "/posts/dbgap/index.html",
       "/posts/ParquetMatrix/index.html",

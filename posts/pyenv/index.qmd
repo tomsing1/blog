@@ -1,0 +1,156 @@
+---
+title: "Creating virtual environment with pyenv"
+author: "Thomas Sandmann"
+date: "2023-12-27"
+freeze: true
+categories: [python, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+I am planning to learn more about (web application) development with python.
+Today I learned how to 
+
+- Manage multiple python installations on the same system and 
+- Create virtual envirnments with
+[pyenv](https://github.com/pyenv/pyenv).
+
+There is a lot of information about virtual environments
+in python out there, e.g. in the
+[official python documentation](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment).
+In addition to managing dependencies for a project, I also foresee the need to
+manage different versions of python itself.
+
+To set up my development environment, I decided to follow the advice of
+[Real python](https://realpython.com/intro-to-pyenv/)
+and
+[The hitchhiker's guide to python](https://docs.python-guide.org/dev/virtualenvs/#installing-pipenv)
+and manage multiple python versions and virtual
+environments with [pyenv](https://github.com/pyenv/pyenv)
+
+## Installing pyenv on MX Linux
+
+I used [homebrew](https://brew.sh/)
+to install `pyenv` on my linux machine running MX 23.1 Libretto.
+
+```bash
+brew update
+brew install pyenv
+```
+
+Afterwards, I executed the following code to add three
+lines to my `~/.bashrc` file, as recommended
+[on the pyenv README page](https://github.com/pyenv/pyenv#set-up-your-shell-environment-for-pyenv).
+
+```bash
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+```
+
+## Installing python with `pyenv`
+
+Next, I used `pyenv` to install the latest release version
+of python, version `3.12.1` (at the time of writing).
+
+### Troubleshooting
+
+I ran into the [issue reported here](https://github.com/pyenv/pyenv/issues/2823),
+preventing me from installing python with `pyenv`
+(see below). It turns out that brew masks the system's
+`pkg-config`, intefering with the compilation of python.
+
+I unlinked `pkg-config` with the following command, and
+the installation succeeded:
+
+```bash
+brew unlink pkg-config
+```
+
+### Installing python version 3.12.1
+
+First, I listed the (many) python versions `pynev` is
+aware of:
+
+```bash
+pyenv install --list
+```
+
+and then installed the version of my choice:
+
+```bash
+pyenv install -v 3.12.1
+```
+
+### Setting the default python version
+
+Finally, I set my new python installation as the 
+default version:
+
+```bash
+pyenv global 3.12.1
+```
+
+## Creating and using virtual environments
+
+To make using virtual environments with `pyenv` easier,
+I installed the `pyenv-virtualenv` plugin:
+
+```bash
+brew install pyenv-virtualenv
+```
+
+### Creating a first virtual environment
+
+The `pyenv virtualenv` command creates a new virtual
+environment for the specified python version (e.g. 3.12.1).
+
+```bash
+pyenv virtualenv 3.12.1 rango
+```
+
+All virtual environments created in this way are stored in
+the same location, by default the `~/.pyenv/versions` folder:
+
+```bash
+ls ~/.pyenv/versions/
+```
+
+### Activating a virtual environment
+
+The following command activates my new `rango` virtual environment:
+
+```bash
+pyenv activate rango
+python --version  # 3.12.1
+```
+
+and the equivalent command deactivates it:
+
+```bash
+pyenv deactivate rango
+```
+
+## Using virtual environment in VS Code
+
+To use my virtual environment in the [VS Code IDE](https://code.visualstudio.com/):
+
+1. Open VSCode preferences (Ctrl + ,)
+2. Search for `venv`. 
+3. Add ~/.pyenv to the “Venv Path” text box.
+
+Once I created a first python file in VS Code, I could choose the python
+interpretor from the `rango` virtual environment by clicking on the python
+version in the bottom right of the IDE window.
+

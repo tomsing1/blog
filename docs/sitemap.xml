@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2023-12-28T18:33:37.075Z</lastmod>
+    <lastmod>2024-01-02T03:32:01.747Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
@@ -159,5 +159,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/pyenv/index.html</loc>
     <lastmod>2023-12-28T18:33:35.594Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/tango/index.html</loc>
+    <lastmod>2024-01-02T03:32:00.001Z</lastmod>
   </url>
 </urlset>

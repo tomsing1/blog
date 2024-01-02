@@ -1,0 +1,63 @@
+---
+title: "First steps: building web applications with Django"
+author: "Thomas Sandmann"
+date: "2024-01-01"
+freeze: true
+categories: [python, django, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+This week, I worked my way through
+[Tango with Django 4](https://www.tangowithdjango.com/),
+an introduction to the
+[Django web development framework](https://www.djangoproject.com/)
+by [Leif Azzopardi](https://twitter.com/leifos/) and 
+[David Maxwell](https://www.dmax.scot/).
+
+Their book offers a great starting point for somebody with a basic background
+in python but no experience in web development. I really enjoyed implementing
+the `Rango` web application they develop in a systematic, step-by-step fashion.
+
+![Tango with Rango book cover](https://d2sofvawe08yqg.cloudfront.net/tangowithdjango4/s_hero2x?1677955635){width=25%}
+
+To follow along, learners have to actually complete the exercises at the end of
+each chapter. That's been a very effective learning strategy for me, as opposed
+to simply _reading_ a tutorial start to finish. 
+
+The book covers e.g.
+
+- Creating & configuring Django projects from scratch
+- Understanding the model -> view -> template workflow
+- Creating forms and committing data to a SQLite database backend
+- User authentication & management
+- etc
+
+Right now, the latest version of the book covers Django version 4, but I was
+able to complete the exercises with Djano 5.3 as well (with a little help from
+Stackoverflow).
+
+While the first 2/3 of the book was great, it seems that the last chapters
+(covering e.g. the Bootstrap CSS framework or implementing search functionality)
+may not quite finished, yet. (The 
+[book's companiongithub repository](https://github.com/tangowithcode/tango_with_django_4_code) doesn't offer code for the later chapters, either.)
+
+But I am thankful for the easy-to-follow introduction into Django's core
+functionality. After all, teaching backend _and_ frontend web development to
+beginners might simply be too much to ask for from a single book. So - thank you
+Leif and David for teaching me to `Tango with Rango` over the last few days!
+
+Next, I am hoping to learn about styling web applications with 
+[bootstrap 5](https://getbootstrap.com/docs/5.0/getting-started/introduction/)
+and, afterwards, taking a deeper dive into javascript (once again).

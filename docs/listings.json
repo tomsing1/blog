@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/volcano/index.html",
       "/posts/tango/index.html",
       "/posts/pyenv/index.html",
       "/posts/quarto-webr/index.html",

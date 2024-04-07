@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2024-04-04T05:08:01.104Z</lastmod>
+    <lastmod>2024-04-07T19:34:01.111Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
@@ -167,5 +167,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/volcano/index.html</loc>
     <lastmod>2024-04-04T05:07:59.514Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/conditional_shiny_widgets/index.html</loc>
+    <lastmod>2024-04-07T19:33:59.332Z</lastmod>
   </url>
 </urlset>

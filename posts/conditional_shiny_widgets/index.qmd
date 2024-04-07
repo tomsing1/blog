@@ -1,0 +1,133 @@
+---
+title: "Conditional panels within shiny modules"
+author: "Thomas Sandmann"
+date: "2024-04-07"
+freeze: true
+categories: [R, shiny, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+The 
+[shiny R package](https://cran.r-project.org/package=shiny)
+includes the
+[conditionalPanel](https://rstudio.github.io/shiny/reference/conditionalPanel.html)
+function to show / hide a panel depending on a javascript expression. Today I
+learned how to use a `conditionalPanel` within a
+[shiny module](https://mastering-shiny.org/scaling-modules.html).
+
+## A shiny module with several conditional selectors
+
+The following example [^1] expands the example shown on the 
+[conditionalPanel help page](https://rstudio.github.io/shiny/reference/conditionalPanel.html). 
+
+[^1]: Also available in 
+[this gist](https://gist.github.com/tomsing1/884f32a3f40abd9a937dab0c54d23fda)
+
+It encapsulates the ui and server elements in separate functions, that together
+constitute the `mod_histogram` module. 
+
+```{r}
+library(shiny)
+
+mod_histogram_ui <- function(id){
+    ns <- NS(id) # <1>
+    fluidPage(
+      sidebarPanel(
+        selectInput(ns("plotType"), "Plot Type",
+                    c(Scatter = "scatter", Histogram = "hist")
+        ),
+        # Only show this panel if the plot type is a histogram
+        conditionalPanel(
+          condition = "input.plotType == 'hist'",
+          ns = ns,  # <2>
+          selectInput(
+            ns("breaks"), "Breaks",
+            c("Sturges", "Scott", "Freedman-Diaconis", "[Custom]" = "custom")
+          ),
+          # Only show this panel if Custom is selected
+          conditionalPanel(
+            condition = "input.breaks == 'custom'",
+            ns = ns,
+            sliderInput(ns("breakCount"), "Break Count", min = 1,
+                        max = 100, value = 10)
+          )
+        )
+      ),
+      mainPanel(
+        plotOutput(ns("plot"))
+      )
+    )
+}
+
+mod_histogram_server <- function(id, df, labels, interactive = FALSE){
+  moduleServer( id, function(input, output, session){
+    x <- rnorm(1000)
+    y <- rnorm(1000)
+
+    output$plot <- renderPlot({
+      if (input$plotType == "scatter") {
+        plot(x, y)
+      } else {
+        breaks <- input$breaks
+        if (breaks == "custom") {
+          breaks <- input$breakCount
+        }
+        hist(x, breaks = breaks)
+      }
+    })
+  })
+}
+
+histogramApp <- function() {
+  ui <- mod_histogram_ui("histogram_1")
+  server <- function(input, output, session) {
+    mod_histogram_server("histogram_1")
+  }
+
+  shinyApp(ui, server)
+}
+```
+
+1. The `ns` object defined in the UI part of the module takes care of
+  managing the module's namespace.
+  
+2. The `ns` namespace is passed as an argument to each `conditionalPanel` call.
+  It automatically modifies the `condition` javascript expression, so we do 
+  _not_ need to include the module's id ourselves (e.g. via `paste` or 
+  `sprintf`, as is sometimes advised on Stack Overflow).
+
+To see a minial shiny app, call the `histogramApp()` function:
+
+```{r}
+#| eval: false
+histogramApp()
+```
+
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info("attached")
+```
+
+</details>
+   

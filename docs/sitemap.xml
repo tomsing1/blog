@@ -70,7 +70,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2024-04-07T19:34:01.111Z</lastmod>
+    <lastmod>2024-04-13T22:41:02.672Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
@@ -126,7 +126,7 @@
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/quarto-figure-size-and-layout/index.html</loc>
-    <lastmod>2023-12-07T15:24:31.932Z</lastmod>
+    <lastmod>2024-04-12T04:21:09.457Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/nextflow-blast-tutorial/index.html</loc>
@@ -171,5 +171,9 @@
   <url>
     <loc>https://tomsing1.github.io/blog/posts/conditional_shiny_widgets/index.html</loc>
     <lastmod>2024-04-07T19:33:59.332Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/volcano_ggiraph/index.html</loc>
+    <lastmod>2024-04-13T22:41:00.668Z</lastmod>
   </url>
 </urlset>

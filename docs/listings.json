@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/volcano_ggiraph/index.html",
       "/posts/conditional_shiny_widgets/index.html",
       "/posts/volcano/index.html",
       "/posts/tango/index.html",

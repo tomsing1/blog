@@ -1,0 +1,258 @@
+---
+title: "Interactive volcano plots with the ggiraph R package"
+author: "Thomas Sandmann"
+date: "2024-04-11"
+freeze: true
+categories: [R, ggplot2, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+The
+[ggiraph R package](https://cran.r-project.org/package=ggiraph)
+is my new favorite way to add interactivity to a ggplot. 
+
+## Introduction
+
+[Last week](../volcano/)
+I explored different ways to create collaborator-friendly volcano plots in R.
+
+This week, a colleague asked me whether I could make it easier for them to 
+identify which genes the points referred to. Luckily, there is no shortage
+of R packages to create interactive plots, including e.g. the
+[plotly](https://cran.r-project.org/package=plotly) [^1] or
+[rbokeh ](https://hafen.github.io/rbokeh/)
+packages. [^2]
+
+[^1]: My previous favorite - also available for other languages including 
+[python](https://plotly.com/python/).
+
+[^2]: See [Robert Kabacoff's "Modern Data Visualization with R" online book](https://rkabacoff.github.io/datavis/Interactive.html)
+for some great examples.
+
+Both `plotly` and `ggiraph` interface with the `ggplot2` R package, allowing
+me to switch between interactive and non-interactive versions of my plots
+with ease.
+
+First, let's get some differential gene expression data, please 
+[see my previous post for details](../volcano/).
+
+::: {.callout-note collapse="true"}
+
+### Retrieving differential expression results from Mattila et al, 2015
+
+Let's retrieve a table with the results from a differential gene expression
+analysis by downloading an excel file published as supplementary table S2
+by
+[Mattila et al, 2015](https://doi.org/10.1016/j.celrep.2015.08.081)
+
+```{r}
+#| message: false
+#| warning: false
+library(poorman)
+library(readxl)
+kFdr <- 0.05
+
+df <- local({
+  kUrl <- paste0(
+    "https://drive.google.com/uc?export=download&",
+    "id=1xWVyoSSrs4hoqf5zVRgGhZPRjNY_fx_7"
+  )  
+  temp_file <- tempfile(fileext = ".xlsx")
+  download.file(kUrl, temp_file)
+  df <- readxl::read_excel(temp_file, sheet = "mlx1 mutant LSD vs. HSD",
+                           skip = 3)
+  
+  df$direction <- with(df, poorman::case_when(
+    logFC > 0 & adj.P.Val < kFdr ~ "up",
+    logFC < 0 & adj.P.Val < kFdr ~ "down",
+    TRUE ~ "n.s."
+  ))
+  df$direction <- factor(df$direction, levels = c("down", "up", "n.s."))
+  return(df)
+})
+```
+
+:::
+
+### A non-interactive volcano plot
+
+Next, we create a volcano plot using `ggplot2`:
+
+```{r}
+#| fig-width: 7.5
+#| fig-height: 7
+
+library(ggplot2)
+ggplot2::theme_set(theme_linedraw(base_size = 14))
+
+p <- ggplot(
+  data = df, 
+  mapping = aes(x = logFC, y = -log10(P.Value), color = direction)
+) +
+  scale_color_manual(values = c("up" = "#E41A1C",
+                                "down" = "#377EB8", 
+                                "n.s." = "lightgrey"),
+                     guide = "none") +
+  geom_point(size = 2, alpha = 0.4) +
+  labs(
+    x = "Fold change (log2)",
+    y = "-log10(p-value)"
+  ) +
+  theme(panel.grid = element_blank())
+print(p)
+```
+
+
+### An interactive volcano plot
+Adding a tooltip for each point is as easy as replacing the `geom_point()` 
+call with its' `ggiraph::geom_point_interactive()` companion.
+
+To see the result, please hover your mouse over a point in the plot below:
+
+```{r}
+#| fig-width: 7.5
+#| fig-height: 7
+
+library(ggiraph)
+
+p <- ggplot(
+  data = df, 
+  mapping = aes(x = logFC, y = -log10(P.Value), color = direction)
+) +
+  scale_color_manual(values = c("up" = "#E41A1C",
+                                "down" = "#377EB8", 
+                                "n.s." = "lightgrey"),
+                     guide = "none") +
+  ggiraph::geom_point_interactive( # <1>
+    aes(
+      tooltip = sprintf("%s\nlogFC: %s\nFDR: %s", 
+                        Symbol, 
+                        signif(logFC, digits = 3),
+                        signif(adj.P.Val, digits = 2)
+                        )
+    ),
+    hover_nearest = TRUE, 
+    size = 3,
+    alpha = 0.4) +
+  labs(
+    x = "Fold change (log2)",
+    y = "-log10(p-value)"
+  ) +
+  theme(panel.grid = element_blank())
+
+ggiraph::girafe(ggobj = p,  # <2>
+                options = list(
+                  opts_tooltip(use_fill = TRUE),
+                  opts_zoom(min = 0.5, max = 5),
+                  opts_sizing(rescale = FALSE),  # <3>
+                  opts_toolbar(saveaspng = TRUE, delay_mouseout = 2000)
+                )
+)
+```
+
+1. `geom_point_interactive()` understands the `tooltip` aesthetic, so we can
+display the gene symbol, the log2 fold change and the FDR for each gene.
+2. The `ggiraph::girafe()` function turns our `ggplot` object into an
+interactive graph, and its arguments define additional properties, e.g. the
+contents of the context menu, or the style of the tool tip information.
+3. By default, `ggiraph` plots rescales to the size of the html container. To
+suppress this behavior, we set `rescale = FALSE` and rely on the `fig-width`
+and `fig-height` defined in this quarto markdown document instead.
+
+### Combining ggrastr and ggiraph
+
+Adding interactivity to the plot increases the size of the html page it is
+contained in. In case that's a concern, e.g. when there are many plots on the
+same page, we can restrict the tool tips to a subset of the points, e.g. only
+those that pass our significance threshold.
+
+We can also combine `ggiraph` with the `ggrastr` package, first plotting
+all points as a rasterized image (which does not encode the position of each
+point separately) - and then overlay transparent interactive points for 
+the significant genes.
+
+```{r}
+#| fig-width: 7.5
+#| fig-height: 7
+
+library(ggrastr) # <1>
+ggplot2::theme_set(theme_linedraw(base_size = 14))
+
+p <- ggplot(
+  data = df, 
+  mapping = aes(x = logFC, y = -log10(P.Value), color = direction)
+) +
+  scale_color_manual(values = c("up" = "#E41A1C",
+                                "down" = "#377EB8", 
+                                "n.s." = "lightgrey"),
+                     guide = "none") +
+  ggrastr::geom_point_rast(size = 2, alpha = 0.4) +  # <2>
+  ggiraph::geom_point_interactive(
+    data = poorman::filter(df, direction != "n.s."), # <3>
+    aes(
+      tooltip = sprintf("%s\nlogFC: %s\nFDR: %s", 
+                        Symbol, 
+                        signif(logFC, digits = 3),
+                        signif(adj.P.Val, digits = 2)
+                        )
+    ),
+    hover_nearest = TRUE, 
+    size = 3,
+    alpha = 0) + # <4>
+  labs(
+    x = "Fold change (log2)",
+    y = "-log10(p-value)"
+  ) +
+  theme(panel.grid = element_blank())
+
+ggiraph::girafe(ggobj = p,
+                options = list(
+                  opts_tooltip(use_fill = TRUE),
+                  opts_zoom(min = 0.5, max = 5),
+                  opts_sizing(rescale = FALSE),
+                  opts_toolbar(saveaspng = TRUE, delay_mouseout = 2000)
+                )
+)
+```
+
+1. The [ggrastr R package](https://cran.r-project.org/package=ggrastr) offers
+drop-in replacements for `ggplot2` functions that help reduce the size (and
+complexity) of graphics.
+2. We add a rasterized layer with all points.
+3. Subsetting the data.frame passed as the `data` argument restricts
+interactivity to only the significant genes.
+4. Because the points are already drawn by the `ggrastr::geom_point_rast`
+function, we set `alpha = 0` to obtain transparent points that will trigger
+the display of the tool tip.
+
+The `ggiraph` package comes with
+[excellent documentation](https://www.ardata.fr/ggiraph-book/)
+- check it out!
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info("attached")
+```
+
+</details>
+   

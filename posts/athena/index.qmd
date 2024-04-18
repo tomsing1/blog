@@ -1,0 +1,394 @@
+---
+title: "Querying JSON files with AWS Athena and the noctua R package"
+author: "Thomas Sandmann"
+date: "2024-04-17"
+freeze: true
+categories: [R, AWS, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+This week, I learned how to query JSON files stored on AWS S3 with the
+[noctua R package](https://cran.r-project.org/package=noctua),
+an API for the 
+[AWS Athena](https://docs.aws.amazon.com/athena/)
+service.
+
+## Overview
+
+Normally, 
+[duckdb](https://duckdb.org/docs/extensions/json.html)
+is my tool of choice for parsing and querying large numbers of JSON files,
+and when the files are available on my local system, it makes easy work of 
+this task. 
+
+But this week, I needed to process more than 20 thousand small
+JSON files stored on AWS S3. Instead of retrieving them first, I used the
+opportunity to learn about 
+[AWS Athena](https://docs.aws.amazon.com/athena/),
+a severless query service that makes it easy to analyze data in Amazon S3 using
+standard SQL. (In other words, I am using a query engine that is located
+close to the data, instead of downloading the data to bring it closer to my
+local `duckdb` query engine.)
+
+Athena supports CSV, JSON, or columnar data formats such as Apache 
+Parquet and Apache ORC, and enables ad-hoc queries without the need to set up
+a database beforehand.
+
+There are multiple ways to interact with AWS Athena from within R [^1]. Here, 
+I am using the
+[noctua R package](https://dyfanjones.github.io/noctua/), which leverages
+the 
+[paws R package](https://www.paws-r-sdk.com/)
+under the hood.
+
+[^1]: Dyfan Jones's blog features great introductions on how to get started
+with the
+[RAthena R package](https://dyfanjones.me/post/athena-and-r-there-is-another-way/),
+which leverages the python 
+[boto3 AWS API](https://aws.amazon.com/sdk-for-python/), 
+or the
+[noctua R package](https://dyfanjones.me/post/r-owl-of-athena/) I am using in
+this post.
+
+### Authentication with AWS
+
+::: {.callout-warning}
+
+Please note that use of AWS services, including the S3 and Athena, 
+[is not free](https://aws.amazon.com/pricing/)
+and requires you to create an account first. Storing the small example data and
+running the Athena queries in this tutorial may be free if you haven't exhausted
+the free tier of your AWS services, yet. But please be aware of the potential
+cost of cloud computing with AWS.
+
+:::
+
+The `paws` R package recognizes 
+[numerous ways of authenticating with AWS](https://github.com/paws-r/paws/blob/main/docs/credentials.md).
+For the following code to run, please ensure that you provided one of them, e.g.
+exported your `key` and `secret key` available as environmental variables, or
+created a credentials file, etc.
+
+```{r}
+library(DBI)
+library(glue)
+library(jsonlite)      # to create example JSON files
+library(paws.storage)  # to copy our example JSON file on AWS S3
+library(noctua)        # to interface with AWS Athena
+```
+
+In this example, I am using the same AWS S3 bucket to store the JSON files
+I want to query (under the `example` prefix), and to store files generated
+by Athena (under the `athena` prefix), but you can use any location on S3 you
+have permission to access.
+
+```{r}
+kRegion <- "us-west-2"
+kDataBucket <- "my-scratch-bucket"
+kDataDir <- "s3://my-scratch-bucket/example/"
+kStagingDir <- "s3://my-scratch-bucket/athena/"
+```
+
+## Creating a set of example JSON files
+
+First, let's create a small set of JSON files, each containing a single record,
+by 
+
+1. looping over the rows of the `mtcars` data.frame,
+2. writing a JSON file to the temporary directory, and 
+3. copying it to AWS S3. 
+
+```{r}
+#| eval: false
+svc <- paws.storage::s3(region = kRegion)   # <1>
+
+data(mtcars)
+mtcars$name <- row.names(mtcars) # <2>
+for (n in seq.int(nrow(mtcars))) {
+  # export the row to a json file
+  temp_file <- tempfile(fileext = ".json")
+  jsonlite::write_json(  # <3>
+    x = mtcars[n, , drop = TRUE],
+    path = temp_file,
+    pretty = FALSE,  # <4>
+    auto_unbox = TRUE)
+  
+  # upload the JSON file to S3
+  svc$put_object( # <5>
+    Body = temp_file,
+    Bucket = kDataBucket,
+    Key = paste0("example/", basename(temp_file))
+  )
+  unlink(temp_file)
+}
+```
+
+1. Establish a connection to the AWS S3 service.
+2. The `write_json` does not export the `row.names` of the data.frame, so 
+we store them in a regular column first.
+3. Export each row of the `mtcars` data.frame into a separate JSON file.
+4. Athena does not accept pretty JSON format. Instead, each JSON-encoded record
+must be represented on a separate line as outlined in the
+[Best practices for reading JSON data](https://docs.aws.amazon.com/athena/latest/ug/parsing-JSON.html)
+documentation page.
+5. Copy the JSON file to AWS S3.
+
+## Connecting to the AWS Athena service
+
+Next, we establish a connection to the AWS Athena service, pointing it to
+our staging location on S3. The `noctua` package provides methods to connect
+to (`dbConnect`) and query (e.g. `dbQuery`) Athena, extending generic methods
+defined in the
+[DBI R package](https://dbi.r-dbi.org/).
+
+```{r}
+#| eval: false
+con <- dbConnect(noctua::athena(), s3_staging_dir = kStagingDir)
+dbGetQuery(con, "show databases")
+```
+
+```
+## INFO: (Data scanned: 0 Bytes)
+
+##    database_name
+##           <char>
+## 1:       default
+```
+
+If this is your first interaction with Athena, only the `default` database
+will be available.
+
+## Creating an external table with AWS Athena
+
+Next, we point Athena to our JSON files, by defining an _external table_ with 
+a schema that matches the column types of the original `mtcars` data.frame:
+
+```{r}
+#| eval: false
+sql <- glue_sql(  # <1>
+  "CREATE EXTERNAL TABLE IF NOT EXISTS mtcars (
+      mpg float,
+      cyl tinyint,
+      disp float,
+      hp smallint,
+      drat float,
+      wt float,
+      qsec float,
+      vs tinyint,
+      am tinyint,
+      gear tinyint,
+      carb tinyint,
+      name string
+ )
+ ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+ LOCATION {kDataDir};", .con = con)
+dbExecute(con, sql)
+```
+
+1. The [glue_sql() command](https://solutions.posit.co/connections/db/best-practices/run-queries-safely/#using-glue_sql)
+facilitates inserting user-defined variables into a SQL query.
+
+```
+# <AthenaResult>
+##   SQL  CREATE EXTERNAL TABLE IF NOT EXISTS mtcars (
+##      mpg float,
+##      cyl tinyint,
+##      disp float,
+##      hp smallint,
+##      drat float,
+##      wt float,
+##      qsec float,
+##      vs tinyint,
+##      am tinyint,
+##      gear tinyint,
+##      carb tinyint,
+##      name string
+## )
+## ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+## LOCATION 's3://my-scratch-bucket/example/';
+```
+
+The `dbListTables` command confirms that our `default` database now
+contains the `mtcars` table:
+
+```{r}
+#| eval: false
+dbListTables(con)
+```
+
+```
+## [1] "mtcars"
+```
+
+## Querying across all JSON files
+
+Now we are ready to issue queries across our collection of JSON files, using
+standard SQL. For example, we can retrieve a subset of rows
+
+```{r}
+#| eval: false
+sql <- glue_sql('SELECT * FROM "mtcars" LIMIT 5', .con = con)
+dbGetQuery(con, sql)
+```
+
+```
+## INFO: (Data scanned: 2.15 KB)
+
+##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    <num> <int> <num> <int> <num> <num> <num> <int> <int> <int> <int>
+## 1:  19.2     8 400.0   175  3.08 3.845 17.05     0     0     3     2
+## 2:  18.1     6 225.0   105  2.76 3.460 20.22     1     0     3     1
+## 3:  22.8     4 108.0    93  3.85 2.320 18.61     1     1     4     1
+## 4:  19.2     6 167.6   123  3.92 3.440 18.30     1     0     4     4
+## 5:  22.8     4 140.8    95  3.92 3.150 22.90     1     0     4     2
+##                name
+##              <char>
+## 1: Pontiac Firebird
+## 2:          Valiant
+## 3:       Datsun 710
+## 4:         Merc 280
+## 5:         Merc 230
+```
+
+filter for specific values
+
+```{r}
+#| eval: false
+sql <- glue_sql('SELECT * FROM "mtcars" WHERE "gear" = 5;', .con = con)
+dbGetQuery(con, sql)
+```
+
+```
+## INFO: (Data scanned: 4.05 KB)
+
+##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    <num> <int> <num> <int> <num> <num> <num> <int> <int> <int> <int>
+## 1:  19.7     6 145.0   175  3.62 2.770  15.5     0     1     5     6
+## 2:  26.0     4 120.3    91  4.43 2.140  16.7     0     1     5     2
+## 3:  15.8     8 351.0   264  4.22 3.170  14.5     0     1     5     4
+## 4:  30.4     4  95.1   113  3.77 1.513  16.9     1     1     5     2
+## 5:  15.0     8 301.0   335  3.54 3.570  14.6     0     1     5     8
+##              name
+##            <char>
+## 1:   Ferrari Dino
+## 2:  Porsche 914-2
+## 3: Ford Pantera L
+## 4:   Lotus Europa
+## 5:  Maserati Bora
+```
+
+or match strings
+
+```{r}
+#| eval: false
+sql <- glue_sql('SELECT * FROM "mtcars" WHERE "name" like \'Ferrari%\';', 
+                .con = con)
+dbGetQuery(con, sql)
+```
+
+```
+## INFO: (Data scanned: 4.05 KB)
+
+##      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    <num> <int> <num> <int> <num> <num> <num> <int> <int> <int> <int>
+## 1:  19.7     6   145   175  3.62  2.77  15.5     0     1     5     6
+##            name
+##          <char>
+## 1: Ferrari Dino
+```
+
+We can also read the full table into our R session, reconstituting the contents
+of the original `mtcars` data.frame:
+
+```{r}
+#| eval: false
+df <- DBI::dbReadTable(con, "mtcars")
+head(df)
+```
+
+```
+## INFO: (Data scanned: 4.05 KB)
+#      mpg   cyl  disp    hp  drat    wt  qsec    vs    am  gear  carb
+##    <num> <int> <num> <int> <num> <num> <num> <int> <int> <int> <int>
+## 1:  17.3     8 275.8   180  3.07 3.730 17.60     0     0     3     3
+## 2:  24.4     4 146.7    62  3.69 3.190 20.00     1     0     4     2
+## 3:  27.3     4  79.0    66  4.08 1.935 18.90     1     1     4     1
+## 4:  21.4     4 121.0   109  4.11 2.780 18.60     1     1     4     2
+## 5:  21.0     6 160.0   110  3.90 2.875 17.02     0     1     4     4
+## 6:  30.4     4  95.1   113  3.77 1.513 16.90     1     1     5     2
+##             name
+##           <char>
+## 1:    Merc 450SL
+## 2:     Merc 240D
+## 3:     Fiat X1-9
+## 4:    Volvo 142E
+## 5: Mazda RX4 Wag
+## 6:  Lotus Europa
+```
+
+## Cleaning up
+
+Once our analysis is complete, we disconnect from the service
+
+```{r}
+#| eval: false
+dbDisconnect(con)
+```
+
+and, if we don't want to query the same JSON files again in the future, we can
+also remove the table from the database:
+
+```{r}
+#| eval: false
+dbRemoveTable(con, "mtcars", delete_data = FALSE)  # <1>
+```
+
+1. Set the `delete_data = FALSE` argument to remove the Athena database, but
+leave the JSON files in place.
+
+## Conclusions
+
+- The `noctua` R package made it easy to interface with AWS Athena, because it
+  allowed me to use the familiar `DBI` API implemented for many database back 
+  ends.
+- Defining the schema for the example table was informed by examining the
+  `mtcars` data set.
+- Querying the collection of JSON files required Athena to read _all_ of them. 
+  To reduce the amount of data that needs to be scanned, you might want to 
+  [partition your data](https://docs.aws.amazon.com/athena/latest/ug/ctas-partitioning-and-bucketing.html) -
+  e.g. split it by date, country, etc - both speeding up queries and reducing
+  cost.
+- The `mtcars` data set is a highly structured, and could easily be stored as
+  a single table on AWS S3, e.g. in a CSV or 
+  [parquet file](https://www.databricks.com/glossary/what-is-parquet). 
+  The latter is highly optimized for columnar data storage, and can be queried
+  in a highly efficient way - definitely something I will consider for large,
+  structured data in the future.
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info("attached")
+```
+
+</details>
+   

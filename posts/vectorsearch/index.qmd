@@ -1,0 +1,586 @@
+---
+title: "Exploring recipes with LLMs, Ollama and R"
+author: "Thomas Sandmann"
+date: "2024-08-21"
+freeze: true
+categories: [R, Ollama, LLM]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+Today I learned about
+
+- Running LLMs locally via Ollama
+- Creating embeddings for a corpus of recipes
+- Exploring the embedding space using PCA, clustering and UMAP
+
+## Acknowledgements
+
+This post is heavily inspired by @hrbrmstr's 
+[DuckDB VSS & CISA KEV](https://dailydrop.hrbrmstr.dev/2024/08/09/drop-514-2024-08-09-duckdb-vector-search/)
+post, and benefited greatly from Joseph Martinez' tutorial on 
+[Semantic Search using Datasette](https://github.com/josephrmartinez/recipe-dataset). 
+As always, all errors are mine.
+
+## Introduction
+
+Large language models (LLMs) are everywhere right now, from chat bots to search
+engines. Today, inspired by
+[Bob Rudis'](https://rud.is/) recent post on exploring a large set of "Known
+Exploited Vulnerabilities by 
+[creating and searching text embeddings](https://dailydrop.hrbrmstr.dev/2024/08/09/drop-514-2024-08-09-duckdb-vector-search/),
+I am using local LLM to explore a large set of 
+[food recipes](https://github.com/josephrmartinez/recipe-dataset?tab=readme-ov-file)
+by
+
+- Embedding each recipe (title, ingredients & instructions) into a high 
+  dimensional space using the `nomic-embed-text` LLM running locally via
+  [Ollama](https://ollama.com/).
+- Exploring the embedding space using principal components (PCs) and 
+  Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP)
+- Cluster recipes and summarize each cluster with the (smallest version of)
+  Meta's `llama3.1` model.
+
+## Installing Ollama
+
+For this post, I am using LLMs that run locally on my M2 Macbook Pro with 16Gb
+RAM. (Some larger LLMs require more memory, so I will stick to the smaller
+models here.)
+
+First, I downloaded and installed the [Ollama application](https://ollama.com/),
+which makes it easy to retrieve and run different models. Once Ollama is
+running (indicated by the llama 🦙 menu item in my Mac's main menu bar), it
+serves 
+[REST endpoints](https://github.com/ollama/ollama/blob/main/docs/api.md),
+including calls to
+
+- generate text based on a prompt: `POST /api/generate`
+- return the numerical embedding for an input: `POST /api/embed`
+
+all from the comfort of my own laptop.
+
+## Downloading models
+
+Next, let's download a few models, including some that only provide embeddings
+(e.g. they output numerical vectors representing the input) and the latest
+[llama 3.1 model](https://ollama.com/library/llama3.1) released by Meta[^1]
+via ollama's command line interface:
+
+```
+ollama pull nomic-embed-text  # embeddings only
+ollama pull nomic-embed-text  # embeddings only
+ollama pull llama3.1:latest   # 8 billion parameters
+```
+
+[^1]: The Llama license allows for redistribution, fine-tuning, and creation of
+derivative work, but requires derived models to include "Llama" at the
+beginning of their name, and any derivative works or services must mention
+"Built with Llama". For more information, see the 
+[original license](https://llama.meta.com/llama3_1/license/).
+
+## Interacting with Ollama from R
+
+Following 
+[Bob's example](https://companion.hrbrmstr.dev/posts/2024-08-09-duckdb-vss/)
+we can submit queries to our `Ollama` server by issuing POST requests via the
+[httr2 package](https://cran.r-project.org/package=httr2). Because we will do
+this many times, the following helper R functions will be useful - one to 
+retrieve embeddings, the other to generate text. 
+
+```{r}
+#| message: false 
+library(dplyr)
+library(httr2)
+
+ollama_embed <- function(input = "This text will be embedded.",
+                         model = "nomic-embed-text:latest") {
+  resp <- httr2::request("http://localhost:11434") |> 
+    httr2::req_url_path("/api/embed") |>
+    httr2::req_headers("Content-Type" = "application/json") |>
+    httr2::req_body_json(
+      list(
+        model = model,
+        input = input,
+        truncate = TRUE,
+        stream = FALSE,
+        keep_alive = "10s",
+        options = list(seed = 123)
+      )
+    ) |> 
+   httr2::req_perform()
+
+  m <- resp |> httr2::resp_body_json(simplifyVector = TRUE) |>
+    getElement("embeddings")
+  m[1, ]
+}
+
+ollama_generate <- function(prompt = "Who is Super Mario's best friend?",
+                            model = "llama3.1:latest") {
+  resp <- httr2::request("http://localhost:11434") |> 
+    httr2::req_url_path("/api/generate") |>
+    httr2::req_headers("Content-Type" = "application/json") |>
+    httr2::req_body_json(
+      list(
+        model = model,
+        prompt = prompt,
+        stream = FALSE,
+        keep_alive = "10s",  # keep the model in memory for 10s after the call
+        options = list(seed = 123)  # reproducible seed
+      )
+    ) |> 
+   httr2::req_perform()
+
+  resp |> httr2::resp_body_json() |>
+    getElement("response")
+}
+```
+
+Ollama offers many different models to choose from, differing in architecture,
+number of parameters, and of course the training data they were built from.
+Typically, larger models take longer to run and require more memory. For 
+example, the following benchmark profiles the turnaround time for our three
+models, averaged over 20 requests:
+
+```{r}
+#| fig-width: 7
+#| fig-height: 4
+#| warning: false
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(microbenchmark)
+})
+set.seed(123)
+# the beginning of Shakespeare's Sonnet 18
+test_input <- paste("Shall I compare thee to a summer's day?", 
+                    "Thou art more lovely and more temperate:",
+                    "Rough winds do shake the darling buds of May,",
+                    "And summer's lease hath all too short a date:")
+microbenchmark(
+    snowflake = ollama_embed(model = "snowflake-arctic-embed:latest",
+                             input = test_input),
+    nomic = ollama_embed(model = "nomic-embed-text:latest",
+                             input = test_input),
+    llama = ollama_embed(model = "llama3.1:latest",
+                             input = test_input),
+    times = 20, unit = "ms"
+) |>
+  ggplot2::autoplot() +
+  theme_linedraw(14)
+```
+
+The `nomic-embed-text` (v1.5) model with 22 million parameters 
+is (usually) faster than `snowflake-arctic-embed:latest` model with 335 million 
+parameters, and both are faster than the `llama3.1` model with 8 billion.
+
+Because it is fast and supports long inputs, and I will stick with the 
+`nomic-embed-text:latest` model here. Speed of course doesn't reflect
+the _quality_ of the embeddings. If you are curious how the choice of model
+influences the results, just swap out the  `model` argument in the calls to the
+`ollama_embed` helper function below.
+
+::: {.callout-note collapse="true"}
+
+## {ollamar} R package
+
+The [ollamar R package](https://cran.r-project.org/package=ollamar)
+offers convenience functions to interact with the `ollama` application.
+
+For example, we can use them to prompt a model of our choice
+and extract its response from the returned object [^2].
+
+```{r}
+#| eval: false
+
+library(ollamar)
+ollamar::test_connection()
+resp <- ollamar::generate("llama3.1", "tell me a 5-word story")
+ollamar::resp_process(resp, "df")$response
+```
+
+[^2]: {ollamar} version 1.1.1 available from CRAN does not support returning the 
+response as plain text from a request, yet, but that feature seems to be
+included in the latest version 
+[on github](https://github.com/hauselin/ollama-r). Here we extract the
+`response` column ourselves.
+
+The `embeddings` function directs requests to the `embed` endpoint instead [^3].
+
+```{r}
+#| eval: false
+
+emb <- ollamar::embeddings("llama3.1", "Hello, how are you?")
+length(emb)
+```
+
+[^3]: Currently, the functions from the {ollamar} package print all `httr2`
+responses (via cat). If that get's annoying, you can silence them e.g. with
+`generate_quietly <- purrr::quietly(ollamar::generate)`, etc. 
+
+:::
+
+## The recipe corpus
+
+Kaggle hosts the 
+[Food Ingredients and Recipes Dataset with Images](https://www.kaggle.com/datasets/pes12017000148/food-ingredients-and-recipe-dataset-with-images)
+dataset, which was originally scraped from
+[the Epicurious Website](https://www.epicurious.com/). 
+The original dataset includes images for each recipe as well, but 
+Joseph Martinez has generously shared a CSV file with just the text information 
+[in this github repository](https://github.com/josephrmartinez/recipe-dataset).
+
+Let's read the full dataset into our R session:
+
+```{r}
+#| message: false
+library(readr)
+recipes <- readr::read_csv(
+  paste0("https://raw.githubusercontent.com/josephrmartinez/recipe-dataset/",
+         "main/13k-recipes.csv"),
+  col_types = "_c_ccc")
+recipes
+```
+
+This corpus is very large. For this example, I sample 5000 random recipes to
+speed up the calculation of the embeddings (see below).
+
+```{r}
+set.seed(123)
+keep <- sample(seq.int(nrow(recipes)), size = 5000, replace = FALSE)
+recipes <- recipes[keep, ]
+```
+
+The list of ingredients is included as a _python_ list, including square
+brackets and quotes. Let's use the `reticulate` R package to coerce it into a
+character vector and then collapse it into a single comma-separated string:
+
+```{r}
+suppressPackageStartupMessages({
+  library(purrr)
+  library(reticulate)
+  library(stringr)
+})
+recipes$Cleaned_Ingredients <- reticulate::py_eval(
+  # combine ingredients from all recipes into a single string to avoid
+  # looping over each one separately
+  paste("[", recipes$Cleaned_Ingredients, "]", collapse = ", ")) |>
+  unlist(recursive = FALSE) |>
+  purrr::map_chr(~ stringr::str_flatten_comma(.)) |>
+  # double quotes, denoting inches, were escaped in the original list
+  stringr::str_replace_all(pattern = stringr::fixed('\"'), 
+                           replacement = ' inch')
+```
+
+Some `Titles` contain escaped quotes, let's remove them.
+
+```{r}
+recipes$Title <- stringr::str_replace_all(
+  string = recipes$Title, 
+  pattern = stringr::fixed('\"'), replacement = "")
+```
+
+I also replace all newlines (or tabs) in the `Instructions` with spaces:
+
+```{r}
+recipes$Instructions <- stringr::str_replace_all(
+  string = recipes$Instructions, 
+  pattern = stringr::regex("[[:space:]]"), replacement = " ")
+```
+
+## Generating embeddings
+
+Now I am ready to pass each recipe to the 
+[nomic-embed-text v1.5](https://ollama.com/library/nomic-embed-text) 
+model via Ollama's `embed` endpoint, which returns a numerical vector for our
+query.
+
+We pass each recipe to the LLM one by one, combining the Title, 
+Ingredients and Instructions of each recipe into a single string. (Now is an
+excellent time to grab a cup of coffee ☕️ - on my M2 Macbook Pro it takes about
+a minute to calculate 1000 embeddings.) 
+
+To keep things organized, I add the embeddings to the original data.frame, as
+the `Embedding` list column.
+
+```{r}
+#| cache: true
+library(tictoc)
+tic("Calculating embeddings")
+recipes$Embedding <- lapply(
+   glue::glue_data(
+    recipes,
+    paste(
+      "{Title}", 
+      "Ingredients: {Cleaned_Ingredients}",
+      "Instructions: {Instructions}"
+    )
+   ), \(x) {
+     ollama_embed(
+       input = x,
+       model = "nomic-embed-text:latest"
+     )
+   })
+toc()
+```
+
+Sometimes I encounter recipes where the embeddings are all zero, so I remove
+those from the data.frame.
+
+```{r}
+if (any(sapply(recipes$Embedding, var) > 0)) {
+  recipes <- recipes[sapply(recipes$Embedding, var) > 0,]
+}
+```
+
+## Exploring the recipes in the embedding space
+
+We now have a representation of each recipe in the high-dimensional embedding
+space. How high dimensional? Let's check:
+
+```{r}
+length(recipes$Embedding[[1]])
+```
+
+To explore the relationship between the recipes in this space, we combine the
+embeddings into a matrix with one column per recipe, and one row for each
+element of the embedding vector.
+
+```{r}
+m <- do.call(cbind, recipes$Embedding)
+colnames(m) <- recipes$Title
+dim(m)
+```
+
+## Exploring the embedding matrix
+
+### Cosine similarity
+
+To compare pairs of recipes to each other, we can calculate a distance metric,
+e.g. Euclidean distance or Cosine similarity between their embedding vectors.
+
+```{r}
+library(coop)  # Fast Covariance, Correlation, and Cosine Similarity Operations
+similarity_cosine <- cosine(m)
+```
+
+The cosine similarity for most pairs of recipes clusters around 0.6, but there
+are some that are much more or much less similar to each other
+
+```{r}
+#| fig-width: 5
+#| fig-height: 4
+hist(as.vector(similarity_cosine), main = "Cosine similarity (all pairs)",
+     xlab = "Cosine similarity")
+```
+
+For example, let's retrieve the titles of the recipes that are most similar
+to `Marbleized Eggs` or `Spinach Salad with Dates`. Reassuringly the best 
+matches sound very similar:
+
+```{r}
+sort(similarity_cosine["Marbleized Eggs", ], decreasing = TRUE) |> 
+  head()
+sort(similarity_cosine["Spinach Salad with Dates", ], decreasing = TRUE) |> 
+  head()
+```
+
+### Principal component analysis 
+
+Now that we have a high-dimensional numerical representation of our recipes, we
+can use tried-and-true methods that are frequently used to explore datasets from
+different domains, e.g. 
+[Principal Component Analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)
+
+```{r}
+#| fig-width: 6
+#| fig-height: 6
+pca <- prcomp(m, center = TRUE, scale. = TRUE)
+pairs(pca$rotation[, 1:3], cex = 0.5, pch = 19, col = adjustcolor("black", 0.2))
+```
+
+The first few principal components separate the recipes into large clumps, 
+and the recipes with the highest loadings on PC2 and PC3 seem to have
+identifiable themes in common. (I wasn't able to guess at what PC1 picked up.)
+
+```{r}
+# PC2 separates deserts from mains
+pc2 <- sort(pca$rotation[, 2])
+recipes[recipes$Title %in% names(head(pc2)), ]$Title
+recipes[recipes$Title %in% names(tail(pc2)), ]$Title
+
+# PC3 separates poultry from cocktails
+pc3 <- sort(pca$rotation[, 3])
+recipes[recipes$Title %in% names(head(pc3)), ]$Title
+recipes[recipes$Title %in% names(tail(pc3)), ]$Title
+```
+
+The principal components are ranked according to how much variance they explain
+in our data. Let's focus on the first 50 components and identify clusters of
+recipes in this space using the Partitioning around medoids (PAM) algorithm,
+a more robust version of k-means clustering [^5]. Here, I am asking for 50
+clusters, an arbitrary number that should give us sufficiently high resolution
+to explore (see below).
+
+[^5]: The `cluster::pam()` function offers a number of optional shortcuts that
+reduce the run time, specified via the `pamonce` argument. Check the functions
+help page if want to learn more!
+
+```{r}
+library(cluster)
+set.seed(123)
+recipes$cluster <- cl <- factor(
+  cluster::pam(pca$rotation[, 1:50], k = 50, cluster.only = TRUE, pamonce = 6)
+)
+```
+
+Now I can color the PCA plots according to the assignment of each recipe to one
+of the 50 clusters. Unsurprisingly, there is a lot of overlap when only the
+first three PCs are plotted:
+
+```{r}
+#| fig-width: 6
+#| fig-height: 6
+cl_cols <- setNames(rainbow(50), 1:50)
+pairs(pca$rotation[, 1:3], col = adjustcolor(cl_cols[as.character(cl)], 0.3),
+      cex = 0.5, pch = 19)
+```
+
+Another way to visualize high dimensional data is to allow non-linear 
+transformations, e.g. via t-distributed stochastic neighbor embedding (tSNE)
+or Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP).
+
+🚨 It is important to remember that distances after dimensionality reductions
+are hard to interpret, and that the choice of parameters can drastically change
+the final visualization [^6].
+
+[^6]: You can also read more about tSNE and UMAP, and the pitfalls of their
+interpretation 
+[here](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011288)
+and
+[here](https://www.nature.com/articles/s41592-024-02301-x). 
+
+Here, I am creating a UMAP embedding based on the first 50 principal components.
+Most of the parameters are left at their default values, except for the number
+of neighbors, which I increased to create a (to me) visually more pleasing
+plot. Each point represents a recipe and is colored by the PAM clusters defined
+above.
+
+```{r}
+#| fig-width: 6.5
+#| fig-height: 6.5
+#| cache: true
+suppressPackageStartupMessages({
+  library(umap)
+})
+custom.config <- umap.defaults
+custom.config$random_state <- 123L
+custom.config$n_neighbors <- 25  # default: 15
+custom.config$min_dist <- 0.1 # default 0.1
+custom.config$n_components <- 2 # default 2
+custom.config$metric <- "euclidean"  # default "euclidean"
+um <- umap::umap(pca$rotation[, 1:50], config=custom.config)
+
+recipes$Dim1 <- um$layout[, 1]
+recipes$Dim2 <- um$layout[, 2]
+
+recipes_medians <- recipes |>
+  dplyr::group_by(cluster) |>
+  dplyr::summarise(Dim1 = median(Dim1), 
+                   Dim2 = median(Dim2))
+recipes |>
+  ggplot() +
+  aes(x = Dim1, y = Dim2) +
+  geom_point(aes(color = cluster), show.legend = FALSE, 
+             alpha = 0.7) + 
+  geom_text(aes(label = cluster), data = recipes_medians) +
+  theme_void()
+```
+
+The UMAP plot shows one large component and a number of smaller clusters, e.g.
+PAM cluster 35 (at the top of the plot), cluster 3 (on the left) or cluster 50
+(on the bottom).
+
+## Summarizing cluster membership
+
+With 50 different clusters, there is a lot to explore in this dataset. Sampling
+a few examples from each cluster provides starting hypotheses about what the
+recipes they contain might have in common.
+
+For example, it seems that cluster 35 contains lamb dishes:
+
+```{r}
+recipes |>
+  dplyr::filter(cluster == 35) |>
+  dplyr::sample_n(size = 10) |>
+  dplyr::pull(Title)
+```
+
+And cluster 4 captured pork recipes:
+
+```{r}
+recipes |>
+  dplyr::filter(cluster == 4) |>
+  dplyr::sample_n(size = 10) |>
+  dplyr::pull(Title)
+```
+
+Let's get `llama3.1`'s help to identify the theme that recipes in each cluster
+have in common, based on their title alone:
+
+```{r}
+#| cache: true
+recipe_themes <- recipes |>
+  group_by(cluster) |>
+  summarize(
+    theme = ollama_generate(
+    prompt = glue::glue(
+      "Identify the common theme among the following recipes, ", 
+      "return fewer than 5 words: ", 
+      "{ paste(Title, collapse = ';') }")
+    )
+  )
+```
+
+The LLM agrees with our manual exploration of clusters 3 and 35 above.
+
+```{r}
+recipe_themes |>
+  dplyr::filter(cluster %in% c(4, 35))
+```
+
+It also provides concise labels for the remaining ones:
+
+```{r}
+recipe_themes |>
+  head()
+```
+
+In a 
+[recent blog post](https://blog.stephenturner.us/p/use-r-to-prompt-a-local-llm-with)
+Stephen Turner uses the `llama3.1` model via Ollama to annotated gene sets in 
+a similar way, check it out!
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessioninfo::session_info(pkgs = "attached")
+```
+
+</details>

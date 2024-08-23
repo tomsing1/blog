@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/vectorsearch/index.html",
       "/posts/athena/index.html",
       "/posts/volcano_ggiraph/index.html",
       "/posts/conditional_shiny_widgets/index.html",

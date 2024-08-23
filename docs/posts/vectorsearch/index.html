@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Sandmann">
+<meta name="dcterms.date" content="2024-08-21">
+
+<title>Exploring recipes with LLMs, Ollama and R – Thomas Sandmann’s blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Thomas Sandmann’s blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/tomsing1"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann"> <i class="bi bi-mastodon" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Exploring recipes with LLMs, Ollama and R</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">Ollama</div>
+                <div class="quarto-category">LLM</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Thomas Sandmann </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 21, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">tl;dr</a></li>
+  <li><a href="#acknowledgements" id="toc-acknowledgements" class="nav-link" data-scroll-target="#acknowledgements">Acknowledgements</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#installing-ollama" id="toc-installing-ollama" class="nav-link" data-scroll-target="#installing-ollama">Installing Ollama</a></li>
+  <li><a href="#downloading-models" id="toc-downloading-models" class="nav-link" data-scroll-target="#downloading-models">Downloading models</a></li>
+  <li><a href="#interacting-with-ollama-from-r" id="toc-interacting-with-ollama-from-r" class="nav-link" data-scroll-target="#interacting-with-ollama-from-r">Interacting with Ollama from R</a></li>
+  <li><a href="#the-recipe-corpus" id="toc-the-recipe-corpus" class="nav-link" data-scroll-target="#the-recipe-corpus">The recipe corpus</a></li>
+  <li><a href="#generating-embeddings" id="toc-generating-embeddings" class="nav-link" data-scroll-target="#generating-embeddings">Generating embeddings</a></li>
+  <li><a href="#exploring-the-recipes-in-the-embedding-space" id="toc-exploring-the-recipes-in-the-embedding-space" class="nav-link" data-scroll-target="#exploring-the-recipes-in-the-embedding-space">Exploring the recipes in the embedding space</a></li>
+  <li><a href="#exploring-the-embedding-matrix" id="toc-exploring-the-embedding-matrix" class="nav-link" data-scroll-target="#exploring-the-embedding-matrix">Exploring the embedding matrix</a>
+  <ul>
+  <li><a href="#cosine-similarity" id="toc-cosine-similarity" class="nav-link" data-scroll-target="#cosine-similarity">Cosine similarity</a></li>
+  <li><a href="#principal-component-analysis" id="toc-principal-component-analysis" class="nav-link" data-scroll-target="#principal-component-analysis">Principal component analysis</a></li>
+  </ul></li>
+  <li><a href="#summarizing-cluster-membership" id="toc-summarizing-cluster-membership" class="nav-link" data-scroll-target="#summarizing-cluster-membership">Summarizing cluster membership</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">Reproducibility</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<p>Today I learned about</p>
+<ul>
+<li>Running LLMs locally via Ollama</li>
+<li>Creating embeddings for a corpus of recipes</li>
+<li>Exploring the embedding space using PCA, clustering and UMAP</li>
+</ul>
+</section>
+<section id="acknowledgements" class="level2">
+<h2 class="anchored" data-anchor-id="acknowledgements">Acknowledgements</h2>
+<p>This post is heavily inspired by <span class="citation" data-cites="hrbrmstr">@hrbrmstr</span>‘s <a href="https://dailydrop.hrbrmstr.dev/2024/08/09/drop-514-2024-08-09-duckdb-vector-search/">DuckDB VSS &amp; CISA KEV</a> post, and benefited greatly from Joseph Martinez’ tutorial on <a href="https://github.com/josephrmartinez/recipe-dataset">Semantic Search using Datasette</a>. As always, all errors are mine.</p>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Large language models (LLMs) are everywhere right now, from chat bots to search engines. Today, inspired by <a href="https://rud.is/">Bob Rudis’</a> recent post on exploring a large set of “Known Exploited Vulnerabilities by <a href="https://dailydrop.hrbrmstr.dev/2024/08/09/drop-514-2024-08-09-duckdb-vector-search/">creating and searching text embeddings</a>, I am using local LLM to explore a large set of <a href="https://github.com/josephrmartinez/recipe-dataset?tab=readme-ov-file">food recipes</a> by</p>
+<ul>
+<li>Embedding each recipe (title, ingredients &amp; instructions) into a high dimensional space using the <code>nomic-embed-text</code> LLM running locally via <a href="https://ollama.com/">Ollama</a>.</li>
+<li>Exploring the embedding space using principal components (PCs) and Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP)</li>
+<li>Cluster recipes and summarize each cluster with the (smallest version of) Meta’s <code>llama3.1</code> model.</li>
+</ul>
+</section>
+<section id="installing-ollama" class="level2">
+<h2 class="anchored" data-anchor-id="installing-ollama">Installing Ollama</h2>
+<p>For this post, I am using LLMs that run locally on my M2 Macbook Pro with 16Gb RAM. (Some larger LLMs require more memory, so I will stick to the smaller models here.)</p>
+<p>First, I downloaded and installed the <a href="https://ollama.com/">Ollama application</a>, which makes it easy to retrieve and run different models. Once Ollama is running (indicated by the llama 🦙 menu item in my Mac’s main menu bar), it serves <a href="https://github.com/ollama/ollama/blob/main/docs/api.md">REST endpoints</a>, including calls to</p>
+<ul>
+<li>generate text based on a prompt: <code>POST /api/generate</code></li>
+<li>return the numerical embedding for an input: <code>POST /api/embed</code></li>
+</ul>
+<p>all from the comfort of my own laptop.</p>
+</section>
+<section id="downloading-models" class="level2">
+<h2 class="anchored" data-anchor-id="downloading-models">Downloading models</h2>
+<p>Next, let’s download a few models, including some that only provide embeddings (e.g.&nbsp;they output numerical vectors representing the input) and the latest <a href="https://ollama.com/library/llama3.1">llama 3.1 model</a> released by Meta<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> via ollama’s command line interface:</p>
+<pre><code>ollama pull nomic-embed-text  # embeddings only
+ollama pull nomic-embed-text  # embeddings only
+ollama pull llama3.1:latest   # 8 billion parameters</code></pre>
+</section>
+<section id="interacting-with-ollama-from-r" class="level2">
+<h2 class="anchored" data-anchor-id="interacting-with-ollama-from-r">Interacting with Ollama from R</h2>
+<p>Following <a href="https://companion.hrbrmstr.dev/posts/2024-08-09-duckdb-vss/">Bob’s example</a> we can submit queries to our <code>Ollama</code> server by issuing POST requests via the <a href="https://cran.r-project.org/package=httr2">httr2 package</a>. Because we will do this many times, the following helper R functions will be useful - one to retrieve embeddings, the other to generate text.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr2)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>ollama_embed <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">input =</span> <span class="st">"This text will be embedded."</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                         <span class="at">model =</span> <span class="st">"nomic-embed-text:latest"</span>) {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  resp <span class="ot">&lt;-</span> httr2<span class="sc">::</span><span class="fu">request</span>(<span class="st">"http://localhost:11434"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_url_path</span>(<span class="st">"/api/embed"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_headers</span>(<span class="st">"Content-Type"</span> <span class="ot">=</span> <span class="st">"application/json"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_body_json</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">model =</span> model,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">input =</span> input,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">truncate =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">stream =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">keep_alive =</span> <span class="st">"10s"</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">options =</span> <span class="fu">list</span>(<span class="at">seed =</span> <span class="dv">123</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>   httr2<span class="sc">::</span><span class="fu">req_perform</span>()</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> resp <span class="sc">|&gt;</span> httr2<span class="sc">::</span><span class="fu">resp_body_json</span>(<span class="at">simplifyVector =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getElement</span>(<span class="st">"embeddings"</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  m[<span class="dv">1</span>, ]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>ollama_generate <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">prompt =</span> <span class="st">"Who is Super Mario's best friend?"</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>                            <span class="at">model =</span> <span class="st">"llama3.1:latest"</span>) {</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  resp <span class="ot">&lt;-</span> httr2<span class="sc">::</span><span class="fu">request</span>(<span class="st">"http://localhost:11434"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_url_path</span>(<span class="st">"/api/generate"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_headers</span>(<span class="st">"Content-Type"</span> <span class="ot">=</span> <span class="st">"application/json"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_body_json</span>(</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">model =</span> model,</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="at">prompt =</span> prompt,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="at">stream =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">keep_alive =</span> <span class="st">"10s"</span>,  <span class="co"># keep the model in memory for 10s after the call</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="at">options =</span> <span class="fu">list</span>(<span class="at">seed =</span> <span class="dv">123</span>)  <span class="co"># reproducible seed</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>   httr2<span class="sc">::</span><span class="fu">req_perform</span>()</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  resp <span class="sc">|&gt;</span> httr2<span class="sc">::</span><span class="fu">resp_body_json</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getElement</span>(<span class="st">"response"</span>)</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ollama offers many different models to choose from, differing in architecture, number of parameters, and of course the training data they were built from. Typically, larger models take longer to run and require more memory. For example, the following benchmark profiles the turnaround time for our three models, averaged over 20 requests:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggplot2)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(microbenchmark)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># the beginning of Shakespeare's Sonnet 18</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>test_input <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Shall I compare thee to a summer's day?"</span>, </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Thou art more lovely and more temperate:"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Rough winds do shake the darling buds of May,"</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"And summer's lease hath all too short a date:"</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">microbenchmark</span>(</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">snowflake =</span> <span class="fu">ollama_embed</span>(<span class="at">model =</span> <span class="st">"snowflake-arctic-embed:latest"</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                             <span class="at">input =</span> test_input),</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">nomic =</span> <span class="fu">ollama_embed</span>(<span class="at">model =</span> <span class="st">"nomic-embed-text:latest"</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                             <span class="at">input =</span> test_input),</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">llama =</span> <span class="fu">ollama_embed</span>(<span class="at">model =</span> <span class="st">"llama3.1:latest"</span>,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                             <span class="at">input =</span> test_input),</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">times =</span> <span class="dv">20</span>, <span class="at">unit =</span> <span class="st">"ms"</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">autoplot</span>() <span class="sc">+</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The <code>nomic-embed-text</code> (v1.5) model with 22 million parameters is (usually) faster than <code>snowflake-arctic-embed:latest</code> model with 335 million parameters, and both are faster than the <code>llama3.1</code> model with 8 billion.</p>
+<p>Because it is fast and supports long inputs, and I will stick with the <code>nomic-embed-text:latest</code> model here. Speed of course doesn’t reflect the <em>quality</em> of the embeddings. If you are curious how the choice of model influences the results, just swap out the <code>model</code> argument in the calls to the <code>ollama_embed</code> helper function below.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+{ollamar} R package
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The <a href="https://cran.r-project.org/package=ollamar">ollamar R package</a> offers convenience functions to interact with the <code>ollama</code> application.</p>
+<p>For example, we can use them to prompt a model of our choice and extract its response from the returned object <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ollamar)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ollamar<span class="sc">::</span><span class="fu">test_connection</span>()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> ollamar<span class="sc">::</span><span class="fu">generate</span>(<span class="st">"llama3.1"</span>, <span class="st">"tell me a 5-word story"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>ollamar<span class="sc">::</span><span class="fu">resp_process</span>(resp, <span class="st">"df"</span>)<span class="sc">$</span>response</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The <code>embeddings</code> function directs requests to the <code>embed</code> endpoint instead <a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>emb <span class="ot">&lt;-</span> ollamar<span class="sc">::</span><span class="fu">embeddings</span>(<span class="st">"llama3.1"</span>, <span class="st">"Hello, how are you?"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(emb)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="the-recipe-corpus" class="level2">
+<h2 class="anchored" data-anchor-id="the-recipe-corpus">The recipe corpus</h2>
+<p>Kaggle hosts the <a href="https://www.kaggle.com/datasets/pes12017000148/food-ingredients-and-recipe-dataset-with-images">Food Ingredients and Recipes Dataset with Images</a> dataset, which was originally scraped from <a href="https://www.epicurious.com/">the Epicurious Website</a>. The original dataset includes images for each recipe as well, but Joseph Martinez has generously shared a CSV file with just the text information <a href="https://github.com/josephrmartinez/recipe-dataset">in this github repository</a>.</p>
+<p>Let’s read the full dataset into our R session:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>recipes <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">"https://raw.githubusercontent.com/josephrmartinez/recipe-dataset/"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         <span class="st">"main/13k-recipes.csv"</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_types =</span> <span class="st">"_c_ccc"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>recipes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 13,501 × 4
+   Title                             Instructions Image_Name Cleaned_Ingredients
+   &lt;chr&gt;                             &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;              
+ 1 Miso-Butter Roast Chicken With A… "Pat chicke… miso-butt… "['1 (3½–4-lb.) wh…
+ 2 Crispy Salt and Pepper Potatoes   "Preheat ov… crispy-sa… "['2 large egg whi…
+ 3 Thanksgiving Mac and Cheese       "Place a ra… thanksgiv… "['1 cup evaporate…
+ 4 Italian Sausage and Bread Stuffi… "Preheat ov… italian-s… "['1 (¾- to 1-poun…
+ 5 Newton's Law                      "Stir toget… newtons-l… "['1 teaspoon dark…
+ 6 Warm Comfort                      "Place 2 ch… warm-comf… "['2 chamomile tea…
+ 7 Apples and Oranges                "Add 3 oz. … apples-an… "['3 oz. Grand Mar…
+ 8 Turmeric Hot Toddy                "For the tu… turmeric-… "['¼ cup granulate…
+ 9 Instant Pot Lamb Haleem           "Combine da… instant-p… "['¾ cup assorted …
+10 Spiced Lentil and Caramelized On… "Place an o… spiced-le… "['1 (14.5-ounce) …
+# ℹ 13,491 more rows</code></pre>
+</div>
+</div>
+<p>This corpus is very large. For this example, I sample 5000 random recipes to speed up the calculation of the embeddings (see below).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq.int</span>(<span class="fu">nrow</span>(recipes)), <span class="at">size =</span> <span class="dv">5000</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>recipes <span class="ot">&lt;-</span> recipes[keep, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The list of ingredients is included as a <em>python</em> list, including square brackets and quotes. Let’s use the <code>reticulate</code> R package to coerce it into a character vector and then collapse it into a single comma-separated string:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(purrr)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(reticulate)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(stringr)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Cleaned_Ingredients <span class="ot">&lt;-</span> reticulate<span class="sc">::</span><span class="fu">py_eval</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># combine ingredients from all recipes into a single string to avoid</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looping over each one separately</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="st">"["</span>, recipes<span class="sc">$</span>Cleaned_Ingredients, <span class="st">"]"</span>, <span class="at">collapse =</span> <span class="st">", "</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unlist</span>(<span class="at">recursive =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">map_chr</span>(<span class="sc">~</span> stringr<span class="sc">::</span><span class="fu">str_flatten_comma</span>(.)) <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># double quotes, denoting inches, were escaped in the original list</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(<span class="at">pattern =</span> stringr<span class="sc">::</span><span class="fu">fixed</span>(<span class="st">'</span><span class="sc">\"</span><span class="st">'</span>), </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                           <span class="at">replacement =</span> <span class="st">' inch'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Some <code>Titles</code> contain escaped quotes, let’s remove them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Title <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">string =</span> recipes<span class="sc">$</span>Title, </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pattern =</span> stringr<span class="sc">::</span><span class="fu">fixed</span>(<span class="st">'</span><span class="sc">\"</span><span class="st">'</span>), <span class="at">replacement =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I also replace all newlines (or tabs) in the <code>Instructions</code> with spaces:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Instructions <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">string =</span> recipes<span class="sc">$</span>Instructions, </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pattern =</span> stringr<span class="sc">::</span><span class="fu">regex</span>(<span class="st">"[[:space:]]"</span>), <span class="at">replacement =</span> <span class="st">" "</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="generating-embeddings" class="level2">
+<h2 class="anchored" data-anchor-id="generating-embeddings">Generating embeddings</h2>
+<p>Now I am ready to pass each recipe to the <a href="https://ollama.com/library/nomic-embed-text">nomic-embed-text v1.5</a> model via Ollama’s <code>embed</code> endpoint, which returns a numerical vector for our query.</p>
+<p>We pass each recipe to the LLM one by one, combining the Title, Ingredients and Instructions of each recipe into a single string. (Now is an excellent time to grab a cup of coffee ☕️ - on my M2 Macbook Pro it takes about a minute to calculate 1000 embeddings.)</p>
+<p>To keep things organized, I add the embeddings to the original data.frame, as the <code>Embedding</code> list column.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tictoc)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>(<span class="st">"Calculating embeddings"</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Embedding <span class="ot">&lt;-</span> <span class="fu">lapply</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>   glue<span class="sc">::</span><span class="fu">glue_data</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    recipes,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"{Title}"</span>, </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Ingredients: {Cleaned_Ingredients}"</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Instructions: {Instructions}"</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>   ), \(x) {</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>     <span class="fu">ollama_embed</span>(</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">input =</span> x,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">model =</span> <span class="st">"nomic-embed-text:latest"</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>     )</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>   })</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Calculating embeddings: 367.923 sec elapsed</code></pre>
+</div>
+</div>
+<p>Sometimes I encounter recipes where the embeddings are all zero, so I remove those from the data.frame.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">any</span>(<span class="fu">sapply</span>(recipes<span class="sc">$</span>Embedding, var) <span class="sc">&gt;</span> <span class="dv">0</span>)) {</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  recipes <span class="ot">&lt;-</span> recipes[<span class="fu">sapply</span>(recipes<span class="sc">$</span>Embedding, var) <span class="sc">&gt;</span> <span class="dv">0</span>,]</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="exploring-the-recipes-in-the-embedding-space" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-the-recipes-in-the-embedding-space">Exploring the recipes in the embedding space</h2>
+<p>We now have a representation of each recipe in the high-dimensional embedding space. How high dimensional? Let’s check:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(recipes<span class="sc">$</span>Embedding[[<span class="dv">1</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 768</code></pre>
+</div>
+</div>
+<p>To explore the relationship between the recipes in this space, we combine the embeddings into a matrix with one column per recipe, and one row for each element of the embedding vector.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">do.call</span>(cbind, recipes<span class="sc">$</span>Embedding)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m) <span class="ot">&lt;-</span> recipes<span class="sc">$</span>Title</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  768 4999</code></pre>
+</div>
+</div>
+</section>
+<section id="exploring-the-embedding-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-the-embedding-matrix">Exploring the embedding matrix</h2>
+<section id="cosine-similarity" class="level3">
+<h3 class="anchored" data-anchor-id="cosine-similarity">Cosine similarity</h3>
+<p>To compare pairs of recipes to each other, we can calculate a distance metric, e.g.&nbsp;Euclidean distance or Cosine similarity between their embedding vectors.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(coop)  <span class="co"># Fast Covariance, Correlation, and Cosine Similarity Operations</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>similarity_cosine <span class="ot">&lt;-</span> <span class="fu">cosine</span>(m)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The cosine similarity for most pairs of recipes clusters around 0.6, but there are some that are much more or much less similar to each other</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">as.vector</span>(similarity_cosine), <span class="at">main =</span> <span class="st">"Cosine similarity (all pairs)"</span>,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Cosine similarity"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>For example, let’s retrieve the titles of the recipes that are most similar to <code>Marbleized Eggs</code> or <code>Spinach Salad with Dates</code>. Reassuringly the best matches sound very similar:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(similarity_cosine[<span class="st">"Marbleized Eggs"</span>, ], <span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>            Marbleized Eggs          To Dye Easter Eggs 
+                  1.0000000                   0.8432208 
+  Chocolate-Filled Delights      Uncle Angelo's Egg Nog 
+                  0.8060919                   0.7770789 
+Olive Oil–Basted Fried Eggs            Foster's Omelets 
+                  0.7673314                   0.7645979 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(similarity_cosine[<span class="st">"Spinach Salad with Dates"</span>, ], <span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                            Spinach Salad with Dates 
+                                           1.0000000 
+Spinach Salad with Pecorino, Pine Nuts, and Currants 
+                                           0.7962855 
+                                  Simple Spinach Dip 
+                                           0.7797199 
+ Carrot Ribbon Salad With Ginger, Parsley, and Dates 
+                                           0.7742124 
+                                    Garlicky Spinach 
+                                           0.7711255 
+         Kale Salad with Dates, Parmesan and Almonds 
+                                           0.7664300 </code></pre>
+</div>
+</div>
+</section>
+<section id="principal-component-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="principal-component-analysis">Principal component analysis</h3>
+<p>Now that we have a high-dimensional numerical representation of our recipes, we can use tried-and-true methods that are frequently used to explore datasets from different domains, e.g.&nbsp; <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Principal Component Analysis</a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(m, <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale. =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="st">"black"</span>, <span class="fl">0.2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The first few principal components separate the recipes into large clumps, and the recipes with the highest loadings on PC2 and PC3 seem to have identifiable themes in common. (I wasn’t able to guess at what PC1 picked up.)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PC2 separates deserts from mains</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>pc2 <span class="ot">&lt;-</span> <span class="fu">sort</span>(pca<span class="sc">$</span>rotation[, <span class="dv">2</span>])</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">head</span>(pc2)), ]<span class="sc">$</span>Title</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Southeast Asian Beef and Rice-Noodle Soup"            
+[2] "Spaghetti Sauce Chicken Afritada"                     
+[3] "Grilled Chicken with Roasted Tomato and Oregano Salsa"
+[4] "Spicy Asian Noodle and Chicken Salad"                 
+[5] "Grilled Pork Shoulder Steaks With Herb Salad"         
+[6] "Thai Beef with Basil"                                 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">tail</span>(pc2)), ]<span class="sc">$</span>Title</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Mini Black-and-White Cookies"        
+[2] "Pastel Butter Cookies"               
+[3] "Cream Puffs with Lemon-Cream Filling"
+[4] "Iced Stars"                          
+[5] "Black-and-White-and-Green Cookies"   
+[6] "Blackberry Walnut Cookies"           </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># PC3 separates poultry from cocktails</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>pc3 <span class="ot">&lt;-</span> <span class="fu">sort</span>(pca<span class="sc">$</span>rotation[, <span class="dv">3</span>])</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">head</span>(pc3)), ]<span class="sc">$</span>Title</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Slow-Smoked Barbecue Chicken"                             
+[2] "Chicken Under a Brick"                                    
+[3] "Grilled Indian-Spiced Butter Chicken"                     
+[4] "Spiced Matzo-Stuffed Chicken Breasts"                     
+[5] "Cambodian Grilled Chicken (Mann Oeng K'tem Sor, Marech)"  
+[6] "Cornbread-Stuffed Cornish Game Hens with Corn Maque Choux"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">tail</span>(pc3)), ]<span class="sc">$</span>Title</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Ramos Gin Fizz"                      
+[2] "Orange, Jícama, and Watercress Salad"
+[3] "Berry Dangerous Fix Cocktail"        
+[4] "Aqua Pearl"                          
+[5] "Peach and Fizzy Grapefruit Float"    
+[6] "Ramos Gin Fizz"                      
+[7] "José's Gin &amp; Tonic"                  </code></pre>
+</div>
+</div>
+<p>The principal components are ranked according to how much variance they explain in our data. Let’s focus on the first 50 components and identify clusters of recipes in this space using the Partitioning around medoids (PAM) algorithm, a more robust version of k-means clustering <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. Here, I am asking for 50 clusters, an arbitrary number that should give us sufficiently high resolution to explore (see below).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>cluster <span class="ot">&lt;-</span> cl <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  cluster<span class="sc">::</span><span class="fu">pam</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>], <span class="at">k =</span> <span class="dv">50</span>, <span class="at">cluster.only =</span> <span class="cn">TRUE</span>, <span class="at">pamonce =</span> <span class="dv">6</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now I can color the PCA plots according to the assignment of each recipe to one of the 50 clusters. Unsurprisingly, there is a lot of overlap when only the first three PCs are plotted:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>cl_cols <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">rainbow</span>(<span class="dv">50</span>), <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">col =</span> <span class="fu">adjustcolor</span>(cl_cols[<span class="fu">as.character</span>(cl)], <span class="fl">0.3</span>),</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">pch =</span> <span class="dv">19</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="576"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Another way to visualize high dimensional data is to allow non-linear transformations, e.g.&nbsp;via t-distributed stochastic neighbor embedding (tSNE) or Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP).</p>
+<p>🚨 It is important to remember that distances after dimensionality reductions are hard to interpret, and that the choice of parameters can drastically change the final visualization <a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.</p>
+<p>Here, I am creating a UMAP embedding based on the first 50 principal components. Most of the parameters are left at their default values, except for the number of neighbors, which I increased to create a (to me) visually more pleasing plot. Each point represents a recipe and is colored by the PAM clusters defined above.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(umap)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>custom.config <span class="ot">&lt;-</span> umap.defaults</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>random_state <span class="ot">&lt;-</span> <span class="dv">123</span>L</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>n_neighbors <span class="ot">&lt;-</span> <span class="dv">25</span>  <span class="co"># default: 15</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>min_dist <span class="ot">&lt;-</span> <span class="fl">0.1</span> <span class="co"># default 0.1</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>n_components <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># default 2</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>metric <span class="ot">&lt;-</span> <span class="st">"euclidean"</span>  <span class="co"># default "euclidean"</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>um <span class="ot">&lt;-</span> umap<span class="sc">::</span><span class="fu">umap</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>], <span class="at">config=</span>custom.config)</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Dim1 <span class="ot">&lt;-</span> um<span class="sc">$</span>layout[, <span class="dv">1</span>]</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Dim2 <span class="ot">&lt;-</span> um<span class="sc">$</span>layout[, <span class="dv">2</span>]</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>recipes_medians <span class="ot">&lt;-</span> recipes <span class="sc">|&gt;</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">Dim1 =</span> <span class="fu">median</span>(Dim1), </span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>                   <span class="at">Dim2 =</span> <span class="fu">median</span>(Dim2))</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>recipes <span class="sc">|&gt;</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> Dim1, <span class="at">y =</span> Dim2) <span class="sc">+</span></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> cluster), <span class="at">show.legend =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>             <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> </span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> cluster), <span class="at">data =</span> recipes_medians) <span class="sc">+</span></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="624"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The UMAP plot shows one large component and a number of smaller clusters, e.g. PAM cluster 35 (at the top of the plot), cluster 3 (on the left) or cluster 50 (on the bottom).</p>
+</section>
+</section>
+<section id="summarizing-cluster-membership" class="level2">
+<h2 class="anchored" data-anchor-id="summarizing-cluster-membership">Summarizing cluster membership</h2>
+<p>With 50 different clusters, there is a lot to explore in this dataset. Sampling a few examples from each cluster provides starting hypotheses about what the recipes they contain might have in common.</p>
+<p>For example, it seems that cluster 35 contains lamb dishes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>recipes <span class="sc">|&gt;</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cluster <span class="sc">==</span> <span class="dv">35</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">sample_n</span>(<span class="at">size =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(Title)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Spiced Lamb Hand Pies"                                          
+ [2] "Lamb Tagine With Chickpeas and Apricots"                        
+ [3] "Easy Provençal Lamb"                                            
+ [4] "Grilled Saffron Rack of Lamb"                                   
+ [5] "Lamb Chops with Red Onion, Grape Tomatoes, and Feta"            
+ [6] "Braised Lamb Shanks with Swiss Chard"                           
+ [7] "Grilled Leg of Lamb with Ancho Chile Marinade"                  
+ [8] "Roasted Lamb Shoulder (Agnello de Latte Arrosto)"               
+ [9] "Lamb Kebabs with Mint Pesto"                                    
+[10] "Braised Lamb Shanks with Spring Vegetables and Spring Gremolata"</code></pre>
+</div>
+</div>
+<p>And cluster 4 captured pork recipes:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>recipes <span class="sc">|&gt;</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cluster <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">sample_n</span>(<span class="at">size =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(Title)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Hoisin-Marinated Pork Chops"                                   
+ [2] "Grilled Rib Pork Chops with Sweet and Tangy Peach Relish"      
+ [3] "Pork Shoulder Al'Diavolo"                                      
+ [4] "Shanghai Soup Dumplings"                                       
+ [5] "Candy Pork"                                                    
+ [6] "Perfect Pork Chops"                                            
+ [7] "Pork Chops with Mustard Sauce"                                 
+ [8] "Stuffed Poblano Chiles with Walnut Sauce and Pomegranate Seeds"
+ [9] "Rolled Pork Loin Roast Stuffed With Olives and Herbs"          
+[10] "My Boudin"                                                     </code></pre>
+</div>
+</div>
+<p>Let’s get <code>llama3.1</code>’s help to identify the theme that recipes in each cluster have in common, based on their title alone:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>recipe_themes <span class="ot">&lt;-</span> recipes <span class="sc">|&gt;</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">theme =</span> <span class="fu">ollama_generate</span>(</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">prompt =</span> glue<span class="sc">::</span><span class="fu">glue</span>(</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Identify the common theme among the following recipes, "</span>, </span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"return fewer than 5 words: "</span>, </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"{ paste(Title, collapse = ';') }"</span>)</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The LLM agrees with our manual exploration of clusters 3 and 35 above.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>recipe_themes <span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cluster <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">35</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  cluster theme                   
+  &lt;fct&gt;   &lt;chr&gt;                   
+1 4       Pork Recipes Galore     
+2 35      Meat, particularly lamb.</code></pre>
+</div>
+</div>
+<p>It also provides concise labels for the remaining ones:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>recipe_themes <span class="sc">|&gt;</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  cluster theme                   
+  &lt;fct&gt;   &lt;chr&gt;                   
+1 1       Global Vegetable Salads.
+2 2       Beans.                  
+3 3       Main Course             
+4 4       Pork Recipes Galore     
+5 5       Salads.                 
+6 6       Chicken dishes.         </code></pre>
+</div>
+</div>
+<p>In a <a href="https://blog.stephenturner.us/p/use-r-to-prompt-a-local-llm-with">recent blog post</a> Stephen Turner uses the <code>llama3.1</code> model via Ollama to annotated gene sets in a similar way, check it out!</p>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">Reproducibility</h2>
+<details>
+<summary>
+Session Information
+</summary>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>(<span class="at">pkgs =</span> <span class="st">"attached"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.4.0 (2024-04-24)
+ os       macOS Sonoma 14.6.1
+ system   aarch64, darwin20
+ ui       X11
+ language (EN)
+ collate  en_US.UTF-8
+ ctype    en_US.UTF-8
+ tz       America/Los_Angeles
+ date     2024-08-22
+ pandoc   3.1.11 @ /Applications/RStudio.app/Contents/Resources/app/quarto/bin/tools/aarch64/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ ! package        * version date (UTC) lib source
+ P cluster        * 2.1.6   2023-12-01 [?] RSPM
+ P coop           * 0.6-3   2021-09-19 [?] RSPM
+ P dplyr          * 1.1.4   2023-11-17 [?] CRAN (R 4.4.0)
+ P ggplot2        * 3.5.1   2024-04-23 [?] CRAN (R 4.4.0)
+ P httr2          * 1.0.2   2024-07-16 [?] CRAN (R 4.4.0)
+ P microbenchmark * 1.4.10  2023-04-28 [?] RSPM
+ P purrr          * 1.0.2   2023-08-10 [?] CRAN (R 4.4.0)
+ P readr          * 2.1.5   2024-01-10 [?] CRAN (R 4.4.0)
+ P reticulate     * 1.38.0  2024-06-19 [?] CRAN (R 4.4.0)
+ P stringr        * 1.5.1   2023-11-14 [?] CRAN (R 4.4.0)
+
+ [1] /Users/sandmann/repositories/blog/renv/library/macos/R-4.4/aarch64-apple-darwin20
+ [2] /Users/sandmann/Library/Caches/org.R-project.R/R/renv/sandbox/macos/R-4.4/aarch64-apple-darwin20/f7156815
+
+ P ── Loaded and on-disk path mismatch.
+
+─ Python configuration ───────────────────────────────────────────────────────
+ python:         /Users/sandmann/miniconda3/bin/python
+ libpython:      /Users/sandmann/miniconda3/lib/libpython3.11.dylib
+ pythonhome:     /Users/sandmann/miniconda3:/Users/sandmann/miniconda3
+ version:        3.11.4 (main, Jul  5 2023, 08:40:20) [Clang 14.0.6 ]
+ numpy:          /Users/sandmann/miniconda3/lib/python3.11/site-packages/numpy
+ numpy_version:  1.26.2
+ 
+ NOTE: Python version was forced by RETICULATE_PYTHON_FALLBACK
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</details>
+
+
+<!-- -->
+
+</section>
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The Llama license allows for redistribution, fine-tuning, and creation of derivative work, but requires derived models to include “Llama” at the beginning of their name, and any derivative works or services must mention “Built with Llama”. For more information, see the <a href="https://llama.meta.com/llama3_1/license/">original license</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>{ollamar} version 1.1.1 available from CRAN does not support returning the response as plain text from a request, yet, but that feature seems to be included in the latest version <a href="https://github.com/hauselin/ollama-r">on github</a>. Here we extract the <code>response</code> column ourselves.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Currently, the functions from the {ollamar} package print all <code>httr2</code> responses (via cat). If that get’s annoying, you can silence them e.g.&nbsp;with <code>generate_quietly &lt;- purrr::quietly(ollamar::generate)</code>, etc.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>The <code>cluster::pam()</code> function offers a number of optional shortcuts that reduce the run time, specified via the <code>pamonce</code> argument. Check the functions help page if want to learn more!<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>You can also read more about tSNE and UMAP, and the pitfalls of their interpretation <a href="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011288">here</a> and <a href="https://www.nature.com/articles/s41592-024-02301-x">here</a>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/tomsing1\.github\.io\/blog\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark"><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb48" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Exploring recipes with LLMs, Ollama and R"</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2024-08-21"</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [R, Ollama, LLM]</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## tl;dr</span></span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>Today I learned about</span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Running LLMs locally via Ollama</span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Creating embeddings for a corpus of recipes</span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Exploring the embedding space using PCA, clustering and UMAP</span>
+<span id="cb48-29"><a href="#cb48-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-30"><a href="#cb48-30" aria-hidden="true" tabindex="-1"></a><span class="fu">## Acknowledgements</span></span>
+<span id="cb48-31"><a href="#cb48-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-32"><a href="#cb48-32" aria-hidden="true" tabindex="-1"></a>This post is heavily inspired by @hrbrmstr's </span>
+<span id="cb48-33"><a href="#cb48-33" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">DuckDB VSS &amp; CISA KEV</span><span class="co">](https://dailydrop.hrbrmstr.dev/2024/08/09/drop-514-2024-08-09-duckdb-vector-search/)</span></span>
+<span id="cb48-34"><a href="#cb48-34" aria-hidden="true" tabindex="-1"></a>post, and benefited greatly from Joseph Martinez' tutorial on </span>
+<span id="cb48-35"><a href="#cb48-35" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Semantic Search using Datasette</span><span class="co">](https://github.com/josephrmartinez/recipe-dataset)</span>. </span>
+<span id="cb48-36"><a href="#cb48-36" aria-hidden="true" tabindex="-1"></a>As always, all errors are mine.</span>
+<span id="cb48-37"><a href="#cb48-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-38"><a href="#cb48-38" aria-hidden="true" tabindex="-1"></a><span class="fu">## Introduction</span></span>
+<span id="cb48-39"><a href="#cb48-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-40"><a href="#cb48-40" aria-hidden="true" tabindex="-1"></a>Large language models (LLMs) are everywhere right now, from chat bots to search</span>
+<span id="cb48-41"><a href="#cb48-41" aria-hidden="true" tabindex="-1"></a>engines. Today, inspired by</span>
+<span id="cb48-42"><a href="#cb48-42" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Bob Rudis'</span><span class="co">](https://rud.is/)</span> recent post on exploring a large set of "Known</span>
+<span id="cb48-43"><a href="#cb48-43" aria-hidden="true" tabindex="-1"></a>Exploited Vulnerabilities by </span>
+<span id="cb48-44"><a href="#cb48-44" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">creating and searching text embeddings</span><span class="co">](https://dailydrop.hrbrmstr.dev/2024/08/09/drop-514-2024-08-09-duckdb-vector-search/)</span>,</span>
+<span id="cb48-45"><a href="#cb48-45" aria-hidden="true" tabindex="-1"></a>I am using local LLM to explore a large set of </span>
+<span id="cb48-46"><a href="#cb48-46" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">food recipes</span><span class="co">](https://github.com/josephrmartinez/recipe-dataset?tab=readme-ov-file)</span></span>
+<span id="cb48-47"><a href="#cb48-47" aria-hidden="true" tabindex="-1"></a>by</span>
+<span id="cb48-48"><a href="#cb48-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-49"><a href="#cb48-49" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Embedding each recipe (title, ingredients &amp; instructions) into a high </span>
+<span id="cb48-50"><a href="#cb48-50" aria-hidden="true" tabindex="-1"></a>  dimensional space using the <span class="in">`nomic-embed-text`</span> LLM running locally via</span>
+<span id="cb48-51"><a href="#cb48-51" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">Ollama</span><span class="co">](https://ollama.com/)</span>.</span>
+<span id="cb48-52"><a href="#cb48-52" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Exploring the embedding space using principal components (PCs) and </span>
+<span id="cb48-53"><a href="#cb48-53" aria-hidden="true" tabindex="-1"></a>  Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP)</span>
+<span id="cb48-54"><a href="#cb48-54" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Cluster recipes and summarize each cluster with the (smallest version of)</span>
+<span id="cb48-55"><a href="#cb48-55" aria-hidden="true" tabindex="-1"></a>  Meta's <span class="in">`llama3.1`</span> model.</span>
+<span id="cb48-56"><a href="#cb48-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-57"><a href="#cb48-57" aria-hidden="true" tabindex="-1"></a><span class="fu">## Installing Ollama</span></span>
+<span id="cb48-58"><a href="#cb48-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-59"><a href="#cb48-59" aria-hidden="true" tabindex="-1"></a>For this post, I am using LLMs that run locally on my M2 Macbook Pro with 16Gb</span>
+<span id="cb48-60"><a href="#cb48-60" aria-hidden="true" tabindex="-1"></a>RAM. (Some larger LLMs require more memory, so I will stick to the smaller</span>
+<span id="cb48-61"><a href="#cb48-61" aria-hidden="true" tabindex="-1"></a>models here.)</span>
+<span id="cb48-62"><a href="#cb48-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-63"><a href="#cb48-63" aria-hidden="true" tabindex="-1"></a>First, I downloaded and installed the <span class="co">[</span><span class="ot">Ollama application</span><span class="co">](https://ollama.com/)</span>,</span>
+<span id="cb48-64"><a href="#cb48-64" aria-hidden="true" tabindex="-1"></a>which makes it easy to retrieve and run different models. Once Ollama is</span>
+<span id="cb48-65"><a href="#cb48-65" aria-hidden="true" tabindex="-1"></a>running (indicated by the llama 🦙 menu item in my Mac's main menu bar), it</span>
+<span id="cb48-66"><a href="#cb48-66" aria-hidden="true" tabindex="-1"></a>serves </span>
+<span id="cb48-67"><a href="#cb48-67" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">REST endpoints</span><span class="co">](https://github.com/ollama/ollama/blob/main/docs/api.md)</span>,</span>
+<span id="cb48-68"><a href="#cb48-68" aria-hidden="true" tabindex="-1"></a>including calls to</span>
+<span id="cb48-69"><a href="#cb48-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-70"><a href="#cb48-70" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>generate text based on a prompt: <span class="in">`POST /api/generate`</span></span>
+<span id="cb48-71"><a href="#cb48-71" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>return the numerical embedding for an input: <span class="in">`POST /api/embed`</span></span>
+<span id="cb48-72"><a href="#cb48-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-73"><a href="#cb48-73" aria-hidden="true" tabindex="-1"></a>all from the comfort of my own laptop.</span>
+<span id="cb48-74"><a href="#cb48-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-75"><a href="#cb48-75" aria-hidden="true" tabindex="-1"></a><span class="fu">## Downloading models</span></span>
+<span id="cb48-76"><a href="#cb48-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-77"><a href="#cb48-77" aria-hidden="true" tabindex="-1"></a>Next, let's download a few models, including some that only provide embeddings</span>
+<span id="cb48-78"><a href="#cb48-78" aria-hidden="true" tabindex="-1"></a>(e.g. they output numerical vectors representing the input) and the latest</span>
+<span id="cb48-79"><a href="#cb48-79" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">llama 3.1 model</span><span class="co">](https://ollama.com/library/llama3.1)</span> released by Meta<span class="ot">[^1]</span></span>
+<span id="cb48-80"><a href="#cb48-80" aria-hidden="true" tabindex="-1"></a>via ollama's command line interface:</span>
+<span id="cb48-81"><a href="#cb48-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-82"><a href="#cb48-82" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-83"><a href="#cb48-83" aria-hidden="true" tabindex="-1"></a><span class="in">ollama pull nomic-embed-text  # embeddings only</span></span>
+<span id="cb48-84"><a href="#cb48-84" aria-hidden="true" tabindex="-1"></a><span class="in">ollama pull nomic-embed-text  # embeddings only</span></span>
+<span id="cb48-85"><a href="#cb48-85" aria-hidden="true" tabindex="-1"></a><span class="in">ollama pull llama3.1:latest   # 8 billion parameters</span></span>
+<span id="cb48-86"><a href="#cb48-86" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-87"><a href="#cb48-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-88"><a href="#cb48-88" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>The Llama license allows for redistribution, fine-tuning, and creation of</span>
+<span id="cb48-89"><a href="#cb48-89" aria-hidden="true" tabindex="-1"></a>derivative work, but requires derived models to include "Llama" at the</span>
+<span id="cb48-90"><a href="#cb48-90" aria-hidden="true" tabindex="-1"></a>beginning of their name, and any derivative works or services must mention</span>
+<span id="cb48-91"><a href="#cb48-91" aria-hidden="true" tabindex="-1"></a>"Built with Llama". For more information, see the </span>
+<span id="cb48-92"><a href="#cb48-92" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">original license</span><span class="co">](https://llama.meta.com/llama3_1/license/)</span>.</span>
+<span id="cb48-93"><a href="#cb48-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-94"><a href="#cb48-94" aria-hidden="true" tabindex="-1"></a><span class="fu">## Interacting with Ollama from R</span></span>
+<span id="cb48-95"><a href="#cb48-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-96"><a href="#cb48-96" aria-hidden="true" tabindex="-1"></a>Following </span>
+<span id="cb48-97"><a href="#cb48-97" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Bob's example</span><span class="co">](https://companion.hrbrmstr.dev/posts/2024-08-09-duckdb-vss/)</span></span>
+<span id="cb48-98"><a href="#cb48-98" aria-hidden="true" tabindex="-1"></a>we can submit queries to our <span class="in">`Ollama`</span> server by issuing POST requests via the</span>
+<span id="cb48-99"><a href="#cb48-99" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">httr2 package</span><span class="co">](https://cran.r-project.org/package=httr2)</span>. Because we will do</span>
+<span id="cb48-100"><a href="#cb48-100" aria-hidden="true" tabindex="-1"></a>this many times, the following helper R functions will be useful - one to </span>
+<span id="cb48-101"><a href="#cb48-101" aria-hidden="true" tabindex="-1"></a>retrieve embeddings, the other to generate text. </span>
+<span id="cb48-102"><a href="#cb48-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-105"><a href="#cb48-105" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-106"><a href="#cb48-106" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false </span></span>
+<span id="cb48-107"><a href="#cb48-107" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb48-108"><a href="#cb48-108" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(httr2)</span>
+<span id="cb48-109"><a href="#cb48-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-110"><a href="#cb48-110" aria-hidden="true" tabindex="-1"></a>ollama_embed <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">input =</span> <span class="st">"This text will be embedded."</span>,</span>
+<span id="cb48-111"><a href="#cb48-111" aria-hidden="true" tabindex="-1"></a>                         <span class="at">model =</span> <span class="st">"nomic-embed-text:latest"</span>) {</span>
+<span id="cb48-112"><a href="#cb48-112" aria-hidden="true" tabindex="-1"></a>  resp <span class="ot">&lt;-</span> httr2<span class="sc">::</span><span class="fu">request</span>(<span class="st">"http://localhost:11434"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb48-113"><a href="#cb48-113" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_url_path</span>(<span class="st">"/api/embed"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-114"><a href="#cb48-114" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_headers</span>(<span class="st">"Content-Type"</span> <span class="ot">=</span> <span class="st">"application/json"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-115"><a href="#cb48-115" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_body_json</span>(</span>
+<span id="cb48-116"><a href="#cb48-116" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(</span>
+<span id="cb48-117"><a href="#cb48-117" aria-hidden="true" tabindex="-1"></a>        <span class="at">model =</span> model,</span>
+<span id="cb48-118"><a href="#cb48-118" aria-hidden="true" tabindex="-1"></a>        <span class="at">input =</span> input,</span>
+<span id="cb48-119"><a href="#cb48-119" aria-hidden="true" tabindex="-1"></a>        <span class="at">truncate =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb48-120"><a href="#cb48-120" aria-hidden="true" tabindex="-1"></a>        <span class="at">stream =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb48-121"><a href="#cb48-121" aria-hidden="true" tabindex="-1"></a>        <span class="at">keep_alive =</span> <span class="st">"10s"</span>,</span>
+<span id="cb48-122"><a href="#cb48-122" aria-hidden="true" tabindex="-1"></a>        <span class="at">options =</span> <span class="fu">list</span>(<span class="at">seed =</span> <span class="dv">123</span>)</span>
+<span id="cb48-123"><a href="#cb48-123" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb48-124"><a href="#cb48-124" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-125"><a href="#cb48-125" aria-hidden="true" tabindex="-1"></a>   httr2<span class="sc">::</span><span class="fu">req_perform</span>()</span>
+<span id="cb48-126"><a href="#cb48-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-127"><a href="#cb48-127" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> resp <span class="sc">|&gt;</span> httr2<span class="sc">::</span><span class="fu">resp_body_json</span>(<span class="at">simplifyVector =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-128"><a href="#cb48-128" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getElement</span>(<span class="st">"embeddings"</span>)</span>
+<span id="cb48-129"><a href="#cb48-129" aria-hidden="true" tabindex="-1"></a>  m[<span class="dv">1</span>, ]</span>
+<span id="cb48-130"><a href="#cb48-130" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb48-131"><a href="#cb48-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-132"><a href="#cb48-132" aria-hidden="true" tabindex="-1"></a>ollama_generate <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">prompt =</span> <span class="st">"Who is Super Mario's best friend?"</span>,</span>
+<span id="cb48-133"><a href="#cb48-133" aria-hidden="true" tabindex="-1"></a>                            <span class="at">model =</span> <span class="st">"llama3.1:latest"</span>) {</span>
+<span id="cb48-134"><a href="#cb48-134" aria-hidden="true" tabindex="-1"></a>  resp <span class="ot">&lt;-</span> httr2<span class="sc">::</span><span class="fu">request</span>(<span class="st">"http://localhost:11434"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb48-135"><a href="#cb48-135" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_url_path</span>(<span class="st">"/api/generate"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-136"><a href="#cb48-136" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_headers</span>(<span class="st">"Content-Type"</span> <span class="ot">=</span> <span class="st">"application/json"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-137"><a href="#cb48-137" aria-hidden="true" tabindex="-1"></a>    httr2<span class="sc">::</span><span class="fu">req_body_json</span>(</span>
+<span id="cb48-138"><a href="#cb48-138" aria-hidden="true" tabindex="-1"></a>      <span class="fu">list</span>(</span>
+<span id="cb48-139"><a href="#cb48-139" aria-hidden="true" tabindex="-1"></a>        <span class="at">model =</span> model,</span>
+<span id="cb48-140"><a href="#cb48-140" aria-hidden="true" tabindex="-1"></a>        <span class="at">prompt =</span> prompt,</span>
+<span id="cb48-141"><a href="#cb48-141" aria-hidden="true" tabindex="-1"></a>        <span class="at">stream =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb48-142"><a href="#cb48-142" aria-hidden="true" tabindex="-1"></a>        <span class="at">keep_alive =</span> <span class="st">"10s"</span>,  <span class="co"># keep the model in memory for 10s after the call</span></span>
+<span id="cb48-143"><a href="#cb48-143" aria-hidden="true" tabindex="-1"></a>        <span class="at">options =</span> <span class="fu">list</span>(<span class="at">seed =</span> <span class="dv">123</span>)  <span class="co"># reproducible seed</span></span>
+<span id="cb48-144"><a href="#cb48-144" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb48-145"><a href="#cb48-145" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">|&gt;</span> </span>
+<span id="cb48-146"><a href="#cb48-146" aria-hidden="true" tabindex="-1"></a>   httr2<span class="sc">::</span><span class="fu">req_perform</span>()</span>
+<span id="cb48-147"><a href="#cb48-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-148"><a href="#cb48-148" aria-hidden="true" tabindex="-1"></a>  resp <span class="sc">|&gt;</span> httr2<span class="sc">::</span><span class="fu">resp_body_json</span>() <span class="sc">|&gt;</span></span>
+<span id="cb48-149"><a href="#cb48-149" aria-hidden="true" tabindex="-1"></a>    <span class="fu">getElement</span>(<span class="st">"response"</span>)</span>
+<span id="cb48-150"><a href="#cb48-150" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb48-151"><a href="#cb48-151" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-152"><a href="#cb48-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-153"><a href="#cb48-153" aria-hidden="true" tabindex="-1"></a>Ollama offers many different models to choose from, differing in architecture,</span>
+<span id="cb48-154"><a href="#cb48-154" aria-hidden="true" tabindex="-1"></a>number of parameters, and of course the training data they were built from.</span>
+<span id="cb48-155"><a href="#cb48-155" aria-hidden="true" tabindex="-1"></a>Typically, larger models take longer to run and require more memory. For </span>
+<span id="cb48-156"><a href="#cb48-156" aria-hidden="true" tabindex="-1"></a>example, the following benchmark profiles the turnaround time for our three</span>
+<span id="cb48-157"><a href="#cb48-157" aria-hidden="true" tabindex="-1"></a>models, averaged over 20 requests:</span>
+<span id="cb48-158"><a href="#cb48-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-161"><a href="#cb48-161" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-162"><a href="#cb48-162" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 7</span></span>
+<span id="cb48-163"><a href="#cb48-163" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb48-164"><a href="#cb48-164" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb48-165"><a href="#cb48-165" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb48-166"><a href="#cb48-166" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(ggplot2)</span>
+<span id="cb48-167"><a href="#cb48-167" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(microbenchmark)</span>
+<span id="cb48-168"><a href="#cb48-168" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb48-169"><a href="#cb48-169" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb48-170"><a href="#cb48-170" aria-hidden="true" tabindex="-1"></a><span class="co"># the beginning of Shakespeare's Sonnet 18</span></span>
+<span id="cb48-171"><a href="#cb48-171" aria-hidden="true" tabindex="-1"></a>test_input <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Shall I compare thee to a summer's day?"</span>, </span>
+<span id="cb48-172"><a href="#cb48-172" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Thou art more lovely and more temperate:"</span>,</span>
+<span id="cb48-173"><a href="#cb48-173" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Rough winds do shake the darling buds of May,"</span>,</span>
+<span id="cb48-174"><a href="#cb48-174" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"And summer's lease hath all too short a date:"</span>)</span>
+<span id="cb48-175"><a href="#cb48-175" aria-hidden="true" tabindex="-1"></a><span class="fu">microbenchmark</span>(</span>
+<span id="cb48-176"><a href="#cb48-176" aria-hidden="true" tabindex="-1"></a>    <span class="at">snowflake =</span> <span class="fu">ollama_embed</span>(<span class="at">model =</span> <span class="st">"snowflake-arctic-embed:latest"</span>,</span>
+<span id="cb48-177"><a href="#cb48-177" aria-hidden="true" tabindex="-1"></a>                             <span class="at">input =</span> test_input),</span>
+<span id="cb48-178"><a href="#cb48-178" aria-hidden="true" tabindex="-1"></a>    <span class="at">nomic =</span> <span class="fu">ollama_embed</span>(<span class="at">model =</span> <span class="st">"nomic-embed-text:latest"</span>,</span>
+<span id="cb48-179"><a href="#cb48-179" aria-hidden="true" tabindex="-1"></a>                             <span class="at">input =</span> test_input),</span>
+<span id="cb48-180"><a href="#cb48-180" aria-hidden="true" tabindex="-1"></a>    <span class="at">llama =</span> <span class="fu">ollama_embed</span>(<span class="at">model =</span> <span class="st">"llama3.1:latest"</span>,</span>
+<span id="cb48-181"><a href="#cb48-181" aria-hidden="true" tabindex="-1"></a>                             <span class="at">input =</span> test_input),</span>
+<span id="cb48-182"><a href="#cb48-182" aria-hidden="true" tabindex="-1"></a>    <span class="at">times =</span> <span class="dv">20</span>, <span class="at">unit =</span> <span class="st">"ms"</span></span>
+<span id="cb48-183"><a href="#cb48-183" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb48-184"><a href="#cb48-184" aria-hidden="true" tabindex="-1"></a>  ggplot2<span class="sc">::</span><span class="fu">autoplot</span>() <span class="sc">+</span></span>
+<span id="cb48-185"><a href="#cb48-185" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_linedraw</span>(<span class="dv">14</span>)</span>
+<span id="cb48-186"><a href="#cb48-186" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-187"><a href="#cb48-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-188"><a href="#cb48-188" aria-hidden="true" tabindex="-1"></a>The <span class="in">`nomic-embed-text`</span> (v1.5) model with 22 million parameters </span>
+<span id="cb48-189"><a href="#cb48-189" aria-hidden="true" tabindex="-1"></a>is (usually) faster than <span class="in">`snowflake-arctic-embed:latest`</span> model with 335 million </span>
+<span id="cb48-190"><a href="#cb48-190" aria-hidden="true" tabindex="-1"></a>parameters, and both are faster than the <span class="in">`llama3.1`</span> model with 8 billion.</span>
+<span id="cb48-191"><a href="#cb48-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-192"><a href="#cb48-192" aria-hidden="true" tabindex="-1"></a>Because it is fast and supports long inputs, and I will stick with the </span>
+<span id="cb48-193"><a href="#cb48-193" aria-hidden="true" tabindex="-1"></a><span class="in">`nomic-embed-text:latest`</span> model here. Speed of course doesn't reflect</span>
+<span id="cb48-194"><a href="#cb48-194" aria-hidden="true" tabindex="-1"></a>the _quality_ of the embeddings. If you are curious how the choice of model</span>
+<span id="cb48-195"><a href="#cb48-195" aria-hidden="true" tabindex="-1"></a>influences the results, just swap out the  <span class="in">`model`</span> argument in the calls to the</span>
+<span id="cb48-196"><a href="#cb48-196" aria-hidden="true" tabindex="-1"></a><span class="in">`ollama_embed`</span> helper function below.</span>
+<span id="cb48-197"><a href="#cb48-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-198"><a href="#cb48-198" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb48-199"><a href="#cb48-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-200"><a href="#cb48-200" aria-hidden="true" tabindex="-1"></a><span class="fu">## {ollamar} R package</span></span>
+<span id="cb48-201"><a href="#cb48-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-202"><a href="#cb48-202" aria-hidden="true" tabindex="-1"></a>The <span class="co">[</span><span class="ot">ollamar R package</span><span class="co">](https://cran.r-project.org/package=ollamar)</span></span>
+<span id="cb48-203"><a href="#cb48-203" aria-hidden="true" tabindex="-1"></a>offers convenience functions to interact with the <span class="in">`ollama`</span> application.</span>
+<span id="cb48-204"><a href="#cb48-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-205"><a href="#cb48-205" aria-hidden="true" tabindex="-1"></a>For example, we can use them to prompt a model of our choice</span>
+<span id="cb48-206"><a href="#cb48-206" aria-hidden="true" tabindex="-1"></a>and extract its response from the returned object <span class="ot">[^2]</span>.</span>
+<span id="cb48-207"><a href="#cb48-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-210"><a href="#cb48-210" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-211"><a href="#cb48-211" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb48-212"><a href="#cb48-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-213"><a href="#cb48-213" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ollamar)</span>
+<span id="cb48-214"><a href="#cb48-214" aria-hidden="true" tabindex="-1"></a>ollamar<span class="sc">::</span><span class="fu">test_connection</span>()</span>
+<span id="cb48-215"><a href="#cb48-215" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> ollamar<span class="sc">::</span><span class="fu">generate</span>(<span class="st">"llama3.1"</span>, <span class="st">"tell me a 5-word story"</span>)</span>
+<span id="cb48-216"><a href="#cb48-216" aria-hidden="true" tabindex="-1"></a>ollamar<span class="sc">::</span><span class="fu">resp_process</span>(resp, <span class="st">"df"</span>)<span class="sc">$</span>response</span>
+<span id="cb48-217"><a href="#cb48-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-218"><a href="#cb48-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-219"><a href="#cb48-219" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>{ollamar} version 1.1.1 available from CRAN does not support returning the </span>
+<span id="cb48-220"><a href="#cb48-220" aria-hidden="true" tabindex="-1"></a>response as plain text from a request, yet, but that feature seems to be</span>
+<span id="cb48-221"><a href="#cb48-221" aria-hidden="true" tabindex="-1"></a>included in the latest version </span>
+<span id="cb48-222"><a href="#cb48-222" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">on github</span><span class="co">](https://github.com/hauselin/ollama-r)</span>. Here we extract the</span>
+<span id="cb48-223"><a href="#cb48-223" aria-hidden="true" tabindex="-1"></a><span class="in">`response`</span> column ourselves.</span>
+<span id="cb48-224"><a href="#cb48-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-225"><a href="#cb48-225" aria-hidden="true" tabindex="-1"></a>The <span class="in">`embeddings`</span> function directs requests to the <span class="in">`embed`</span> endpoint instead <span class="ot">[^3]</span>.</span>
+<span id="cb48-226"><a href="#cb48-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-229"><a href="#cb48-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-230"><a href="#cb48-230" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb48-231"><a href="#cb48-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-232"><a href="#cb48-232" aria-hidden="true" tabindex="-1"></a>emb <span class="ot">&lt;-</span> ollamar<span class="sc">::</span><span class="fu">embeddings</span>(<span class="st">"llama3.1"</span>, <span class="st">"Hello, how are you?"</span>)</span>
+<span id="cb48-233"><a href="#cb48-233" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(emb)</span>
+<span id="cb48-234"><a href="#cb48-234" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-235"><a href="#cb48-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-236"><a href="#cb48-236" aria-hidden="true" tabindex="-1"></a><span class="ot">[^3]: </span>Currently, the functions from the {ollamar} package print all <span class="in">`httr2`</span></span>
+<span id="cb48-237"><a href="#cb48-237" aria-hidden="true" tabindex="-1"></a>responses (via cat). If that get's annoying, you can silence them e.g. with</span>
+<span id="cb48-238"><a href="#cb48-238" aria-hidden="true" tabindex="-1"></a><span class="in">`generate_quietly &lt;- purrr::quietly(ollamar::generate)`</span>, etc. </span>
+<span id="cb48-239"><a href="#cb48-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-240"><a href="#cb48-240" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb48-241"><a href="#cb48-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-242"><a href="#cb48-242" aria-hidden="true" tabindex="-1"></a><span class="fu">## The recipe corpus</span></span>
+<span id="cb48-243"><a href="#cb48-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-244"><a href="#cb48-244" aria-hidden="true" tabindex="-1"></a>Kaggle hosts the </span>
+<span id="cb48-245"><a href="#cb48-245" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Food Ingredients and Recipes Dataset with Images</span><span class="co">](https://www.kaggle.com/datasets/pes12017000148/food-ingredients-and-recipe-dataset-with-images)</span></span>
+<span id="cb48-246"><a href="#cb48-246" aria-hidden="true" tabindex="-1"></a>dataset, which was originally scraped from</span>
+<span id="cb48-247"><a href="#cb48-247" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the Epicurious Website</span><span class="co">](https://www.epicurious.com/)</span>. </span>
+<span id="cb48-248"><a href="#cb48-248" aria-hidden="true" tabindex="-1"></a>The original dataset includes images for each recipe as well, but </span>
+<span id="cb48-249"><a href="#cb48-249" aria-hidden="true" tabindex="-1"></a>Joseph Martinez has generously shared a CSV file with just the text information </span>
+<span id="cb48-250"><a href="#cb48-250" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">in this github repository</span><span class="co">](https://github.com/josephrmartinez/recipe-dataset)</span>.</span>
+<span id="cb48-251"><a href="#cb48-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-252"><a href="#cb48-252" aria-hidden="true" tabindex="-1"></a>Let's read the full dataset into our R session:</span>
+<span id="cb48-253"><a href="#cb48-253" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-256"><a href="#cb48-256" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-257"><a href="#cb48-257" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb48-258"><a href="#cb48-258" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
+<span id="cb48-259"><a href="#cb48-259" aria-hidden="true" tabindex="-1"></a>recipes <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_csv</span>(</span>
+<span id="cb48-260"><a href="#cb48-260" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste0</span>(<span class="st">"https://raw.githubusercontent.com/josephrmartinez/recipe-dataset/"</span>,</span>
+<span id="cb48-261"><a href="#cb48-261" aria-hidden="true" tabindex="-1"></a>         <span class="st">"main/13k-recipes.csv"</span>),</span>
+<span id="cb48-262"><a href="#cb48-262" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_types =</span> <span class="st">"_c_ccc"</span>)</span>
+<span id="cb48-263"><a href="#cb48-263" aria-hidden="true" tabindex="-1"></a>recipes</span>
+<span id="cb48-264"><a href="#cb48-264" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-265"><a href="#cb48-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-266"><a href="#cb48-266" aria-hidden="true" tabindex="-1"></a>This corpus is very large. For this example, I sample 5000 random recipes to</span>
+<span id="cb48-267"><a href="#cb48-267" aria-hidden="true" tabindex="-1"></a>speed up the calculation of the embeddings (see below).</span>
+<span id="cb48-268"><a href="#cb48-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-271"><a href="#cb48-271" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-272"><a href="#cb48-272" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb48-273"><a href="#cb48-273" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">seq.int</span>(<span class="fu">nrow</span>(recipes)), <span class="at">size =</span> <span class="dv">5000</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb48-274"><a href="#cb48-274" aria-hidden="true" tabindex="-1"></a>recipes <span class="ot">&lt;-</span> recipes[keep, ]</span>
+<span id="cb48-275"><a href="#cb48-275" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-276"><a href="#cb48-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-277"><a href="#cb48-277" aria-hidden="true" tabindex="-1"></a>The list of ingredients is included as a _python_ list, including square</span>
+<span id="cb48-278"><a href="#cb48-278" aria-hidden="true" tabindex="-1"></a>brackets and quotes. Let's use the <span class="in">`reticulate`</span> R package to coerce it into a</span>
+<span id="cb48-279"><a href="#cb48-279" aria-hidden="true" tabindex="-1"></a>character vector and then collapse it into a single comma-separated string:</span>
+<span id="cb48-280"><a href="#cb48-280" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-283"><a href="#cb48-283" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-284"><a href="#cb48-284" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb48-285"><a href="#cb48-285" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(purrr)</span>
+<span id="cb48-286"><a href="#cb48-286" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(reticulate)</span>
+<span id="cb48-287"><a href="#cb48-287" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(stringr)</span>
+<span id="cb48-288"><a href="#cb48-288" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb48-289"><a href="#cb48-289" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Cleaned_Ingredients <span class="ot">&lt;-</span> reticulate<span class="sc">::</span><span class="fu">py_eval</span>(</span>
+<span id="cb48-290"><a href="#cb48-290" aria-hidden="true" tabindex="-1"></a>  <span class="co"># combine ingredients from all recipes into a single string to avoid</span></span>
+<span id="cb48-291"><a href="#cb48-291" aria-hidden="true" tabindex="-1"></a>  <span class="co"># looping over each one separately</span></span>
+<span id="cb48-292"><a href="#cb48-292" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="st">"["</span>, recipes<span class="sc">$</span>Cleaned_Ingredients, <span class="st">"]"</span>, <span class="at">collapse =</span> <span class="st">", "</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb48-293"><a href="#cb48-293" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unlist</span>(<span class="at">recursive =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-294"><a href="#cb48-294" aria-hidden="true" tabindex="-1"></a>  purrr<span class="sc">::</span><span class="fu">map_chr</span>(<span class="sc">~</span> stringr<span class="sc">::</span><span class="fu">str_flatten_comma</span>(.)) <span class="sc">|&gt;</span></span>
+<span id="cb48-295"><a href="#cb48-295" aria-hidden="true" tabindex="-1"></a>  <span class="co"># double quotes, denoting inches, were escaped in the original list</span></span>
+<span id="cb48-296"><a href="#cb48-296" aria-hidden="true" tabindex="-1"></a>  stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(<span class="at">pattern =</span> stringr<span class="sc">::</span><span class="fu">fixed</span>(<span class="st">'</span><span class="sc">\"</span><span class="st">'</span>), </span>
+<span id="cb48-297"><a href="#cb48-297" aria-hidden="true" tabindex="-1"></a>                           <span class="at">replacement =</span> <span class="st">' inch'</span>)</span>
+<span id="cb48-298"><a href="#cb48-298" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-299"><a href="#cb48-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-300"><a href="#cb48-300" aria-hidden="true" tabindex="-1"></a>Some <span class="in">`Titles`</span> contain escaped quotes, let's remove them.</span>
+<span id="cb48-301"><a href="#cb48-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-304"><a href="#cb48-304" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-305"><a href="#cb48-305" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Title <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(</span>
+<span id="cb48-306"><a href="#cb48-306" aria-hidden="true" tabindex="-1"></a>  <span class="at">string =</span> recipes<span class="sc">$</span>Title, </span>
+<span id="cb48-307"><a href="#cb48-307" aria-hidden="true" tabindex="-1"></a>  <span class="at">pattern =</span> stringr<span class="sc">::</span><span class="fu">fixed</span>(<span class="st">'</span><span class="sc">\"</span><span class="st">'</span>), <span class="at">replacement =</span> <span class="st">""</span>)</span>
+<span id="cb48-308"><a href="#cb48-308" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-309"><a href="#cb48-309" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-310"><a href="#cb48-310" aria-hidden="true" tabindex="-1"></a>I also replace all newlines (or tabs) in the <span class="in">`Instructions`</span> with spaces:</span>
+<span id="cb48-311"><a href="#cb48-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-314"><a href="#cb48-314" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-315"><a href="#cb48-315" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Instructions <span class="ot">&lt;-</span> stringr<span class="sc">::</span><span class="fu">str_replace_all</span>(</span>
+<span id="cb48-316"><a href="#cb48-316" aria-hidden="true" tabindex="-1"></a>  <span class="at">string =</span> recipes<span class="sc">$</span>Instructions, </span>
+<span id="cb48-317"><a href="#cb48-317" aria-hidden="true" tabindex="-1"></a>  <span class="at">pattern =</span> stringr<span class="sc">::</span><span class="fu">regex</span>(<span class="st">"[[:space:]]"</span>), <span class="at">replacement =</span> <span class="st">" "</span>)</span>
+<span id="cb48-318"><a href="#cb48-318" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-319"><a href="#cb48-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-320"><a href="#cb48-320" aria-hidden="true" tabindex="-1"></a><span class="fu">## Generating embeddings</span></span>
+<span id="cb48-321"><a href="#cb48-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-322"><a href="#cb48-322" aria-hidden="true" tabindex="-1"></a>Now I am ready to pass each recipe to the </span>
+<span id="cb48-323"><a href="#cb48-323" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">nomic-embed-text v1.5</span><span class="co">](https://ollama.com/library/nomic-embed-text)</span> </span>
+<span id="cb48-324"><a href="#cb48-324" aria-hidden="true" tabindex="-1"></a>model via Ollama's <span class="in">`embed`</span> endpoint, which returns a numerical vector for our</span>
+<span id="cb48-325"><a href="#cb48-325" aria-hidden="true" tabindex="-1"></a>query.</span>
+<span id="cb48-326"><a href="#cb48-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-327"><a href="#cb48-327" aria-hidden="true" tabindex="-1"></a>We pass each recipe to the LLM one by one, combining the Title, </span>
+<span id="cb48-328"><a href="#cb48-328" aria-hidden="true" tabindex="-1"></a>Ingredients and Instructions of each recipe into a single string. (Now is an</span>
+<span id="cb48-329"><a href="#cb48-329" aria-hidden="true" tabindex="-1"></a>excellent time to grab a cup of coffee ☕️ - on my M2 Macbook Pro it takes about</span>
+<span id="cb48-330"><a href="#cb48-330" aria-hidden="true" tabindex="-1"></a>a minute to calculate 1000 embeddings.) </span>
+<span id="cb48-331"><a href="#cb48-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-332"><a href="#cb48-332" aria-hidden="true" tabindex="-1"></a>To keep things organized, I add the embeddings to the original data.frame, as</span>
+<span id="cb48-333"><a href="#cb48-333" aria-hidden="true" tabindex="-1"></a>the <span class="in">`Embedding`</span> list column.</span>
+<span id="cb48-334"><a href="#cb48-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-337"><a href="#cb48-337" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-338"><a href="#cb48-338" aria-hidden="true" tabindex="-1"></a><span class="co">#| cache: true</span></span>
+<span id="cb48-339"><a href="#cb48-339" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tictoc)</span>
+<span id="cb48-340"><a href="#cb48-340" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>(<span class="st">"Calculating embeddings"</span>)</span>
+<span id="cb48-341"><a href="#cb48-341" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Embedding <span class="ot">&lt;-</span> <span class="fu">lapply</span>(</span>
+<span id="cb48-342"><a href="#cb48-342" aria-hidden="true" tabindex="-1"></a>   glue<span class="sc">::</span><span class="fu">glue_data</span>(</span>
+<span id="cb48-343"><a href="#cb48-343" aria-hidden="true" tabindex="-1"></a>    recipes,</span>
+<span id="cb48-344"><a href="#cb48-344" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste</span>(</span>
+<span id="cb48-345"><a href="#cb48-345" aria-hidden="true" tabindex="-1"></a>      <span class="st">"{Title}"</span>, </span>
+<span id="cb48-346"><a href="#cb48-346" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Ingredients: {Cleaned_Ingredients}"</span>,</span>
+<span id="cb48-347"><a href="#cb48-347" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Instructions: {Instructions}"</span></span>
+<span id="cb48-348"><a href="#cb48-348" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-349"><a href="#cb48-349" aria-hidden="true" tabindex="-1"></a>   ), \(x) {</span>
+<span id="cb48-350"><a href="#cb48-350" aria-hidden="true" tabindex="-1"></a>     <span class="fu">ollama_embed</span>(</span>
+<span id="cb48-351"><a href="#cb48-351" aria-hidden="true" tabindex="-1"></a>       <span class="at">input =</span> x,</span>
+<span id="cb48-352"><a href="#cb48-352" aria-hidden="true" tabindex="-1"></a>       <span class="at">model =</span> <span class="st">"nomic-embed-text:latest"</span></span>
+<span id="cb48-353"><a href="#cb48-353" aria-hidden="true" tabindex="-1"></a>     )</span>
+<span id="cb48-354"><a href="#cb48-354" aria-hidden="true" tabindex="-1"></a>   })</span>
+<span id="cb48-355"><a href="#cb48-355" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span>
+<span id="cb48-356"><a href="#cb48-356" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-357"><a href="#cb48-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-358"><a href="#cb48-358" aria-hidden="true" tabindex="-1"></a>Sometimes I encounter recipes where the embeddings are all zero, so I remove</span>
+<span id="cb48-359"><a href="#cb48-359" aria-hidden="true" tabindex="-1"></a>those from the data.frame.</span>
+<span id="cb48-360"><a href="#cb48-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-363"><a href="#cb48-363" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-364"><a href="#cb48-364" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">any</span>(<span class="fu">sapply</span>(recipes<span class="sc">$</span>Embedding, var) <span class="sc">&gt;</span> <span class="dv">0</span>)) {</span>
+<span id="cb48-365"><a href="#cb48-365" aria-hidden="true" tabindex="-1"></a>  recipes <span class="ot">&lt;-</span> recipes[<span class="fu">sapply</span>(recipes<span class="sc">$</span>Embedding, var) <span class="sc">&gt;</span> <span class="dv">0</span>,]</span>
+<span id="cb48-366"><a href="#cb48-366" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb48-367"><a href="#cb48-367" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-368"><a href="#cb48-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-369"><a href="#cb48-369" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploring the recipes in the embedding space</span></span>
+<span id="cb48-370"><a href="#cb48-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-371"><a href="#cb48-371" aria-hidden="true" tabindex="-1"></a>We now have a representation of each recipe in the high-dimensional embedding</span>
+<span id="cb48-372"><a href="#cb48-372" aria-hidden="true" tabindex="-1"></a>space. How high dimensional? Let's check:</span>
+<span id="cb48-373"><a href="#cb48-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-376"><a href="#cb48-376" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-377"><a href="#cb48-377" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(recipes<span class="sc">$</span>Embedding[[<span class="dv">1</span>]])</span>
+<span id="cb48-378"><a href="#cb48-378" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-379"><a href="#cb48-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-380"><a href="#cb48-380" aria-hidden="true" tabindex="-1"></a>To explore the relationship between the recipes in this space, we combine the</span>
+<span id="cb48-381"><a href="#cb48-381" aria-hidden="true" tabindex="-1"></a>embeddings into a matrix with one column per recipe, and one row for each</span>
+<span id="cb48-382"><a href="#cb48-382" aria-hidden="true" tabindex="-1"></a>element of the embedding vector.</span>
+<span id="cb48-383"><a href="#cb48-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-386"><a href="#cb48-386" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-387"><a href="#cb48-387" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">do.call</span>(cbind, recipes<span class="sc">$</span>Embedding)</span>
+<span id="cb48-388"><a href="#cb48-388" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m) <span class="ot">&lt;-</span> recipes<span class="sc">$</span>Title</span>
+<span id="cb48-389"><a href="#cb48-389" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(m)</span>
+<span id="cb48-390"><a href="#cb48-390" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-391"><a href="#cb48-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-392"><a href="#cb48-392" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploring the embedding matrix</span></span>
+<span id="cb48-393"><a href="#cb48-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-394"><a href="#cb48-394" aria-hidden="true" tabindex="-1"></a><span class="fu">### Cosine similarity</span></span>
+<span id="cb48-395"><a href="#cb48-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-396"><a href="#cb48-396" aria-hidden="true" tabindex="-1"></a>To compare pairs of recipes to each other, we can calculate a distance metric,</span>
+<span id="cb48-397"><a href="#cb48-397" aria-hidden="true" tabindex="-1"></a>e.g. Euclidean distance or Cosine similarity between their embedding vectors.</span>
+<span id="cb48-398"><a href="#cb48-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-401"><a href="#cb48-401" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-402"><a href="#cb48-402" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(coop)  <span class="co"># Fast Covariance, Correlation, and Cosine Similarity Operations</span></span>
+<span id="cb48-403"><a href="#cb48-403" aria-hidden="true" tabindex="-1"></a>similarity_cosine <span class="ot">&lt;-</span> <span class="fu">cosine</span>(m)</span>
+<span id="cb48-404"><a href="#cb48-404" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-405"><a href="#cb48-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-406"><a href="#cb48-406" aria-hidden="true" tabindex="-1"></a>The cosine similarity for most pairs of recipes clusters around 0.6, but there</span>
+<span id="cb48-407"><a href="#cb48-407" aria-hidden="true" tabindex="-1"></a>are some that are much more or much less similar to each other</span>
+<span id="cb48-408"><a href="#cb48-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-411"><a href="#cb48-411" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-412"><a href="#cb48-412" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 5</span></span>
+<span id="cb48-413"><a href="#cb48-413" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb48-414"><a href="#cb48-414" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(<span class="fu">as.vector</span>(similarity_cosine), <span class="at">main =</span> <span class="st">"Cosine similarity (all pairs)"</span>,</span>
+<span id="cb48-415"><a href="#cb48-415" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Cosine similarity"</span>)</span>
+<span id="cb48-416"><a href="#cb48-416" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-417"><a href="#cb48-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-418"><a href="#cb48-418" aria-hidden="true" tabindex="-1"></a>For example, let's retrieve the titles of the recipes that are most similar</span>
+<span id="cb48-419"><a href="#cb48-419" aria-hidden="true" tabindex="-1"></a>to <span class="in">`Marbleized Eggs`</span> or <span class="in">`Spinach Salad with Dates`</span>. Reassuringly the best </span>
+<span id="cb48-420"><a href="#cb48-420" aria-hidden="true" tabindex="-1"></a>matches sound very similar:</span>
+<span id="cb48-421"><a href="#cb48-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-424"><a href="#cb48-424" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-425"><a href="#cb48-425" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(similarity_cosine[<span class="st">"Marbleized Eggs"</span>, ], <span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb48-426"><a href="#cb48-426" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb48-427"><a href="#cb48-427" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(similarity_cosine[<span class="st">"Spinach Salad with Dates"</span>, ], <span class="at">decreasing =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb48-428"><a href="#cb48-428" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb48-429"><a href="#cb48-429" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-430"><a href="#cb48-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-431"><a href="#cb48-431" aria-hidden="true" tabindex="-1"></a><span class="fu">### Principal component analysis </span></span>
+<span id="cb48-432"><a href="#cb48-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-433"><a href="#cb48-433" aria-hidden="true" tabindex="-1"></a>Now that we have a high-dimensional numerical representation of our recipes, we</span>
+<span id="cb48-434"><a href="#cb48-434" aria-hidden="true" tabindex="-1"></a>can use tried-and-true methods that are frequently used to explore datasets from</span>
+<span id="cb48-435"><a href="#cb48-435" aria-hidden="true" tabindex="-1"></a>different domains, e.g. </span>
+<span id="cb48-436"><a href="#cb48-436" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Principal Component Analysis</span><span class="co">](https://en.wikipedia.org/wiki/Principal_component_analysis)</span></span>
+<span id="cb48-437"><a href="#cb48-437" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-440"><a href="#cb48-440" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-441"><a href="#cb48-441" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6</span></span>
+<span id="cb48-442"><a href="#cb48-442" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb48-443"><a href="#cb48-443" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(m, <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale. =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb48-444"><a href="#cb48-444" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> <span class="fu">adjustcolor</span>(<span class="st">"black"</span>, <span class="fl">0.2</span>))</span>
+<span id="cb48-445"><a href="#cb48-445" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-446"><a href="#cb48-446" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-447"><a href="#cb48-447" aria-hidden="true" tabindex="-1"></a>The first few principal components separate the recipes into large clumps, </span>
+<span id="cb48-448"><a href="#cb48-448" aria-hidden="true" tabindex="-1"></a>and the recipes with the highest loadings on PC2 and PC3 seem to have</span>
+<span id="cb48-449"><a href="#cb48-449" aria-hidden="true" tabindex="-1"></a>identifiable themes in common. (I wasn't able to guess at what PC1 picked up.)</span>
+<span id="cb48-450"><a href="#cb48-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-453"><a href="#cb48-453" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-454"><a href="#cb48-454" aria-hidden="true" tabindex="-1"></a><span class="co"># PC2 separates deserts from mains</span></span>
+<span id="cb48-455"><a href="#cb48-455" aria-hidden="true" tabindex="-1"></a>pc2 <span class="ot">&lt;-</span> <span class="fu">sort</span>(pca<span class="sc">$</span>rotation[, <span class="dv">2</span>])</span>
+<span id="cb48-456"><a href="#cb48-456" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">head</span>(pc2)), ]<span class="sc">$</span>Title</span>
+<span id="cb48-457"><a href="#cb48-457" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">tail</span>(pc2)), ]<span class="sc">$</span>Title</span>
+<span id="cb48-458"><a href="#cb48-458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-459"><a href="#cb48-459" aria-hidden="true" tabindex="-1"></a><span class="co"># PC3 separates poultry from cocktails</span></span>
+<span id="cb48-460"><a href="#cb48-460" aria-hidden="true" tabindex="-1"></a>pc3 <span class="ot">&lt;-</span> <span class="fu">sort</span>(pca<span class="sc">$</span>rotation[, <span class="dv">3</span>])</span>
+<span id="cb48-461"><a href="#cb48-461" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">head</span>(pc3)), ]<span class="sc">$</span>Title</span>
+<span id="cb48-462"><a href="#cb48-462" aria-hidden="true" tabindex="-1"></a>recipes[recipes<span class="sc">$</span>Title <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">tail</span>(pc3)), ]<span class="sc">$</span>Title</span>
+<span id="cb48-463"><a href="#cb48-463" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-464"><a href="#cb48-464" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-465"><a href="#cb48-465" aria-hidden="true" tabindex="-1"></a>The principal components are ranked according to how much variance they explain</span>
+<span id="cb48-466"><a href="#cb48-466" aria-hidden="true" tabindex="-1"></a>in our data. Let's focus on the first 50 components and identify clusters of</span>
+<span id="cb48-467"><a href="#cb48-467" aria-hidden="true" tabindex="-1"></a>recipes in this space using the Partitioning around medoids (PAM) algorithm,</span>
+<span id="cb48-468"><a href="#cb48-468" aria-hidden="true" tabindex="-1"></a>a more robust version of k-means clustering <span class="ot">[^5]</span>. Here, I am asking for 50</span>
+<span id="cb48-469"><a href="#cb48-469" aria-hidden="true" tabindex="-1"></a>clusters, an arbitrary number that should give us sufficiently high resolution</span>
+<span id="cb48-470"><a href="#cb48-470" aria-hidden="true" tabindex="-1"></a>to explore (see below).</span>
+<span id="cb48-471"><a href="#cb48-471" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-472"><a href="#cb48-472" aria-hidden="true" tabindex="-1"></a><span class="ot">[^5]: </span>The <span class="in">`cluster::pam()`</span> function offers a number of optional shortcuts that</span>
+<span id="cb48-473"><a href="#cb48-473" aria-hidden="true" tabindex="-1"></a>reduce the run time, specified via the <span class="in">`pamonce`</span> argument. Check the functions</span>
+<span id="cb48-474"><a href="#cb48-474" aria-hidden="true" tabindex="-1"></a>help page if want to learn more!</span>
+<span id="cb48-475"><a href="#cb48-475" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-478"><a href="#cb48-478" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-479"><a href="#cb48-479" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span>
+<span id="cb48-480"><a href="#cb48-480" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb48-481"><a href="#cb48-481" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>cluster <span class="ot">&lt;-</span> cl <span class="ot">&lt;-</span> <span class="fu">factor</span>(</span>
+<span id="cb48-482"><a href="#cb48-482" aria-hidden="true" tabindex="-1"></a>  cluster<span class="sc">::</span><span class="fu">pam</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>], <span class="at">k =</span> <span class="dv">50</span>, <span class="at">cluster.only =</span> <span class="cn">TRUE</span>, <span class="at">pamonce =</span> <span class="dv">6</span>)</span>
+<span id="cb48-483"><a href="#cb48-483" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-484"><a href="#cb48-484" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-485"><a href="#cb48-485" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-486"><a href="#cb48-486" aria-hidden="true" tabindex="-1"></a>Now I can color the PCA plots according to the assignment of each recipe to one</span>
+<span id="cb48-487"><a href="#cb48-487" aria-hidden="true" tabindex="-1"></a>of the 50 clusters. Unsurprisingly, there is a lot of overlap when only the</span>
+<span id="cb48-488"><a href="#cb48-488" aria-hidden="true" tabindex="-1"></a>first three PCs are plotted:</span>
+<span id="cb48-489"><a href="#cb48-489" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-492"><a href="#cb48-492" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-493"><a href="#cb48-493" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6</span></span>
+<span id="cb48-494"><a href="#cb48-494" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb48-495"><a href="#cb48-495" aria-hidden="true" tabindex="-1"></a>cl_cols <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">rainbow</span>(<span class="dv">50</span>), <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>)</span>
+<span id="cb48-496"><a href="#cb48-496" aria-hidden="true" tabindex="-1"></a><span class="fu">pairs</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">col =</span> <span class="fu">adjustcolor</span>(cl_cols[<span class="fu">as.character</span>(cl)], <span class="fl">0.3</span>),</span>
+<span id="cb48-497"><a href="#cb48-497" aria-hidden="true" tabindex="-1"></a>      <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">pch =</span> <span class="dv">19</span>)</span>
+<span id="cb48-498"><a href="#cb48-498" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-499"><a href="#cb48-499" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-500"><a href="#cb48-500" aria-hidden="true" tabindex="-1"></a>Another way to visualize high dimensional data is to allow non-linear </span>
+<span id="cb48-501"><a href="#cb48-501" aria-hidden="true" tabindex="-1"></a>transformations, e.g. via t-distributed stochastic neighbor embedding (tSNE)</span>
+<span id="cb48-502"><a href="#cb48-502" aria-hidden="true" tabindex="-1"></a>or Uniform Manifold Approximation and Projection for Dimension Reduction (UMAP).</span>
+<span id="cb48-503"><a href="#cb48-503" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-504"><a href="#cb48-504" aria-hidden="true" tabindex="-1"></a>🚨 It is important to remember that distances after dimensionality reductions</span>
+<span id="cb48-505"><a href="#cb48-505" aria-hidden="true" tabindex="-1"></a>are hard to interpret, and that the choice of parameters can drastically change</span>
+<span id="cb48-506"><a href="#cb48-506" aria-hidden="true" tabindex="-1"></a>the final visualization <span class="ot">[^6]</span>.</span>
+<span id="cb48-507"><a href="#cb48-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-508"><a href="#cb48-508" aria-hidden="true" tabindex="-1"></a><span class="ot">[^6]: </span>You can also read more about tSNE and UMAP, and the pitfalls of their</span>
+<span id="cb48-509"><a href="#cb48-509" aria-hidden="true" tabindex="-1"></a>interpretation </span>
+<span id="cb48-510"><a href="#cb48-510" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">here</span><span class="co">](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011288)</span></span>
+<span id="cb48-511"><a href="#cb48-511" aria-hidden="true" tabindex="-1"></a>and</span>
+<span id="cb48-512"><a href="#cb48-512" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">here</span><span class="co">](https://www.nature.com/articles/s41592-024-02301-x)</span>. </span>
+<span id="cb48-513"><a href="#cb48-513" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-514"><a href="#cb48-514" aria-hidden="true" tabindex="-1"></a>Here, I am creating a UMAP embedding based on the first 50 principal components.</span>
+<span id="cb48-515"><a href="#cb48-515" aria-hidden="true" tabindex="-1"></a>Most of the parameters are left at their default values, except for the number</span>
+<span id="cb48-516"><a href="#cb48-516" aria-hidden="true" tabindex="-1"></a>of neighbors, which I increased to create a (to me) visually more pleasing</span>
+<span id="cb48-517"><a href="#cb48-517" aria-hidden="true" tabindex="-1"></a>plot. Each point represents a recipe and is colored by the PAM clusters defined</span>
+<span id="cb48-518"><a href="#cb48-518" aria-hidden="true" tabindex="-1"></a>above.</span>
+<span id="cb48-519"><a href="#cb48-519" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-522"><a href="#cb48-522" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-523"><a href="#cb48-523" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6.5</span></span>
+<span id="cb48-524"><a href="#cb48-524" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6.5</span></span>
+<span id="cb48-525"><a href="#cb48-525" aria-hidden="true" tabindex="-1"></a><span class="co">#| cache: true</span></span>
+<span id="cb48-526"><a href="#cb48-526" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb48-527"><a href="#cb48-527" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(umap)</span>
+<span id="cb48-528"><a href="#cb48-528" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb48-529"><a href="#cb48-529" aria-hidden="true" tabindex="-1"></a>custom.config <span class="ot">&lt;-</span> umap.defaults</span>
+<span id="cb48-530"><a href="#cb48-530" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>random_state <span class="ot">&lt;-</span> <span class="dv">123</span>L</span>
+<span id="cb48-531"><a href="#cb48-531" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>n_neighbors <span class="ot">&lt;-</span> <span class="dv">25</span>  <span class="co"># default: 15</span></span>
+<span id="cb48-532"><a href="#cb48-532" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>min_dist <span class="ot">&lt;-</span> <span class="fl">0.1</span> <span class="co"># default 0.1</span></span>
+<span id="cb48-533"><a href="#cb48-533" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>n_components <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="co"># default 2</span></span>
+<span id="cb48-534"><a href="#cb48-534" aria-hidden="true" tabindex="-1"></a>custom.config<span class="sc">$</span>metric <span class="ot">&lt;-</span> <span class="st">"euclidean"</span>  <span class="co"># default "euclidean"</span></span>
+<span id="cb48-535"><a href="#cb48-535" aria-hidden="true" tabindex="-1"></a>um <span class="ot">&lt;-</span> umap<span class="sc">::</span><span class="fu">umap</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span>], <span class="at">config=</span>custom.config)</span>
+<span id="cb48-536"><a href="#cb48-536" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-537"><a href="#cb48-537" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Dim1 <span class="ot">&lt;-</span> um<span class="sc">$</span>layout[, <span class="dv">1</span>]</span>
+<span id="cb48-538"><a href="#cb48-538" aria-hidden="true" tabindex="-1"></a>recipes<span class="sc">$</span>Dim2 <span class="ot">&lt;-</span> um<span class="sc">$</span>layout[, <span class="dv">2</span>]</span>
+<span id="cb48-539"><a href="#cb48-539" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-540"><a href="#cb48-540" aria-hidden="true" tabindex="-1"></a>recipes_medians <span class="ot">&lt;-</span> recipes <span class="sc">|&gt;</span></span>
+<span id="cb48-541"><a href="#cb48-541" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span></span>
+<span id="cb48-542"><a href="#cb48-542" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(<span class="at">Dim1 =</span> <span class="fu">median</span>(Dim1), </span>
+<span id="cb48-543"><a href="#cb48-543" aria-hidden="true" tabindex="-1"></a>                   <span class="at">Dim2 =</span> <span class="fu">median</span>(Dim2))</span>
+<span id="cb48-544"><a href="#cb48-544" aria-hidden="true" tabindex="-1"></a>recipes <span class="sc">|&gt;</span></span>
+<span id="cb48-545"><a href="#cb48-545" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb48-546"><a href="#cb48-546" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> Dim1, <span class="at">y =</span> Dim2) <span class="sc">+</span></span>
+<span id="cb48-547"><a href="#cb48-547" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> cluster), <span class="at">show.legend =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb48-548"><a href="#cb48-548" aria-hidden="true" tabindex="-1"></a>             <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> </span>
+<span id="cb48-549"><a href="#cb48-549" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> cluster), <span class="at">data =</span> recipes_medians) <span class="sc">+</span></span>
+<span id="cb48-550"><a href="#cb48-550" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span>
+<span id="cb48-551"><a href="#cb48-551" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-552"><a href="#cb48-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-553"><a href="#cb48-553" aria-hidden="true" tabindex="-1"></a>The UMAP plot shows one large component and a number of smaller clusters, e.g.</span>
+<span id="cb48-554"><a href="#cb48-554" aria-hidden="true" tabindex="-1"></a>PAM cluster 35 (at the top of the plot), cluster 3 (on the left) or cluster 50</span>
+<span id="cb48-555"><a href="#cb48-555" aria-hidden="true" tabindex="-1"></a>(on the bottom).</span>
+<span id="cb48-556"><a href="#cb48-556" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-557"><a href="#cb48-557" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summarizing cluster membership</span></span>
+<span id="cb48-558"><a href="#cb48-558" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-559"><a href="#cb48-559" aria-hidden="true" tabindex="-1"></a>With 50 different clusters, there is a lot to explore in this dataset. Sampling</span>
+<span id="cb48-560"><a href="#cb48-560" aria-hidden="true" tabindex="-1"></a>a few examples from each cluster provides starting hypotheses about what the</span>
+<span id="cb48-561"><a href="#cb48-561" aria-hidden="true" tabindex="-1"></a>recipes they contain might have in common.</span>
+<span id="cb48-562"><a href="#cb48-562" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-563"><a href="#cb48-563" aria-hidden="true" tabindex="-1"></a>For example, it seems that cluster 35 contains lamb dishes:</span>
+<span id="cb48-564"><a href="#cb48-564" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-567"><a href="#cb48-567" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-568"><a href="#cb48-568" aria-hidden="true" tabindex="-1"></a>recipes <span class="sc">|&gt;</span></span>
+<span id="cb48-569"><a href="#cb48-569" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cluster <span class="sc">==</span> <span class="dv">35</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-570"><a href="#cb48-570" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">sample_n</span>(<span class="at">size =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-571"><a href="#cb48-571" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(Title)</span>
+<span id="cb48-572"><a href="#cb48-572" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-573"><a href="#cb48-573" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-574"><a href="#cb48-574" aria-hidden="true" tabindex="-1"></a>And cluster 4 captured pork recipes:</span>
+<span id="cb48-575"><a href="#cb48-575" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-578"><a href="#cb48-578" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-579"><a href="#cb48-579" aria-hidden="true" tabindex="-1"></a>recipes <span class="sc">|&gt;</span></span>
+<span id="cb48-580"><a href="#cb48-580" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cluster <span class="sc">==</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-581"><a href="#cb48-581" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">sample_n</span>(<span class="at">size =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb48-582"><a href="#cb48-582" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">pull</span>(Title)</span>
+<span id="cb48-583"><a href="#cb48-583" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-584"><a href="#cb48-584" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-585"><a href="#cb48-585" aria-hidden="true" tabindex="-1"></a>Let's get <span class="in">`llama3.1`</span>'s help to identify the theme that recipes in each cluster</span>
+<span id="cb48-586"><a href="#cb48-586" aria-hidden="true" tabindex="-1"></a>have in common, based on their title alone:</span>
+<span id="cb48-587"><a href="#cb48-587" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-590"><a href="#cb48-590" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-591"><a href="#cb48-591" aria-hidden="true" tabindex="-1"></a><span class="co">#| cache: true</span></span>
+<span id="cb48-592"><a href="#cb48-592" aria-hidden="true" tabindex="-1"></a>recipe_themes <span class="ot">&lt;-</span> recipes <span class="sc">|&gt;</span></span>
+<span id="cb48-593"><a href="#cb48-593" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span></span>
+<span id="cb48-594"><a href="#cb48-594" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb48-595"><a href="#cb48-595" aria-hidden="true" tabindex="-1"></a>    <span class="at">theme =</span> <span class="fu">ollama_generate</span>(</span>
+<span id="cb48-596"><a href="#cb48-596" aria-hidden="true" tabindex="-1"></a>    <span class="at">prompt =</span> glue<span class="sc">::</span><span class="fu">glue</span>(</span>
+<span id="cb48-597"><a href="#cb48-597" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Identify the common theme among the following recipes, "</span>, </span>
+<span id="cb48-598"><a href="#cb48-598" aria-hidden="true" tabindex="-1"></a>      <span class="st">"return fewer than 5 words: "</span>, </span>
+<span id="cb48-599"><a href="#cb48-599" aria-hidden="true" tabindex="-1"></a>      <span class="st">"{ paste(Title, collapse = ';') }"</span>)</span>
+<span id="cb48-600"><a href="#cb48-600" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-601"><a href="#cb48-601" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb48-602"><a href="#cb48-602" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-603"><a href="#cb48-603" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-604"><a href="#cb48-604" aria-hidden="true" tabindex="-1"></a>The LLM agrees with our manual exploration of clusters 3 and 35 above.</span>
+<span id="cb48-605"><a href="#cb48-605" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-608"><a href="#cb48-608" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-609"><a href="#cb48-609" aria-hidden="true" tabindex="-1"></a>recipe_themes <span class="sc">|&gt;</span></span>
+<span id="cb48-610"><a href="#cb48-610" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(cluster <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">35</span>))</span>
+<span id="cb48-611"><a href="#cb48-611" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-612"><a href="#cb48-612" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-613"><a href="#cb48-613" aria-hidden="true" tabindex="-1"></a>It also provides concise labels for the remaining ones:</span>
+<span id="cb48-614"><a href="#cb48-614" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-617"><a href="#cb48-617" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-618"><a href="#cb48-618" aria-hidden="true" tabindex="-1"></a>recipe_themes <span class="sc">|&gt;</span></span>
+<span id="cb48-619"><a href="#cb48-619" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span>
+<span id="cb48-620"><a href="#cb48-620" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-621"><a href="#cb48-621" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-622"><a href="#cb48-622" aria-hidden="true" tabindex="-1"></a>In a </span>
+<span id="cb48-623"><a href="#cb48-623" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">recent blog post</span><span class="co">](https://blog.stephenturner.us/p/use-r-to-prompt-a-local-llm-with)</span></span>
+<span id="cb48-624"><a href="#cb48-624" aria-hidden="true" tabindex="-1"></a>Stephen Turner uses the <span class="in">`llama3.1`</span> model via Ollama to annotated gene sets in </span>
+<span id="cb48-625"><a href="#cb48-625" aria-hidden="true" tabindex="-1"></a>a similar way, check it out!</span>
+<span id="cb48-626"><a href="#cb48-626" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-627"><a href="#cb48-627" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducibility</span></span>
+<span id="cb48-628"><a href="#cb48-628" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-629"><a href="#cb48-629" aria-hidden="true" tabindex="-1"></a>&lt;details&gt;</span>
+<span id="cb48-630"><a href="#cb48-630" aria-hidden="true" tabindex="-1"></a>&lt;summary&gt;</span>
+<span id="cb48-631"><a href="#cb48-631" aria-hidden="true" tabindex="-1"></a>Session Information</span>
+<span id="cb48-632"><a href="#cb48-632" aria-hidden="true" tabindex="-1"></a>&lt;/summary&gt;</span>
+<span id="cb48-633"><a href="#cb48-633" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-636"><a href="#cb48-636" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb48-637"><a href="#cb48-637" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>(<span class="at">pkgs =</span> <span class="st">"attached"</span>)</span>
+<span id="cb48-638"><a href="#cb48-638" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb48-639"><a href="#cb48-639" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-640"><a href="#cb48-640" aria-hidden="true" tabindex="-1"></a>&lt;/details&gt;</span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

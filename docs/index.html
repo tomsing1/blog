@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.5.56">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Thomas Sandmann’s blog - Welcome</title>
+<title>Welcome – Thomas Sandmann’s blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -50,7 +50,13 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -59,6 +65,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -95,57 +102,84 @@ ul.task-list li input[type="checkbox"] {
   })
   </script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="alternate" type="application/rss+xml" title="Thomas Sandmann's blog" href="index.xml"></head>
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="alternate" type="application/rss+xml" title="Thomas Sandmann's blog" href="index.xml" data-external="1"></head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Thomas Sandmann’s blog</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/tomsing1" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/tomsing1"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/" rel="" target=""><i class="bi bi-linkedin" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"> <i class="bi bi-linkedin" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://genomic.social/@thomas_sandmann" rel="" target=""><i class="bi bi-mastodon" role="img">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann"> <i class="bi bi-mastodon" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="./index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+    <a class="nav-link" href="./index.xml"> <i class="bi bi-rss" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -158,7 +192,7 @@ ul.task-list li input[type="checkbox"] {
   </div>
     
   
-  <div class="quarto-title-meta">
+  <div class="quarto-title-meta column-page-left">
 
       
     
@@ -171,9 +205,10 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(41)</span></div><div class="category" data-category="AWS">AWS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="Bioconductor">Bioconductor <span class="quarto-category-count">(2)</span></div><div class="category" data-category="CSS">CSS <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Literature">Literature <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NCBI">NCBI <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NGS">NGS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="Quarto">Quarto <span class="quarto-category-count">(1)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(22)</span></div><div class="category" data-category="SQL">SQL <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TIL">TIL <span class="quarto-category-count">(34)</span></div><div class="category" data-category="conda">conda <span class="quarto-category-count">(1)</span></div><div class="category" data-category="conference">conference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="databases">databases <span class="quarto-category-count">(1)</span></div><div class="category" data-category="dbGAP">dbGAP <span class="quarto-category-count">(1)</span></div><div class="category" data-category="django">django <span class="quarto-category-count">(1)</span></div><div class="category" data-category="ggplot2">ggplot2 <span class="quarto-category-count">(2)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nextflow">nextflow <span class="quarto-category-count">(5)</span></div><div class="category" data-category="parquet">parquet <span class="quarto-category-count">(3)</span></div><div class="category" data-category="postgres">postgres <span class="quarto-category-count">(2)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(4)</span></div><div class="category" data-category="quarto">quarto <span class="quarto-category-count">(2)</span></div><div class="category" data-category="scRNAseq">scRNAseq <span class="quarto-category-count">(1)</span></div><div class="category" data-category="shiny">shiny <span class="quarto-category-count">(1)</span></div><div class="category" data-category="streamlit">streamlit <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tidyverse">tidyverse <span class="quarto-category-count">(1)</span></div><div class="category" data-category="visualization">visualization <span class="quarto-category-count">(2)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(42)</span></div><div class="category" data-category="AWS">AWS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="Bioconductor">Bioconductor <span class="quarto-category-count">(2)</span></div><div class="category" data-category="CSS">CSS <span class="quarto-category-count">(1)</span></div><div class="category" data-category="LLM">LLM <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Literature">Literature <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NCBI">NCBI <span class="quarto-category-count">(1)</span></div><div class="category" data-category="NGS">NGS <span class="quarto-category-count">(4)</span></div><div class="category" data-category="Ollama">Ollama <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Quarto">Quarto <span class="quarto-category-count">(1)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(23)</span></div><div class="category" data-category="SQL">SQL <span class="quarto-category-count">(2)</span></div><div class="category" data-category="TIL">TIL <span class="quarto-category-count">(34)</span></div><div class="category" data-category="conda">conda <span class="quarto-category-count">(1)</span></div><div class="category" data-category="conference">conference <span class="quarto-category-count">(1)</span></div><div class="category" data-category="databases">databases <span class="quarto-category-count">(1)</span></div><div class="category" data-category="dbGAP">dbGAP <span class="quarto-category-count">(1)</span></div><div class="category" data-category="django">django <span class="quarto-category-count">(1)</span></div><div class="category" data-category="ggplot2">ggplot2 <span class="quarto-category-count">(2)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nextflow">nextflow <span class="quarto-category-count">(5)</span></div><div class="category" data-category="parquet">parquet <span class="quarto-category-count">(3)</span></div><div class="category" data-category="postgres">postgres <span class="quarto-category-count">(2)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(4)</span></div><div class="category" data-category="quarto">quarto <span class="quarto-category-count">(2)</span></div><div class="category" data-category="scRNAseq">scRNAseq <span class="quarto-category-count">(1)</span></div><div class="category" data-category="shiny">shiny <span class="quarto-category-count">(1)</span></div><div class="category" data-category="streamlit">streamlit <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tidyverse">tidyverse <span class="quarto-category-count">(1)</span></div><div class="category" data-category="visualization">visualization <span class="quarto-category-count">(2)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
 
 
 
@@ -184,7 +219,6 @@ ul.task-list li input[type="checkbox"] {
 
 
 <div class="quarto-listing quarto-listing-container-table" id="listing-listing">
-
 <table class="quarto-listing-table table">
 <thead>
 <tr>
@@ -203,7 +237,21 @@ Reading Time
 </tr>
 </thead>
 <tbody class="list">
-<tr data-index="0" data-categories="R,AWS,TIL" data-listing-date-sort="1713337200000" data-listing-file-modified-sort="1713406496577" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-title-sort="Querying JSON files with AWS Athena and the noctua R package" data-listing-filename-sort="index.qmd">
+<tr data-index="0" data-categories="R,Ollama,LLM" data-listing-date-sort="1724223600000" data-listing-file-modified-sort="1724371577832" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2622" data-listing-title-sort="Exploring recipes with LLMs, Ollama and R" data-listing-filename-sort="index.qmd">
+<td>
+<span class="listing-date">Aug 21, 2024</span>
+</td>
+<td>
+<a href="./posts/vectorsearch/index.html" class="title listing-title">Exploring recipes with LLMs, Ollama and R</a>
+</td>
+<td>
+<span class="listing-author">Thomas Sandmann</span>
+</td>
+<td>
+<span class="listing-reading-time">14 min</span>
+</td>
+</tr>
+<tr data-index="1" data-categories="R,AWS,TIL" data-listing-date-sort="1713337200000" data-listing-file-modified-sort="1723413653877" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2381" data-listing-title-sort="Querying JSON files with AWS Athena and the noctua R package" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Apr 17, 2024</span>
 </td>
@@ -217,7 +265,7 @@ Reading Time
 <span class="listing-reading-time">12 min</span>
 </td>
 </tr>
-<tr data-index="1" data-categories="R,ggplot2,TIL" data-listing-date-sort="1712818800000" data-listing-file-modified-sort="1713048033133" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="Interactive volcano plots with the ggiraph R package" data-listing-filename-sort="index.qmd">
+<tr data-index="2" data-categories="R,ggplot2,TIL" data-listing-date-sort="1712818800000" data-listing-file-modified-sort="1723413653882" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1592" data-listing-title-sort="Interactive volcano plots with the ggiraph R package" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Apr 11, 2024</span>
 </td>
@@ -231,7 +279,7 @@ Reading Time
 <span class="listing-reading-time">8 min</span>
 </td>
 </tr>
-<tr data-index="2" data-categories="R,shiny,TIL" data-listing-date-sort="1712473200000" data-listing-file-modified-sort="1712518427531" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Conditional panels within shiny modules" data-listing-filename-sort="index.qmd">
+<tr data-index="3" data-categories="R,shiny,TIL" data-listing-date-sort="1712473200000" data-listing-file-modified-sort="1723413653877" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="617" data-listing-title-sort="Conditional panels within shiny modules" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Apr 7, 2024</span>
 </td>
@@ -245,7 +293,7 @@ Reading Time
 <span class="listing-reading-time">4 min</span>
 </td>
 </tr>
-<tr data-index="3" data-categories="R,ggplot2,TIL" data-listing-date-sort="1712127600000" data-listing-file-modified-sort="1712207249736" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-title-sort="Collaborator-friendly volcano plots with ggplot2" data-listing-filename-sort="index.qmd">
+<tr data-index="4" data-categories="R,ggplot2,TIL" data-listing-date-sort="1712127600000" data-listing-file-modified-sort="1723413653881" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1204" data-listing-title-sort="Collaborator-friendly volcano plots with ggplot2" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Apr 3, 2024</span>
 </td>
@@ -259,7 +307,7 @@ Reading Time
 <span class="listing-reading-time">7 min</span>
 </td>
 </tr>
-<tr data-index="4" data-categories="python,django,TIL" data-listing-date-sort="1704096000000" data-listing-file-modified-sort="1704166313876" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="First steps: building web applications with Django" data-listing-filename-sort="index.qmd">
+<tr data-index="5" data-categories="python,django,TIL" data-listing-date-sort="1704096000000" data-listing-file-modified-sort="1723413653881" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="261" data-listing-title-sort="First steps: building web applications with Django" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 1, 2024</span>
 </td>
@@ -273,7 +321,7 @@ Reading Time
 <span class="listing-reading-time">2 min</span>
 </td>
 </tr>
-<tr data-index="5" data-categories="python,TIL" data-listing-date-sort="1703664000000" data-listing-file-modified-sort="1703788096968" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Creating virtual environments with pyenv" data-listing-filename-sort="index.qmd">
+<tr data-index="6" data-categories="python,TIL" data-listing-date-sort="1703664000000" data-listing-file-modified-sort="1723413653877" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="410" data-listing-title-sort="Creating virtual environments with pyenv" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 27, 2023</span>
 </td>
@@ -287,7 +335,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="6" data-categories="R,Quarto,TIL" data-listing-date-sort="1700294400000" data-listing-file-modified-sort="1700623052940" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="Embedding R into Quarto documents with quarto-webr" data-listing-filename-sort="index.qmd">
+<tr data-index="7" data-categories="R,Quarto,TIL" data-listing-date-sort="1700294400000" data-listing-file-modified-sort="1723413653880" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1432" data-listing-title-sort="Embedding R into Quarto documents with quarto-webr" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 18, 2023</span>
 </td>
@@ -301,7 +349,7 @@ Reading Time
 <span class="listing-reading-time">8 min</span>
 </td>
 </tr>
-<tr data-index="7" data-categories="NCBI,dbGAP,TIL" data-listing-date-sort="1694934000000" data-listing-file-modified-sort="1700336271738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Retrieving access-controlled data from NCBI's dbGAP repository" data-listing-filename-sort="index.qmd">
+<tr data-index="8" data-categories="NCBI,dbGAP,TIL" data-listing-date-sort="1694934000000" data-listing-file-modified-sort="1694992130161" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1130" data-listing-title-sort="Retrieving access-controlled data from NCBI's dbGAP repository" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Sep 17, 2023</span>
 </td>
@@ -315,7 +363,7 @@ Reading Time
 <span class="listing-reading-time">6 min</span>
 </td>
 </tr>
-<tr data-index="8" data-categories="R,TIL,parquet,Bioconductor" data-listing-date-sort="1694588400000" data-listing-file-modified-sort="1700336271738" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-title-sort="Adventures with parquet III: single-cell RNA-seq data and comparison with HDF5-backed arrays" data-listing-filename-sort="index.qmd">
+<tr data-index="9" data-categories="R,TIL,parquet,Bioconductor" data-listing-date-sort="1694588400000" data-listing-file-modified-sort="1694663033624" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2197" data-listing-title-sort="Adventures with parquet III: single-cell RNA-seq data and comparison with HDF5-backed arrays" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Sep 13, 2023</span>
 </td>
@@ -329,7 +377,7 @@ Reading Time
 <span class="listing-reading-time">11 min</span>
 </td>
 </tr>
-<tr data-index="9" data-categories="R,TIL,parquet,Bioconductor" data-listing-date-sort="1693897200000" data-listing-file-modified-sort="1693976738724" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-title-sort="Adventures with parquet II: Implementing the parquetArraySeed S4 class" data-listing-filename-sort="index.qmd">
+<tr data-index="10" data-categories="R,TIL,parquet,Bioconductor" data-listing-date-sort="1693897200000" data-listing-file-modified-sort="1694021761565" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2150" data-listing-title-sort="Adventures with parquet II: Implementing the parquetArraySeed S4 class" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Sep 5, 2023</span>
 </td>
@@ -343,7 +391,7 @@ Reading Time
 <span class="listing-reading-time">11 min</span>
 </td>
 </tr>
-<tr data-index="10" data-categories="R,parquet,TIL" data-listing-date-sort="1693465200000" data-listing-file-modified-sort="1693849514398" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-title-sort="Adventures with parquet: Storing &amp; querying gene expression data" data-listing-filename-sort="index.qmd">
+<tr data-index="11" data-categories="R,parquet,TIL" data-listing-date-sort="1693465200000" data-listing-file-modified-sort="1694021761565" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1395" data-listing-title-sort="Adventures with parquet: Storing &amp; querying gene expression data" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Aug 31, 2023</span>
 </td>
@@ -357,7 +405,7 @@ Reading Time
 <span class="listing-reading-time">7 min</span>
 </td>
 </tr>
-<tr data-index="11" data-categories="R,TIL" data-listing-date-sort="1693378800000" data-listing-file-modified-sort="1693787228665" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-title-sort="Organizing sequencing metadata: experimenting with S7" data-listing-filename-sort="index.qmd">
+<tr data-index="12" data-categories="R,TIL" data-listing-date-sort="1693378800000" data-listing-file-modified-sort="1693442547786" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1804" data-listing-title-sort="Organizing sequencing metadata: experimenting with S7" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Aug 30, 2023</span>
 </td>
@@ -371,7 +419,7 @@ Reading Time
 <span class="listing-reading-time">10 min</span>
 </td>
 </tr>
-<tr data-index="12" data-categories="R,TIL" data-listing-date-sort="1693206000000" data-listing-file-modified-sort="1693787228729" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="tourrr: Exploring multi-dimensional data" data-listing-filename-sort="index.qmd">
+<tr data-index="13" data-categories="R,TIL" data-listing-date-sort="1693206000000" data-listing-file-modified-sort="1693435176350" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1058" data-listing-title-sort="tourrr: Exploring multi-dimensional data" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Aug 28, 2023</span>
 </td>
@@ -385,7 +433,7 @@ Reading Time
 <span class="listing-reading-time">6 min</span>
 </td>
 </tr>
-<tr data-index="13" data-categories="TIL,quarto,CSS" data-listing-date-sort="1690786800000" data-listing-file-modified-sort="1693787228664" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Customizing my Quarto website" data-listing-filename-sort="index.qmd">
+<tr data-index="14" data-categories="TIL,quarto,CSS" data-listing-date-sort="1690786800000" data-listing-file-modified-sort="1693237937440" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="24" data-listing-title-sort="Customizing my Quarto website" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jul 31, 2023</span>
 </td>
@@ -399,7 +447,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="14" data-categories="TIL,python,streamlit" data-listing-date-sort="1690182000000" data-listing-file-modified-sort="1693787228585" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Guess the correlation - a first streamlit app" data-listing-filename-sort="index.qmd">
+<tr data-index="15" data-categories="TIL,python,streamlit" data-listing-date-sort="1690182000000" data-listing-file-modified-sort="1693237937377" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="439" data-listing-title-sort="Guess the correlation - a first streamlit app" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jul 24, 2023</span>
 </td>
@@ -413,7 +461,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="15" data-categories="TIL" data-listing-date-sort="1689922800000" data-listing-file-modified-sort="1693787228591" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Grav - a lightweight content management system" data-listing-filename-sort="index.qmd">
+<tr data-index="16" data-categories="TIL" data-listing-date-sort="1689922800000" data-listing-file-modified-sort="1693237937386" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="50" data-listing-title-sort="Grav - a lightweight content management system" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jul 21, 2023</span>
 </td>
@@ -427,7 +475,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="16" data-categories="TIL" data-listing-date-sort="1689922800000" data-listing-file-modified-sort="1693787228585" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Greg Wilson: Late Night Thoughts on Listening to Ike Quebec (2018)" data-listing-filename-sort="index.qmd">
+<tr data-index="17" data-categories="TIL" data-listing-date-sort="1689922800000" data-listing-file-modified-sort="1693237937378" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="483" data-listing-title-sort="Greg Wilson: Late Night Thoughts on Listening to Ike Quebec (2018)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jul 21, 2023</span>
 </td>
@@ -441,7 +489,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="17" data-categories="R,tidyverse,TIL" data-listing-date-sort="1687762800000" data-listing-file-modified-sort="1693787228589" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Documenting data wrangling with the dtrackr R package" data-listing-filename-sort="index.qmd">
+<tr data-index="18" data-categories="R,tidyverse,TIL" data-listing-date-sort="1687762800000" data-listing-file-modified-sort="1693237937384" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="550" data-listing-title-sort="Documenting data wrangling with the dtrackr R package" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jun 26, 2023</span>
 </td>
@@ -455,7 +503,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="18" data-categories="SQL,AWS,TIL" data-listing-date-sort="1683356400000" data-listing-file-modified-sort="1693787228590" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Querying parquet files with duckdb" data-listing-filename-sort="index.qmd">
+<tr data-index="19" data-categories="SQL,AWS,TIL" data-listing-date-sort="1683356400000" data-listing-file-modified-sort="1693352700782" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1013" data-listing-title-sort="Querying parquet files with duckdb" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">May 6, 2023</span>
 </td>
@@ -469,7 +517,7 @@ Reading Time
 <span class="listing-reading-time">6 min</span>
 </td>
 </tr>
-<tr data-index="19" data-categories="TIL,R,scRNAseq" data-listing-date-sort="1678608000000" data-listing-file-modified-sort="1693787228592" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="Lemur: analyzing multi-condition single-cell data" data-listing-filename-sort="index.qmd">
+<tr data-index="20" data-categories="TIL,R,scRNAseq" data-listing-date-sort="1678608000000" data-listing-file-modified-sort="1693237937387" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2751" data-listing-title-sort="Lemur: analyzing multi-condition single-cell data" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Mar 12, 2023</span>
 </td>
@@ -483,8 +531,7 @@ Reading Time
 <span class="listing-reading-time">14 min</span>
 </td>
 </tr>
-
-<tr data-index="20" data-categories="SQL,postgres" data-listing-date-sort="1677312000000" data-listing-file-modified-sort="1693787228664" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Simultaneously inserting records into two tables with Postgres CTEs" data-listing-filename-sort="index.qmd">
+<tr data-index="21" data-categories="SQL,postgres" data-listing-date-sort="1677312000000" data-listing-file-modified-sort="1693237937439" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="728" data-listing-title-sort="Simultaneously inserting records into two tables with Postgres CTEs" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Feb 25, 2023</span>
 </td>
@@ -498,7 +545,7 @@ Reading Time
 <span class="listing-reading-time">4 min</span>
 </td>
 </tr>
-<tr data-index="21" data-categories="R,AWS,TIL" data-listing-date-sort="1674288000000" data-listing-file-modified-sort="1693787228588" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-title-sort="Distributing R packages with a drat repository hosted on AWS S3" data-listing-filename-sort="index.qmd">
+<tr data-index="22" data-categories="R,AWS,TIL" data-listing-date-sort="1674288000000" data-listing-file-modified-sort="1693435774710" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2316" data-listing-title-sort="Distributing R packages with a drat repository hosted on AWS S3" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 21, 2023</span>
 </td>
@@ -512,7 +559,7 @@ Reading Time
 <span class="listing-reading-time">12 min</span>
 </td>
 </tr>
-<tr data-index="22" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693787228592" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow" data-listing-filename-sort="index.qmd">
+<tr data-index="23" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693237937387" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2596" data-listing-title-sort="QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -526,7 +573,7 @@ Reading Time
 <span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-<tr data-index="23" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693787228595" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output" data-listing-filename-sort="index.qmd">
+<tr data-index="24" data-categories="nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693237937390" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="629" data-listing-title-sort="QuantSeq RNAseq analysis (2): Exploring nf-core/rnaseq output" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -540,7 +587,7 @@ Reading Time
 <span class="listing-reading-time">4 min</span>
 </td>
 </tr>
-<tr data-index="24" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693787228595" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-title-sort="QuantSeq RNAseq analysis (3): Validating published results (no UMIs)" data-listing-filename-sort="index.qmd">
+<tr data-index="25" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693237937391" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2796" data-listing-title-sort="QuantSeq RNAseq analysis (3): Validating published results (no UMIs)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -554,7 +601,7 @@ Reading Time
 <span class="listing-reading-time">14 min</span>
 </td>
 </tr>
-<tr data-index="25" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693787228622" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="QuantSeq RNAseq analysis (4): Validating published results (with UMIs)" data-listing-filename-sort="index.qmd">
+<tr data-index="26" data-categories="R,nextflow,NGS" data-listing-date-sort="1673856000000" data-listing-file-modified-sort="1693435251639" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2569" data-listing-title-sort="QuantSeq RNAseq analysis (4): Validating published results (with UMIs)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 16, 2023</span>
 </td>
@@ -568,7 +615,7 @@ Reading Time
 <span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-<tr data-index="26" data-categories="TIL,R,databases" data-listing-date-sort="1672646400000" data-listing-file-modified-sort="1693787228591" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-title-sort="SQL and noSQL approaches to creating &amp; querying databases (using R)" data-listing-filename-sort="index.qmd">
+<tr data-index="27" data-categories="TIL,R,databases" data-listing-date-sort="1672646400000" data-listing-file-modified-sort="1693435386117" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2439" data-listing-title-sort="SQL and noSQL approaches to creating &amp; querying databases (using R)" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Jan 2, 2023</span>
 </td>
@@ -582,8 +629,7 @@ Reading Time
 <span class="listing-reading-time">13 min</span>
 </td>
 </tr>
-
-<tr data-index="27" data-categories="TIL,R,visualization" data-listing-date-sort="1672128000000" data-listing-file-modified-sort="1693787228591" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-title-sort="Interactive GSEA results: visualizations with reactable &amp; plotly" data-listing-filename-sort="index.qmd">
+<tr data-index="28" data-categories="TIL,R,visualization" data-listing-date-sort="1672128000000" data-listing-file-modified-sort="1693435104394" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-word-count-sort="5240" data-listing-title-sort="Interactive GSEA results: visualizations with reactable &amp; plotly" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 27, 2022</span>
 </td>
@@ -597,7 +643,7 @@ Reading Time
 <span class="listing-reading-time">27 min</span>
 </td>
 </tr>
-<tr data-index="28" data-categories="TIL,R,visualization" data-listing-date-sort="1671868800000" data-listing-file-modified-sort="1693787228787" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="UpSet plots: comparing differential expression across contrasts" data-listing-filename-sort="index.qmd">
+<tr data-index="29" data-categories="TIL,R,visualization" data-listing-date-sort="1671868800000" data-listing-file-modified-sort="1693237937440" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1547" data-listing-title-sort="UpSet plots: comparing differential expression across contrasts" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 24, 2022</span>
 </td>
@@ -611,7 +657,7 @@ Reading Time
 <span class="listing-reading-time">8 min</span>
 </td>
 </tr>
-<tr data-index="29" data-categories="TIL,R,quarto" data-listing-date-sort="1671696000000" data-listing-file-modified-sort="1701962638894" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Figure size, layout &amp; tabsets with Quarto" data-listing-filename-sort="index.qmd">
+<tr data-index="30" data-categories="TIL,R,quarto" data-listing-date-sort="1671696000000" data-listing-file-modified-sort="1723413653878" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="382" data-listing-title-sort="Figure size, layout &amp; tabsets with Quarto" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 22, 2022</span>
 </td>
@@ -625,7 +671,7 @@ Reading Time
 <span class="listing-reading-time">2 min</span>
 </td>
 </tr>
-<tr data-index="30" data-categories="TIL,R,postgres" data-listing-date-sort="1670832000000" data-listing-file-modified-sort="1693787228664" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-title-sort="Full text search in Postgres - the R way" data-listing-filename-sort="index.qmd">
+<tr data-index="31" data-categories="TIL,R,postgres" data-listing-date-sort="1670832000000" data-listing-file-modified-sort="1693237937439" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2153" data-listing-title-sort="Full text search in Postgres - the R way" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 12, 2022</span>
 </td>
@@ -639,7 +685,7 @@ Reading Time
 <span class="listing-reading-time">11 min</span>
 </td>
 </tr>
-<tr data-index="31" data-categories="TIL,R" data-listing-date-sort="1670745600000" data-listing-file-modified-sort="1693787228664" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Updating R the easy way: using rig command line tool" data-listing-filename-sort="index.qmd">
+<tr data-index="32" data-categories="TIL,R" data-listing-date-sort="1670745600000" data-listing-file-modified-sort="1693237937440" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="208" data-listing-title-sort="Updating R the easy way: using rig command line tool" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 11, 2022</span>
 </td>
@@ -653,7 +699,7 @@ Reading Time
 <span class="listing-reading-time">2 min</span>
 </td>
 </tr>
-<tr data-index="32" data-categories="TIL,conference" data-listing-date-sort="1670659200000" data-listing-file-modified-sort="1693787228587" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="2022 normconf: lightning talks" data-listing-filename-sort="index.qmd">
+<tr data-index="33" data-categories="TIL,conference" data-listing-date-sort="1670659200000" data-listing-file-modified-sort="1693237937382" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="162" data-listing-title-sort="2022 normconf: lightning talks" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 10, 2022</span>
 </td>
@@ -667,7 +713,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="33" data-categories="TIL,R" data-listing-date-sort="1670486400000" data-listing-file-modified-sort="1693787228664" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="The rlist R package" data-listing-filename-sort="index.qmd">
+<tr data-index="34" data-categories="TIL,R" data-listing-date-sort="1670486400000" data-listing-file-modified-sort="1693237937440" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="99" data-listing-title-sort="The rlist R package" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Dec 8, 2022</span>
 </td>
@@ -681,7 +727,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="34" data-categories="TIL" data-listing-date-sort="1668672000000" data-listing-file-modified-sort="1693787228588" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Creating custom badges for your README" data-listing-filename-sort="index.qmd">
+<tr data-index="35" data-categories="TIL" data-listing-date-sort="1668672000000" data-listing-file-modified-sort="1693237937382" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="166" data-listing-title-sort="Creating custom badges for your README" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 17, 2022</span>
 </td>
@@ -695,7 +741,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="35" data-categories="TIL,nextflow" data-listing-date-sort="1668499200000" data-listing-file-modified-sort="1693787228592" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-title-sort="Learning nextflow: blasting multiple sequences" data-listing-filename-sort="index.qmd">
+<tr data-index="36" data-categories="TIL,nextflow" data-listing-date-sort="1668499200000" data-listing-file-modified-sort="1693237937387" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1457" data-listing-title-sort="Learning nextflow: blasting multiple sequences" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 15, 2022</span>
 </td>
@@ -709,7 +755,7 @@ Reading Time
 <span class="listing-reading-time">8 min</span>
 </td>
 </tr>
-<tr data-index="36" data-categories="TIL,python" data-listing-date-sort="1668412800000" data-listing-file-modified-sort="1693787228664" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Python type hints" data-listing-filename-sort="index.qmd">
+<tr data-index="37" data-categories="TIL,python" data-listing-date-sort="1668412800000" data-listing-file-modified-sort="1693237937440" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="48" data-listing-title-sort="Python type hints" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 14, 2022</span>
 </td>
@@ -723,7 +769,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="37" data-categories="Literature" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1693787228590" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex" data-listing-filename-sort="index.qmd">
+<tr data-index="38" data-categories="Literature" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1693237937385" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="407" data-listing-title-sort="Fujita et al: Cell-subtype specific effects of genetic variation in the aging and Alzheimer cortex" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 13, 2022</span>
 </td>
@@ -737,7 +783,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="38" data-categories="TIL,AWS" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1693787228587" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Refreshing &amp; exporting temporary AWS credentials" data-listing-filename-sort="index.qmd">
+<tr data-index="39" data-categories="TIL,AWS" data-listing-date-sort="1668326400000" data-listing-file-modified-sort="1693237937381" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="523" data-listing-title-sort="Refreshing &amp; exporting temporary AWS credentials" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 13, 2022</span>
 </td>
@@ -751,7 +797,7 @@ Reading Time
 <span class="listing-reading-time">3 min</span>
 </td>
 </tr>
-<tr data-index="39" data-categories="TIL,conda" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1693787228664" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Installing pyroe with conda" data-listing-filename-sort="index.qmd">
+<tr data-index="40" data-categories="TIL,conda" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1693237937439" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="108" data-listing-title-sort="Installing pyroe with conda" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 12, 2022</span>
 </td>
@@ -765,7 +811,7 @@ Reading Time
 <span class="listing-reading-time">1 min</span>
 </td>
 </tr>
-<tr data-index="40" data-categories="news" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1693787228787" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Welcome To My Blog" data-listing-filename-sort="index.qmd">
+<tr data-index="41" data-categories="news" data-listing-date-sort="1668240000000" data-listing-file-modified-sort="1693237937440" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="33" data-listing-title-sort="Welcome To My Blog" data-listing-filename-sort="index.qmd">
 <td>
 <span class="listing-date">Nov 12, 2022</span>
 </td>
@@ -780,7 +826,6 @@ Reading Time
 </td>
 </tr>
 </tbody>
-
 </table>
 <div class="listing-no-matching d-none">
 No matching items
@@ -830,6 +875,33 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       } else {
         el.classList.add('notransition');
       }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
     }
   }
   const toggleColorMode = (alternate) => {
@@ -898,13 +970,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return localAlternateSentinel;
     }
   }
-  let localAlternateSentinel = 'default';
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
   // Dark / light mode switch
   window.quartoToggleColorScheme = () => {
     // Read the current dark / light value 
     let toAlternate = !hasAlternateSentinel();
     toggleColorMode(toAlternate);
     setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
   };
   // Ensure there is a toggle, if there isn't float one in the top right
   if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
@@ -939,18 +1013,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -982,11 +1045,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/tomsing1\.github\.io\/blog\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -996,8 +1098,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1009,7 +1120,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1053,6 +1287,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1078,6 +1313,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1138,6 +1399,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

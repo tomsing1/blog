@@ -290,23 +290,23 @@ Warning
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-3" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-3" data-code-lines="1" data-code-annotation="1">Establish a connection to the AWS S3 service.</span>
+<span data-code-lines="1" data-code-annotation="1" data-code-cell="annotated-cell-3">Establish a connection to the AWS S3 service.</span>
 </dd>
 <dt data-target-cell="annotated-cell-3" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-3" data-code-lines="4" data-code-annotation="2">The <code>write_json</code> does not export the <code>row.names</code> of the data.frame, so we store them in a regular column first.</span>
+<span data-code-lines="4" data-code-annotation="2" data-code-cell="annotated-cell-3">The <code>write_json</code> does not export the <code>row.names</code> of the data.frame, so we store them in a regular column first.</span>
 </dd>
 <dt data-target-cell="annotated-cell-3" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-3" data-code-lines="8" data-code-annotation="3">Export each row of the <code>mtcars</code> data.frame into a separate JSON file.</span>
+<span data-code-lines="8" data-code-annotation="3" data-code-cell="annotated-cell-3">Export each row of the <code>mtcars</code> data.frame into a separate JSON file.</span>
 </dd>
 <dt data-target-cell="annotated-cell-3" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-3" data-code-lines="11" data-code-annotation="4">Athena does not accept pretty JSON format. Instead, each JSON-encoded record must be represented on a separate line as outlined in the <a href="https://docs.aws.amazon.com/athena/latest/ug/parsing-JSON.html">Best practices for reading JSON data</a> documentation page.</span>
+<span data-code-lines="11" data-code-annotation="4" data-code-cell="annotated-cell-3">Athena does not accept pretty JSON format. Instead, each JSON-encoded record must be represented on a separate line as outlined in the <a href="https://docs.aws.amazon.com/athena/latest/ug/parsing-JSON.html">Best practices for reading JSON data</a> documentation page.</span>
 </dd>
 <dt data-target-cell="annotated-cell-3" data-target-annotation="5">5</dt>
 <dd>
-<span data-code-cell="annotated-cell-3" data-code-lines="15" data-code-annotation="5">Copy the JSON file to AWS S3.</span>
+<span data-code-lines="15" data-code-annotation="5" data-code-cell="annotated-cell-3">Copy the JSON file to AWS S3.</span>
 </dd>
 </dl>
 </div>
@@ -352,7 +352,7 @@ Warning
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="1" data-code-annotation="1">The <a href="https://solutions.posit.co/connections/db/best-practices/run-queries-safely/#using-glue_sql">glue_sql() command</a> facilitates inserting user-defined variables into a SQL query.</span>
+<span data-code-lines="1" data-code-annotation="1" data-code-cell="annotated-cell-6">The <a href="https://solutions.posit.co/connections/db/best-practices/run-queries-safely/#using-glue_sql">glue_sql() command</a> facilitates inserting user-defined variables into a SQL query.</span>
 </dd>
 </dl>
 </div>
@@ -474,7 +474,7 @@ Warning
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-19" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-19" data-code-lines="1" data-code-annotation="1">Set the <code>delete_data = FALSE</code> argument to remove the Athena database, but leave the JSON files in place.</span>
+<span data-code-lines="1" data-code-annotation="1" data-code-cell="annotated-cell-19">Set the <code>delete_data = FALSE</code> argument to remove the Athena database, but leave the JSON files in place.</span>
 </dd>
 </dl>
 </div>

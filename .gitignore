@@ -9,3 +9,5 @@ env
 *.parquet
 /env/
 **derby.log
+posts/*/index_cache/*
+posts/*/index_files/*

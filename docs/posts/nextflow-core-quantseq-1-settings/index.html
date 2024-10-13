@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Thomas Sandmann">
 <meta name="dcterms.date" content="2023-01-16">
 
-<title>Thomas Sandmann’s blog - QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow</title>
+<title>QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow – Thomas Sandmann’s blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -24,7 +24,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -35,7 +35,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -84,7 +84,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -93,6 +99,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -105,49 +112,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Thomas Sandmann’s blog</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/tomsing1" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/tomsing1"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/" rel="" target=""><i class="bi bi-linkedin" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"> <i class="bi bi-linkedin" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://genomic.social/@thomas_sandmann" rel="" target=""><i class="bi bi-mastodon" role="img">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann"> <i class="bi bi-mastodon" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="../../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -229,6 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
+
 
 
 
@@ -636,6 +644,33 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
   }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
   const toggleColorMode = (alternate) => {
     // Switch the stylesheets
     const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
@@ -702,13 +737,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return localAlternateSentinel;
     }
   }
-  let localAlternateSentinel = 'default';
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
   // Dark / light mode switch
   window.quartoToggleColorScheme = () => {
     // Read the current dark / light value 
     let toAlternate = !hasAlternateSentinel();
     toggleColorMode(toAlternate);
     setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
   };
   // Ensure there is a toggle, if there isn't float one in the top right
   if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
@@ -743,18 +780,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -786,7 +812,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
   const viewSource = window.document.getElementById('quarto-view-source') ||
                      window.document.getElementById('quarto-code-tools-source');
   if (viewSource) {
@@ -838,10 +886,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/tomsing1\.github\.io\/blog\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -851,8 +916,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -864,7 +938,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -908,6 +1105,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -933,6 +1131,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -993,7 +1217,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 <script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
-</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark"><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="sourceCode" id="cb11" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "QuantSeq RNAseq analysis (1): configuring the nf-core/rnaseq workflow"</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
@@ -1307,16 +1533,16 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb11-311"><a href="#cb11-311" aria-hidden="true" tabindex="-1"></a>sQuantSeq FWD data __without UMIs__:</span>
 <span id="cb11-312"><a href="#cb11-312" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-313"><a href="#cb11-313" aria-hidden="true" tabindex="-1"></a><span class="in">```json</span></span>
-<span id="cb11-314"><a href="#cb11-314" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb11-315"><a href="#cb11-315" aria-hidden="true" tabindex="-1"></a>    <span class="st">"save_reference"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-316"><a href="#cb11-316" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fasta"</span><span class="op">:</span> <span class="st">"https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M17/GRCm38.primary_assembly.genome.fa.gz"</span><span class="op">,</span></span>
-<span id="cb11-317"><a href="#cb11-317" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gtf"</span><span class="op">:</span> <span class="st">"https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M17/gencode.vM17.primary_assembly.annotation.gtf.gz"</span><span class="op">,</span></span>
-<span id="cb11-318"><a href="#cb11-318" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_star_align_args"</span><span class="op">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="op">,</span></span>
-<span id="cb11-319"><a href="#cb11-319" aria-hidden="true" tabindex="-1"></a>    <span class="st">"with_umi"</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span></span>
-<span id="cb11-320"><a href="#cb11-320" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_salmon_quant_args"</span><span class="op">:</span> <span class="st">"--noLengthCorrection"</span><span class="op">,</span></span>
-<span id="cb11-321"><a href="#cb11-321" aria-hidden="true" tabindex="-1"></a>    <span class="st">"skip_stringtie"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-322"><a href="#cb11-322" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gencode"</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb11-323"><a href="#cb11-323" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-314"><a href="#cb11-314" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-315"><a href="#cb11-315" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"save_reference"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb11-316"><a href="#cb11-316" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"fasta"</span><span class="fu">:</span> <span class="st">"https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M17/GRCm38.primary_assembly.genome.fa.gz"</span><span class="fu">,</span></span>
+<span id="cb11-317"><a href="#cb11-317" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gtf"</span><span class="fu">:</span> <span class="st">"https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M17/gencode.vM17.primary_assembly.annotation.gtf.gz"</span><span class="fu">,</span></span>
+<span id="cb11-318"><a href="#cb11-318" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"extra_star_align_args"</span><span class="fu">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="fu">,</span></span>
+<span id="cb11-319"><a href="#cb11-319" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"with_umi"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb11-320"><a href="#cb11-320" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"extra_salmon_quant_args"</span><span class="fu">:</span> <span class="st">"--noLengthCorrection"</span><span class="fu">,</span></span>
+<span id="cb11-321"><a href="#cb11-321" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"skip_stringtie"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb11-322"><a href="#cb11-322" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gencode"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb11-323"><a href="#cb11-323" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
 <span id="cb11-324"><a href="#cb11-324" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb11-325"><a href="#cb11-325" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-326"><a href="#cb11-326" aria-hidden="true" tabindex="-1"></a>We store the JSON string in a file called <span class="in">`nf_params.json`</span>, and then pass it to</span>
@@ -1349,21 +1575,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb11-353"><a href="#cb11-353" aria-hidden="true" tabindex="-1"></a>indices in our <span class="in">`nf_params.json`</span> file, e.g.</span>
 <span id="cb11-354"><a href="#cb11-354" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-355"><a href="#cb11-355" aria-hidden="true" tabindex="-1"></a><span class="in">```json</span></span>
-<span id="cb11-356"><a href="#cb11-356" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb11-357"><a href="#cb11-357" aria-hidden="true" tabindex="-1"></a>    <span class="st">"save_reference"</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span></span>
-<span id="cb11-358"><a href="#cb11-358" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fasta"</span><span class="op">:</span> <span class="st">"genome/GRCm38.primary_assembly.genome.fa"</span><span class="op">,</span></span>
-<span id="cb11-359"><a href="#cb11-359" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gtf"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.gtf"</span><span class="op">,</span></span>
-<span id="cb11-360"><a href="#cb11-360" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gene_bed"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.bed"</span><span class="op">,</span></span>
-<span id="cb11-361"><a href="#cb11-361" aria-hidden="true" tabindex="-1"></a>    <span class="st">"transcript_fasta"</span><span class="op">:</span> <span class="st">"genome/genome.transcripts.fa"</span><span class="op">,</span></span>
-<span id="cb11-362"><a href="#cb11-362" aria-hidden="true" tabindex="-1"></a>    <span class="st">"star_index"</span><span class="op">:</span> <span class="st">"genome/index/star"</span><span class="op">,</span></span>
-<span id="cb11-363"><a href="#cb11-363" aria-hidden="true" tabindex="-1"></a>    <span class="st">"salmon_index"</span><span class="op">:</span> <span class="st">"genome/index/salmon"</span><span class="op">,</span></span>
-<span id="cb11-364"><a href="#cb11-364" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rsem_index"</span><span class="op">:</span> <span class="st">"genome/rsem"</span><span class="op">,</span></span>
-<span id="cb11-365"><a href="#cb11-365" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_star_align_args"</span><span class="op">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="op">,</span></span>
-<span id="cb11-366"><a href="#cb11-366" aria-hidden="true" tabindex="-1"></a>    <span class="st">"with_umi"</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span></span>
-<span id="cb11-367"><a href="#cb11-367" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_salmon_quant_args"</span><span class="op">:</span> <span class="st">"--noLengthCorrection"</span><span class="op">,</span></span>
-<span id="cb11-368"><a href="#cb11-368" aria-hidden="true" tabindex="-1"></a>    <span class="st">"skip_stringtie"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-369"><a href="#cb11-369" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gencode"</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb11-370"><a href="#cb11-370" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-356"><a href="#cb11-356" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-357"><a href="#cb11-357" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"save_reference"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb11-358"><a href="#cb11-358" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"fasta"</span><span class="fu">:</span> <span class="st">"genome/GRCm38.primary_assembly.genome.fa"</span><span class="fu">,</span></span>
+<span id="cb11-359"><a href="#cb11-359" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gtf"</span><span class="fu">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.gtf"</span><span class="fu">,</span></span>
+<span id="cb11-360"><a href="#cb11-360" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gene_bed"</span><span class="fu">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.bed"</span><span class="fu">,</span></span>
+<span id="cb11-361"><a href="#cb11-361" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"transcript_fasta"</span><span class="fu">:</span> <span class="st">"genome/genome.transcripts.fa"</span><span class="fu">,</span></span>
+<span id="cb11-362"><a href="#cb11-362" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"star_index"</span><span class="fu">:</span> <span class="st">"genome/index/star"</span><span class="fu">,</span></span>
+<span id="cb11-363"><a href="#cb11-363" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"salmon_index"</span><span class="fu">:</span> <span class="st">"genome/index/salmon"</span><span class="fu">,</span></span>
+<span id="cb11-364"><a href="#cb11-364" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"rsem_index"</span><span class="fu">:</span> <span class="st">"genome/rsem"</span><span class="fu">,</span></span>
+<span id="cb11-365"><a href="#cb11-365" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"extra_star_align_args"</span><span class="fu">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="fu">,</span></span>
+<span id="cb11-366"><a href="#cb11-366" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"with_umi"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb11-367"><a href="#cb11-367" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"extra_salmon_quant_args"</span><span class="fu">:</span> <span class="st">"--noLengthCorrection"</span><span class="fu">,</span></span>
+<span id="cb11-368"><a href="#cb11-368" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"skip_stringtie"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb11-369"><a href="#cb11-369" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gencode"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb11-370"><a href="#cb11-370" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
 <span id="cb11-371"><a href="#cb11-371" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb11-372"><a href="#cb11-372" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-373"><a href="#cb11-373" aria-hidden="true" tabindex="-1"></a>Our next run will execute much faster, because these reference files and indices</span>
@@ -1490,24 +1716,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb11-494"><a href="#cb11-494" aria-hidden="true" tabindex="-1"></a>store them elsewhere, please provide absolute paths in the JSON file instead.)</span>
 <span id="cb11-495"><a href="#cb11-495" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-496"><a href="#cb11-496" aria-hidden="true" tabindex="-1"></a><span class="in">```json</span></span>
-<span id="cb11-497"><a href="#cb11-497" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb11-498"><a href="#cb11-498" aria-hidden="true" tabindex="-1"></a>    <span class="st">"save_reference"</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span></span>
-<span id="cb11-499"><a href="#cb11-499" aria-hidden="true" tabindex="-1"></a>    <span class="st">"fasta"</span><span class="op">:</span> <span class="st">"genome/GRCm38.primary_assembly.genome.fa"</span><span class="op">,</span></span>
-<span id="cb11-500"><a href="#cb11-500" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gtf"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.gtf"</span><span class="op">,</span></span>
-<span id="cb11-501"><a href="#cb11-501" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gene_bed"</span><span class="op">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.bed"</span><span class="op">,</span></span>
-<span id="cb11-502"><a href="#cb11-502" aria-hidden="true" tabindex="-1"></a>    <span class="st">"transcript_fasta"</span><span class="op">:</span> <span class="st">"genome/genome.transcripts.fa"</span><span class="op">,</span></span>
-<span id="cb11-503"><a href="#cb11-503" aria-hidden="true" tabindex="-1"></a>    <span class="st">"star_index"</span><span class="op">:</span> <span class="st">"genome/index/star"</span><span class="op">,</span></span>
-<span id="cb11-504"><a href="#cb11-504" aria-hidden="true" tabindex="-1"></a>    <span class="st">"salmon_index"</span><span class="op">:</span> <span class="st">"genome/index/salmon"</span><span class="op">,</span></span>
-<span id="cb11-505"><a href="#cb11-505" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rsem_index"</span><span class="op">:</span> <span class="st">"genome/rsem"</span><span class="op">,</span></span>
-<span id="cb11-506"><a href="#cb11-506" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_star_align_args"</span><span class="op">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="op">,</span></span>
-<span id="cb11-507"><a href="#cb11-507" aria-hidden="true" tabindex="-1"></a>    <span class="st">"with_umi"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-508"><a href="#cb11-508" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_extract_method"</span><span class="op">:</span> <span class="st">"regex"</span><span class="op">,</span></span>
-<span id="cb11-509"><a href="#cb11-509" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_grouping_method"</span><span class="op">:</span> <span class="st">"unique"</span><span class="op">,</span></span>
-<span id="cb11-510"><a href="#cb11-510" aria-hidden="true" tabindex="-1"></a>    <span class="st">"umitools_bc_pattern"</span><span class="op">:</span> <span class="st">"^(?P&lt;umi_1&gt;.{6})(?P&lt;discard_1&gt;.{4}).*"</span><span class="op">,</span></span>
-<span id="cb11-511"><a href="#cb11-511" aria-hidden="true" tabindex="-1"></a>    <span class="st">"extra_salmon_quant_args"</span><span class="op">:</span> <span class="st">"--noLengthCorrection"</span><span class="op">,</span></span>
-<span id="cb11-512"><a href="#cb11-512" aria-hidden="true" tabindex="-1"></a>    <span class="st">"skip_stringtie"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
-<span id="cb11-513"><a href="#cb11-513" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gencode"</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb11-514"><a href="#cb11-514" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-497"><a href="#cb11-497" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-498"><a href="#cb11-498" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"save_reference"</span><span class="fu">:</span> <span class="kw">false</span><span class="fu">,</span></span>
+<span id="cb11-499"><a href="#cb11-499" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"fasta"</span><span class="fu">:</span> <span class="st">"genome/GRCm38.primary_assembly.genome.fa"</span><span class="fu">,</span></span>
+<span id="cb11-500"><a href="#cb11-500" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gtf"</span><span class="fu">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.gtf"</span><span class="fu">,</span></span>
+<span id="cb11-501"><a href="#cb11-501" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gene_bed"</span><span class="fu">:</span> <span class="st">"genome/gencode.vM17.primary_assembly.annotation.bed"</span><span class="fu">,</span></span>
+<span id="cb11-502"><a href="#cb11-502" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"transcript_fasta"</span><span class="fu">:</span> <span class="st">"genome/genome.transcripts.fa"</span><span class="fu">,</span></span>
+<span id="cb11-503"><a href="#cb11-503" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"star_index"</span><span class="fu">:</span> <span class="st">"genome/index/star"</span><span class="fu">,</span></span>
+<span id="cb11-504"><a href="#cb11-504" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"salmon_index"</span><span class="fu">:</span> <span class="st">"genome/index/salmon"</span><span class="fu">,</span></span>
+<span id="cb11-505"><a href="#cb11-505" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"rsem_index"</span><span class="fu">:</span> <span class="st">"genome/rsem"</span><span class="fu">,</span></span>
+<span id="cb11-506"><a href="#cb11-506" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"extra_star_align_args"</span><span class="fu">:</span> <span class="st">"--alignIntronMax 1000000 --alignIntronMin 20 --alignMatesGapMax 1000000 --alignSJoverhangMin 8 --outFilterMismatchNmax 999 --outFilterMultimapNmax 20 --outFilterType BySJout --outFilterMismatchNoverLmax 0.1 --clip3pAdapterSeq AAAAAAAA"</span><span class="fu">,</span></span>
+<span id="cb11-507"><a href="#cb11-507" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"with_umi"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb11-508"><a href="#cb11-508" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"umitools_extract_method"</span><span class="fu">:</span> <span class="st">"regex"</span><span class="fu">,</span></span>
+<span id="cb11-509"><a href="#cb11-509" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"umitools_grouping_method"</span><span class="fu">:</span> <span class="st">"unique"</span><span class="fu">,</span></span>
+<span id="cb11-510"><a href="#cb11-510" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"umitools_bc_pattern"</span><span class="fu">:</span> <span class="st">"^(?P&lt;umi_1&gt;.{6})(?P&lt;discard_1&gt;.{4}).*"</span><span class="fu">,</span></span>
+<span id="cb11-511"><a href="#cb11-511" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"extra_salmon_quant_args"</span><span class="fu">:</span> <span class="st">"--noLengthCorrection"</span><span class="fu">,</span></span>
+<span id="cb11-512"><a href="#cb11-512" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"skip_stringtie"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb11-513"><a href="#cb11-513" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"gencode"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb11-514"><a href="#cb11-514" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
 <span id="cb11-515"><a href="#cb11-515" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb11-516"><a href="#cb11-516" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-517"><a href="#cb11-517" aria-hidden="true" tabindex="-1"></a>We store the JSON string in a file called <span class="in">`nf_params.json`</span>, and then pass it to</span>
@@ -1528,9 +1754,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb11-532"><a href="#cb11-532" aria-hidden="true" tabindex="-1"></a><span class="in">`SRP213880`</span> directory. </span>
 <span id="cb11-533"><a href="#cb11-533" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-534"><a href="#cb11-534" aria-hidden="true" tabindex="-1"></a>Next, we will take a closer look at the available results in </span>
-<span id="cb11-535"><a href="#cb11-535" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the second post in this series</span><span class="co">](../nextflow-core-quantseq-2-output/index.html)</span>].</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-535"><a href="#cb11-535" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">the second post in this series</span><span class="co">](../nextflow-core-quantseq-2-output/index.html)</span>].</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+
 
 
 

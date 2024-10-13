@@ -2,14 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Thomas Sandmann">
 <meta name="dcterms.date" content="2023-01-02">
 
-<title>Thomas Sandmann’s blog - SQL and noSQL approaches to creating &amp; querying databases (using R)</title>
+<title>SQL and noSQL approaches to creating &amp; querying databases (using R) – Thomas Sandmann’s blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -24,7 +24,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -35,7 +35,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -84,7 +84,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -93,6 +99,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -109,49 +116,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Thomas Sandmann’s blog</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../about.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/tomsing1" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/tomsing1"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/" rel="" target=""><i class="bi bi-linkedin" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"> <i class="bi bi-linkedin" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://genomic.social/@thomas_sandmann" rel="" target=""><i class="bi bi-mastodon" role="img">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann"> <i class="bi bi-mastodon" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="../../index.xml" rel="" target=""><i class="bi bi-rss" role="img">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
   <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -224,6 +231,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
+
 
 
 
@@ -443,7 +451,7 @@ Unnesting columns
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> hallmarks, json_each(hallmarks.json, <span class="st">'$.geneSymbols'</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> json_each.<span class="fu">value</span> <span class="kw">LIKE</span> <span class="st">'%Abca1%'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="knitsql-table">
-<table class="table table-sm table-striped small">
+<table class="caption-top table table-sm table-striped small">
 <caption>5 records</caption>
 <thead>
 <tr class="header">
@@ -709,7 +717,6 @@ Verifying foreign keys
 <span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_fk</span>(tbl_elementset, geneset, tbl_geneset) <span class="sc">%&gt;%</span></span>
 <span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_draw</span>(<span class="at">view_type =</span> <span class="st">"all"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-
 <div class="grViz html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-aaf8b96f471cb6a5008c" style="width:50%;height:240px;"></div>
 <script type="application/json" data-for="htmlwidget-aaf8b96f471cb6a5008c">{"x":{"diagram":"#data_model\ndigraph {\ngraph [rankdir=LR tooltip=\"Data Model\" ]\n\nnode [margin=0 fontcolor = \"#444444\" ]\n\nedge [color = \"#555555\", arrowsize = 1, ]\n\npack=true\npackmode= \"node\"\n\n  \"tbl_element\" [id = \"tbl_element\", label = <<TABLE ALIGN=\"LEFT\" BORDER=\"1\" CELLBORDER=\"0\" CELLSPACING=\"0\" COLOR=\"#555555\">\n    <TR>\n      <TD COLSPAN=\"1\" BGCOLOR=\"#EFEBDD\" BORDER=\"0\"><FONT COLOR=\"#000000\">tbl_element<\/FONT>\n<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"element\"><U>element<\/U><\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\">entrezid<\/TD>\n    <\/TR>\n  <\/TABLE>>, shape = \"plaintext\"] \n\n  \"tbl_elementset\" [id = \"tbl_elementset\", label = <<TABLE ALIGN=\"LEFT\" BORDER=\"1\" CELLBORDER=\"0\" CELLSPACING=\"0\" COLOR=\"#555555\">\n    <TR>\n      <TD COLSPAN=\"1\" BGCOLOR=\"#EFEBDD\" BORDER=\"0\"><FONT COLOR=\"#000000\">tbl_elementset<\/FONT>\n<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"element\">element<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"geneset\">geneset<\/TD>\n    <\/TR>\n  <\/TABLE>>, shape = \"plaintext\"] \n\n  \"tbl_geneset\" [id = \"tbl_geneset\", label = <<TABLE ALIGN=\"LEFT\" BORDER=\"1\" CELLBORDER=\"0\" CELLSPACING=\"0\" COLOR=\"#555555\">\n    <TR>\n      <TD COLSPAN=\"1\" BGCOLOR=\"#EFEBDD\" BORDER=\"0\"><FONT COLOR=\"#000000\">tbl_geneset<\/FONT>\n<\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\" PORT=\"geneset\"><U>geneset<\/U><\/TD>\n    <\/TR>\n    <TR>\n      <TD ALIGN=\"LEFT\" BGCOLOR=\"#FFFFFF\">url<\/TD>\n    <\/TR>\n  <\/TABLE>>, shape = \"plaintext\"] \n\n\"tbl_elementset\":\"element\"->\"tbl_element\":\"element\" [id=\"tbl_elementset_1\"]\n\"tbl_elementset\":\"geneset\"->\"tbl_geneset\":\"geneset\" [id=\"tbl_elementset_2\"]\n}","config":{"engine":null,"options":null}},"evals":[],"jsHooks":[]}</script>
 <p>Model diagram</p>
@@ -1004,6 +1011,33 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       }
     }
   }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
   const toggleColorMode = (alternate) => {
     // Switch the stylesheets
     const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
@@ -1070,13 +1104,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return localAlternateSentinel;
     }
   }
-  let localAlternateSentinel = 'default';
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
   // Dark / light mode switch
   window.quartoToggleColorScheme = () => {
     // Read the current dark / light value 
     let toAlternate = !hasAlternateSentinel();
     toggleColorMode(toAlternate);
     setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
   };
   // Ensure there is a toggle, if there isn't float one in the top right
   if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
@@ -1111,18 +1147,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1154,7 +1179,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
   const viewSource = window.document.getElementById('quarto-view-source') ||
                      window.document.getElementById('quarto-code-tools-source');
   if (viewSource) {
@@ -1206,10 +1253,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   if (showAllCode) {
     showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
-  function tippyHover(el, contentFn) {
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/tomsing1\.github\.io\/blog\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1219,8 +1283,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1232,7 +1305,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1276,6 +1472,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1301,6 +1498,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1361,7 +1584,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 <script src="https://giscus.app/client.js" data-repo="tomsing1/blog" data-repo-id="R_kgDOIZ9LJw" data-category="Announcements" data-category-id="DIC_kwDOIZ9LJ84CTvnC" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
-</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark"><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="sourceCode" id="cb60" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "SQL and noSQL approaches to creating &amp; querying databases (using R)"</span></span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
@@ -1431,17 +1656,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-67"><a href="#cb60-67" aria-hidden="true" tabindex="-1"></a>database instead; my favorite is <span class="co">[</span><span class="ot">Postgres</span><span class="co">](https://www.postgresql.org/)</span>.)</span>
 <span id="cb60-68"><a href="#cb60-68" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-69"><a href="#cb60-69" aria-hidden="true" tabindex="-1"></a><span class="in">```{r message=FALSE}</span></span>
-<span id="cb60-70"><a href="#cb60-70" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BiocSet)</span>
-<span id="cb60-71"><a href="#cb60-71" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dm)</span>
-<span id="cb60-72"><a href="#cb60-72" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb60-73"><a href="#cb60-73" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(jsonlite)</span>
-<span id="cb60-74"><a href="#cb60-74" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nodbi)</span>
-<span id="cb60-75"><a href="#cb60-75" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(org.Mm.eg.db)</span>
-<span id="cb60-76"><a href="#cb60-76" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
-<span id="cb60-77"><a href="#cb60-77" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DiagrammeR)</span>
-<span id="cb60-78"><a href="#cb60-78" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RSQLite)</span>
-<span id="cb60-79"><a href="#cb60-79" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tibble)</span>
-<span id="cb60-80"><a href="#cb60-80" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb60-70"><a href="#cb60-70" aria-hidden="true" tabindex="-1"></a><span class="in">library(BiocSet)</span></span>
+<span id="cb60-71"><a href="#cb60-71" aria-hidden="true" tabindex="-1"></a><span class="in">library(dm)</span></span>
+<span id="cb60-72"><a href="#cb60-72" aria-hidden="true" tabindex="-1"></a><span class="in">library(dplyr)</span></span>
+<span id="cb60-73"><a href="#cb60-73" aria-hidden="true" tabindex="-1"></a><span class="in">library(jsonlite)</span></span>
+<span id="cb60-74"><a href="#cb60-74" aria-hidden="true" tabindex="-1"></a><span class="in">library(nodbi)</span></span>
+<span id="cb60-75"><a href="#cb60-75" aria-hidden="true" tabindex="-1"></a><span class="in">library(org.Mm.eg.db)</span></span>
+<span id="cb60-76"><a href="#cb60-76" aria-hidden="true" tabindex="-1"></a><span class="in">library(purrr)</span></span>
+<span id="cb60-77"><a href="#cb60-77" aria-hidden="true" tabindex="-1"></a><span class="in">library(DiagrammeR)</span></span>
+<span id="cb60-78"><a href="#cb60-78" aria-hidden="true" tabindex="-1"></a><span class="in">library(RSQLite)</span></span>
+<span id="cb60-79"><a href="#cb60-79" aria-hidden="true" tabindex="-1"></a><span class="in">library(tibble)</span></span>
+<span id="cb60-80"><a href="#cb60-80" aria-hidden="true" tabindex="-1"></a><span class="in">library(tidyr)</span></span>
 <span id="cb60-81"><a href="#cb60-81" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-82"><a href="#cb60-82" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-83"><a href="#cb60-83" aria-hidden="true" tabindex="-1"></a><span class="fu">## The Mouse Hallmarks MSigDB collection</span></span>
@@ -1457,10 +1682,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-93"><a href="#cb60-93" aria-hidden="true" tabindex="-1"></a>). </span>
 <span id="cb60-94"><a href="#cb60-94" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-95"><a href="#cb60-95" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
-<span id="cb60-96"><a href="#cb60-96" aria-hidden="true" tabindex="-1"></a>json_file <span class="ot">&lt;-</span> <span class="fu">paste0</span>(</span>
-<span id="cb60-97"><a href="#cb60-97" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/tomsing1/blog/main/posts/"</span>,</span>
-<span id="cb60-98"><a href="#cb60-98" aria-hidden="true" tabindex="-1"></a>  <span class="st">"geneset-sqlite-db/mh.all.v2022.1.Mm.json"</span>)</span>
-<span id="cb60-99"><a href="#cb60-99" aria-hidden="true" tabindex="-1"></a>mh <span class="ot">&lt;-</span> jsonlite<span class="sc">::</span><span class="fu">read_json</span>(json_file, <span class="at">simplifyVector =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-96"><a href="#cb60-96" aria-hidden="true" tabindex="-1"></a><span class="in">json_file &lt;- paste0(</span></span>
+<span id="cb60-97"><a href="#cb60-97" aria-hidden="true" tabindex="-1"></a><span class="in">  "https://raw.githubusercontent.com/tomsing1/blog/main/posts/",</span></span>
+<span id="cb60-98"><a href="#cb60-98" aria-hidden="true" tabindex="-1"></a><span class="in">  "geneset-sqlite-db/mh.all.v2022.1.Mm.json")</span></span>
+<span id="cb60-99"><a href="#cb60-99" aria-hidden="true" tabindex="-1"></a><span class="in">mh &lt;- jsonlite::read_json(json_file, simplifyVector = TRUE)</span></span>
 <span id="cb60-100"><a href="#cb60-100" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-101"><a href="#cb60-101" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-102"><a href="#cb60-102" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
@@ -1566,7 +1791,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-214"><a href="#cb60-214" aria-hidden="true" tabindex="-1"></a>the  <span class="in">`r length(mh)`</span> gene sets. </span>
 <span id="cb60-215"><a href="#cb60-215" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-216"><a href="#cb60-216" aria-hidden="true" tabindex="-1"></a><span class="in">```{r message=FALSE, warning=FALSE}</span></span>
-<span id="cb60-217"><a href="#cb60-217" aria-hidden="true" tabindex="-1"></a><span class="fu">docdb_create</span>(src, <span class="at">key =</span> <span class="st">"hallmarks"</span>, <span class="at">value =</span> mh2)</span>
+<span id="cb60-217"><a href="#cb60-217" aria-hidden="true" tabindex="-1"></a><span class="in">docdb_create(src, key = "hallmarks", value = mh2)</span></span>
 <span id="cb60-218"><a href="#cb60-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-219"><a href="#cb60-219" aria-hidden="true" tabindex="-1"></a>We can retrieve the full set of records as a <span class="in">`data.frame`</span> with the <span class="in">`docdb_get()`</span></span>
 <span id="cb60-220"><a href="#cb60-220" aria-hidden="true" tabindex="-1"></a>function. (Here we select a subset of the returned columns due to space </span>
@@ -1637,18 +1862,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-295"><a href="#cb60-295" aria-hidden="true" tabindex="-1"></a>sets that include e.g. the <span class="in">`Abca1`</span> gene:</span>
 <span id="cb60-296"><a href="#cb60-296" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-297"><a href="#cb60-297" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
-<span id="cb60-298"><a href="#cb60-298" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> src<span class="sc">$</span>con</span>
+<span id="cb60-298"><a href="#cb60-298" aria-hidden="true" tabindex="-1"></a><span class="in">con &lt;- src$con</span></span>
 <span id="cb60-299"><a href="#cb60-299" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-300"><a href="#cb60-300" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-301"><a href="#cb60-301" aria-hidden="true" tabindex="-1"></a><span class="in">```{sql connection=con}</span></span>
-<span id="cb60-302"><a href="#cb60-302" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> hallmarks<span class="ch">.</span>json<span class="op">-&gt;&gt;</span><span class="st">'name'</span> <span class="kw">as</span> name</span>
-<span id="cb60-303"><a href="#cb60-303" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> hallmarks, json_each(hallmarks<span class="ch">.</span>json, <span class="st">'$.geneSymbols'</span>)</span>
-<span id="cb60-304"><a href="#cb60-304" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> json_each<span class="ch">.</span>value <span class="kw">LIKE</span> <span class="st">'%Abca1%'</span></span>
+<span id="cb60-302"><a href="#cb60-302" aria-hidden="true" tabindex="-1"></a><span class="in">SELECT hallmarks.json-&gt;&gt;'name' as name</span></span>
+<span id="cb60-303"><a href="#cb60-303" aria-hidden="true" tabindex="-1"></a><span class="in">FROM hallmarks, json_each(hallmarks.json, '$.geneSymbols')</span></span>
+<span id="cb60-304"><a href="#cb60-304" aria-hidden="true" tabindex="-1"></a><span class="in">WHERE json_each.value LIKE '%Abca1%'</span></span>
 <span id="cb60-305"><a href="#cb60-305" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-306"><a href="#cb60-306" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-307"><a href="#cb60-307" aria-hidden="true" tabindex="-1"></a><span class="in">```{r include=FALSE}</span></span>
-<span id="cb60-308"><a href="#cb60-308" aria-hidden="true" tabindex="-1"></a><span class="fu">dbDisconnect</span>(con)</span>
-<span id="cb60-309"><a href="#cb60-309" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(src)</span>
+<span id="cb60-308"><a href="#cb60-308" aria-hidden="true" tabindex="-1"></a><span class="in">dbDisconnect(con)</span></span>
+<span id="cb60-309"><a href="#cb60-309" aria-hidden="true" tabindex="-1"></a><span class="in">rm(src)</span></span>
 <span id="cb60-310"><a href="#cb60-310" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-311"><a href="#cb60-311" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-312"><a href="#cb60-312" aria-hidden="true" tabindex="-1"></a>Depending on comfortable you are reading / writing SQL, this might be a nicer</span>
@@ -1770,13 +1995,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-440"><a href="#cb60-440" aria-hidden="true" tabindex="-1"></a><span class="in">`element`</span> data.frame.</span>
 <span id="cb60-441"><a href="#cb60-441" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-442"><a href="#cb60-442" aria-hidden="true" tabindex="-1"></a><span class="in">```{r warning=FALSE, message=FALSE}</span></span>
-<span id="cb60-443"><a href="#cb60-443" aria-hidden="true" tabindex="-1"></a>gene_symbols <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">unlist</span>(purrr<span class="sc">::</span><span class="fu">map</span>(mh2, <span class="st">"geneSymbols"</span>)))</span>
-<span id="cb60-444"><a href="#cb60-444" aria-hidden="true" tabindex="-1"></a>element <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
-<span id="cb60-445"><a href="#cb60-445" aria-hidden="true" tabindex="-1"></a>  <span class="at">element =</span> gene_symbols,</span>
-<span id="cb60-446"><a href="#cb60-446" aria-hidden="true" tabindex="-1"></a>  <span class="at">entrezid =</span> <span class="fu">mapIds</span>(org.Mm.eg.db, <span class="at">keys =</span> gene_symbols, <span class="at">keytype =</span> <span class="st">"SYMBOL"</span>, </span>
-<span id="cb60-447"><a href="#cb60-447" aria-hidden="true" tabindex="-1"></a>                    <span class="at">column =</span> <span class="st">"ENTREZID"</span>)</span>
-<span id="cb60-448"><a href="#cb60-448" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb60-449"><a href="#cb60-449" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(element)</span>
+<span id="cb60-443"><a href="#cb60-443" aria-hidden="true" tabindex="-1"></a><span class="in">gene_symbols &lt;- unique(unlist(purrr::map(mh2, "geneSymbols")))</span></span>
+<span id="cb60-444"><a href="#cb60-444" aria-hidden="true" tabindex="-1"></a><span class="in">element &lt;- data.frame(</span></span>
+<span id="cb60-445"><a href="#cb60-445" aria-hidden="true" tabindex="-1"></a><span class="in">  element = gene_symbols,</span></span>
+<span id="cb60-446"><a href="#cb60-446" aria-hidden="true" tabindex="-1"></a><span class="in">  entrezid = mapIds(org.Mm.eg.db, keys = gene_symbols, keytype = "SYMBOL", </span></span>
+<span id="cb60-447"><a href="#cb60-447" aria-hidden="true" tabindex="-1"></a><span class="in">                    column = "ENTREZID")</span></span>
+<span id="cb60-448"><a href="#cb60-448" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
+<span id="cb60-449"><a href="#cb60-449" aria-hidden="true" tabindex="-1"></a><span class="in">head(element)</span></span>
 <span id="cb60-450"><a href="#cb60-450" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-451"><a href="#cb60-451" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-452"><a href="#cb60-452" aria-hidden="true" tabindex="-1"></a>Finally, we create the <span class="in">`element_set`</span> *join table*, connecting gene sets to</span>
@@ -1844,17 +2069,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-522"><a href="#cb60-522" aria-hidden="true" tabindex="-1"></a>functions.)</span>
 <span id="cb60-523"><a href="#cb60-523" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-524"><a href="#cb60-524" aria-hidden="true" tabindex="-1"></a><span class="in">```{r message=FALSE}</span></span>
-<span id="cb60-525"><a href="#cb60-525" aria-hidden="true" tabindex="-1"></a><span class="co">#| out-width: "50%"</span></span>
-<span id="cb60-526"><a href="#cb60-526" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-align: "center"</span></span>
-<span id="cb60-527"><a href="#cb60-527" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig.widh: 5</span></span>
-<span id="cb60-528"><a href="#cb60-528" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig.height: 2.5</span></span>
-<span id="cb60-529"><a href="#cb60-529" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Model diagram"</span></span>
-<span id="cb60-530"><a href="#cb60-530" aria-hidden="true" tabindex="-1"></a><span class="fu">dm_from_con</span>(con, <span class="at">learn_keys =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb60-531"><a href="#cb60-531" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_pk</span>(tbl_element, element) <span class="sc">%&gt;%</span></span>
-<span id="cb60-532"><a href="#cb60-532" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_pk</span>(tbl_geneset, geneset) <span class="sc">%&gt;%</span></span>
-<span id="cb60-533"><a href="#cb60-533" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_fk</span>(tbl_elementset, element, tbl_element) <span class="sc">%&gt;%</span></span>
-<span id="cb60-534"><a href="#cb60-534" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_add_fk</span>(tbl_elementset, geneset, tbl_geneset) <span class="sc">%&gt;%</span></span>
-<span id="cb60-535"><a href="#cb60-535" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dm_draw</span>(<span class="at">view_type =</span> <span class="st">"all"</span>)</span>
+<span id="cb60-525"><a href="#cb60-525" aria-hidden="true" tabindex="-1"></a><span class="in">#| out-width: "50%"</span></span>
+<span id="cb60-526"><a href="#cb60-526" aria-hidden="true" tabindex="-1"></a><span class="in">#| fig-align: "center"</span></span>
+<span id="cb60-527"><a href="#cb60-527" aria-hidden="true" tabindex="-1"></a><span class="in">#| fig.widh: 5</span></span>
+<span id="cb60-528"><a href="#cb60-528" aria-hidden="true" tabindex="-1"></a><span class="in">#| fig.height: 2.5</span></span>
+<span id="cb60-529"><a href="#cb60-529" aria-hidden="true" tabindex="-1"></a><span class="in">#| fig-cap: "Model diagram"</span></span>
+<span id="cb60-530"><a href="#cb60-530" aria-hidden="true" tabindex="-1"></a><span class="in">dm_from_con(con, learn_keys = FALSE) %&gt;%</span></span>
+<span id="cb60-531"><a href="#cb60-531" aria-hidden="true" tabindex="-1"></a><span class="in">  dm_add_pk(tbl_element, element) %&gt;%</span></span>
+<span id="cb60-532"><a href="#cb60-532" aria-hidden="true" tabindex="-1"></a><span class="in">  dm_add_pk(tbl_geneset, geneset) %&gt;%</span></span>
+<span id="cb60-533"><a href="#cb60-533" aria-hidden="true" tabindex="-1"></a><span class="in">  dm_add_fk(tbl_elementset, element, tbl_element) %&gt;%</span></span>
+<span id="cb60-534"><a href="#cb60-534" aria-hidden="true" tabindex="-1"></a><span class="in">  dm_add_fk(tbl_elementset, geneset, tbl_geneset) %&gt;%</span></span>
+<span id="cb60-535"><a href="#cb60-535" aria-hidden="true" tabindex="-1"></a><span class="in">  dm_draw(view_type = "all")</span></span>
 <span id="cb60-536"><a href="#cb60-536" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-537"><a href="#cb60-537" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-538"><a href="#cb60-538" aria-hidden="true" tabindex="-1"></a><span class="fu">### Querying the database</span></span>
@@ -1971,20 +2196,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb60-661"><a href="#cb60-661" aria-hidden="true" tabindex="-1"></a>to create &amp; populate a Postgres database, and how to index and search it </span>
 <span id="cb60-662"><a href="#cb60-662" aria-hidden="true" tabindex="-1"></a>effectively.</span>
 <span id="cb60-663"><a href="#cb60-663" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-664"><a href="#cb60-664" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;details&gt;</span></span>
-<span id="cb60-665"><a href="#cb60-665" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;summary&gt;</span></span>
+<span id="cb60-664"><a href="#cb60-664" aria-hidden="true" tabindex="-1"></a>&lt;details&gt;</span>
+<span id="cb60-665"><a href="#cb60-665" aria-hidden="true" tabindex="-1"></a>&lt;summary&gt;</span>
 <span id="cb60-666"><a href="#cb60-666" aria-hidden="true" tabindex="-1"></a>SessionInfo</span>
-<span id="cb60-667"><a href="#cb60-667" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/summary&gt;</span></span>
+<span id="cb60-667"><a href="#cb60-667" aria-hidden="true" tabindex="-1"></a>&lt;/summary&gt;</span>
 <span id="cb60-668"><a href="#cb60-668" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb60-671"><a href="#cb60-671" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
 <span id="cb60-672"><a href="#cb60-672" aria-hidden="true" tabindex="-1"></a><span class="co">#| echo: false</span></span>
 <span id="cb60-673"><a href="#cb60-673" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
 <span id="cb60-674"><a href="#cb60-674" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb60-675"><a href="#cb60-675" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-676"><a href="#cb60-676" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/details&gt;</span></span>
-</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb60-676"><a href="#cb60-676" aria-hidden="true" tabindex="-1"></a>&lt;/details&gt;</span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
+
 
 
 

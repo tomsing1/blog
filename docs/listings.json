@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/boxr/index.html",
       "/posts/tidyHeatmap/index.html",
       "/posts/vectorsearch/index.html",
       "/posts/athena/index.html",

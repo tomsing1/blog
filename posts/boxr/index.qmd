@@ -1,5 +1,7 @@
 ---
 title: "Interacting with box cloud storage: the boxr R package"
+author: "Thomas Sandmann"
+date: "2024-11-30"
 execute:
   echo: true
   warning: false
@@ -254,8 +256,8 @@ longer valid, so please replace them with your own to follow along.
 ::::
 
 ```{r}
-Sys.setenv(BOX_CLIENT_ID="jpxpdi7wum1sc6jtdylt3c0zev088lx7")
-Sys.setenv(BOX_CLIENT_SECRET="ayiKjtE8E2sDMyTjXWxvUM2kuSZK0fZ2")
+Sys.setenv(BOX_CLIENT_ID="0o5h6s0mey2l5f6l89bkjrmk42vjv9g2")
+Sys.setenv(BOX_CLIENT_SECRET="Zfv4UX5Fi2rQAK9Cskcf3RgtFlptrH2c")
 ```
 
 Usually, I add the `BOX_CLIENT_ID` and `BOX_CLIENT_SECRET` to my `.Renviron`
@@ -680,7 +682,7 @@ To share the folder (e.g. to _create a collaboration_ in box' lingo), I need to
 2. Provide the identifier of the folder I want to share
 3. Provide `user_id` of the service account I want to share the folder with.
   - This information was returned by the `box_auth_service()` call above. 
-    In this example the `user_id` is `38300848207`.
+    In this example the `user_id` is `38323581037`.
 4. Decide on the `role`, e.g. the set of permissions, I want to grant to the
   service account.
 
@@ -695,7 +697,7 @@ folder_id <- objects |>                       # <3>
 boxr::box_collab_get(folder_id)               # <4>
 boxr::box_collab_create(                      # <5>
   dir_id = folder_id, 
-  user_id = "38302244533", 
+  user_id = "38323581037", 
   role = "co-owner") |>
   as.data.frame()
 ```
@@ -706,7 +708,7 @@ boxr::box_collab_create(                      # <5>
 4. Confirm that the folder currently doesn't have collaborators, e.g. is not
   shared with any other box account (service or otherwise).
 5. Share the `tutorial` folder with the service account, whose use_id is
-   `38302244533`.
+   `38323581037`.
 
 Now that the service account has access to the `tutorial` folder, I 
 re-authenticate via `box_auth_service(). The `r_jwt` app can now list the 

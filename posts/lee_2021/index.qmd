@@ -1,0 +1,338 @@
+---
+title: "CITE-seq analysis of B-cells"
+subtitle: "Reanalysis of data published by Lee et al, 2021"
+author: "Thomas Sandmann"
+date: "2024-09-02"
+draft: true
+freeze: true
+categories: [TIL, NGS]
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## tl;dr
+
+This week I learned how to analyze CITE-seq data, e.g. transcriptome and 
+surface-protein levels measured simultaneously for the same single cells.
+
+To learn how gene expression and protein markers can be combined to identify
+cell sub-types, I reanalyzed a dataset published by 
+[Lee et al, Nature Communications, 2021](https://www.nature.com/articles/s41467-021-27232-5),
+starting with raw sequencing reads.
+
+## Overview
+
+In 2021, 
+[Lee et al](https://www.nature.com/articles/s41467-021-27232-5)
+characterized the gene expression landscape of mouse B-cells, performing
+[CITE-seq](https://en.wikipedia.org/wiki/CITE-Seq) 
+on B cells collected from bone marrow of two wildtype C57BL/6 mice.
+
+First, the authors enriched B-cells using fluorescent activated cell sorting
+(FACS) with antibodies detecting the B220 of the CD45 protein (encoded by the
+[PTPRC gene](https://en.wikipedia.org/wiki/PTPRC)), a pan B-cell marker in mice
+[^1]. To capture both naive and mature cells, they retained equal numbers of 
+B-cells positive or negative for CD43 staining [^2]
+
+[^1]: The field of immunology has identified a large number of cell type
+specific markers, which are often used in combination to define granular
+cell subtypes. Confusingly, despite having the same names in humans and mice,
+the cell type distribution of many markers differs between species. See
+[Figure 3 by Weisel et al, Nat Immunology, 2022 ](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8712407/figure/F3/)
+for a helpful overview of human and mouse B-cell markers.
+
+[^2]: In mice, CD43 (aka sialophorin) is expressed on pro–B cells, plasma cells,
+peritoneal and spleen CD5+ B cells (B-1 cells), but not on resting, conventional
+peripheral B cells.
+
+B-cells from each mouse were first incubated with different 
+oligonucleotide-tagged "cell hashing" antibodies, and then combined into a
+single pool. Afterwards, the cells were stained with additional oligo-tagged
+"feature detection" antibodies recognizing B-cell surface markers. Finally, 
+both the intracellular transcriptome and the presence of the antibody markers
+were read out using single-cell RNA-seq capture on the 10X Genomics 
+microfluidics platform.
+
+![Figure 1A by Lee et al, 2021](lee_figure_1A.jpg){width=80%, fig-alt="Schematic of the experimental setup."}
+
+::: {.callout-note collapse="false"}
+
+### Cell staining - details
+
+Bone marrow cells from two 8-week-old wild-type mice were each stained
+with 
+
+- 2 different hashtag antibodies (one for each mouse)
+- 5 CITE-seq antibodies (targeting surface proteins)
+- 2 fluorescently labelled antibodies (B220/CD45R and CD43) used for
+  FACS enrichment of B-cells. 
+    - Both B220+,CD43+  and B220+/CD43- populations were captured and mixed at a
+      1:1 ratio to enrich for all early progenitor B-cell subsets. 
+
+This strategy captures the vast majority of developing B cells in the bone
+marrow  but does exclude a small fraction of developing CD19+ B cells that
+express  CD11c, Ly6G, or NK1.1.
+
+:::
+
+## Data availability
+
+The authors made all of the raw sequencing data and processed count matrices 
+available via NCBI's GEO repository as 
+[serices GSE168158](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE168158).
+
+They performed their own analysis with 10X Genomics' `cellranger` software
+(version 3.1.0), aligning the reads to the `mm10` version of the mouse genome.
+Downstream processing was performed using various R/Bioconductor packages.
+
+Here, I am performing a re-analysis of the raw data with the latest available
+version of `cellranger` (version 8.0.1) and the latest reference genome (GRCm39,
+Ensembl version 110).
+
+## Retrieving the raw data
+
+The
+[ENA repository](https://www.ebi.ac.uk/ena/browser/home)
+mirrors data available from the SRA - and it offers FASTQ files for download via
+FTP.
+(SRA also has cloud delivery options for FASTQ files, but I prefer a simple FTP
+download).
+
+The download links are shown in the table at the bottom of 
+[ENA's browser page for this project](https://www.ebi.ac.uk/ena/browser/view/PRJNA706373).
+
+I really like to use 
+[rclone](https://rclone.org/)
+as my "swiss army knife" to transfer files between remote and / or local sources.
+
+First, I set up a new `ena` _remote_ for the ENA ftp server 
+(`ftp.sra.ebi.ac.uk`) with the interactive `rclone config` command (username:
+`anonymous`, password: `anonymous`). Next, I copy the folders for each of the
+three runs (each with 2 FASTQ files - R1 and R2) to my local machine.
+
+Finally, because `cellranger` expects filename with a specific pattern, I rename
+them afterwards.
+
+```bash
+mkdir -p fastq
+pushd fastq
+
+# interactively configure FTP remote for ftp.sra.ebi.ac.uk called `ena`
+# rclone config 
+
+# transfer the files for the three runs
+rclone copy -v ena://vol1/fastq/SRR138/085/SRR13847285/ .
+rclone copy -v ena://vol1/fastq/SRR138/086/SRR13847286/ .
+rclone copy -v ena://vol1/fastq/SRR138/087/SRR13847287/ .
+
+# rename the files according to cellranger's expectations
+mv SRR13847285_1.fastq.gz SRR13847285_S1_L001_R1_001.fastq.gz  # gene expression (47 Gb)
+mv SRR13847285_2.fastq.gz SRR13847285_S1_L001_R2_001.fastq.gz  # gene expression (114 Gb)
+mv SRR13847286_1.fastq.gz SRR13847286_S1_L001_R1_001.fastq.gz  # antibody capture
+mv SRR13847286_2.fastq.gz SRR13847286_S1_L001_R2_001.fastq.gz  # antibody capture
+mv SRR13847287_1.fastq.gz SRR13847287_S1_L001_R1_001.fastq.gz  # multiplexing capture
+mv SRR13847287_2.fastq.gz SRR13847287_S1_L001_R2_001.fastq.gz  # multiplexing capture
+
+popd
+```
+
+To process the raw data from this study, I need to consider both the hashtag
+antibodies (identifying each cell's animal of origin) and the CITE-seq
+antibodies (identifying the detected surface proteins). (The fluorescently
+labelled antibodies are not captured in the sequencing library; they determined
+which cells were included in the experiment in the first place.)
+
+### Cell hashing antibodies
+
+Lee et al used two hashing antibodies to label cells from two animals:
+
+- [TotalSeq A0301](https://www.biolegend.com/en-gb/products/totalseq-a0301-anti-mouse-hashtag-1-antibody-16103)
+    - A mixture of two antibodies recognizing mouse CD45 and MHC class I
+    - Barcode sequence: `ACCCACCAGTAAGAC`
+- [TotalSeq A0302](https://www.biolegend.com/en-gb/products/totalseq-a0302-anti-mouse-hashtag-2-antibody-16104)
+    - The same mixture of antibodies recognizing mouse CD45 and MHC class I, but
+      with a different barcode.
+    - barcode `GGTCGAGAGCATTCA`
+    
+Interestingly, in the method section they also mention:
+
+>Four other hashtag samples were present in this experiment and were excluded to derive
+only the wildtype B cells.
+
+So they _actually_ combined cells from six different animals and super-loaded a
+single 10X genomics lane. (This also explains why the FASTQ files of gene
+expression library are so large - they contain 1.2 billion reads.)
+Unfortunately, they don't specify what the barcodes of these other four hashing
+antibodies were. For a first pass analysis, I will assume that they used the
+TotalSeq anti-mouse hashtags 3-6 for the remaining samples, as they used
+hashtags 1 and 2 for the two samples of interest.
+
+::: {.callout-note collapse="true"}
+
+The hashtag barcodes are the first 15 nucleotides of the R2 read. This baroque
+bash pipe will list the top 6 most frequent barcodes among the first 100,000
+reads - and confirms that the authors indeed used Biolegends hashing antibodies
+A0301-A0306.
+
+```
+gzip -cd fastq/SRR13847287_S1_L001_R2_001.fastq.gz | \
+  grep -A 1 "^@" | \
+  grep -v "@" | \
+  grep -v "-" | \
+  cut -c 1-15 | \
+  head -n 100000 | \
+  sort | \
+  uniq -c | \
+  sort -n | \
+  tail -n 6
+``` 
+:::
+
+#### Cell hashing reference file
+
+Cellranger was designed to demultiplex cells labelled with 
+cholesterol-modified oligonucleotides (CMOs), defined in a 
+[CMO reference file](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/multi#cmoreference).
+
+To decode the cell hashing antibodies used by Lee et al (the two barcodes
+associated with the relevant samples, as well as the four barcodes assigned to
+_mystery_ samples not further described in the paper) I provide an analogous
+`hashing_reference.csv` configuration file:
+
+```
+id,name,read,pattern,sequence,feature_type
+A0301,A0301,R2,5P(BC),ACCCACCAGTAAGAC,Multiplexing Capture
+A0302,A0302,R2,5P(BC),GGTCGAGAGCATTCA,Multiplexing Capture
+A0303,A0303,R2,5P(BC),CTTGCCGCATGTCAT,Multiplexing Capture
+A0304,A0304,R2,5P(BC),AAAGCATTCTTCACG,Multiplexing Capture
+A0305,A0305,R2,5P(BC),CTTTGTCTTTGTGAG,Multiplexing Capture
+A0306,A0306,R2,5P(BC),TATGCTGCCACGGTA,Multiplexing Capture
+```
+
+### CITE-Seq antibodies
+
+In addition to the hashing antibodies, the authors also labelled the cells with
+oligo-tagged antibodies recognizing the following surface proteins that are
+expressed on B-cells:
+
+- anti-B220 / CD45R [TotalSeq A0103](https://www.biolegend.com/en-us/punchout/punchout-products/product-detail/totalseq-a0103-anti-mouse-human-cd45r-b220antibody-15925?GroupID=GROUP658)
+  - Clone RA3-6B2
+  - The B220/CD45R isoform of CD45 is a pan B-cell marker in mice.
+  - Barcode sequence: `CCTACACCTCATAAT`
+- anti-CD19 [TotalSeq A0093](https://www.biolegend.com/en-us/punchout/punchout-products/product-detail/totalseq-a0093-anti-mouse-cd19-antibody-16199)
+  - Clone 6D5
+  - CD19 is expressed on all pro-B to mature B cells (during development) and 
+    follicular dendritic cells.
+  - Barcode sequence: `ATCAGCCATGTCAGT`
+- anti-CD93 / C1QR1 [TotalSeq A0113](https://www.biolegend.com/en-us/punchout/punchout-products/product-detail/totalseq-a0113-anti-mouse-cd93-aa4-1-early-b-lineage-antibody-16416)
+  - Clone AA4.1
+  - CD93 / C1QR1 is expressed on B cell precursors until the T2 stage, as well
+    as  a wide variety of cells such as platelets, monocytes, microglia and 
+    endothelial cells.
+  - Barcode sequence: `GGTATTTCCTGTGGT`
+- anti-CD25/ IL-2Rα [TotalSeq A0097](https://www.biolegend.com/en-gb/products/totalseq-a0097-anti-mouse-cd25-antibody-16233)
+  - Clone PC61
+  - IL-2Rα is expressed on activated T and B cells, thymocyte subsets, pre-B
+    cells, and T regulatory cells
+  - Barcode sequence: `ACCATGAGACACAGT`
+- anti-IgM [TotalSeq A0450](https://www.biolegend.com/en-gb/products/totalseq-a0450-anti-mouse-igm-antibody-16772)
+  - Clone RMM-1
+  - Surface IgM is expressed on the majority of mature B cells.
+  - Barcode sequence: `AGCTACGCATTCAAT`
+
+#### Feature reference file
+
+The barcode information is provided to `cellranger multi` in the 
+`feature_reference.csv`
+[file](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/latest/using/feature-bc-analysis#feature-ref):
+
+```
+id,name,read,pattern,sequence,feature_type
+CD45R,CD45R_TotalA,R2,^(BC),CCTACACCTCATAAT,Antibody Capture
+CD19,CD19_TotalA,R2,^(BC),ATCAGCCATGTCAGT,Antibody Capture
+CD93,CD93_TotalA,R2,^(BC),GGTATTTCCTGTGGT,Antibody Capture
+CD25,CD25_TotalA,R2,^(BC),ACCATGAGACACAGT,Antibody Capture
+IgM ,IgM_TotalA,R2,^(BC),AGCTACGCATTCAAT,Antibody Capture
+```
+
+## Running cellranger multi
+
+The current version (8.0.1) of the
+[cellranger multi pipeline](https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/running-pipelines/cr-3p-multi)
+can process the three libraries (gene expression, hashtag oligos and CITE-seq oligos) 
+together, and automatically demultiplexes hashed samples. 
+The `cellranger multi` command requires a set of 
+[configuration options](https://www.10xgenomics.com/support/software/cell-ranger/latest/advanced/cr-multi-config-csv-opts),
+provided in a CSV file (alongside the hashtag- and feature-configuration files defined
+above).
+
+Instructions for analyzing antibody hash tags alongside surface antibody protein
+capture data
+[are here](https://kb.10xgenomics.com/hc/en-us/articles/4407386498957-I-used-antibody-tags-for-cell-surface-protein-capture-and-cell-hashing-with-Single-Cell-3-chemistry-How-can-I-use-Cell-Ranger-to-analyze-my-data).
+
+I will use the following `config.csv` file, together with the 
+`refdata-gex-GRCm39-2024-A` mouse genome reference (and STAR index)
+[supplied by 10X Genomics](https://www.10xgenomics.com/support/software/cell-ranger/latest/release-notes/cr-reference-release-notes).
+
+Interestingly, the R1 reads for the gene expression library (SRR13847285) are 26
+bp long, but the R1 reads for the hashing and CITE-seq libraries are 28 bp long. 
+To avoid a `cellranger` error I set the `r1-length` parameter to 26 for both
+gene expression and feature libraries.
+
+::: {.callout-note collapse="true"}
+
+Cellranger 8.0.1 returned the following error message due to the mismatched
+R1 read lenghts: 
+
+>We detected a mixture of different R1 lengths ([26-28]), which breaks
+assumptions in how UMIs are tabulated and corrected. To process these data, 
+you will need to truncate to the shortest observed R1 length by providing 26 
+to the --r1-length argument if are running count/vdj, or via the r1-length 
+parameter in each of the following tables of your multi config CSV if you are
+running multi: [gene-expression], [feature], [feature]
+
+:::
+
+Note: Only _absolute_ paths are accepted in the `config.csv` file, e.g. the
+working directory (`/data/bcells`) needs to be specified in full. (Symbolic
+links are not followed, either.)
+
+```
+[gene-expression]
+reference,/data/bcells/refdata-gex-GRCm39-2024-A
+no-secondary,false
+create-bam,false
+min-assignment-confidence,0.9
+cmo-set,/data/bcells/hashing_reference.csv
+r1-length,26
+
+[feature]
+reference,/data/bcells/feature_reference.csv
+r1-length,26
+
+[libraries]
+fastq_id,fastqs,lanes,feature_types,subsample_rate
+SRR13847285,/data/bcells/fastq,any,Gene Expression,1
+SRR13847286,/data/bcells/fastq,any,Antibody Capture,1
+SRR13847287,/data/bcells/fastq,any,Multiplexing Capture,1
+
+[samples]
+sample_id,cmo_ids,description
+A0301,A0301,Animal 1 (WT)
+A0302,A0302,Animal 2 (WT)
+A0303,A0303,Animal 3 (unknown)
+A0304,A0304,Animal 4 (unknown)
+A0305,A0305,Animal 5 (unknown)
+A0306,A0306,Animal 6 (unknown)
+```
+
+Now I can start the analysis pipeline with `cellranger` (version 8.0.1) with the
+following command:
+
+```bash
+cellranger multi --id=B_cells --csv=config.csv
+```
+
+## Examining the results
+

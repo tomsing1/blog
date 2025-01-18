@@ -11,7 +11,8 @@ listing:
   sort-ui: false
   filter-ui: false
   fields: [date, title, author, reading-time]
-  feed: 
+  feed:
+    type: partial
     categories: [R]
 page-layout: full
 title-block-banner: true

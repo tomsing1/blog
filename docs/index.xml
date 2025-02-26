@@ -11,7 +11,17 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.6.36</generator>
-<lastBuildDate>Mon, 23 Dec 2024 08:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 25 Feb 2025 08:00:00 GMT</lastBuildDate>
+<item>
+  <title>Analyzing targeted locus amplification (TLA) data</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/tla/</link>
+  <description><![CDATA[ This week, I had the chance to learn about a technique that was new to me: targeted locus amplification (TLA), initially described by <a href="https://pubmed.ncbi.nlm.nih.gov/25129690/">de Vree et al, Nature Biotechnology</a> in 2014<sup>1</sup>. ]]></description>
+  <category>NGS</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/tla/</guid>
+  <pubDate>Tue, 25 Feb 2025 08:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Compressing single-cell RNA-seq data with run-length encoding and LZW</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -220,15 +230,6 @@
   <category>streamlit</category>
   <guid>https://tomsing1.github.io/blog/posts/30days-of-streamlit/</guid>
   <pubDate>Mon, 24 Jul 2023 07:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Grav - a lightweight content management system</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/grav/</link>
-  <description><![CDATA[ Today I learned about <a href="https://getgrav.org/">Grav</a>, a lightweight content-management system, from <a href="https://fosstodon.org/@Danwwilson/110748191305268643">danwwilson</a>. Grav is based on flat files, e.g.&nbsp;it does not require a database, and automatically renders pages written in markdown. ]]></description>
-  <category>TIL</category>
-  <guid>https://tomsing1.github.io/blog/posts/grav/</guid>
-  <pubDate>Fri, 21 Jul 2023 07:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

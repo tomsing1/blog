@@ -1,0 +1,12 @@
+# pixi environments
+.pixi
+
+
+# pixi environments
+.pixi
+*.egg-info
+
+# temporary files
+fastq
+alignments
+ref_folder

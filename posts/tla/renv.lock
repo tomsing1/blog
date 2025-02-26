@@ -1,0 +1,25 @@
+{
+  "R": {
+    "Version": "4.4.2",
+    "Repositories": [
+      {
+        "Name": "P3M",
+        "URL": "https://packagemanager.posit.co/cran/latest"
+      },
+      {
+        "Name": "CRAN",
+        "URL": "https://cloud.r-project.org"
+      }
+    ]
+  },
+  "Packages": {
+    "renv": {
+      "Package": "renv",
+      "Version": "1.1.1",
+      "OS_type": null,
+      "NeedsCompilation": "no",
+      "Repository": "P3M",
+      "Source": "Repository"
+    }
+  }
+}

@@ -1,0 +1,242 @@
+---
+title: "Gene expression analysis with pydeseq2"
+subtitle: "Building my first app with the marimo notebook environment"
+author: "Thomas Sandmann"
+date: "2025-04-25"
+freeze: true
+categories: [NGS, python, marimo, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+This week I learned how to 
+
+- Perform bulk RNA-seq analyses in python, using the excellent [pydeseq2 module](https://pydeseq2.readthedocs.io/en/stable/).
+- Explore the [recount3](https://rna.recount.bio) collection of thousands of 
+  consistently preprocessed public RNA-seq datasets.
+- Create a web application using [marimo](https://marimo.io) to
+  perform (simple) analyses interactively.
+
+## Overview
+
+When it comes to the analysis of bulk (or pseudo-bulk) RNA-seq data, my go-to R 
+packages are either 
+[limma](https://bioconductor.org/packages/release/bioc/html/limma.html) or [DESeq2](https://bioconductor.org/packages/release/bioc/html/DESeq2.html)[^1].
+This week, I wanted to learn how to implement a similar analysis using python - 
+and do so in the `marimo` notebook environment, a project I have been following
+for some time[^2].
+
+To learn how to use marimo, both as a notebook and in the form of an app, I 
+chose to create a workflow that performs differential gene expression analysis
+of bulk RNA-seq data using the excellent 
+[pydeseq2](https://pydeseq2.readthedocs.io/en/latest/index.html) module[^3]. 
+The result is my first notebook / app, called
+[mariner](https://github.com/tomsing1/mariner).
+
+[^1]: DESeq2 estimates the variance-mean dependence in count data and tests for
+differential expression usinga model based on the negative binomial
+distribution. limma's `voom` method estimates the mean-variance relationship of
+the log-counts, generates a precision weight for each observation and enters
+these into the limma empirical Bayes analysis pipeline.
+
+[^2]: [marimo's documentation](https://docs.marimo.io) is excellent. Recently, 
+the marimo team has also started to post short videos on
+[their youtube channel](https://www.youtube.com/@marimo-team/videos). 
+And I found 
+[Calm code's marimo track](https://calmcode.io/course/marimo/introduction)
+to be an excellent place to start learning about it! (Thank you Vincent!)
+
+[^3]: `pydeseq2` is a reimplementation of the pioneering [DESeq2 R package](https://bioconductor.org/packages/release/bioc/html/DESeq2.html) and has been given 
+[a stamp of approval](https://x.com/mikelove/status/1651542670785781763?s=20) by Michael Love, one of DESeq2's original authors.
+
+## Data source
+
+The [recount3 project](https://rna.recount.bio/) has processed and shared
+thousands of publicly available human and mouse RNA-seq datasets. The recount3
+team has provided the 
+[study explorer](https://jhubiostatistics.shinyapps.io/recount3-study-explorer/)
+(a web application based on the shiny R package) that allows users to search
+and filter the collection, and to get links to various processed files stored as
+compressed CSV files, e.g. gene- and exon-level counts, sample and project
+metadata, as well as gene annotations (based on Gencode).
+
+A full list of all available projects, samples and files is also available in
+the the 
+[study explorer github repository](https://github.com/LieberInstitute/recount3-docs/tree/master/study-explorer). 
+
+## Getting started with a template
+
+To get started, I took advantage of the 
+[marimo uv starter template](https://github.com/marimo-team/marimo-uv-starter-template),
+which creates a project directory including `src` and `test` directories, as 
+well as various configuration files to leverage the 
+[uv package manager](https://docs.astral.sh/uv/).
+
+The [final project](https://github.com/tomsing1/mariner)
+has the following structure:
+
+```
+├── .github/           # GitHub Actions workflows
+├── data               # Datasets
+│   └── recount3.db    # duckdb metadata database
+├── docs               # Documentation
+│   └── images         # Screenshots
+├── scripts/           # Scripts
+│   └── recount3.db    # R script used to create the duckdb database
+├── src/               # Source code
+│   └── app.py         # Sample marimo notebook
+│   └── utils.py       # Sample marimo notebook
+├── pyproject.toml     # Project configuration
+├── tests/             # Test files
+│   └── test_utils.py  # Unit test for the utils submodule
+├── pyproject.toml     # Project configuration
+├── uv.lock            # Dependency lock file
+└── Dockerfile         # Instructions to build a docker image
+```
+
+## Analysis steps
+
+The [mariner notebook](https://github.com/tomsing1/mariner/blob/main/src/app.py)
+allows users to:
+
+1. Browse RNA-sequencing projects curated by the 
+  [recount3](https://rna.recount.bio/) team & select a study of interest
+
+  ![Project Table](https://github.com/tomsing1/mariner/raw/main/docs/images/project_table.jpg)
+  I wrote a simple 
+  [R script](https://github.com/tomsing1/mariner/blob/main/scripts/create_metadata_duckdb_db.R)
+  to collate this metadata into a 
+  [duckdb database](https://github.com/tomsing1/mariner/blob/main/data/recount3.db),
+  which is accessed via http from the notebook. (I chose `duckdb` over `sqlite`
+  because I can store the database file 
+  [in my github repository](https://github.com/tomsing1/mariner/blob/main/data/recount3.db)
+  and access it via http from anywhere.) This allows me to display an
+  interactive table in my marimo notebook for users to search, and to select a
+  dataset of interest from. Because marimo supports SQL code cells and connects
+  to `duckdb` out of the box, it was straightforward to display additional
+  details about the selected dataset.
+
+2. Retrieve the raw counts, sample- and gene-annotations from recount3
+
+  ![Sample Table](https://github.com/tomsing1/mariner/raw/main/docs/images/sample_table.jpg)
+  recount3 provides sample metadata (e.g. annotations provided by the original
+  submitters of the data) and raw counts in the form of CSV files. I wrote
+  simple functions to retrieve, parse & filter these files, to provide users
+  with a quick overview of the study design. (I also implemented a simple
+  caching functionality using the `@lru_cache` decorator from the `functtools`
+  module to avoid downloading the same files in the same session twice.)
+  
+  To keep my notebook short and potentially reuse these functions in other
+  projects, I kept these and other helper functions in a separate 
+  [utils](https://github.com/tomsing1/mariner/blob/main/src/utils.py) module.
+  
+3. Define up to two covariates of interest for differential expression analysis
+
+  ![Covariate selection](https://github.com/tomsing1/mariner/raw/main/docs/images/covariates.jpg)
+
+  Some of the studies in recount3 are either very large or very complex, e.g.
+  with many different treatments, conditions or sample sources. For now, I
+  chose to enable users to define the linear model to fit based on existing
+  sample annotation columns (e.g. `agent` or `cell_line` in the example shown)
+  above. Users choose the main effect of interest, and can optionally also
+  include one additional covariate to adjust for (which is included as an 
+  additive predictor in the model)[^4].
+  
+  [^4]: `pydeseq2` uses the
+  [formulaic](https://matthewwardrop.github.io/formulaic/latest/)
+  module to define linear models, which felt quite familiar to me coming from R.
+
+  Focussing only on categorical covariates, I enabled users to choose the 
+  numerator and the denominator of the comparison via a drop-down menu.
+
+4. Fit a generalized linear model using 
+  [pydeseq2](https://pydeseq2.readthedocs.io/en/latest/index.html)
+  and extract p-values for a comparison of interest
+  
+  Once the design of the experiment is defined, it's time to fit the negative
+  binomial model, to extract the contrast of interest and provide p-values using
+  [Wald's test](https://en.wikipedia.org/wiki/Wald_test).
+  
+::: {.callout-tip title="Dealing with state in marimo"}
+  
+  At this point, I struggled a bit because 
+  [the pydeseq2 tutorial](https://pydeseq2.readthedocs.io/en/stable/auto_examples/plot_step_by_step.html#read-counts-modeling) 
+  illustrates how to first create a DeseqDataSet object, and then apply several
+  methods that modify its state. First, I tried to perform each step in a 
+  different code cell, but that conflicted with marimo's requirement to keep
+  track of the reactive relationships between them. 
+  
+  [Calmcode's video on "Dealing with state in marimo"](https://calmcode.io/course/marimo/state)
+  helped me a lot to get a better grip on this difference between `python` and
+  `marimo` concepts.
+   
+:::
+
+  ![Statistics table](https://github.com/tomsing1/mariner/raw/main/docs/images/stats_table.jpg)
+  The results are presented in an interactive table, with one row for each
+  tested gene, rendered via 
+  [marimo.ui.table](https://docs.marimo.io/api/inputs/table/), 
+  providing helpful overview charts, the ability to filter, sort or download -
+  and to select one or more genes for visualization.
+
+
+5. Plot the raw or normalized gene expression counts for one or more genes of
+   interest
+
+  There are many different ways to explore the results of a differential
+  expression analyis. Here, I opted for simple scatter plots. Users can specify
+  the categorical x-axis (based on the available sample annotations) and display
+  either raw or normalized counts for each sample.
+  
+  ![Scatter plots](https://github.com/tomsing1/mariner/raw/main/docs/images/scatter_plots.jpg)
+
+## Lessons learned
+
+- `marimo` provides great interactive elements out of the box, making it easy
+  to first develop a workflow based on hard-coded variables, and to then add
+  interactivity (e.g. via pull-down menus) later.
+- The interaction between marimo and my `duckdb` database was seamless, thanks
+  to marimo's built-in SQL cells.
+- A big difference between writing regular python scripts or Jupyter notebooks
+  and `marimo` is the latter's requirement to have a single cell that defines
+  a variable (to avoid ambiguous reactive graphs). That's still something I need
+  to wrap my head around.
+- Because marimo notebooks / apps are _just python_, I was able to add the same
+  `pytest` [unit tests](https://github.com/tomsing1/mariner/tree/main/tests)
+  I would use for other modules, and to check / format
+  my code with [ruff](https://docs.astral.sh/ruff/) [^5].
+- I am only at the beginning of my python journey, but I am sure `marimo` will
+  remain a part of it!
+  
+  [^5]: I disabled linting for lines that merely called an object of interest,
+  triggering it to be displayed in the notebook, with the `# noqa B018` comment, 
+  e.g. [here](https://github.com/tomsing1/mariner/blob/b73959237c8a02e042af813ee268eb8cc2ab4c44/src/app.py#L123)
+
+## Known limitations
+
+The main goal of this project was to learn, not to ship a fully functional
+application. With that in mind, here are a few known limitations:
+
+- Some of the RNA-seq projects curated by recount3 are either very large (and 
+  take a long time to model) or are not associated with obvious covariates for 
+  modeling. For these studies, users likely want to download the data & 
+  annotations via the recount3 study explorer and perform a custom analysis.
+- Currently, only categorical covariates are supported by pydeseq2.
+- Because not all of the python modules that are imported by my notebook are
+  available as pure python wheels today, the notebook cannot be deployed via
+  webassembly. For now, I can package and deploy the app on a server 
+  [using docker](https://github.com/tomsing1/mariner#docker)
+  instead.

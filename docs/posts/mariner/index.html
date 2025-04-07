@@ -207,6 +207,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#data-source" id="toc-data-source" class="nav-link" data-scroll-target="#data-source">Data source</a></li>
   <li><a href="#getting-started-with-a-template" id="toc-getting-started-with-a-template" class="nav-link" data-scroll-target="#getting-started-with-a-template">Getting started with a template</a></li>
   <li><a href="#analysis-steps" id="toc-analysis-steps" class="nav-link" data-scroll-target="#analysis-steps">Analysis steps</a></li>
+  <li><a href="#deployment-via-docker" id="toc-deployment-via-docker" class="nav-link" data-scroll-target="#deployment-via-docker">Deployment via Docker</a></li>
   <li><a href="#lessons-learned" id="toc-lessons-learned" class="nav-link" data-scroll-target="#lessons-learned">Lessons learned</a></li>
   <li><a href="#known-limitations" id="toc-known-limitations" class="nav-link" data-scroll-target="#known-limitations">Known limitations</a></li>
   </ul>
@@ -300,7 +301,15 @@ Dealing with state in marimo
 <li>Plot the raw or normalized gene expression counts for one or more genes of interest</li>
 </ol>
 <p>There are many different ways to explore the results of a differential expression analyis. Here, I opted for simple scatter plots. Users can specify the categorical x-axis (based on the available sample annotations) and display either raw or normalized counts for each sample.</p>
-<p><img src="https://github.com/tomsing1/mariner/raw/main/docs/images/scatter_plots.jpg" class="img-fluid" alt="Scatter plots"> ## Deployment via Docker</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://github.com/tomsing1/mariner/raw/main/docs/images/scatter_plots.jpg" class="img-fluid figure-img"></p>
+<figcaption>Scatter plots</figcaption>
+</figure>
+</div>
+</section>
+<section id="deployment-via-docker" class="level2">
+<h2 class="anchored" data-anchor-id="deployment-via-docker">Deployment via Docker</h2>
 <p>Because not all of the python modules that are imported by my notebook are available as pure python wheels today, the notebook cannot be deployed via webassembly. For now, I can package and deploy the app on a server <a href="https://github.com/tomsing1/mariner#docker">using docker</a> instead.</p>
 <p>A pre-built docker image for the <code>arm64</code> platform is available from <a href="https://hub.docker.com/r/tomsing1/mariner">dockerhub</a>:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> pull tomsing1/mariner</span>

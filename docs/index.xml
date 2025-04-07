@@ -16,7 +16,7 @@
   <title>Gene expression analysis with pydeseq2</title>
   <dc:creator>Thomas Sandmann</dc:creator>
   <link>https://tomsing1.github.io/blog/posts/mariner/</link>
-  <description><![CDATA[ This week I learned how to ]]></description>
+  <description><![CDATA[ This week I learned how to (1) Perform bulk RNA-seq analyses in python, using the excellent <a href="https://pydeseq2.readthedocs.io/en/stable/">pydeseq2 module</a>, (2) Explore the <a href="https://rna.recount.bio">recount3</a> collection of thousands of consistently preprocessed public RNA-seq datasets, and (3)Create a web application using <a href="https://marimo.io">marimo</a> to perform (simple) analyses interactively. ]]></description>
   <category>NGS</category>
   <category>python</category>
   <category>marimo</category>

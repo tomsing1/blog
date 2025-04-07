@@ -23,12 +23,12 @@ editor_options:
 ## tl;dr
 
 This week I learned how to 
-
-- Perform bulk RNA-seq analyses in python, using the excellent [pydeseq2 module](https://pydeseq2.readthedocs.io/en/stable/).
-- Explore the [recount3](https://rna.recount.bio) collection of thousands of 
-  consistently preprocessed public RNA-seq datasets.
-- Create a web application using [marimo](https://marimo.io) to
-  perform (simple) analyses interactively.
+(1) Perform bulk RNA-seq analyses in python, using
+the excellent [pydeseq2 module](https://pydeseq2.readthedocs.io/en/stable/),
+(2) Explore the [recount3](https://rna.recount.bio) collection of thousands of 
+consistently preprocessed public RNA-seq datasets, and 
+(3)Create a web application using [marimo](https://marimo.io) to
+perform (simple) analyses interactively.
 
 ## Overview
 
@@ -202,6 +202,31 @@ allows users to:
   either raw or normalized counts for each sample.
   
   ![Scatter plots](https://github.com/tomsing1/mariner/raw/main/docs/images/scatter_plots.jpg)
+
+## Deployment via Docker
+
+Because not all of the python modules that are imported by my notebook are
+available as pure python wheels today, the notebook cannot be deployed via
+webassembly. For now, I can package and deploy the app on a server 
+[using docker](https://github.com/tomsing1/mariner#docker)
+instead.
+  
+A pre-built docker image for the `arm64` platform is available from [dockerhub](https://hub.docker.com/r/tomsing1/mariner):
+
+  ```bash
+  docker pull tomsing1/mariner
+  docker run -p 8080:8080 --rm -it tomsing1/mariner
+  ```
+You can reach the application at [localhost:8080](localhost:8080).
+
+Alternatively, you can build the docker image yourself, using the [
+Dockerfile](https://github.com/tomsing1/mariner/blob/main/Dockerfile)
+included in the repository:
+
+  ```bash
+  docker build -t tomsing1/mariner .
+  docker run -p 8080:8080 --rm -it tomsing1/mariner
+  ```
 
 ## Lessons learned
 

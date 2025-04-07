@@ -226,7 +226,7 @@
   <title>SQL and noSQL approaches to creating &amp; querying databases (using R)</title>
   <dc:creator>Thomas Sandmann</dc:creator>
   <link>https://tomsing1.github.io/blog/posts/geneset-sqlite-db/</link>
-  <description><![CDATA[ The first step of any data analysis is to obtain and explore the available data, often by accessing and querying a database. There many great introductions on how to <em>read</em> data into an R session. But I found it harder to find tutorials on how to <em>create</em> and <em>populate</em> a new database from scratch. ]]></description>
+  <description><![CDATA[ The first step of any data analysis is to obtain and explore the available data, often by accessing and querying a database. There many great introductions on how to <em>read</em> data into an R session. But I found it harder to find tutorials on how to <em>create</em> and <em>populate</em> a new database from scratch. Here, I explore both noSQL and SQL approaches to data management. ]]></description>
   <category>TIL</category>
   <category>R</category>
   <category>databases</category>

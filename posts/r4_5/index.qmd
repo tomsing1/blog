@@ -25,12 +25,14 @@ editor_options:
   chunk_output_type: console
 ---
 
-On Friday, [R version 4.5](https://cran.r-project.org/) was released. If you are curious about what's new and what's changed, you might enjoy [this blog post](https://www.jumpingrivers.com/blog/whats-new-r45/) (or the official [list of changes here](https://cran.r-project.org/bin/windows/base/NEWS.R-4.5.0rc.html)). 
-
-### 📰 Importing only selected objects & functions from a package
-
+On Friday, [R version 4.5](https://cran.r-project.org/) was released. If you are curious about what's new and what's changed, you might enjoy reading
+[Russ Hyde's blog post](https://www.jumpingrivers.com/blog/whats-new-r45/)
+or R's official 
+[list of changes](https://cran.r-project.org/bin/windows/base/NEWS.R-4.5.0rc.html). 
 For me, the introduction of the `use()` function is the most interesting aspect
 of this update.
+
+### 📰 Importing only selected objects & functions from a package
 
 Until now, we had two choices of attaching a package to our R sessions:
 

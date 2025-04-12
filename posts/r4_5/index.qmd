@@ -1,0 +1,89 @@
+---
+title: "R 4.5: importing selected objects & functions from R packages"
+author: "Thomas Sandmann"
+date: "2025-04-12"
+execute:
+  echo: true
+  warning: false
+  message: false
+draft: false
+freeze: true
+categories: [R]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    anchor-sections: true
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+On Friday, [R version 4.5](https://cran.r-project.org/) was released. If you are curious about what's new and what's changed, you might enjoy [this blog post](https://www.jumpingrivers.com/blog/whats-new-r45/) (or the official [list of changes here](https://cran.r-project.org/bin/windows/base/NEWS.R-4.5.0rc.html)). 
+
+### 📰 Importing only selected objects & functions from a package
+
+For me, the introduction of the `use()` function is the most interesting aspect
+of this update.
+
+Until now, we had two choices of attaching a package to our R sessions:
+
+* Using `library("dplyr")` or `require("poorman")`, adding all functions, 
+classes and objects that are exported by the package to our R session.   
+* Using the triple-colon notation, e.g. `dplyr::filter`, and ensuring that the dependency is captured elsewhere (e.g. in the `DESCRIPTION` file of an R 
+package)
+
+The former can lead to unwanted surprises, e.g. when two packages export 
+functions with the same name. (For example, `dplyr's` or `poorman's` `filter`
+functions mask base R's `filter` function.)
+
+Other programming languages, including python, allow users to attach / import
+only those functions or objects they want into the current workspace. For 
+example, in python you might see: from math import pi
+
+💡 Starting with R 4.5, you can now do the same in R \- with the `base::use()`
+function. For example, the following code will only attach the select and
+mutate functions to your R session (but not dplyr's filter function \- or
+anything else):
+
+```r
+use("poorman", c("filter", "mutate"))
+```
+
+No more wondering which filter function you are actually calling\!
+
+### 🚨 Buyer beware
+
+But, as Konrad Rudolph 
+[points out](https://mastodon.social/@klmr/114261539783693441),
+the new `base::use()` implementation is not perfect. Under the hood, it still
+uses `library()` \- and as a consequence, you can only import objects from the
+same R package *once* per R session.
+
+For example, running the following code snippet in a single R session leads to 
+an error, because the second use() call is ineffective (but doesn't tell you\!):
+
+```r
+use("poorman", c("filter"))  
+filter(mtcars, cyl \> 3\)  \# works\!
+
+use("poorman", c("select"))  
+select(mtcars, cyl)  \# fails  
+Error in select(mtcar, cyl) : could not find function "select"
+```
+
+So: buyer beware\! 
+
+If you are interested in a different implementation of the `use()` approach, 
+check out 
+[Konrad's](https://mastodon.social/@klmr) own
+[box R package](https://cran.r-project.org/package=box). 
+Not only does it come with its own `box::use()` function, but it also allows you turn your own R code into reusable modules \- without having to compose an 
+entire R package every time!
+

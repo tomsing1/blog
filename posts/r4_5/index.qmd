@@ -1,5 +1,5 @@
 ---
-title: "R 4.5: importing selected objects & functions from R packages"
+title: "R 4.5: importing only selected objects & functions from R packages"
 author: "Thomas Sandmann"
 date: "2025-04-12"
 execute:
@@ -32,7 +32,7 @@ or R's official
 For me, the introduction of the `use()` function is the most interesting aspect
 of this update.
 
-### 📰 Importing only selected objects & functions from a package
+### Importing only selected objects & functions from a package
 
 Until now, we had two choices of attaching a package to our R sessions:
 
@@ -60,7 +60,7 @@ use("poorman", c("filter", "mutate"))
 
 No more wondering which filter function you are actually calling\!
 
-### 🚨 Buyer beware
+### Buyer beware
 
 But, as Konrad Rudolph 
 [points out](https://mastodon.social/@klmr/114261539783693441),

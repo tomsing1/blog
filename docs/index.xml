@@ -25,6 +25,15 @@
   <pubDate>Fri, 25 Apr 2025 07:00:00 GMT</pubDate>
 </item>
 <item>
+  <title>R 4.5: importing only selected objects &amp; functions from R packages</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/r4_5/</link>
+  <description><![CDATA[ On Friday, <a href="https://cran.r-project.org/">R version 4.5</a> was released. If you are curious about what’s new and what’s changed, you might enjoy reading <a href="https://www.jumpingrivers.com/blog/whats-new-r45/">Russ Hyde’s blog post</a> or R’s official <a href="https://cran.r-project.org/bin/windows/base/NEWS.R-4.5.0rc.html">list of changes</a>. For me, the introduction of the <code>use()</code> function is the most interesting aspect of this update. ]]></description>
+  <category>R</category>
+  <guid>https://tomsing1.github.io/blog/posts/r4_5/</guid>
+  <pubDate>Sat, 12 Apr 2025 07:00:00 GMT</pubDate>
+</item>
+<item>
   <title>Analyzing targeted locus amplification (TLA) data</title>
   <dc:creator>Thomas Sandmann</dc:creator>
   <link>https://tomsing1.github.io/blog/posts/tla/</link>
@@ -220,17 +229,6 @@
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/tourr/</guid>
   <pubDate>Mon, 28 Aug 2023 07:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Customizing my Quarto website</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/quarto-css/</link>
-  <description><![CDATA[ Today I gave <a href="https://tomsing1.github.io/blog/">my blog</a> a facelift, switching to a different theme and also including some custom CSS. <a href="https://scicomm.xyz/@basepair">Christian Gebhard’s</a> <a href="https://jollydata.blog/posts/2022-08-06-_switching-to-quarto/switching-to-quarto.html#themes">tutorial</a> was super helpful. Many thanks, Christian! ]]></description>
-  <category>TIL</category>
-  <category>quarto</category>
-  <category>CSS</category>
-  <guid>https://tomsing1.github.io/blog/posts/quarto-css/</guid>
-  <pubDate>Mon, 31 Jul 2023 07:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

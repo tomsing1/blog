@@ -2,7 +2,7 @@
 title: "Gene expression analysis with pydeseq2"
 subtitle: "Building my first app with the marimo notebook environment"
 author: "Thomas Sandmann"
-date: "2025-04-25"
+date: "2025-04-06"
 freeze: true
 categories: [NGS, python, marimo, TIL]
 editor:

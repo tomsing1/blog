@@ -11,7 +11,16 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.6.36</generator>
-<lastBuildDate>Fri, 25 Apr 2025 07:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 12 Apr 2025 07:00:00 GMT</lastBuildDate>
+<item>
+  <title>R 4.5: importing only selected objects &amp; functions from R packages</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/r4_5/</link>
+  <description><![CDATA[ On Friday, <a href="https://cran.r-project.org/">R version 4.5</a> was released. If you are curious about what’s new and what’s changed, you might enjoy reading <a href="https://www.jumpingrivers.com/blog/whats-new-r45/">Russ Hyde’s blog post</a> or R’s official <a href="https://cran.r-project.org/bin/windows/base/NEWS.R-4.5.0rc.html">list of changes</a>. For me, the introduction of the <code>use()</code> function is the most interesting aspect of this update. ]]></description>
+  <category>R</category>
+  <guid>https://tomsing1.github.io/blog/posts/r4_5/</guid>
+  <pubDate>Sat, 12 Apr 2025 07:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Gene expression analysis with pydeseq2</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -22,16 +31,7 @@
   <category>marimo</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/mariner/</guid>
-  <pubDate>Fri, 25 Apr 2025 07:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>R 4.5: importing only selected objects &amp; functions from R packages</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/r4_5/</link>
-  <description><![CDATA[ On Friday, <a href="https://cran.r-project.org/">R version 4.5</a> was released. If you are curious about what’s new and what’s changed, you might enjoy reading <a href="https://www.jumpingrivers.com/blog/whats-new-r45/">Russ Hyde’s blog post</a> or R’s official <a href="https://cran.r-project.org/bin/windows/base/NEWS.R-4.5.0rc.html">list of changes</a>. For me, the introduction of the <code>use()</code> function is the most interesting aspect of this update. ]]></description>
-  <category>R</category>
-  <guid>https://tomsing1.github.io/blog/posts/r4_5/</guid>
-  <pubDate>Sat, 12 Apr 2025 07:00:00 GMT</pubDate>
+  <pubDate>Sun, 06 Apr 2025 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Analyzing targeted locus amplification (TLA) data</title>

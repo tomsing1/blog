@@ -1,0 +1,561 @@
+---
+title: "Non-compartmental PK analysis with the PKNCA R package"
+subtitle: "First step into the pharmacokinetics world"
+author: "Thomas Sandmann"
+date: "2025-04-27"
+freeze: true
+categories: [R]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+Pharmacokinetics (PK) studies how drugs are absorbed, distributed, metabolized
+or excreted (ADME) over time. Analyses usually start with plotting the
+measured drug concentrations versus time, followed by the calculation of one or
+more variables, e.g. estimates of drug _exposure_ over time such as 
+minimum or maximum drug concentratiosn ($C_{min}$ and $C_{max}$), 
+the time at which $C_{max}$ was reached ($t_{max}$), the total exposure - often
+based on the area under curve (AUC), etc.
+
+To describe the behavior of a drug, empirical or mechanistic models are used, 
+and the latter can be sub-grouped into `compartmental` or `non-compartmental`
+approaches [^1]. Here, I am focusing exclusively on non-compartmental analysis
+(NCA), which is widely used and offer standard algebraic solutions for many
+types of questions [^2].
+
+
+[^1]: [Applied Biopharmaceutics and Pharmacokinetics](https://accesspharmacy.mhmedical.com/book.aspx?bookid=1592)
+by Shargel and Yu discusses the distinction between different pharmacokinetic
+approaches and their pros and cons in detail.
+
+[^2]: Compartmental models usually rely on statistical models represented as
+partial differential equations. The model is fit to the data using e.g. least
+squares regression, maximum-likelihood or Bayesian techniques and often require
+numerical solutions to non-linear regression problems. They also require the
+analyst to make explicit and implicit assumptions, e.g. about the the
+[reaction order](https://en.wikipedia.org/wiki/Rate_equation)
+governing the rates at which drug concentration changeover time.
+
+## Non-compartmental analysis
+
+NCA is based on estimating PK parameters directly from the concentration-time
+curve, without requiring a mathematical model that describes the entire behavior
+of the drug [^3]. It is appropriate when 
+
+1. Exposure increases proportionally with drug dose and the PK parameters don't
+   change over time (e.g. there aren't any saturation effects, etc)
+2. The drug is eliminated from the same pool that the concentration measurements
+   are obtained from.
+3. There are not other sources of the drug than those in the measured pool.
+4. Sufficient data is available, e.g. 12 or more concentation time points for
+   a single-dose administration.
+
+[Source: Shargel an Yu, 7th edition, Chapter 25](https://accesspharmacy.mhmedical.com/book.aspx?bookid=1592)
+
+[^3]: NCA approaches are sometimes referred to as "model-free", but that's not
+entirely correct. For example, to calculate the full exposure of a subject it
+is often necessary to extrapolate beyond the final measurement. Typically, a
+first-order elimination process is assumed to estimate the residiual drug
+concentrations, e.g. expecting a log-linear decrees toward zero, to calculate
+the $AUC_\infty$ value.
+
+## Software solutions
+
+There are many commercial tools to perform PK analyses, many of which can
+perform both NCA and compartmental analyses. The relevant
+[CRAN Task View](https://cran.r-project.org/web/views/Pharmacokinetics.html)
+also list multiple options, including long-standing solutions such as 
+[ncappc](https://cran.r-project.org/package=ncappc), 
+published in 2015, or
+[NonCompart](https://cran.r-project.org/package=NonCompart),
+published in 2016.
+
+Another solution, the
+[PKNCA R package](https://cran.r-project.org/package=PKNCA), 
+also published in 2015, stood out to me because of the depth and breadth of its 
+[documentation](https://billdenney.github.io/pknca/), 
+including multiple vignettes. In addition, the `PKNCA` R package also allows
+users to specify business rules that impact the final results, e.g. how to 
+deal with missing values - either within a set of measurements or at the end
+of a time series.
+
+## Theophillin treatment data
+
+The 
+[PKNCA R package](https://cran.r-project.org/package=PKNCA),
+written and maintained by 
+[Bill Denney](https://orcid.org/0000-0002-5759-428X)
+and Clare Buckeridge includes examples that use the `Theoph` dataset incluced
+in base R. Let's start by exploring this dataset.
+
+```{r}
+suppressPackageStartupMessages({
+  library("poorman")
+  library("ggplot2")
+  library("ggsci")
+  library("PKNCA")
+  library("scales")
+})
+theme_set(theme_linedraw(14))
+```
+
+The `datasets::Theoph` dataset contains `r nrow(Theoph)` measurements from
+`r nlevels(Theoph$Subject)` subjects, each treated with a single oral dose of
+[Theophylline](https://en.wikipedia.org/wiki/Theophylline), 
+a drug classically used to treat e.g. Asthma or chronic obstructive pulmonary
+disease (COPD) [^4].
+
+[^4]: Theophillin is found naturally e.g. in tea; as a drug it has mainly been
+replaced by newer pharmaceuticals - see e.g. [this review](https://pmc.ncbi.nlm.nih.gov/articles/PMC11170423/)
+for more details.
+
+```{r}
+summary(datasets::Theoph)
+```
+
+At each time point, the concentration of `Theophillin` in the serum was
+recorded. Most of the `r length(unique(Theoph$Dose))` different oral doses 
+levels were only assessed in a  single subject, but two subjects received 
+`4.4 mg/kg` or `4.53 mg/kg` of the drug.
+
+```{r}
+#| fig-width: 7.5
+#| fig-height: 5
+label_function <- function(x) paste(x, "mg/kg")
+
+Theoph |>
+  poorman::mutate(
+    Subject = factor(Subject, levels = unique(Subject)),
+    Dose = factor(Dose, levels = sort(unique(Dose)))) |>
+  ggplot() +
+  aes(x = Time, y = conc, color = Subject) + 
+  geom_point(size = 1) +
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       title = "Theophillin serum concentrations by Dose") +
+  facet_wrap(~ Dose, labeller = labeller(Dose = label_function)) +
+  theme(panel.grid = element_blank())
+```
+
+Because the drug was given orally and needed to be absorbed through the
+gut before it reaches the serum (and circulates throughout the body), its
+maximum concentration is reached after several ours, and it declines slowly over
+the course of roughly a day.
+
+For analysis with the `PKNCA` package, we need to represent the data in (at 
+least) data.frames, one for `dose` information and the other for `concentration`
+measurements. (A third data.frame can be used to specify `intervals` of 
+interest, see below.)
+
+Let's start by capturing the concentration data by passing the relevant columns
+of the `Theophil` dataframe to the `PKNA::PKNCAconc` function.
+
+```{r}
+conc_df <- PKNCAconc(data = Theoph, formula = conc ~ Time|Subject)  # <1>
+conc_df  # <2>
+```
+
+1. The `Subject` column is encoded as a factor. The right hand side of the
+  formula groups the data by subject, reflecting the multi-subject design of
+  this dataset. (The right-most variable is always assumed to correspond to an
+  individual.)
+2. The `conc_df` object is an instance of the `PKNCAconc` class. 
+
+Next, we subset the `Theoph` dataset to the first time point for each subject,
+e.g. `Time == 0`, when they received the single drug dose and pass these rows
+into the `PKNCAdose` constructor.
+
+```{r}
+dose_df <- PKNCAdose(data = subset(Theoph, Time == 0),
+                     formula = conc ~ Time|Subject)
+dim(dose_df$data)  # <3>
+```
+
+3. The `dose_df` object is an instance of the `PKNCAdose` class, and it`s 
+  `data` element contains a single row for each subject (e.g. their single 
+  dose).
+
+::: {.callout-note collapse="true"}
+### Sparse data
+
+Sometimes, datasets are *sparse*, e.g. no subject / animal has data for the 
+entire time course. (An extreme example are endpoints that can only be
+measured post mortem; for pre-clinical _in vivo_ studies, animals might be
+sacrificed at different times and each contribute only a single data point
+to the PK dataset.)
+
+To perform NCA on sparse data, simply add the `sparse=TRUE` argument to the 
+`PKNCAdose` call.
+
+:::
+
+Next, we combine both objects by passing them the `PKNCAdata` function.
+
+```{r}
+pk_data <- PKNCAdata(conc_df, dose_df)  # <4>
+results <- pk.nca(pk_data)  # <5>
+summary(results)  # <6>
+```
+
+4. Because we omit the optional `intervals` argument to the `PKNCAdata`
+  function, default intervals are defined for us automatically, and a minimal
+  set of parameters to estimate is included. (More on that below.)
+5. The `pk.nca` data performs the actual calculations, separately for each
+  interval.
+6. Finally, the `summary` function returns the results & confidence intervals 
+  in the form of a data.frame - with one for each interval and group.
+
+We obtain summarized results across all subject for the following
+parameters[^5]:
+
+- `N` the number of subjects
+- `auclast`: $AUC_{last}$, e.g. the area under the concentration time curve from
+  the beginning of the interval to the last concentration above the limit of
+  quantification, represented as geometric mean and geometric coefficient of 
+  variation.
+- `cmax`: $C_{max}$, e.g. the maximum observed concentration
+- `tmax`: $t_{max}$, e.g. the time of the maximum observed concentration,
+  represented as median & range
+- `half.life`: $t_{\frac{1}{2}}$, e.g. the (terminal) half-life, represented
+  as arithmetic mean and standard deviation
+- `aucinf.obs`: $AUC_{obs}^{\infty}$ e.g. the area under the concentration
+  time curve from the beginning of the interval to infinity with extrapolation 
+  to infinity from the observed last measured concentration ($C_{last}$), 
+  represented as geometric mean and geometric coefficient of variation.
+
+The summary has two rows, one for each of the two default intervals:
+
+1. 0-24 hours
+2. 0-Infinity
+
+and parameters are estimated when their requirements are met, e.g. $AUC_{last}$
+can be calculated based on the first interval, but $AUC_{obs}^{\infty}$
+requires measurements taken at the last timepoint (25 hours).
+
+[^5]: A full list of available parameter is 
+[available here](https://billdenney.github.io/pknca/articles/v03-selection-of-calculation-intervals.html#parameters-available-for-calculation-in-an-interval)
+
+::: {.callout-note collapse="false"}
+### Redefining aggregation functions
+
+The `PKNCA` package includes predefined aggregation statistics for each of
+the available parameters, but it also allows us to overwrite them.
+
+For example, by default the _half-life_ is summarized by calculating the
+arithmetic meand and the standard deviation. If we prefer e.g. calculating
+the median and median absolute deviation (MAD) instead, we can define these 
+new business rules with the `PKNCA.set.summary`, along with a human-readable
+description:
+
+```{r}
+PKNCA.set.summary(
+  name="half.life",
+  description="median and median absolute deviation",
+  point=\(x) median(x, na.rm = TRUE),
+  spread=\(x) mad(x, na.rm = TRUE),
+  rounding=list(signif = 3)
+)
+```
+
+**Note:** Please take a look at the predefined aggregation functions, e.g. 
+`business.mean` or `business.sd` to understand how they behave when there are
+any / many missing values. You might want to implement a similar behavior in
+your own summarization functions.
+
+:::
+
+### Accessing estimates for individual subjects
+
+The `summary` function automatically summarizes results, using an appropriate
+method (e.g. arithmetic mean, median, etc). If no grouping has been defined (as
+in the case shown above), summary statistics are aggregated across the entire
+dataset. 
+
+To access the results _before_ aggregation, e.g. for each individual subject,
+we can access the `result` slot of the `pk.nca()` output. (For convenience,
+that authors defined a `as.data.frame()` S3 method that extracts this slot for
+us.)
+
+For each subject and interval (identified by the `start` and `end` columns), 
+we see the estimate (`PPORRES`) for every parameter (`PPTESTCD`). 
+
+```{r}
+as.data.frame(results) |>
+  head(n = 14)
+```
+
+The object not only contains the parameters that were reported in the summary,
+but also those that were computed because they were required to estimate the
+requested ones.
+
+```{r}
+#| warning: false
+results |>
+  as.data.frame() |>
+  poorman::distinct(PPTESTCD)
+```
+
+## Defining intervals
+
+So far, we have relied on the `PKNCAdata` function's ability to define default
+intervals. 
+
+As we observed above, one of the default intervals spans the entire study, e.g.
+unless instructed otherwise, the `PKNCAdata` function will define an interval
+from `start=0` to `end=Inf` by default.
+
+The `Theophil` dataset's last time point was collected after 25 
+hours. To demonstrate the flexibility of the `PKNCAdata` function, let's define
+return _different_ parameters for two separate intervals:
+
+An interval object is a data.frame with both `start` and `end` columns, as well
+as columns for each of the parameters we would like to estimate [^6]. For 
+example,  
+
+1. 0 to 24 hours: `auclast`, `r.squared` and `adj.r.squared` parameters
+2. 0 to 25 hours: `auclast`, `lambda.z` and `tlast` parameters
+
+**Note:** Overlapping intervals, e.g. as in this example, are no problem.
+
+[^6]: The full list of supported parameters is available 
+[here](https://billdenney.github.io/pknca/articles/v03-selection-of-calculation-intervals.html#parameters-available-for-calculation-in-an-interval).
+
+```{r}
+interval_df <- data.frame(
+  start = 0,  # <1>
+  end = c(24, 25),  # <2>
+  auclast = TRUE,
+  r.squared = c(TRUE, FALSE),
+  adj.r.squared = c(TRUE, FALSE),
+  lambda.z = c(FALSE, TRUE),
+  tlase = c(FALSE, TRUE)
+)
+interval_df
+```
+
+1. To create a data.frame with two rows, we can rely on R's vector recycling
+  behavior to fill in the required number of identical entries.
+2. When values differ between rows, we need to explicitly list each value.
+
+```{r}
+pk_data <- PKNCAdata(conc_df, dose_df, intervals = interval_df)  # <3>
+results <- pk.nca(pk_data)
+summary(results)
+```
+
+3. The data.frame is passed to the `PKNCAdata` function via the `intervals`
+argument.
+
+**Note:** Although we only specified the parameters we were interested in,
+the `PKNCAdata` function automatically also requested all other parameters that
+were needed for these calculations for us. As before, they are available in the
+`results` object, but only those we explicitely requested are aggregated and 
+included in the summary.
+
+## Nested groups
+
+The `Theoph` dataset contains one more column that we haven't used, yet, the
+body weight of each subject. Let's split this statistic at the median, to create
+two subgroups of subjects: `A` and `B`.
+
+```{r}
+Theoph$Group <- factor(ifelse(Theoph$Wt > median(Theoph$Wt), "A", "B"))
+```
+
+How can we obtain parameter estimates _separately_ for each of these subgroups?
+Let's return to the beginning of our analysis and define the concentration
+and dose data.frames, but also include the `subgroup` column this time.
+
+The rest of our code remains unchanged, as the `summary` function will
+aggregate the estimates at the levels of the `Group` variable automatically.
+
+```{r}
+conc_df <- PKNCAconc(data = Theoph, 
+                     formula = conc ~ Time|Group + Subject)  # <1>
+dose_df <- PKNCAdose(data = subset(Theoph, Time == 0),
+                     formula = conc ~ Time|Group + Subject)
+pk_data <- PKNCAdata(conc_df, dose_df, intervals = interval_df)  # <2>
+results <- pk.nca(pk_data)  # <3>
+summary(results)  # <4>
+```
+
+1. We include the `Group` covariate in the formula, to the _left_ of the
+  `Subject` variable - because the final variable is interpreted as the 
+  individual subject by default. (This can be overriden by specifying the 
+  `subject` argument.)
+2. We combine the three data.frames (including the custom intervals we 
+  defined above).
+3. The `pk.nca` estimates the subject-level results
+4. We obtain the summary statistics - aggregated at the `Group` level.
+
+::: {.callout-note collapse="false"}
+### Varying intervals by group
+
+What if we wanted to request different parameters for group `A` than for group
+`B`? Easy - we simply include a `Group` column in our `intervals_df` data.frame.
+The `PKNAdata` function automatically joins data.frames based on column names.
+
+For example, let's request `r.squared` for group `A`, and `adj.r.squared` for
+group `B`:
+
+```{r}
+interval_df <- data.frame(
+  start = 0,  # <1>
+  end = Inf,
+  Group = c("A", "B"),  # <2>
+  r.squared = c(TRUE, FALSE),  # <3>
+  adj.r.squared = c(FALSE, TRUE)
+)
+interval_df
+```
+
+1. We only focus on a single interval here, spanning the entire experiment.
+2. We add a new column to the data.frame, with one row for each of the groups.
+3. We can toggle the parameter request for each group by setting the boolean
+  values for each row.
+
+The rest of our code remains unchanged - the interval definitions do all of the
+heavy lifting!
+
+```{r}
+conc_df <- PKNCAconc(data = Theoph, 
+                     formula = conc ~ Time|Group + Subject)
+dose_df <- PKNCAdose(data = subset(Theoph, Time == 0),
+                     formula = conc ~ Time|Group + Subject)
+pk_data <- PKNCAdata(conc_df, dose_df, intervals = interval_df)
+results <- pk.nca(pk_data)
+summary(results)
+```
+
+The summary now return two rows, one for each `Group` and the same 0 -> Inf
+interval.
+
+**Note:** We could also have requested multiple intervals at the same time by
+specifying additional rows in the data.frame, as in the examples above.
+
+:::
+
+## Multi-dose studies
+
+In the `Theoph` study every subject received only a single dose of the drug.
+To demonstrate that the `PKNCA` R package can handle multi-dose studies as well,
+we will simulate a longer time series with multiple doses using
+[superposition](https://www.certara.com/knowledge-base/the-superposition-principle/).
+
+### Superposition
+
+We follow the example from the
+[PKNCA vignette](https://billdenney.github.io/pknca/articles/Superposition.html)
+and simulate the profile we should expect if all subjects had received
+7 doses every 12 hours over a 96 hour interval.
+
+::: {.callout-note collapse="true"}
+### Assumptions
+
+The principle of superposition is based on the assumptions that 
+
+1. The drug is eliminated by first-order kinetics.
+2. Subsequent doses are not influenced by previous ones, e.g. there is no change
+in physiology, drug metabolism is not altered due to enzyme saturation or 
+induction, etc.
+
+:::
+
+```{r}
+Theoph |>
+  as.data.frame() |>  # <1>
+  poorman::filter(Time == 0)
+```
+
+1. The `Theoph` dataset is not a regular data.frame, but a `groupedData` object
+(defined in the `nlme` R package). We coerce it to a regular data.frame to use
+`poorman` (or `dplyr`) functions to subset and modify it.
+
+You might have noticed that the concentration at the first time point (0 hours)
+is not exactly zero. This could be due to measurement error (e.g. the lower
+limit of quantitation of the assay), or because the subject's serum contained
+theophylline from another source[^7].
+
+[^7]: Trace amounts of theophylline are naturally present in tea, coffee, 
+chocolate, yerba maté, guarana, and kola nut (source: [Wikipedia](https://en.wikipedia.org/wiki/Theophylline)).
+
+To extrapolate the data via superposition, though, we need to include a
+baseline value of zero, so (**just for didactic purposes**), we reset that
+value manually:
+
+```{r}
+theo_corrected <- Theoph |>
+  as.data.frame() |>
+  poorman::mutate(conc = ifelse(Time == 0, 0, conc))  # <2>
+theo_corrected |>
+  poorman::filter(Time == 0)
+```
+
+2. We set the concentration measurement for the first time point to zero.
+
+Now, we can superimpose the profile, assuming that a new dose of the drug
+is provided every 12 hours.
+
+```{r}
+pk_multi <- theo_corrected |>
+  PKNCAconc(formula = conc ~ Time|Subject) |>
+  PKNCA::superposition(
+    tau = 4 * 24,  # <3> 
+    n.tau = 1,  # <4>
+    dose.times=seq(0, 3 * 24, by = 12)  # <5>
+  )
+```
+
+3. The total dosing interval (from first dose to last observation).
+4. The number of `tau` dosing intervals to simulate, set to one because we
+  want to simulate a single interval starting with a concentration of zero.
+5. Specific dosing times within the interval.
+
+```{r}
+#| fig-width: 8
+#| fig-height: 5
+pk_multi |>
+  poorman::mutate(
+    Subject = factor(Subject, levels = unique(Subject))
+  ) |>
+  ggplot() +
+  aes(x = time, y = conc, color = Subject) +
+  geom_point(size = 1) +
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       title = "Multi-dose study (superposition)") +
+  theme(panel.grid = element_blank())
+```
+
+## Excluding results
+
+[Excluding results](https://billdenney.github.io/pknca/articles/v07-post-processing.html#modifying-results)
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessionInfo()
+```
+
+</details>
+

@@ -542,6 +542,12 @@ pk_multi |>
   theme(panel.grid = element_blank())
 ```
 
+## Units
+
+## Imputation
+
+## Business rules & options
+
 ## Excluding results
 
 [Excluding results](https://billdenney.github.io/pknca/articles/v07-post-processing.html#modifying-results)

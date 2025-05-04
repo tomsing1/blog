@@ -166,10 +166,16 @@ abundant features in the other modality.
 ## Running CHOIR
 
 The
-[CHOIR R package](https://github.com/corceslab/CHOIR)
+[CHOIR R package](https://github.com/corceslab/CHOIR)[^7]
 implements the algorithm and is accompanied by a 
 [very nice vignette](https://www.choirclustering.com/articles/CHOIR.html)
 to get users started. 
+
+[^7]: The `CHOIR` R package is tightly integrated with the R / Bioconductor
+ecosystem and comes with a **very large number of dependencies**. On my system, 
+it required installing and downloading ~ 200 additional R packages in a fresh
+`renv` environment - not even counting the optional `countsplit`, `ggnewscale` 
+or `scRNAseq` R packages and _their_ dependencies.
 
 Let's step through the vignette, using the `LaMannoBrainData` scRNA-seq dataset
 that is available via the
@@ -185,12 +191,14 @@ Using either the
 2. `buildTree` and `pruneTree` functions for more control over each step.
 
 ```{r}
-library(CHOIR)
-library(countsplit)
-library(ggnewscale)
-library(ragg)
-library(scRNAseq)
-library(Seurat)
+suppressPackageStartupMessages({
+  library(CHOIR)
+  library(countsplit)
+  library(ggnewscale)
+  library(ragg)
+  library(scRNAseq)
+  library(Seurat)
+})
 ```
 
 The `LaMannoBrainData` function retrieves raw scRNA-seq data published by 
@@ -221,9 +229,9 @@ First, let's use the `CHOIR` wrapper function with default arguments.
 object <- CHOIR(object, n_cores = n_cores)  # <1>
 ```
 
-1. Using additional cores speeds up the computation.
+1. Using multiple cores speeds up the computation.
 
-## Step-by-step
+Alternatively, we can perform the exact same calculations in a stepwise fashion:
 
 ```{r}
 object |>
@@ -235,9 +243,14 @@ object |>
 head(object@meta.data)
 ```
 
+For convenience, the `CHOIR` package also includes functions to run
+`UMAP`
+
 ```{r}
 object <- runCHOIRumap(object, reduction = "P0_reduction")
 ```
+
+and to plot the results of the sub-clustering analysis:
 
 ```{r}
 plotCHOIR(object)
@@ -251,17 +264,32 @@ plotCHOIR(object,
 
 ## Running CHOIR with Harmony batch correction / integration
 
+If a dataset contains cells collected in multiple batches (e.g. on different
+days or even using different technologies), we can use the 
+[Harmony](https://www.nature.com/articles/s41592-019-0619-0)
+to integrate them into a shared embedding space. 
+
+The example dataset does not contain `batch` information - so we just
+just assign cells to two random batches (`A` and `B`) to demonstrate this
+functionality
+
 ```{r}
-object <- CreateSeuratObject(data_matrix, 
+object <- CreateSeuratObject(data_matrix,  # <1>  
                              min.features = 100,
                              min.cells = 5)
 object <- NormalizeData(object)
-object$batch <- sample(c("A", "B"), size = ncol(object), replace = TRUE)
+
+set.seed(123)
+object$batch <- sample(c("A", "B"), size = ncol(object), replace = TRUE)  # <2>
 
 object <- CHOIR(object, 
                 batch_correction_method = "Harmony",
                 batch_labels = "batch")
 ```
+
+1. Let's start with a fresh Seurat object.
+2. Because the example dataset does not include cells from multiple batches,
+we just create a random indicator variable for demonstration purposes.
 
 ## Count splitting
 

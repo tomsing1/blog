@@ -2,7 +2,7 @@
 title: "Non-compartmental PK analysis with the PKNCA R package"
 subtitle: "First step into the pharmacokinetics world"
 author: "Thomas Sandmann"
-date: "2025-04-27"
+date: "2025-05-04"
 freeze: true
 categories: [R]
 editor:
@@ -22,68 +22,68 @@ editor_options:
 
 ## tl;dr
 
+## Non-compartmental analysis
+
 Pharmacokinetics (PK) studies how drugs are absorbed, distributed, metabolized
-or excreted (ADME) over time. Analyses usually start with plotting the
-measured drug concentrations versus time, followed by the calculation of one or
-more variables, e.g. estimates of drug _exposure_ over time such as 
-minimum or maximum drug concentratiosn ($C_{min}$ and $C_{max}$), 
-the time at which $C_{max}$ was reached ($t_{max}$), the total exposure - often
-based on the area under curve (AUC), etc.
+or excreted (ADME) over time. _Mechanistic models_ include kinetic parameters
+governing  how a drug enters & exists one or more compartments. They can predict
+drug concentrations that have not been observed directly, but require solving
+complex differential equations and analysts need to make specific assumptions
+(e.g. 
+[reaction order](https://en.wikipedia.org/wiki/Rate_equation) or 
+the rates at which drug concentration change over time.[^1]).
 
-To describe the behavior of a drug, empirical or mechanistic models are used, 
-and the latter can be sub-grouped into `compartmental` or `non-compartmental`
-approaches [^1]. Here, I am focusing exclusively on non-compartmental analysis
-(NCA), which is widely used and offer standard algebraic solutions for many
-types of questions [^2].
+[^1]: _Compartmental_ models usually rely on statistical models represented as
+partial differential equations. The models are fit to the data using e.g. least
+squares regression, maximum-likelihood or Bayesian techniques and often require
+numerical solutions to non-linear regression problems. 
 
+In contrast, non-compartmental analysis (NCA) focuses on algebraic
+estimates of statistics that can be directly inferred from the observed 
+concentration ~ time curve [^2], including e.g. estimates of drug _exposure_ 
+(based on the area under the curve), minimum or maximum drug concentration 
+($C_{min}$ and $C_{max}$), or the time at which $C_{max}$ was reached 
+($t_{max}$), without requiring a mathematical model that describes the 
+entire behavior of the drug[^3].
 
-[^1]: [Applied Biopharmaceutics and Pharmacokinetics](https://accesspharmacy.mhmedical.com/book.aspx?bookid=1592)
+[^2]: [Applied Biopharmaceutics and Pharmacokinetics](https://accesspharmacy.mhmedical.com/book.aspx?bookid=1592)
 by Shargel and Yu discusses the distinction between different pharmacokinetic
 approaches and their pros and cons in detail.
 
-[^2]: Compartmental models usually rely on statistical models represented as
-partial differential equations. The model is fit to the data using e.g. least
-squares regression, maximum-likelihood or Bayesian techniques and often require
-numerical solutions to non-linear regression problems. They also require the
-analyst to make explicit and implicit assumptions, e.g. about the the
-[reaction order](https://en.wikipedia.org/wiki/Rate_equation)
-governing the rates at which drug concentration changeover time.
+[^3]: NCA approaches are sometimes referred to as "model-free", but that's not
+entirely correct. For example, to calculate the full drug exposure of a subject
+it is often necessary to extrapolate beyond the final measurement. Typically, a
+first-order elimination process is assumed to estimate the residual drug
+concentrations, e.g. expecting a log-linear decrease toward zero, to calculate
+the $AUC_\infty$ value.
 
-## Non-compartmental analysis
+::: {.callout-note collapse="true"}
+### Assumptions
 
-NCA is based on estimating PK parameters directly from the concentration-time
-curve, without requiring a mathematical model that describes the entire behavior
-of the drug [^3]. It is appropriate when 
+NCA is appropriate when 
 
 1. Exposure increases proportionally with drug dose and the PK parameters don't
    change over time (e.g. there aren't any saturation effects, etc)
 2. The drug is eliminated from the same pool that the concentration measurements
    are obtained from.
-3. There are not other sources of the drug than those in the measured pool.
+3. There aren't any other sources of the drug than those in the measured pool.
 4. Sufficient data is available, e.g. 12 or more concentation time points for
    a single-dose administration.
 
-[Source: Shargel an Yu, 7th edition, Chapter 25](https://accesspharmacy.mhmedical.com/book.aspx?bookid=1592)
-
-[^3]: NCA approaches are sometimes referred to as "model-free", but that's not
-entirely correct. For example, to calculate the full exposure of a subject it
-is often necessary to extrapolate beyond the final measurement. Typically, a
-first-order elimination process is assumed to estimate the residiual drug
-concentrations, e.g. expecting a log-linear decrees toward zero, to calculate
-the $AUC_\infty$ value.
+:::
 
 ## Software solutions
 
 There are many commercial tools to perform PK analyses, many of which can
 perform both NCA and compartmental analyses. The relevant
 [CRAN Task View](https://cran.r-project.org/web/views/Pharmacokinetics.html)
-also list multiple options, including long-standing solutions such as 
+also list multiple options in R, including long-standing solutions such as 
 [ncappc](https://cran.r-project.org/package=ncappc), 
 published in 2015, or
 [NonCompart](https://cran.r-project.org/package=NonCompart),
 published in 2016.
 
-Another solution, the
+The
 [PKNCA R package](https://cran.r-project.org/package=PKNCA), 
 also published in 2015, stood out to me because of the depth and breadth of its 
 [documentation](https://billdenney.github.io/pknca/), 
@@ -92,7 +92,7 @@ users to specify business rules that impact the final results, e.g. how to
 deal with missing values - either within a set of measurements or at the end
 of a time series.
 
-## Theophillin treatment data
+## Example data: Theophillin treatment
 
 The 
 [PKNCA R package](https://cran.r-project.org/package=PKNCA),
@@ -106,6 +106,7 @@ suppressPackageStartupMessages({
   library("poorman")
   library("ggplot2")
   library("ggsci")
+  library("patchwork")
   library("PKNCA")
   library("scales")
 })
@@ -153,13 +154,15 @@ Theoph |>
 
 Because the drug was given orally and needed to be absorbed through the
 gut before it reaches the serum (and circulates throughout the body), its
-maximum concentration is reached after several ours, and it declines slowly over
-the course of roughly a day.
+maximum concentration is reached after several hours, and it declines slowly
+over the course of roughly a day.
 
 For analysis with the `PKNCA` package, we need to represent the data in (at 
-least) data.frames, one for `dose` information and the other for `concentration`
-measurements. (A third data.frame can be used to specify `intervals` of 
-interest, see below.)
+least) two data.frames, one for `dose` information and the other for 
+`concentration` measurements. (A third data.frame can be used to specify 
+`intervals` of interest, see below.)
+
+#### Measured concentrations
 
 Let's start by capturing the concentration data by passing the relevant columns
 of the `Theophil` dataframe to the `PKNA::PKNCAconc` function.
@@ -174,6 +177,8 @@ conc_df  # <2>
   this dataset. (The right-most variable is always assumed to correspond to an
   individual.)
 2. The `conc_df` object is an instance of the `PKNCAconc` class. 
+
+#### Dosing schedule
 
 Next, we subset the `Theoph` dataset to the first time point for each subject,
 e.g. `Time == 0`, when they received the single drug dose and pass these rows
@@ -215,7 +220,9 @@ summary(results)  # <6>
   function, default intervals are defined for us automatically, and a minimal
   set of parameters to estimate is included. (More on that below.)
 5. The `pk.nca` data performs the actual calculations, separately for each
-  interval.
+  interval and subject. 
+  - For example, the $AUC_{last}$ is calculated for each of the subjects
+    separately, and then aggregated across all of them (see below).
 6. Finally, the `summary` function returns the results & confidence intervals 
   in the form of a data.frame - with one for each interval and group.
 
@@ -232,7 +239,7 @@ parameters[^5]:
   represented as median & range
 - `half.life`: $t_{\frac{1}{2}}$, e.g. the (terminal) half-life, represented
   as arithmetic mean and standard deviation
-- `aucinf.obs`: $AUC_{obs}^{\infty}$ e.g. the area under the concentration
+- `aucinf.obs`: $AUC_{obs}^{\inf}$ e.g. the area under the concentration
   time curve from the beginning of the interval to infinity with extrapolation 
   to infinity from the observed last measured concentration ($C_{last}$), 
   represented as geometric mean and geometric coefficient of variation.
@@ -243,13 +250,250 @@ The summary has two rows, one for each of the two default intervals:
 2. 0-Infinity
 
 and parameters are estimated when their requirements are met, e.g. $AUC_{last}$
-can be calculated based on the first interval, but $AUC_{obs}^{\infty}$
+can be calculated based on the first interval, but $AUC_{obs}^{\inf}$
 requires measurements taken at the last timepoint (25 hours).
 
 [^5]: A full list of available parameter is 
 [available here](https://billdenney.github.io/pknca/articles/v03-selection-of-calculation-intervals.html#parameters-available-for-calculation-in-an-interval)
 
-::: {.callout-note collapse="false"}
+## Pharmacokinetic metrics
+
+### $AUC_{last}$
+
+The `PKNCA` R package supports the calculation of multiple estimates for the
+"area under the curve", an estimate of total exposure to the drug, detailed in 
+[this vignette](https://billdenney.github.io/pknca/articles/v05-auc-calculation-with-PKNCA.html).
+
+For example, let's plot the measurements for Subject 1. At the end of the
+study, e.g. after 25 hours, the `Theophylline` concentrations are still markedly
+higher than at the start. 
+
+The $AUC_{last}$ metric includes only the area under the curve below the points
+that were _actually_ measured, e.g. in this example until 25 hours, and is 
+calculated using the 
+[trapezoid rule](https://en.wikipedia.org/wiki/Trapezoidal_rule)[^7]
+
+[^7]: Danielle Navarro wrote a great blog entry on 
+[Non-compartmental analysis](https://blog.djnavarro.net/posts/2023-04-26_non-compartmental-analysis/#a-simple-approach)
+that illustrates (among other things) why the trapezoid rule is only a
+simplified estimate of the AUC, and why it can over- and underestimate the
+actual area.
+
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+conc_subset <-  poorman::filter(conc_df$data, Subject == "1")
+conc_subset |> 
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(aes(ymin = min(conc), ymax = conc), fill="skyblue") +
+  geom_point() + 
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  scale_x_continuous(limits = c(NA, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = "Subject 1",
+       title = "Theophillin serum concentrations") +
+  theme(panel.grid = element_blank())
+```
+
+Yet, there is clearly `Theophylline` left in the subject's serum at this time 
+point, e.g. their overall drug dose is underestimated if we truncate the AUC 
+at the last measured time point.
+
+To estimate the _full_ area under the curve, beyond the last measured value,
+we have to estimate how the drug concentration would continue to decline.
+And to do _that_, we need to extrapolate beyond the last measured time point.
+We will need to make some additional assumptions to do so.
+
+### $AUC_{\inf}$
+
+For many drugs, the decrease in concentration over time follows a first order
+kinetics. If that's the case for `Theophylline`, then we should 
+observe a linear log(concentration) ~ Time relationship - at least at the end
+of the time course, when the majority of the orally available drug has
+already entered the serum.
+
+After log transforming the y-axis, we observe just that:
+
+```{r}
+conc_min <- min(conc_subset$conc)
+conc_subset |>
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(aes(ymin = conc_min, ymax = conc), fill="skyblue") +
+  geom_point(size = 3) + 
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  scale_y_continuous(transform = scales::log10_trans(), 
+                     limits = c(conc_min, NA)) + 
+  scale_x_continuous(limits = c(0, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  annotation_logticks(sides = "l") + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = "Subject 1",
+       title = "Theophillin serum concentrations") +
+  theme(panel.grid = element_blank())
+```
+
+Next, we fit a line through the last four points[^8], regressing 
+`log10(concentration)` on `Time` as the only predictor.
+
+```{r}
+fit <- lm(log10(conc) ~ Time, data = tail(conc_subset, n = 4))  # <1>
+summary(fit)  # <2>
+```
+
+1. Because our concentration data.frame is sorted by increasing Time, we 
+can simply subset it to the last 4 rows.
+2. The fit explains a large fraction of the variance for these (last 4)
+measurements, as evidenced by an R-squared value close to 1.
+
+[^8]: Which / how many points to include in the linear fit is another choice the
+analyst makes. The minimum number of points and the choice between different
+potential linear fits is governed by several of the 
+[PKNCA.options](https://billdenney.github.io/pknca/articles/v40-options-for-controlling-PKNCA.html)
+that make the business rules that are applied transparent.
+
+Next, we can use the linear model to extrapolate beyond the last measured
+data point, and also predict when the concentration will drop to zero - or the
+lower limit of quantitation (`LLQ`). We don't know the `LLQ` for the assay
+used in the `Theoph` dataset, we will simply use the lowest reported
+concentration ($C_{min}$, observed at time zero).
+
+```{r}
+\time_min = (
+  log10(conc_min) - fit$coefficients["(Intercept)"]
+  ) / fit$coefficients["Time"]
+```
+
+Based on our model, `Theophylline` should have returned to baseline levels
+after `r unname(ceiling(time_min))` hours.
+
+We can also predict the remaining `Theopylline` levels at specific times. Let's 
+pick 4 evenly-spaced time points between the last measured one 
+(`r max(fit$model$Time)` hours) and `r unname(ceiling(time_min))` hours and
+use the `predict.lm` function to obtain the prediced concentrations.
+
+```{r}
+extra_time <- seq(max(fit$model$Time), time_min, length.out = 4)
+extrapolated <- data.frame(
+  conc = 10^predict.lm(fit, newdata = data.frame(Time = extra_time)),
+  Time = extra_time,
+  origin = "predicted"
+)
+extrapolated
+```
+
+We can add these extrapolated measurements to our dataset and plot the
+both the observed and predicted measurements together - first with a 
+log10 transformed y-axis, and then the untransformed concentrations:
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+df_combined <- conc_subset |> 
+  poorman::select(Time, conc) |>
+  poorman::mutate(origin = "observed") |>
+  poorman::bind_rows(extrapolated)
+
+p1 <- df_combined |>
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="skyblue",
+    data = ~ filter(.x, origin == "observed")) +
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="pink",
+    data = ~ filter(.x, origin == "predicted")) +
+  scale_color_manual(values = c(observed = "blue", predicted = "red"), 
+                     name = element_blank()) + 
+  scale_fill_discrete(name = element_blank()) + 
+  geom_point(size = 3, aes(color = origin)) + 
+  geom_line(linewidth = 1, aes(color = origin)) +
+  geom_line(data = extrapolated, color = "red", linewidth = 1) +
+  scale_y_continuous(transform = scales::log10_trans(), 
+                     limits = c(conc_min, NA)) + 
+  scale_x_continuous(limits = c(0, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  annotation_logticks(sides = "l") + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = "Subject 1",
+       title = "Log linear concentration ~ time curve") +
+  theme(panel.grid = element_blank())
+
+p2 <- df_combined |>
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="skyblue",
+    data = ~ filter(.x, origin == "observed")) +
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="pink",
+    data = ~ filter(.x, origin == "predicted")) +
+  scale_color_manual(values = c(observed = "blue", predicted = "red"), 
+                     name = element_blank()) + 
+  scale_fill_discrete(name = element_blank()) + 
+  geom_point(size = 3, aes(color = origin)) + 
+  geom_line(linewidth = 1, aes(color = origin)) +
+  geom_line(data = extrapolated, color = "red", linewidth = 1) +
+  scale_y_continuous(limits = c(conc_min, NA)) + 
+  scale_x_continuous(limits = c(0, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = "Subject 1",
+       caption = "Red: log-linear extrapolation",
+       title = "Linear concentration ~ time curve") +
+  theme(panel.grid = element_blank())
+p1 + p2 + plot_layout(guides = 'collect')
+```
+
+The linear curve shows the gradual decline in `Theophylline` concentrations,
+and we can use this curve to estimate the complete $AUC_{\inf}$ metric[^9].
+
+[^9]: Actually, this is not the full story. the `PKNCA` package can calculate
+different $AUC_{\inf}$ estimates: $AUC_{\inf,obs}$ and $AUC_{\inf,pred}$,
+depending on whether the observed or predicted concentrations for the last
+time point above the LLQ (e.g. $t_{last}$) are used. On top of that, there is
+also the $AUC_{all}$ version, which is useful when you have later observations
+that fell below the LLQ. Please see the
+[vignette](https://billdenney.github.io/pknca/articles/v05-auc-calculation-with-PKNCA.html)
+for more details - and consult your friendly neighborhood PK/PD expert for
+advice on which metrics are used in your organization.
+
+### Accessing estimates for individual subjects
+
+The `summary` function automatically summarizes results, using an appropriate
+method (e.g. arithmetic mean, median, etc). If no grouping has been defined (as
+in the case shown above), summary statistics are aggregated across the entire
+dataset. 
+
+To access the results _before_ aggregation, e.g. for each individual subject,
+we can access the `result` slot of the `pk.nca()` output. (For convenience,
+that authors defined a `as.data.frame()` S3 method that extracts this slot for
+us.)
+
+For each subject and interval (identified by the `start` and `end` columns), 
+we see the estimate (`PPORRES`) for every parameter (`PPTESTCD`). 
+
+```{r}
+as.data.frame(results) |>
+  head(n = 14)
+```
+
+The object not only contains the parameters that were reported in the summary,
+but also those that were computed because they were required to estimate the
+requested ones (e.g. `half.life` or `tlast`, etc).
+
+```{r}
+#| warning: false
+results |>
+  as.data.frame() |>
+  poorman::distinct(PPTESTCD)
+```
+
+::: {.callout-note collapse="true"}
 ### Redefining aggregation functions
 
 The `PKNCA` package includes predefined aggregation statistics for each of
@@ -277,38 +521,6 @@ any / many missing values. You might want to implement a similar behavior in
 your own summarization functions.
 
 :::
-
-### Accessing estimates for individual subjects
-
-The `summary` function automatically summarizes results, using an appropriate
-method (e.g. arithmetic mean, median, etc). If no grouping has been defined (as
-in the case shown above), summary statistics are aggregated across the entire
-dataset. 
-
-To access the results _before_ aggregation, e.g. for each individual subject,
-we can access the `result` slot of the `pk.nca()` output. (For convenience,
-that authors defined a `as.data.frame()` S3 method that extracts this slot for
-us.)
-
-For each subject and interval (identified by the `start` and `end` columns), 
-we see the estimate (`PPORRES`) for every parameter (`PPTESTCD`). 
-
-```{r}
-as.data.frame(results) |>
-  head(n = 14)
-```
-
-The object not only contains the parameters that were reported in the summary,
-but also those that were computed because they were required to estimate the
-requested ones.
-
-```{r}
-#| warning: false
-results |>
-  as.data.frame() |>
-  poorman::distinct(PPTESTCD)
-```
-
 ## Defining intervals
 
 So far, we have relied on the `PKNCAdata` function's ability to define default

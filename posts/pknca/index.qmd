@@ -268,6 +268,24 @@ For example, let's plot the measurements for Subject 1. At the end of the
 study, e.g. after 25 hours, the `Theophylline` concentrations are still markedly
 higher than at the start. 
 
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+conc_subset <-  poorman::filter(conc_df$data, Subject == "1")
+conc_subset |> 
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_point() + 
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  scale_x_continuous(limits = c(NA, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = "Subject 1",
+       title = "Theophillin serum concentrations") +
+  theme(panel.grid = element_blank())
+```
+
 The $AUC_{last}$ metric includes only the area under the curve below the points
 that were _actually_ measured, e.g. in this example until 25 hours, and is 
 calculated using the 
@@ -293,7 +311,7 @@ conc_subset |>
   scale_x_continuous(limits = c(NA, 60), 
                      breaks = scales::pretty_breaks(n = 5)) + 
   labs(x = "Time (hr)", y = "Concentration (mg/L)",
-       subtitle = "Subject 1",
+       subtitle = bquote("Subject 1:" ~ AUC[last]),
        title = "Theophillin serum concentrations") +
   theme(panel.grid = element_blank())
 ```
@@ -332,7 +350,7 @@ conc_subset |>
                      breaks = scales::pretty_breaks(n = 5)) + 
   annotation_logticks(sides = "l") + 
   labs(x = "Time (hr)", y = "Concentration (mg/L)",
-       subtitle = "Subject 1",
+       subtitle = bquote("Subject 1:" ~ AUC[last]),
        title = "Theophillin serum concentrations") +
   theme(panel.grid = element_blank())
 ```
@@ -363,7 +381,7 @@ used in the `Theoph` dataset, we will simply use the lowest reported
 concentration ($C_{min}$, observed at time zero).
 
 ```{r}
-\time_min = (
+time_min = (
   log10(conc_min) - fit$coefficients["(Intercept)"]
   ) / fit$coefficients["Time"]
 ```
@@ -419,7 +437,7 @@ p1 <- df_combined |>
                      breaks = scales::pretty_breaks(n = 5)) + 
   annotation_logticks(sides = "l") + 
   labs(x = "Time (hr)", y = "Concentration (mg/L)",
-       subtitle = "Subject 1",
+       subtitle = bquote("Subject 1:" ~ AUC[inf]),
        title = "Log linear concentration ~ time curve") +
   theme(panel.grid = element_blank())
 
@@ -442,7 +460,7 @@ p2 <- df_combined |>
   scale_x_continuous(limits = c(0, 60), 
                      breaks = scales::pretty_breaks(n = 5)) + 
   labs(x = "Time (hr)", y = "Concentration (mg/L)",
-       subtitle = "Subject 1",
+       subtitle = bquote("Subject 1:" ~ AUC[inf]),
        caption = "Red: log-linear extrapolation",
        title = "Linear concentration ~ time curve") +
   theme(panel.grid = element_blank())

@@ -356,7 +356,19 @@ conc_subset |>
 ```
 
 Next, we fit a line through the last four points[^8], regressing 
-`log10(concentration)` on `Time` as the only predictor.
+`log10(concentration)` on `Time` as the only predictor[^9].
+
+[^8]: Which / how many points to include in the linear fit is another choice the
+analyst makes. The minimum number of points and the choice between different
+potential linear fits is governed by several of the 
+[PKNCA.options](https://billdenney.github.io/pknca/articles/v40-options-for-controlling-PKNCA.html)
+that make the business rules that are applied transparent.
+
+[^9]:Please note that we are implementing this procedure for illustration
+only; the `PKNCA` package includes helper functions to interpolate or
+extrapolate measurements. Please consult the
+[help pages](https://billdenney.github.io/pknca/reference/interp.extrap.conc.html)
+for details.
 
 ```{r}
 fit <- lm(log10(conc) ~ Time, data = tail(conc_subset, n = 4))  # <1>
@@ -367,12 +379,6 @@ summary(fit)  # <2>
 can simply subset it to the last 4 rows.
 2. The fit explains a large fraction of the variance for these (last 4)
 measurements, as evidenced by an R-squared value close to 1.
-
-[^8]: Which / how many points to include in the linear fit is another choice the
-analyst makes. The minimum number of points and the choice between different
-potential linear fits is governed by several of the 
-[PKNCA.options](https://billdenney.github.io/pknca/articles/v40-options-for-controlling-PKNCA.html)
-that make the business rules that are applied transparent.
 
 Next, we can use the linear model to extrapolate beyond the last measured
 data point, and also predict when the concentration will drop to zero - or the
@@ -468,9 +474,9 @@ p1 + p2 + plot_layout(guides = 'collect')
 ```
 
 The linear curve shows the gradual decline in `Theophylline` concentrations,
-and we can use this curve to estimate the complete $AUC_{\inf}$ metric[^9].
+and we can use this curve to estimate the complete $AUC_{\inf}$ metric[^10].
 
-[^9]: Actually, this is not the full story. the `PKNCA` package can calculate
+[^10]: Actually, this is not the full story. the `PKNCA` package can calculate
 different $AUC_{\inf}$ estimates: $AUC_{\inf,obs}$ and $AUC_{\inf,pred}$,
 depending on whether the observed or predicted concentrations for the last
 time point above the LLQ (e.g. $t_{last}$) are used. On top of that, there is

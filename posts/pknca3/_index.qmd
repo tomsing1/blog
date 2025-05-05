@@ -259,10 +259,8 @@ The summary has two rows, one for each of the two default intervals:
 2. 0-Infinity
 
 and parameters are estimated when their requirements are met, e.g. $AUC_{last}$
-considers only time points with the specified interval. In contrast,
-$AUC_{obs}^{\inf}$ extrapolates concentrations beyond the last time point to
-estimate the full exposure of the subject. (I will provide a deeper dive int 
-different AUC metrics in a follow-up post.)
+can be calculated based on the first interval, but $AUC_{obs}^{\inf}$
+requires measurements taken at the last timepoint (25 hours).
 
 [^5]: A full list of available parameter is 
 [available here](https://billdenney.github.io/pknca/articles/v03-selection-of-calculation-intervals.html#parameters-available-for-calculation-in-an-interval)
@@ -336,14 +334,14 @@ unless instructed otherwise, the `PKNCAdata` function will define an interval
 from `start=0` to `end=Inf` by default.
 
 The `Theophil` dataset's last time point was collected after 25 
-hours. To demonstrate the flexibility of the `PKNCAdata` function, let's
+hours. To demonstrate the flexibility of the `PKNCAdata` function, let's define
 return _different_ parameters for two separate intervals:
 
-An `interval` object is a data.frame with both `start` and `end` columns, as 
-well as columns for each of the parameters we would like to estimate [^6]. For 
+An interval object is a data.frame with both `start` and `end` columns, as well
+as columns for each of the parameters we would like to estimate [^6]. For 
 example,  
 
-1. 0 to 12 hours: `auclast`, `r.squared` and `adj.r.squared` parameters
+1. 0 to 24 hours: `auclast`, `r.squared` and `adj.r.squared` parameters
 2. 0 to 25 hours: `auclast`, `lambda.z` and `tlast` parameters
 
 **Note:** Overlapping intervals, e.g. as in this example, are no problem.
@@ -354,7 +352,7 @@ example,
 ```{r}
 interval_df <- data.frame(
   start = 0,  # <1>
-  end = c(12, 25),  # <2>
+  end = c(24, 25),  # <2>
   auclast = TRUE,
   r.squared = c(TRUE, FALSE),
   adj.r.squared = c(TRUE, FALSE),
@@ -383,7 +381,7 @@ were needed for these calculations for us. As before, they are available in the
 `results` object, but only those we explicitely requested are aggregated and 
 included in the summary.
 
-## Grouping subjects
+## Nested groups
 
 The `Theoph` dataset contains one more column that we haven't used, yet, the
 body weight of each subject. Let's split this statistic at the median, to create
@@ -465,6 +463,99 @@ interval.
 specifying additional rows in the data.frame, as in the examples above.
 
 :::
+
+## Multi-dose studies
+
+In the `Theoph` study every subject received only a single dose of the drug.
+To demonstrate that the `PKNCA` R package can handle multi-dose studies as well,
+we will simulate a longer time series with multiple doses using
+[superposition](https://www.certara.com/knowledge-base/the-superposition-principle/).
+
+### Superposition
+
+We follow the example from the
+[PKNCA vignette](https://billdenney.github.io/pknca/articles/Superposition.html)
+and simulate the profile we should expect if all subjects had received
+7 doses every 12 hours over a 96 hour interval.
+
+::: {.callout-note collapse="true"}
+### Assumptions
+
+The principle of superposition is based on the assumptions that 
+
+1. The drug is eliminated by first-order kinetics.
+2. Subsequent doses are not influenced by previous ones, e.g. there is no change
+in physiology, drug metabolism is not altered due to enzyme saturation or 
+induction, etc.
+
+:::
+
+```{r}
+Theoph |>
+  as.data.frame() |>  # <1>
+  poorman::filter(Time == 0)
+```
+
+1. The `Theoph` dataset is not a regular data.frame, but a `groupedData` object
+(defined in the `nlme` R package). We coerce it to a regular data.frame to use
+`poorman` (or `dplyr`) functions to subset and modify it.
+
+You might have noticed that the concentration at the first time point (0 hours)
+is not exactly zero. This could be due to measurement error (e.g. the lower
+limit of quantitation of the assay), or because the subject's serum contained
+theophylline from another source[^7].
+
+[^7]: Trace amounts of theophylline are naturally present in tea, coffee, 
+chocolate, yerba maté, guarana, and kola nut (source: [Wikipedia](https://en.wikipedia.org/wiki/Theophylline)).
+
+To extrapolate the data via superposition, though, we need to include a
+baseline value of zero, so (**just for didactic purposes**), we reset that
+value manually:
+
+```{r}
+theo_corrected <- Theoph |>
+  as.data.frame() |>
+  poorman::mutate(conc = ifelse(Time == 0, 0, conc))  # <2>
+theo_corrected |>
+  poorman::filter(Time == 0)
+```
+
+2. We set the concentration measurement for the first time point to zero.
+
+Now, we can superimpose the profile, assuming that a new dose of the drug
+is provided every 12 hours.
+
+```{r}
+pk_multi <- theo_corrected |>
+  PKNCAconc(formula = conc ~ Time|Subject) |>
+  PKNCA::superposition(
+    tau = 4 * 24,  # <3> 
+    n.tau = 1,  # <4>
+    dose.times=seq(0, 3 * 24, by = 12)  # <5>
+  )
+```
+
+3. The total dosing interval (from first dose to last observation).
+4. The number of `tau` dosing intervals to simulate, set to one because we
+  want to simulate a single interval starting with a concentration of zero.
+5. Specific dosing times within the interval.
+
+```{r}
+#| fig-width: 8
+#| fig-height: 5
+pk_multi |>
+  poorman::mutate(
+    Subject = factor(Subject, levels = unique(Subject))
+  ) |>
+  ggplot() +
+  aes(x = time, y = conc, color = Subject) +
+  geom_point(size = 1) +
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       title = "Multi-dose study (superposition)") +
+  theme(panel.grid = element_blank())
+```
 
 ## Units
 

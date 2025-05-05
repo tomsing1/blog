@@ -1,0 +1,309 @@
+---
+title: "Non-compartmental PK analysis with the PKNCA R package - Part 2"
+subtitle: "Key PK metrics"
+author: "Thomas Sandmann"
+date: "2025-05-04"
+freeze: true
+categories: [R]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+In a series of blog posts I will dive into non-compartmental analysis (NCA),
+a set of tools from the field of Pharmacokinetics (PK). I am using the 
+excellent 
+[PKNCA R package](https://cran.r-project.org/package=PKNCA)
+to estimate parameters, for both single- and multi-dose studies. This is a
+new field for me, so buckle up and join me on my learning journey! This first
+post focuses on the representation of PK data for use with `PKNCA`, and
+demonstrates how top perform a basic analysis of a single-dose study.
+
+## Example data: Theophylline treatment
+
+The 
+[PKNCA R package](https://cran.r-project.org/package=PKNCA),
+written and maintained by 
+[Bill Denney](https://orcid.org/0000-0002-5759-428X)
+and Clare Buckeridge includes examples that use the `Theoph` dataset incluced
+in base R. Let's start by exploring this dataset.
+
+```{r}
+suppressPackageStartupMessages({
+  library("poorman")
+  library("ggplot2")
+  library("ggsci")
+  library("patchwork")
+  library("PKNCA")
+  library("scales")
+})
+theme_set(theme_linedraw(14))
+```
+
+
+As in the my first post, I am using the `Theoph` dataset that is included with
+R as an example. Today, I am focussing only on the `Subject`, `Time` and
+`conc` columns.
+
+```{r}
+conc_df <- Theoph |>
+  as.data.frame() |>
+  poorman::select(Subject, Time, conc)
+```
+
+## Pharmacokinetic metrics
+
+### $AUC_{last}$
+
+The `PKNCA` R package supports the calculation of multiple estimates for the
+"area under the curve", an estimate of total exposure to the drug, detailed in 
+[this vignette](https://billdenney.github.io/pknca/articles/v05-auc-calculation-with-PKNCA.html).
+
+For example, let's plot the measurements for Subject 1. At the end of the
+study, e.g. after 25 hours, the `Theophylline` concentrations are still markedly
+higher than at the start. 
+
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+conc_subset <-  poorman::filter(conc_df$data, Subject == "1")
+conc_subset |> 
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_point() + 
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  scale_x_continuous(limits = c(NA, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = "Subject 1",
+       title = "Theophillin serum concentrations") +
+  theme(panel.grid = element_blank())
+```
+
+The $AUC_{last}$ metric includes only the area under the curve below the points
+that were _actually_ measured, e.g. in this example until 25 hours, and is 
+calculated using the 
+[trapezoid rule](https://en.wikipedia.org/wiki/Trapezoidal_rule)[^1]
+
+[^1]: Danielle Navarro wrote a great blog entry on 
+[Non-compartmental analysis](https://blog.djnavarro.net/posts/2023-04-26_non-compartmental-analysis/#a-simple-approach)
+that illustrates (among other things) why the trapezoid rule is only a
+simplified estimate of the AUC, and why it can over- and underestimate the
+actual area.
+
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+conc_subset <-  poorman::filter(conc_df$data, Subject == "1")
+conc_subset |> 
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(aes(ymin = min(conc), ymax = conc), fill="skyblue") +
+  geom_point() + 
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  scale_x_continuous(limits = c(NA, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = bquote("Subject 1:" ~ AUC[last]),
+       title = "Theophillin serum concentrations") +
+  theme(panel.grid = element_blank())
+```
+
+Yet, there is clearly `Theophylline` left in the subject's serum at this time 
+point, e.g. their overall drug dose is underestimated if we truncate the AUC 
+at the last measured time point.
+
+To estimate the _full_ area under the curve, beyond the last measured value,
+we have to estimate how the drug concentration would continue to decline.
+And to do _that_, we need to extrapolate beyond the last measured time point.
+We will need to make some additional assumptions to do so.
+
+### $AUC_{\inf}$
+
+For many drugs, the decrease in concentration over time follows a first order
+kinetics. If that's the case for `Theophylline`, then we should 
+observe a linear log(concentration) ~ Time relationship - at least at the end
+of the time course, when the majority of the orally available drug has
+already entered the serum.
+
+After log transforming the y-axis, we observe just that:
+
+```{r}
+conc_min <- min(conc_subset$conc)
+conc_subset |>
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(aes(ymin = conc_min, ymax = conc), fill="skyblue") +
+  geom_point(size = 3) + 
+  geom_line(linewidth = 0.25) +
+  scale_color_igv() +
+  scale_y_continuous(transform = scales::log10_trans(), 
+                     limits = c(conc_min, NA)) + 
+  scale_x_continuous(limits = c(0, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  annotation_logticks(sides = "l") + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = bquote("Subject 1:" ~ AUC[last]),
+       title = "Theophillin serum concentrations") +
+  theme(panel.grid = element_blank())
+```
+
+Next, we fit a line through the last four points[^2], regressing 
+`log10(concentration)` on `Time` as the only predictor[^3].
+
+[^2]: Which / how many points to include in the linear fit is another choice the
+analyst makes. The minimum number of points and the choice between different
+potential linear fits is governed by several of the 
+[PKNCA.options](https://billdenney.github.io/pknca/articles/v40-options-for-controlling-PKNCA.html)
+that make the business rules that are applied transparent.
+
+[^3]:Please note that we are implementing this procedure for illustration
+only; the `PKNCA` package includes helper functions to interpolate or
+extrapolate measurements. Please consult the
+[help pages](https://billdenney.github.io/pknca/reference/interp.extrap.conc.html)
+for details.
+
+```{r}
+fit <- lm(log10(conc) ~ Time, data = tail(conc_subset, n = 4))  # <1>
+summary(fit)  # <2>
+```
+
+1. Because our concentration data.frame is sorted by increasing Time, we 
+can simply subset it to the last 4 rows.
+2. The fit explains a large fraction of the variance for these (last 4)
+measurements, as evidenced by an R-squared value close to 1.
+
+Next, we can use the linear model to extrapolate beyond the last measured
+data point, and also predict when the concentration will drop to zero - or the
+lower limit of quantitation (`LLQ`). We don't know the `LLQ` for the assay
+used in the `Theoph` dataset, we will simply use the lowest reported
+concentration ($C_{min}$, observed at time zero).
+
+```{r}
+time_min = (
+  log10(conc_min) - fit$coefficients["(Intercept)"]
+  ) / fit$coefficients["Time"]
+```
+
+Based on our model, `Theophylline` should have returned to baseline levels
+after `r unname(ceiling(time_min))` hours.
+
+We can also predict the remaining `Theopylline` levels at specific times. Let's 
+pick 4 evenly-spaced time points between the last measured one 
+(`r max(fit$model$Time)` hours) and `r unname(ceiling(time_min))` hours and
+use the `predict.lm` function to obtain the prediced concentrations.
+
+```{r}
+extra_time <- seq(max(fit$model$Time), time_min, length.out = 4)
+extrapolated <- data.frame(
+  conc = 10^predict.lm(fit, newdata = data.frame(Time = extra_time)),
+  Time = extra_time,
+  origin = "predicted"
+)
+extrapolated
+```
+
+We can add these extrapolated measurements to our dataset and plot the
+both the observed and predicted measurements together - first with a 
+log10 transformed y-axis, and then the untransformed concentrations:
+
+```{r}
+#| fig-width: 12
+#| fig-height: 5
+df_combined <- conc_subset |> 
+  poorman::select(Time, conc) |>
+  poorman::mutate(origin = "observed") |>
+  poorman::bind_rows(extrapolated)
+
+p1 <- df_combined |>
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="skyblue",
+    data = ~ filter(.x, origin == "observed")) +
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="pink",
+    data = ~ filter(.x, origin == "predicted")) +
+  scale_color_manual(values = c(observed = "blue", predicted = "red"), 
+                     name = element_blank()) + 
+  scale_fill_discrete(name = element_blank()) + 
+  geom_point(size = 3, aes(color = origin)) + 
+  geom_line(linewidth = 1, aes(color = origin)) +
+  geom_line(data = extrapolated, color = "red", linewidth = 1) +
+  scale_y_continuous(transform = scales::log10_trans(), 
+                     limits = c(conc_min, NA)) + 
+  scale_x_continuous(limits = c(0, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  annotation_logticks(sides = "l") + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = bquote("Subject 1:" ~ AUC[inf]),
+       title = "Log linear concentration ~ time curve") +
+  theme(panel.grid = element_blank())
+
+p2 <- df_combined |>
+  ggplot() + 
+  aes(x = Time, y = conc) + 
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="skyblue",
+    data = ~ filter(.x, origin == "observed")) +
+  geom_ribbon(
+    aes(ymin = conc_min, ymax = conc), fill="pink",
+    data = ~ filter(.x, origin == "predicted")) +
+  scale_color_manual(values = c(observed = "blue", predicted = "red"), 
+                     name = element_blank()) + 
+  scale_fill_discrete(name = element_blank()) + 
+  geom_point(size = 3, aes(color = origin)) + 
+  geom_line(linewidth = 1, aes(color = origin)) +
+  geom_line(data = extrapolated, color = "red", linewidth = 1) +
+  scale_y_continuous(limits = c(conc_min, NA)) + 
+  scale_x_continuous(limits = c(0, 60), 
+                     breaks = scales::pretty_breaks(n = 5)) + 
+  labs(x = "Time (hr)", y = "Concentration (mg/L)",
+       subtitle = bquote("Subject 1:" ~ AUC[inf]),
+       caption = "Red: log-linear extrapolation",
+       title = "Linear concentration ~ time curve") +
+  theme(panel.grid = element_blank())
+p1 + p2 + plot_layout(guides = 'collect')
+```
+
+The linear curve shows the gradual decline in `Theophylline` concentrations,
+and we can use this curve to estimate the complete $AUC_{\inf}$ metric[^4].
+
+[^4]: Actually, this is not the full story. the `PKNCA` package can calculate
+different $AUC_{\inf}$ estimates: $AUC_{\inf,obs}$ and $AUC_{\inf,pred}$,
+depending on whether the observed or predicted concentrations for the last
+time point above the LLQ (e.g. $t_{last}$) are used. On top of that, there is
+also the $AUC_{all}$ version, which is useful when you have later observations
+that fell below the LLQ. Please see the
+[vignette](https://billdenney.github.io/pknca/articles/v05-auc-calculation-with-PKNCA.html)
+for more details - and consult your friendly neighborhood PK/PD expert for
+advice on which metrics are used in your organization.
+
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessionInfo()
+```
+
+</details>
+

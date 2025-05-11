@@ -1,0 +1,880 @@
+---
+title: "CHOIR: A principled approach to clustering single-cell data"
+author: "Thomas Sandmann"
+date: "2025-05-11"
+execute:
+  echo: true
+  warning: false
+  message: false
+freeze: true
+categories: [R, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    anchor-sections: true
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+This week I learned about
+[CHOIR](https://www.nature.com/articles/s41588-025-02148-8)
+from the Corces group at the 
+[Gladstone Institutes](https://gladstone.org/people/ryan-corces)
+that aims to prevent overclustring single-cell data. `CHOIR` first subdivides
+a dataset into a hierarchical set of so many subclusters that overclustering
+is highly likely. It then trains ensembls of random forest classifiers to 
+separate sibling clusters from each other based on gene expression, and merges
+those that cannot be reliably distinguished. `CHOIR` also includes optional
+harmonization (via 
+[Harmony](https://www.nature.com/articles/s41592-019-0619-0)
+and can reduce the risk of double dipping through 
+[count splitting](https://arxiv.org/pdf/2307.12985). Here, I am learning how to
+run `CHOIR` using two public datasets.
+
+## Overview
+
+In April, Cathrin Sant, Lennar Mucke and M. Ryan Corces published their paper
+CHOIR improves significance-based detection of cell types and states from 
+single-cell data in 
+[Nature Genetics](https://www.nature.com/articles/s41588-025-02148-8) (and 
+their preprint is 
+[freely avaiable here](https://www.biorxiv.org/content/10.1101/2024.01.18.576317v2)
+). 
+
+They address a well-known challenge in single-cell analyses: many published
+analyses use clustering, an exploratory technique, to define subsets of cells
+that (might) correspond to cell types or cell states. Yet, as Susan Holmes and 
+Wolfgang Huber point out[^1] 
+
+> [...] clustering methods will always deliver groups, even if there are none. 
+If, in fact, there are no real clusters in the data, a hierarchical clustering 
+tree may show relatively short inner branches; but it is difficult to quantify
+this. In general it is important to validate your choice of clusters with more
+objective criteria.
+
+[^1]: In their excellent book 
+[Modern Statistics for Modern Biology](https://www.huber.embl.de/msmb/):
+
+In practice, single-cell clusters are usually defined an iterative way, with
+manual interventions to split or combine subgroups based e.g. on the
+expression of marker genes and other prior knowledge[^2]. This involves numerous
+choices, e.g. the choice of variable features to consider, which dimensionality
+reduction method to employ, how to create nearest neighbor graphs, the 
+clustering method[^3] and its parameters, e.g. the _resolution_ that determines
+the granularity of the final results.
+
+The commonly used approaches [^4] readily subdivide homogeneous datasets (e.g.
+without any actual subgroups) into clusters and invite speculation as to their
+biological meaning.
+
+[^2]: Afterwards, analysts often compare gene expression between the newly discovered 
+clusters - and sometimes use the presence of differentially expressed genes as 
+support for the biological validity of the identified subgroups. This approach
+is flawed, because  clustering and differential expression on the same data 
+_always_ creates apparent differences between the subgroups. See e.g. 
+[Zhang et al](https://www.cell.com/cell-systems/fulltext/S2405-4712(19)30269-8),
+[Neufeld et al](https://academic.oup.com/biostatistics/article/25/1/270/6893953)
+or 
+[Song et al](https://pmc.ncbi.nlm.nih.gov/articles/PMC10401959/)
+for post-hoc methods to perform post-doc analyses in a rigorous way without
+_double-dipping_.
+
+[^3]: The [Louvain](https://en.wikipedia.org/wiki/Louvain_method) or 
+[Leiden](https://www.nature.com/articles/s41598-019-41695-z) 
+algorithms are popular choices.
+
+[^4]: Including 
+[Seurat's default workflow](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#cluster-the-cells)
+
+Sant and co-workers developed `CHOIR`, a principled approach to reduce the risk 
+of both over- and underclustering single-cell data, illustrated in 
+[Figure 1](https://www.biorxiv.org/content/biorxiv/early/2025/02/19/2024.01.18.576317/F1.large.jpg) 
+of their preprint (shown below). 
+
+The main steps of the algorithm are:
+
+1. Starting with the full dataset, `CHOIR` performs multiple rounds
+of iterative clustering - each with higher resolution - to separate the cells
+into a hierarchical tree of many possible clusters.
+  - `CHOIR` keeps track of the parent-child relationships between clusters, e.g.
+    how each parent cluster is split into two or more child clusters through
+    subsequent clustering steps.
+  - This step is designed to produce _overclustering_, e.g. the proposed
+    clusters are smaller than they should be.
+  - Clustering results depend on the choices made during data preprocessing,
+    e.g. the selection of variable genes and dimensionality reduction. 
+    Initially, the most variable genes might be markers of coarse cell types;
+    but as the number of clusters increases, the same genes might not 
+    distinguish finer distinctions (e.g. cell states) within them. `CHOIR` 
+    therefore repeats the feature-selection and dimensionality reduction within
+    each of the initial clusters, and uses these updated values for 
+    sub-clustering.
+    
+2. Next, this overclustered hierarchical clustering tree is _pruned_, starting
+with the leaves of the tree (e.g. the smallest clusters).
+  - For each pair of sibling clusters (say `A` and `B`), `CHOIR` attempts to
+  trains a random forest (RF) classifier[^5] on a balanced (e.g. downsampled)
+  set of cells from each cluster, with the goal of assigning cells to the
+  correct source (e.g. cluster `A` or `B`). Because the cluster assignments are
+  known, the accuracy of the predictions can be determined. 
+  - If classifier fails to achieve an accuracy of at least 0.5, the clusters are
+  considered too similar and are merged. 
+  - If the accuracy exceeds 0.5, a null distribution is created: the cluster
+  labels are randomized and a second classifier is trained for comparison. 
+  The whole process is repeated 100 times to estimate how much better the former
+  classifier (performed on the actual assignments) performs compared to the
+  latter (trained on randomized data).
+
+If the RF classifier significantly (p < 0.05 after Bonferroni correction)
+outperforms the randomized baseline, there is sufficient evidence to keep the
+two clusters separate. If not, then the two candidate clusters are merged
+instead.
+
+::: {.callout-info collapse="true"}
+
+### Additional features
+
+`CHOIR`'s full implementation also includes harmonization of cells obtained
+in different batches using 
+[Harmony](https://www.nature.com/articles/s41592-019-0619-0), allows users to
+specify batch covariates (and limit tests to within-batch comparisons) or to
+employ 
+[count splitting](https://academic.oup.com/biostatistics/article/25/1/270/6893953)
+to avoid double-dipping.
+
+For each pairwise comparison of candidate clusters, `CHOIR` records the 
+accuracy of the trained classifiers, providing a metric of relatedness between
+them. It also retains information about feature (gene) importances, which
+might pinpoint useful marker genes.
+
+:::
+
+[^5]: Random forest classifiers are less prone to overfitting than other
+statistical learning approaches and don't make distributional assumptions. They
+can also highlight which features (e.g. genes) are most informative and might
+therefore correspond to useful marker genes of a cluster.
+
+![Figure 1 by Sant et al](Sant_figure1.jpg)
+In their paper, the authors systematically compare `CHOIR`'s performance to
+that of other approaches using e.g.
+
+- Simulated data
+- Published single-cell RNA-seq data from a mixture of (many) immortalized cell
+lines
+- Multi-modal (e.g. single-cell RNA-seq accompanied by matching 
+CITE-seq or sci-Space) data[^6]. 
+
+[^6]: Clusters defined based solely on the scRNA-seq data are more likely to 
+be biologically meaningful (aka true) if they also reveal differentially
+abundant features in the other modality.
+
+## Running CHOIR
+
+### La Manno et al: 243 dopaminergic neurons
+
+The
+[CHOIR R package](https://github.com/corceslab/CHOIR)[^7]
+implements the algorithm and is accompanied by a 
+[very nice vignette](https://www.choirclustering.com/articles/CHOIR.html)
+to get users started. 
+
+[^7]: The `CHOIR` R package is tightly integrated with the R / Bioconductor
+ecosystem and comes with a **very large number of dependencies**. On my system, 
+it required installing and downloading ~ 200 additional R packages in a fresh
+`renv` environment - not even counting the optional `countsplit`, `ggnewscale` 
+or `scRNAseq` R packages and _their_ dependencies.
+
+Let's step through the vignette, using the `LaMannoBrainData` scRNA-seq dataset
+that is available via the
+[scRNAseq Bioconductor package](https://www.bioconductor.org/packages/release/data/experiment/html/scRNAseq.html).
+
+The package offers two different ways of running the algorithm, starting with 
+either a `Seurat`, `SingleCellExperiment`, or `ArchR` object containing
+normalized counts.
+
+Using either the
+
+1. `CHOIR` function to perform both steps of the analysis, or the
+2. `buildTree` and `pruneTree` functions for more control over each step.
+
+```{r}
+#| warning: false
+suppressPackageStartupMessages({
+  library(CHOIR)
+  library(countsplit)
+  library(ggnewscale)
+  library(ragg)
+  library(scRNAseq)
+  library(Seurat)
+  library(tictoc)
+})
+```
+
+The `LaMannoBrainData` function retrieves raw scRNA-seq data published by 
+[La Manno et al](https://pubmed.ncbi.nlm.nih.gov/27716510/); 
+here, we use a subset of the data collected from mouse adult dopaminergic
+neurons. We store the raw count matrix in a Seurat object, and perform basic
+quality filtering & normalization (using the default `LogNormalize` method).
+
+```{r}
+data_matrix <- LaMannoBrainData('mouse-adult')@assays@data$counts
+colnames(data_matrix) <- seq(1:ncol(data_matrix))
+object <- data_matrix  |> 
+  CreateSeuratObject(
+    min.features = 100,
+    min.cells = 5) |>
+  NormalizeData()
+object
+```
+
+In this example, I will parallelize the analysis across two (local) CPUs.
+
+```{r}
+options(future.globals.maxSize = 2.0 * 1e9)  # <1>
+n_cores = 4  # <2>
+```
+
+1. The `CHOIR` function relies on the 
+[future package](https://future.futureverse.org)
+to distribute worksloads across multiple cores. By default, `future` only 
+allows global variables of < 500 MB to be passed to different workers. Here,
+I am increasing that limit to 2 GB to successfully run `CHOIR`.
+2. I parallelize the execution across 4s (local) CPUs.
+
+First, let's use the `CHOIR` wrapper function with default arguments.
+
+```{r}
+object <- CHOIR(object, n_cores = n_cores)
+```
+
+Alternatively, we could perform the exact same calculations in a step wise 
+fashion:
+
+```{r}
+#| eval: false
+object <- object |>
+  buildTree(n_cores = n_cores) |>
+  pruneTree(n_cores = n_cores)
+object
+```
+
+The `metadata` slot of the Seurat object contains the `CHOIR_clusters_0.05`
+column, specifying the final cluster each cell was assigned to (at the default
+significance threshold `alpha` = 0.05).
+
+```{r}
+head(object@meta.data)
+```
+
+In addition, the output object has one additional dimensionality reduction: 
+`CHOIR_P0_reduction`, containing the principal components calculated on 
+variable features for the full dataset (P0). 
+
+Additional outputs can be found in the `misc` slot of the object, inside the
+`CHOIR` nested list:
+
+```{r}
+names(object@misc$CHOIR)
+```
+
+For example, we can access the dimensionality reduction results for each of 
+the sub-clustering iterations (including the first one, `P0`, which is
+also stored in the `object@reductions$CHOIR_P0_reduction` slot, see above).
+
+```{r}
+names(object@misc$CHOIR$reduction)
+```
+
+and the variable features they are each based on:
+
+```{r}
+names(object@misc$CHOIR$var_features)
+```
+
+For convenience, the `CHOIR` package also includes functions to run
+`UMAP` to embed the principal components into a two dimensional space. 
+For example, we can perform UMAP on the first (`P0`) principal components:
+
+```{r}
+object <- runCHOIRumap(object, reduction = "P0_reduction")
+names(object@misc$CHOIR$reduction)
+```
+
+The UMAP coordinates have been added to the `misc` slot of the object:
+
+```{r}
+names(object@misc$CHOIR$reduction)
+```
+
+The `CHOIR` package also includes helper functions to plot the results of the
+sub-clustering analysis, e.g. the `UMAP` we generated above.
+
+```{r}
+#| warning: false
+#| fig-width: 5
+#| fig-height: 5
+plotCHOIR(object, key = "CHOIR", reduction = "P0_reduction_UMAP")  # <1>
+```
+
+1. The `plotCHOIR` function is aware that the dimensionality reduction
+results are found in the `misc` slot, under the provided `key` (default: `CHOIR`
+).
+
+The final set of clusters was chosen based on the ability of a (collection of) 
+random forest classifier(s) to accurately assign cells to them. We can
+add the observed mean (out-of-bag) prediction error for each pair to the plot:
+
+```{r}
+#| warning: false
+#| fig-width: 5
+#| fig-height: 5
+plotCHOIR(object,
+          reduction = "P0_reduction_UMAP",
+          accuracy_scores = TRUE,
+          plot_nearest = FALSE)
+```
+
+## A larger dataset: mouse brain cell types (Zeisel et al, 2015)
+
+The dataset we analyzed above was very small, containing only 243 neurons with
+very similar gene expression profiles. As a second example, let's analyze
+a (classic) dataset of ~ 3000 mouse brain cell types published by 
+[Zeisel et al](https://pubmed.ncbi.nlm.nih.gov/25700174/)
+next. 
+The raw data is also available via the `scRNAseq` Bioconductor package:
+
+```{r}
+sce <- fetchDataset("zeisel-brain-2015", "2023-12-14")
+```
+
+This `SingleCellExperiment` object contains raw counts for `r ncol(sce)` cells,
+assigned to one of `r length(unique(sce$level1class))` coarse cell types 
+(`level1class`):
+
+```{r}
+table(sce$level1class)
+```
+
+and one of `r length(unique(sce$level2class))` more granular cell types 
+(`level2class`):
+
+```{r}
+table(sce$level2class)
+```
+
+### Quality control & normalization
+
+We follow the steps outlined in the 
+[Single-Cell Analysis Workflows with Bioconductor book](https://bioconductor.org/books/3.21/OSCA.workflows/zeisel-mouse-brain-strt-seq.html)
+to preprocess and normalize the counts. This also gives us the opportunity
+to employ packages from the `Bioconductor` universe as an alternative to
+`Seurat` for single-cell analysis.
+
+```{r}
+#| warning: false
+suppressPackageStartupMessages({
+  library(BiocParallel)  # <1>
+  library(scater)  # <2> 
+  library(scran)  # <3>
+})
+multicore_param <- BiocParallel::MulticoreParam(workers = n_cores)
+```
+
+1. The [BiocParallel Bioconductor package](https://www.bioconductor.org/packages/release/bioc/html/BiocParallel.html) 
+facilitates parallel execution across multiple cores or computers.
+2. The 
+[scater Bioconductor package](https://bioconductor.org/packages/release/bioc/html/scater.html) 
+ contains functionality focussed on quality control and visualization of single-cell data.
+3. The 
+[scran Bioconductor package](https://bioconductor.org/packages/release/bioc/html/scran.html)
+Bioconductor package offers methods to assign cell cycle phase, detection of
+highly variable and significantly correlated genes, identification of marker 
+genes, and other common tasks (such as normalization as used here).
+
+The expression for some genes was recorded in more than one feature, e.g. there
+are two rows for the `Hist1h4n` gene:
+
+```{r}
+grep("Hist1h4n", row.names(sce), value = TRUE)
+```
+
+We combine the counts for features assigned to the same gene symbol:
+
+```{r}
+sce <- aggregateAcrossFeatures(sce, id=sub("_loc[0-9]+$", "", rownames(sce)))
+```
+
+Now we are ready for quality control & normalization.
+
+```{r}
+stats <- perCellQCMetrics(sce, subsets = list(  # <4>
+  Mt = rowData(sce)$featureType == "mito"))
+qc <- quickPerCellQC(stats, percent_subsets=c("altexps_ERCC_percent", 
+                                              "subsets_Mt_percent"))
+sce <- sce[,!qc$discard]
+
+set.seed(1000)
+clusters <- quickCluster(sce, BPPARAM = multicore_param)
+sce <- computeSumFactors(sce, cluster = clusters,  # <5>
+                                BPPARAM = multicore_param) 
+sce <- logNormCounts(sce)
+```
+
+4. We remove low quality cells that remained in the datas despite the authors' 
+  original filtering procedure.
+5. We obtain normalized counts using 
+[deconvolution size factors](https://bioconductor.org/books/3.21/OSCA.basic/normalization.html#normalization-by-deconvolution)
+
+### Clustering using CHOIR
+
+Let's stick to `CHOIR`'s default parameters and parallelize over `r n_cores`
+once again. 
+
+```{r}
+tic(msg = "Starting CHOIR run")
+sce <- CHOIR(sce, n_cores = n_cores)
+toc()
+```
+
+The `colData` slot of the SingleCellExperiment object now contains the 
+`CHOIR_clusters_0.05` column, indication which of the 
+`r length(unique(sce$CHOIR_clusters_0.05))` `CHOIR` clusters 
+a cell was assigned to.
+
+Let's visualize the results in a UMAP and color each cell either by its
+published cell type label (`level1class` or `level2class`) or its `CHOIR`
+cluster.
+
+`CHOIR` assigned many more clusters than are captured as `level1class` by
+Zeisel et al:
+
+```{r}
+#| warning: false
+#| fig-width: 14
+#| fig-height: 5
+sce <- runCHOIRumap(sce, reduction = "P0_reduction")
+plotCHOIR(sce,
+          group_by = "level1class",
+          reduction = "P0_reduction_UMAP",
+          accuracy_scores = FALSE,
+          plot_nearest = FALSE) +
+plotCHOIR(sce,
+          group_by = "CHOIR_clusters_0.05",
+          reduction = "P0_reduction_UMAP",
+          accuracy_scores = FALSE,
+          plot_nearest = FALSE)
+```
+
+Because of the large number of granular cell types / `CHOIR` clusters, it is
+difficult to assess the degree of concordance visually:
+
+```{r}
+#| warning: false
+#| fig-width: 14
+#| fig-height: 5
+plotCHOIR(sce,
+          group_by = "level2class",
+          reduction = "P0_reduction_UMAP",
+          accuracy_scores = FALSE,
+          plot_nearest = FALSE) +
+plotCHOIR(sce,
+          group_by = "CHOIR_clusters_0.05",
+          reduction = "P0_reduction_UMAP",
+          accuracy_scores = FALSE,
+          plot_nearest = FALSE)
+```
+
+Instead, let's calculate the proportion of overlap between the original coarse
+annotations and the `CHOIR` clusters and visualize them in a heatmap.
+
+First, we plot the number of cells assigned to the each cluster / cell type[^8],
+
+[^8] I found the `plotClustersTable` function from the
+[clusterExperiment](https://www.bioconductor.org/packages/release/bioc/html/clusterExperiment.html)
+very helpful here, as it automatically reorders the rows and columns of the
+heatmap.
+
+```{r}
+#| fig-width: 7
+#| fig-height: 3.25
+suppressPackageStartupMessages({
+  library(clusterExperiment)
+})
+cluster_table <- with(colData(sce), table(level1class, CHOIR_clusters_0.05))
+plotClustersTable(cluster_table, legend = FALSE, cexRow = 0.5)
+```
+
+Alternatively, we can also calculate the _proportion_ of overlap[^9] between the
+cluster assignments first, e.g. the fraction of the cells from each cell
+type assigned by Zeisel et al (`level1class`) in each of the `CHOIR` clusters.
+
+[^9]: The type of proportion (e.g. group 1 / group 2 or vice versa) is defined
+by the `margin` argument in the `prop.table` function.
+
+```{r}
+#| fig-width: 7
+#| fig-height: 3.25
+prop_table <- with(colData(sce), prop.table(cluster_table, margin = 1)) 
+plotClustersTable(prop_table, cexRow = 0.5, legend = FALSE)
+```
+
+It seems that nearly all of the `CHOIR` clusters have captured a subset of 
+a single cell type defined by Zeisel et al, e.g. the clusters are nested
+subsets of the original labels and might reflect further sub-division into more
+granular types.
+
+Zeisel et al also provided more granular annotations as 
+`r length(unique(sce$level2class))` `level2class` groups. Let's 
+look at their concordance with the `CHOIR` clusters in the same way [^10].
+
+[^10]: Because Zeisel et al defined _more_ sub-clusters than identified by 
+`CHOIR`, we don't expect perfect concordance - but hopefully `CHOIR` captured 
+cells from the (more granual) `level2class` annotations inside the same
+clusters.
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 5.5
+cluster_table <- with(colData(sce), table(level2class, CHOIR_clusters_0.05))
+prop_table <- with(colData(sce), prop.table(cluster_table, margin = 1)) 
+plotClustersTable(prop_table, legend = FALSE, cexRow = 0.5)
+```
+
+Let's take a closer look at the `r `sum(sce$level1class == "microglia")` cells
+Zeisel et al annotated as `microglia`, and then sub-grouped into 4 level two
+groups (Mgl1, Mgl2, Pvm1 and Pvm2). `CHOIR` lumped almost all of them into
+a single sub-cluster:
+
+```{r}
+#| fig-width: 5
+#| fig-height: 3
+with(colData(sce)[sce$level1class == "microglia", ], 
+     table(level2class, CHOIR_clusters_0.05)
+) |>
+  plotClustersTable()
+```
+
+Similarly, Zeisel et al distinguished 
+`r length(unique(sce$level2class[sce$level1class == "interneurons"]))`
+different subtypes of interneurons, which overlap ~ 4 `CHOIR` clusters:
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 3.5
+with(colData(sce)[sce$level1class == "interneurons", ], 
+     table(level2class, CHOIR_clusters_0.05)
+) |>
+  plotClustersTable()
+```
+
+Finally, Zeisel et al classified oligodendrocytes into 
+`r length(unique(sce$level2class[sce$level1class == "oligodendrocytes"]))`
+different subtypes of interneurons. `CHOIR` clustered them into even more
+sub-groups:
+
+```{r}
+#| fig-width: 5.5
+#| fig-height: 3
+with(colData(sce)[sce$level1class == "oligodendrocytes", ], 
+     table(level2class, CHOIR_clusters_0.05)
+) |>
+  plotClustersTable()
+```
+
+## Identifying cell states: mouse microglia (Nugent et al, 2018)
+
+Zeisel et al sampled cells of many different types, e.g. neurons and glia.
+Another application of single-cell (or single-nuclei) analysis is the
+identification of different transcriptional (and presumably functiona) states
+_within_ a single cell type.
+
+In 2019,
+[Nugent et al](https://pubmed.ncbi.nlm.nih.gov/31902528/)
+fed mice with one of three different versions (genotypes) of the
+[Trem2 surface receptor gene](https://en.wikipedia.org/wiki/TREM2), 
+e.g. either
+
+1. wildtype _Trem2_, 
+2. heterozyogus knockout of the _Trem2_, or 
+3. homozygous knockout of _Trem2_
+
+either a control or 0.2% cuprizone diet for 5 weeks or 12 weeks. 
+(Cuprizone causes demyelination of neurons, and the two time points were chosen
+to model either its acute or chronic effects.)
+
+The authors[^11] isolated microglia using fluorescent activated cell sorting 
+(FACS) based on high _Cd11b_ and low _Cd45_ expression, and performed 
+single-cell RNA-seq using the 10X Genomics system. 
+
+Let's download the raw count matrix from the 
+[NCBI GEO repository](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE130626),
+combine it with the sample annotations and create a `SingleCellExperiment`.
+
+```{r}
+#| warning: false
+suppressPackageStartupMessages({
+  library(Matrix)
+  library(SingleCellExperiment)
+})
+options(timeout = 360)
+
+sce <- local({
+  temp_dir <- file.path(tempdir(), "GSE130626")
+  dir.create(temp_dir, showWarnings = FALSE, recursive = TRUE)
+  
+  url_root <- paste0("https://www.ncbi.nlm.nih.gov/geo/download/?",
+                     "acc=GSE130626&format=file&file=GSE130626_")
+  m <- local({
+    raw_counts <- file.path(temp_dir, "umi_counts.csv.gz")
+    download.file(
+      paste0(url_root, "umi_counts.csv.gz"), 
+      destfile = raw_counts)
+    read.csv(raw_counts, row.names = 1) |>
+      as("sparseMatrix")
+  })
+  
+  cell_anno <- local({
+    cell_metadata <- file.path(temp_dir, "cell_info.csv.gz")
+    download.file(
+      paste0(url_root, "cell_info.csv.gz"), 
+      destfile = cell_metadata)
+    read.csv(cell_metadata, row.names = 1)
+  })
+  
+  gene_anno <- local({
+    gene_metadata <- file.path(temp_dir, "gene_info.csv.gz")
+    download.file(
+      paste0(url_root, "gene_info.csv.gz"), 
+      destfile = gene_metadata)
+    read.csv(gene_metadata, row.names = 1)
+  })
+  stopifnot(nrow(cell_anno) == ncol(m))
+  stopifnot(nrow(gene_anno) == nrow(m))
+  
+  SingleCellExperiment(
+    assays=list(counts=m), 
+    rowData = gene_anno, 
+    colData = cell_anno
+  )
+})
+```
+
+[^11]: I am a co-author of this paper.
+
+The dataset contains measurements for `r ncol(sce)` cells, from the 
+following groups:
+
+```{r}
+with(colData(sce), table(treatment, trem2_genotype))
+```
+
+During the original analysis, we clustered the microglia into 
+`r length(unique(sce$snn_cluster))` clusters. Let's see how many clusters
+`CHOIR` detects!
+
+### Quality control and normalization
+
+We follow the same normalization strategy we applied to the Zeisel et al data.
+
+```{r}
+stats <- perCellQCMetrics(sce, subsets = list(
+  Mt = rowData(sce)$is_mito))
+qc <- quickPerCellQC(stats, percent_subsets=c("subsets_Mt_percent"))
+sce <- sce[,!qc$discard]
+
+set.seed(1000)
+clusters <- quickCluster(sce, BPPARAM = multicore_param)
+sce <- computeSumFactors(sce, cluster = clusters, BPPARAM = multicore_param) 
+sce <- logNormCounts(sce)
+```
+
+### Exploratory analysis
+
+To take a quick peek at the data, we identify variable genes across
+the dataset, perform PCA followed by tSNE and UMAP embedding,
+and then visualize the results.
+
+```{r}
+#| fig-width: 4
+#| fig-height: 4
+dec <- modelGeneVarByPoisson(sce)
+top <- getTopHVGs(dec, prop=0.1)
+sce <- denoisePCA(sce, subset.row=top, technical=dec)
+set.seed(123L)
+sce <- runTSNE(sce, dimred="PCA")
+plotTSNE(sce, color_by = "snn_cluster")
+```
+
+The tSNE plot looks similar to 
+[Figure 2A](https://www.cell.com/cms/10.1016/j.neuron.2019.12.007/asset/2fb9c417-5178-4817-b4c2-e131a042b1f0/main.assets/gr2_lrg.jpg)
+from the 2019 publication, that's encouraging.
+
+Cells from the four treatment groups (defined by the `treatment` and
+`trem2_genotype` annotations) appear to be well mixed, too, e.g. we don't
+see evidence for (strong) batch effects.
+
+```{r}
+#| fig-width: 9
+#| fig-height: 3.5
+plotTSNE(sce, color_by = "trem2_genotype") +
+  plotTSNE(sce, color_by = "treatment")
+```
+
+### Defining clusters with CHOIR
+
+Next, we run `CHOIR` again using default parameters.
+
+```{r}
+tic(msg = "Starting CHOIR run")
+sce <- CHOIR(sce, n_cores = n_cores)
+toc()
+```
+
+followed by UMAP embedding using PCs from the first dimensionality reduction
+step:
+
+```{r}
+#| warning: false
+#| fig-width: 9
+#| fig-height: 5
+sce <- runCHOIRumap(sce, reduction = "P0_reduction")
+plotCHOIR(sce,
+          group_by = "snn_cluster",
+          reduction = "P0_reduction_UMAP",
+          accuracy_scores = FALSE,
+          plot_nearest = FALSE) +
+plotCHOIR(sce,
+          group_by = "CHOIR_clusters_0.05",
+          reduction = "P0_reduction_UMAP",
+          accuracy_scores = FALSE,
+          plot_nearest = FALSE)
+```
+
+As for the Zeisel et al dataset, it is hard to judge concordance between the
+two UMAPs visually. Instead, we plot the overlap between the original clusters
+(`snn_cluster`) and those defined by `CHOIR`.
+
+```{r}
+#| fig-width: 6.5
+#| fig-height: 3.5
+with(colData(sce), 
+     prop.table(table(snn_cluster, CHOIR_clusters_0.05), margin = 1)
+) |>
+  plotClustersTable()
+```
+
+There are few `CHOIR` clusters (columns) that contain only cells from a 
+single cluster defined by Nugent et al. Most other `CHOIR` clusters constitute
+a mixture of cells from multiple of the original groups. 
+
+Despite the relatively similar overall number of clusters (
+`r length(unique(sce$snn_cluster))` original clusters and 
+`r length(unique(sce$CHOIR_clusters_0.05))` `CHOIR` clusters)
+the results look quite different. This is not a surprise, as the choice of
+clustering methods and parameters has a strong impact on the final outcome.
+
+To identify stable clustering solutions, it might be necessary to explore
+a collection of results, e.g. via the
+[clusterExperiment Bioconductor R package](https://www.bioconductor.org/packages/release/bioc/html/clusterExperiment.html)
+instead of relying on any single approach. 
+
+## Additional features
+
+### Running CHOIR with Harmony batch correction / integration
+
+If a dataset contains cells collected in multiple batches (e.g. on different
+days or even using different technologies), we can use the 
+[Harmony](https://www.nature.com/articles/s41592-019-0619-0)
+to integrate them into a shared embedding space. 
+
+Let's return to the (very small) neuron dataset by 
+[La Manno et al](https://pubmed.ncbi.nlm.nih.gov/27716510/) to demonstrate this
+functionality.
+
+This dataset does not contain `batch` information - so let'sjust
+just assign cells to two random batches (`A` and `B`) to see how `CHOIR`
+handles them.
+
+```{r}
+object <- CreateSeuratObject(data_matrix,  # <1>  
+                             min.features = 100,
+                             min.cells = 5)
+object <- NormalizeData(object)
+
+set.seed(123)
+object$batch <- sample(c("A", "B"), size = ncol(object), replace = TRUE)  # <2>
+
+object <- CHOIR(object, 
+                batch_correction_method = "Harmony",
+                batch_labels = "batch")
+```
+
+1. Let's start with a fresh Seurat object.
+2. Because the example dataset does not include cells from multiple batches,
+we just create a random indicator variable (for demonstration purposes only).
+
+### Count splitting
+
+`CHOIR` is using the entire count matrix to cluster & assess sub-cluster
+membership. Although an individual random forest is relatively robust towards
+overfitting, the entire `CHOIR` workflow might suffer from the problem of 
+"double dipping", e.g. creating spurious / overly optimistic results because
+clustering & inference are based on the same data.
+
+[Neufeld et al](https://academic.oup.com/biostatistics/article/25/1/270/6893953)
+have proposed _count splitting_ as a novel approach to safeguard against
+overfitting in this context, and `CHOIR` has the option of implementing it
+within its workflow [^12] and can be requested via the `countsplit` argument.
+
+[^12]: The original _count splitting_ approach was based on the assumption that 
+after accounting for heterogenous expected expression across cells and genes, 
+the scRNA-seq data follow a Poisson distribution. If this assumption was 
+violated the approach might not perform as expected. More recently, the method
+has been extended to data that follows a negative binomial distribution; this
+is still an area of [active research](https://arxiv.org/abs/2307.12985).
+
+To demonstrate, we again return to the small dataset we used above and start
+with a fresh SeuratObject:
+
+```{r}
+#| warning: false
+object <- CreateSeuratObject(data_matrix, 
+                             min.features = 100,
+                             min.cells = 5)
+object <- NormalizeData(object)
+object <- runCountSplit(object)
+object@assays
+object <- CHOIR(object,
+                use_slot = "counts_log",
+                countsplit = TRUE, 
+                n_cores = n_cores)
+```
+
+### Very large datasets
+
+If your dataset is too large to process in one step (e.g. more than 500,000 
+cells), check out the separate vignette on
+[using CHOIR for atlas-scale data](https://www.choirclustering.com/articles/atlas_scale_data.html).
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessionInfo()
+```
+
+</details>

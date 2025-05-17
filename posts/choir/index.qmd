@@ -6,6 +6,7 @@ execute:
   echo: true
   warning: false
   message: false
+  cache: true
 freeze: true
 categories: [R, TIL]
 editor:
@@ -241,7 +242,7 @@ In this example, I will parallelize the analysis across two (local) CPUs.
 
 ```{r}
 options(future.globals.maxSize = 2.0 * 1e9)  # <1>
-n_cores = 4  # <2>
+n_cores = 8  # <2>
 ```
 
 1. The `CHOIR` function relies on the 
@@ -499,7 +500,7 @@ annotations and the `CHOIR` clusters and visualize them in a heatmap.
 
 First, we plot the number of cells assigned to the each cluster / cell type[^8],
 
-[^8] I found the `plotClustersTable` function from the
+[^8]: I found the `plotClustersTable` function from the
 [clusterExperiment](https://www.bioconductor.org/packages/release/bioc/html/clusterExperiment.html)
 very helpful here, as it automatically reorders the rows and columns of the
 heatmap.
@@ -591,7 +592,7 @@ with(colData(sce)[sce$level1class == "oligodendrocytes", ],
   plotClustersTable()
 ```
 
-## Identifying cell states: mouse microglia (Nugent et al, 2018)
+## Identifying cell states: mouse microglia (Nugent et al, 2019)
 
 Zeisel et al sampled cells of many different types, e.g. neurons and glia.
 Another application of single-cell (or single-nuclei) analysis is the
@@ -865,6 +866,33 @@ object <- CHOIR(object,
 If your dataset is too large to process in one step (e.g. more than 500,000 
 cells), check out the separate vignette on
 [using CHOIR for atlas-scale data](https://www.choirclustering.com/articles/atlas_scale_data.html).
+
+## Conclusions
+
+- `CHOIR` is a solid piece of engineering, and it can be inserted seamlessly 
+into both Seurat and Bioconductor / SingleCellExperiment based workflows. It
+would  be great to see it added to Bioconductor! (Although I don't envy the 
+authors for having to maintain a package with so deep a depencency tree.)
+- It addresses an important question: how to avoid over- or under-clustering 
+data, once specific clustering parameters (e.g. the defaults set by `CHOIR`) 
+have been selected? 
+- It does _not_ provide a solution to finding robust / stable 
+clustering solutions in the first place. For example, the 
+[clusterExperiment](https://www.bioconductor.org/packages/release/bioc/html/clusterExperiment.html)
+package offers functionality to explore the parameter space and compare various 
+clustering solutions[^13], and the 
+[clustree package](https://lazappi.github.io/clustree/) 
+visualizes changes effected by increasing the granularity of clustering 
+solutions.
+- `CHOIR` is a useful addition to my single-cell toolbox, and allows me to 
+justify the number of clusters I report. But it does not remove an analysts' 
+responsibility to explore multiple parameters and understand the sensitivity of
+results to the (many) choices made along the way.
+
+[^13]: A similar approach has been a staple in the analysis of bulk RNA-seq 
+(and other omics data) via the 
+[ConsensusClusterPlus Bioconductor package](https://bioconductor.org/packages/release/bioc/html/ConsensusClusterPlus.html)
+for more than 15 years! 
 
 ## Reproducibility
 

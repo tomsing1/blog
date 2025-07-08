@@ -1,0 +1,457 @@
+---
+title: "ducklake: Managing gene expression data across studies"
+author: "Thomas Sandmann"
+date: "2025-07-07"
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: true
+freeze: true
+categories: [R, duckdb, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    anchor-sections: true
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+#| message: false
+#| warning: false
+#| cache: false
+suppressPackageStartupMessages({
+  library(DESeq2)
+  library(dbplyr)
+  library(dplyr)
+  library(duckdb)
+  library(edgeR)
+  library(fs)
+  library(ggplot2)
+  library(glue)
+  library(limma)
+  library(sessioninfo)
+  library(stringr)
+  library(tidyr)
+})
+package.version("duckdb")  #  <1> 
+```
+
+1.  We need version 1.3.1 of `duckdb` or above.
+
+## Overview
+
+In May 2025, the `duckdb` team released the [DuckLake\` core extension](https://duckdb.org/docs/stable/core_extensions/ducklake) to manage a [data lake](https://en.wikipedia.org/wiki/Data_lake).
+
+::: {.callout-note}
+### Data lakes 💧
+A data lake describes a setup where (usually large) datasets are not added as tables to the relational database, but are stored in files instead. These files can be stored on the local system or in the cloud, and are queried as needed. Different file formats are used, including e.g. CSV or [parquet](https://parquet.apache.org/docs/file-format/).
+:::
+
+Keeping track of external files often requires additional infrastructure, e.g. a [catalog](https://www.ibm.com/think/topics/data-catalog), and updating / changing data while keeping track of file locations and names can pose challenges[^1].
+
+[^1]: The [DuckLake release post](https://duckdb.org/2025/05/27/ducklake.html) provides a great summary and explains the motivation behind the development of the extension.
+
+Here, I am creating my first DuckLake to store transcriptome-wide results from a differential gene expression analysis.
+
+## Differential gene expression data: Wang et al, 2018
+
+Let's get some gene expression data to play with. In 2018, [Wang et al](https://www.ncbi.nlm.nih.gov/pubmed/30558641) published the transcriptome analysis of mouse microglia, isolated either from the [rTg4510 mouse model](https://www.alzforum.org/research-models/rtgtaup301l4510) or wildtype animals. Four age groups of mice (2-, 4-, 6-, and 8-months) were analyzed to capture longitudinal gene expression changes that correspond to varying levels of pathology, from minimal tau accumulation to massive neuronal loss.
+
+A `DESeqDataset` object with raw counts, sample and gene annotations is available in my [rnaseq-examples](https://github.com/tomsing1/rnaseq-examples) github repository[^2].
+
+[^2]: The repository contains an installable R package, but here I am just retrieving the serialized R object and load it into the R session.
+
+::: {.callout-note collapse="true"}
+#### Retrieving the raw RNA-seq counts 🧬
+
+```{r}
+#| message: false
+#| warning: false
+dge <- local({
+  temp_file <- tempfile(fileext = ".rda")
+  download.file(url = paste0("https://github.com/tomsing1/rnaseq-examples/raw/",
+                             "refs/heads/main/data/tau.rda"), 
+                destfile = temp_file
+  )
+  load(temp_file)
+  edgeR::normLibSizes(tau, method = "TMM")
+})
+```
+:::
+
+There are 4 animals in each of the `r nlevels(dge$samples$group)` experimental groups.
+
+```{r}
+table(dge$samples$group)
+```
+
+We can compare the different genotypes (and time points) e.g. using the [limma/voom](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29) workflow. Because there four different time points (2, 4, 6 and 8 months), we extract four different contrasts, each comparing Tau-expressing with wildtype animals.
+
+::: {.callout-note collapse="true"}
+#### Differential expression analysis with limma / voom 📊
+
+```{r fig.width=5, fig.height=5}
+design <- model.matrix(~ 0 + group, data = dge$samples)
+colnames(design) <- sub("group", "", colnames(design))
+
+keep <- filterByExpr(dge, design = design)
+fit <- voomLmFit(
+  counts = dge[keep & dge$genes$gene_type == "protein_coding", ],
+  design = design,
+  plot = TRUE,
+  sample.weights = TRUE)
+
+contrasts = makeContrasts(
+  two_months = "rTg4510_2 - WT_2",
+  four_months = "rTg4510_4 - WT_4",
+  six_months = "rTg4510_6 - WT_6",
+  eight_months = "rTg4510_8 - WT_8",
+  levels = design
+)
+fit2 <- contrasts.fit(fit, contrasts = contrasts)
+fit2 <- eBayes(fit2)
+```
+:::
+
+At each time point, we detect a large number of differentially expressed genes (with the default FDR \< 5% threshold).
+
+```{r}
+summary(decideTests(fit2))
+```
+
+::: {.callout-note collapse="true"}
+#### Statistical results 📈
+
+The `fit2` MArrayLM object contains statistics for all of the contrasts, and this information can be extracted with the `limma::topTable` function.
+
+```{r}
+#| cache: false
+stats <- lapply(colnames(fit2), \(contrast) {
+  tt <- topTable(fit2, coef = contrast, confint = TRUE, number = Inf)[
+    , c("symbol", "gene_id", "logFC", "CI.L", "CI.R", "P.Value", "adj.P.Val")]
+  data.frame(
+    contrast = contrast, 
+    tt
+  )
+})
+stats <- do.call(rbind, stats)   |>
+  dplyr::mutate(study = "Wang_2018", .before = 1)
+row.names(stats) <- NULL
+head(stats)
+```
+
+We might also be interested in the raw counts and normalized expression scores (Counts per million reads) for each gene in each of the samples.
+
+```{r}
+#| cache: false
+exprs <- local({
+  counts <- dge$counts |>
+    as.data.frame() |>
+    dplyr::bind_cols(dge$genes) |>
+    tidyr::pivot_longer(cols = starts_with("DRN-"), names_to = "sample_id", 
+                        values_to = "counts") |>
+    dplyr::pull("counts")
+  
+  edgeR::cpm(dge, normalized.lib.sizes = TRUE) |>
+    as.data.frame() |>
+    dplyr::bind_cols(dge$genes) |>
+    tidyr::pivot_longer(cols = starts_with("DRN-"), names_to = "sample_id", 
+                        values_to = "cpm") |>
+    dplyr::mutate(counts = counts) |>
+    dplyr::left_join(
+      data.frame(sample_id = colnames(dge), 
+                 group = as.character(dge$samples$group)
+      ),
+      by = "sample_id"
+    )
+}) |>
+  dplyr::mutate(study = "Wang_2018", .before = 1)
+head(exprs)
+```
+:::
+
+We now have two large tables:
+
+-   `exprs`: `r nrow(exprs)` rows and `r ncol(exprs)` columns with raw and normalized counts for each of the `r ncol(dge)` samples.
+-   `stats`: `r nrow(stats)` rows and `r ncol(stats)` columns with the results of the differential expression analysis, across `r ncol(fit2)` contrasts.
+
+To make these tables easier to access from other tools (not just within R), let's create our first DuckLake!
+
+## Instantiating a DuckLake
+
+A `DuckLake` takes advantage of a *catalog database*, and we can choose among many different options [as outlined here](https://ducklake.select/docs/stable/duckdb/usage/choosing_a_catalog_database). For this example, I will use `duckdb` as the database engine, because there will only be a single client (e.g. my R session) that will interact with it.
+
+All interactions with my `DuckLake` will be conducted using SQL, e.g. it is not tied to R (or python, etc). Here, I am leveraging the [duckdb R package](https://duckdb.r-universe.dev/duckdb) to connect to duckdb from within R, but the same functionality would be available e.g. by interacting with `duckdb` via the command line.
+
+```{r}
+#| cache: false
+db_file <- file.path(tempdir(), "metadata.ducklake") # <1>
+work_dir <- file.path(tempdir(), "lake_data_files")  # <2>
+```
+
+First, we define two paths:
+
+1.  The location of the metadata database. Here, we are using a `duckdb` instance, but we could also use another relational database (e.g. Postgres).
+2.  The path to a folder that will contain the data in the form of parquet files.
+
+```{r}
+#| include: false
+#| cache: false
+if (file.exists(db_file)) unlink(db_file)
+if (dir.exists(work_dir)) unlink(work_dir, recursive = TRUE)
+```
+
+```{r}
+#| cache: false
+#| results: hide
+con <- dbConnect(duckdb())  # <1>
+db_path <- glue_sql('{paste0("ducklake:", db_file)}', .con = con)  # <2>
+```
+
+1.  We instantiate a `duckdb` instance in memory and connect to it, to manage the connection to the metadata database (which also happens to be a `duckdb` instance, but a different one!)
+2.  The path to the data lake's metadata database is prefixed with`ducklake:`.
+
+The following SQL code first installs the `ducklake` extension, which is then used automatically when a `DuckLake` is attached by
+
+1.  Specifying the metadata database (by pointing to the `db_path` location) and
+2.  The location where data is stored in parquet files.
+
+Afterwards, we can work with the `my_ducklake` data lake in the same way we interact with any other database, e.g. we can create a table (`demo`) and insert values.
+
+```{sql}
+#| connection: con
+#| cache: false
+#| results: hide
+INSTALL ducklake;
+ATTACH ?db_path AS my_ducklake (DATA_PATH ?work_dir);
+USE my_ducklake;
+```
+
+```{r}
+#| cache: false
+#| warning: false
+dbWriteTable(
+  conn = con, 
+  name = "stats",
+  value = dplyr::filter(stats, contrast %in% c("two_months", "four_months"))
+)
+dbWriteTable(con, "exprs", exprs)
+```
+
+To retrieve the data
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT contrast, COUNT(symbol) FROM my_ducklake.stats GROUP BY contrast;
+```
+
+```{r}
+#| cache: false
+tbl(con, "stats") |>
+  dplyr::filter(symbol == "Cd34")
+```
+
+```{r}
+#| cache: false
+fs::dir_info(file.path(work_dir, "main", "stats")) |>
+  dplyr::mutate(filename = basename(path)) |>
+  dplyr::select(filename, size)
+```
+
+```{r}
+#| cache: false
+#| warning: false
+dbAppendTable(
+  conn = con, 
+  name = "stats",
+  value = dplyr::filter(stats, contrast %in% c("six_months", "eight_months"))
+)
+```
+
+```{r}
+#| cache: false
+fs::dir_info(file.path(work_dir, "main", "stats")) |>
+  dplyr::mutate(filename = basename(path)) |>
+  dplyr::select(filename, size)
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT contrast, COUNT(symbol) FROM my_ducklake.stats GROUP BY contrast;
+```
+
+::: {.callout-note collapse="true"}
+## Time travel 🧭
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT * FROM ducklake_snapshots('my_ducklake');
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT contrast, COUNT(symbol) 
+FROM my_ducklake.stats AT (VERSION => 2)
+GROUP BY contrast;
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT contrast, COUNT(symbol) 
+FROM my_ducklake.stats AT (VERSION => 3)
+GROUP BY contrast;
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+FROM ducklake_table_info('my_ducklake')
+```
+
+Get all changes in snapshot 1 and 2:
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT snapshot_id, change_type, COUNT(*) 
+FROM ducklake_table_changes('my_ducklake', 'main', 'stats', 1, 2)
+GROUP BY snapshot_id, change_type;
+```
+
+Or in snapshots 2 and 3:
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT snapshot_id, change_type, COUNT(*) 
+FROM ducklake_table_changes('my_ducklake', 'main', 'stats', 2, 3)
+GROUP BY snapshot_id, change_type;
+```
+
+Query specifically the insertions performed in snapshot 2:
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT snapshot_id, COUNT(*) 
+FROM ducklake_table_insertions('my_ducklake', 'main', 'stats', 2, 2)
+GROUP BY snapshot_id;
+```
+:::
+
+## Exploring gene expression results
+
+Now that we have the results for multiple comparisons (aka contrasts) in place, we can e.g. look for genes that are significantly up- or down-regulated (FDR \< 5%) between Tau-transgenic and wildtype animals at *both* 6 and 8 months of age.
+
+To keep things readable, we create two Common Table Expressions (CTEs), each extracting the results of one contrast (e.g. either `six_months` or `four_months`). Then we join the results and limit the output to 1000 random genes that pass the FDR threshold. (We order the results by the `hash` of the gene symbol to obtain a pseudo-random ordering.)
+
+```{sql}
+#| connection: con
+#| cache: false
+#| output.var: df
+WITH six AS (
+  SELECT symbol, logFC, "P.Value", "adj.P.Val"
+  FROM stats
+  WHERE study = 'Wang_2018' AND contrast = 'six_months' AND "adj.P.Val" < 0.05
+),
+eight AS (
+  SELECT symbol, logFC, "P.Value", "adj.P.Val"
+  FROM stats
+  WHERE study = 'Wang_2018' AND contrast = 'eight_months' AND "adj.P.Val" < 0.05
+)
+SELECT s.symbol, 
+       s.logFC six_logFC, s."P.Value" six_p,
+       e.logFC eight_logFC, e."P.Value" eight_p
+FROM six s
+JOIN eight e ON s.symbol = e.symbol
+ORDER BY hash(s.symbol, 1234)
+LIMIT 1000;
+```
+
+We see that almost all genes that pass the FDR threshold at both time points are differentially regulated *in the same direction* at both time points (e.g. they fall into the top right or bottom left quadrants). Their log fold changes are highly correlated between the two ages as well (e.g. most of the points fall close to the diagonal).
+
+```{r}
+#| fig-width: 5
+#| fig-height: 5
+df |>
+  ggplot() +
+  aes(x = six_logFC, y = eight_logFC) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) + 
+  labs(x = "Six-months (log2 fold change)", 
+       y = "Eight-months (log2 fold change)",
+       title = "Tau vs WT",
+       subtitle = "Significant differential expression at both ages.",
+       caption = "FDR < 5%"
+  )
+```
+
+We can also plot the normalized expression of a specific gene across all samples collected in this study by querying the `exprs` table. For example, let's examine the expression of the *Apoe* gene:
+
+```{sql}
+#| connection: con
+#| cache: false
+#| output.var: df
+SELECT symbol, cpm, counts, "group"
+FROM exprs
+WHERE study = 'Wang_2018' AND symbol = 'Apoe';
+```
+
+*Apoe* gene expression is stongly increased in the Tau transgenic animals:
+
+```{r}
+#| fig-width: 5
+#| fig-height: 3
+data.frame(
+  stringr::str_split_fixed(df$group, pattern = "_", 2)
+) |>
+  setNames(c("genotype", "age")) |>
+  dplyr::mutate(genotype = factor(genotype, levels = c("WT", "rTg4510"))) |>
+  dplyr::bind_cols(df) |>
+  ggplot() +
+  aes(x = age, y = cpm) +
+  facet_wrap(~ genotype) +
+  geom_point() +
+  labs(x = "Age (months)", 
+       y = "Normalized expression (CPM)",
+       title = "Apoe"
+  )
+```
+
+## Cleanup
+
+To disconnect, we first switch back to an in-memory `duckdb` connection, and then detach from the data lake.
+
+```{r}
+#| cache: false
+dbExecute(conn = con, "USE memory;DETACH my_ducklake;")
+dbDisconnect(con)
+```
+
+## Reproducibility
+
+::: {.callout-note collapse="true"}
+
+### Session Information ℹ️
+```{r}
+sessioninfo::session_info()
+```
+
+:::

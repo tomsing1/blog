@@ -50,26 +50,50 @@ package.version("duckdb")  #  <1>
 
 ## Overview
 
-In May 2025, the `duckdb` team released the [DuckLake\` core extension](https://duckdb.org/docs/stable/core_extensions/ducklake) to manage a [data lake](https://en.wikipedia.org/wiki/Data_lake).
+In May 2025, the `duckdb` team released the 
+[DuckLake core extension](https://duckdb.org/docs/stable/core_extensions/ducklake) 
+to manage a 
+[data lake](https://en.wikipedia.org/wiki/Data_lake).
 
 ::: {.callout-note}
 ### Data lakes 💧
-A data lake describes a setup where (usually large) datasets are not added as tables to the relational database, but are stored in files instead. These files can be stored on the local system or in the cloud, and are queried as needed. Different file formats are used, including e.g. CSV or [parquet](https://parquet.apache.org/docs/file-format/).
+A data lake describes a setup where (usually large) datasets are not added as
+tables to the relational database, but are stored in files instead. These files
+can be stored on the local system or in the cloud, and are queried as needed.
+Different file formats are used, including e.g. CSV or
+[parquet](https://parquet.apache.org/docs/file-format/).
 :::
 
-Keeping track of external files often requires additional infrastructure, e.g. a [catalog](https://www.ibm.com/think/topics/data-catalog), and updating / changing data while keeping track of file locations and names can pose challenges[^1].
+Keeping track of external files often requires additional infrastructure, e.g. a
+[catalog](https://www.ibm.com/think/topics/data-catalog), and updating /
+changing data while keeping track of file locations and names can pose
+challenges[^1].
 
-[^1]: The [DuckLake release post](https://duckdb.org/2025/05/27/ducklake.html) provides a great summary and explains the motivation behind the development of the extension.
+[^1]: The [DuckLake release post](https://duckdb.org/2025/05/27/ducklake.html) 
+provides a great summary and explains the motivation behind the development of
+the extension.
 
-Here, I am creating my first DuckLake to store transcriptome-wide results from a differential gene expression analysis.
+Here, I am creating my first DuckLake to store transcriptome-wide results from a
+differential gene expression analysis.
 
 ## Differential gene expression data: Wang et al, 2018
 
-Let's get some gene expression data to play with. In 2018, [Wang et al](https://www.ncbi.nlm.nih.gov/pubmed/30558641) published the transcriptome analysis of mouse microglia, isolated either from the [rTg4510 mouse model](https://www.alzforum.org/research-models/rtgtaup301l4510) or wildtype animals. Four age groups of mice (2-, 4-, 6-, and 8-months) were analyzed to capture longitudinal gene expression changes that correspond to varying levels of pathology, from minimal tau accumulation to massive neuronal loss.
+Let's get some gene expression data to play with. In 2018, 
+[Wang et al](https://www.ncbi.nlm.nih.gov/pubmed/30558641) 
+published the transcriptome analysis of mouse microglia, isolated either from 
+the 
+[rTg4510 mouse model](https://www.alzforum.org/research-models/rtgtaup301l4510) 
+or wildtype animals. Four age groups of mice (2-, 4-, 6-, and 8-months) were 
+analyzed to capture longitudinal gene expression changes that correspond to 
+varying levels of pathology, from minimal tau accumulation to massive neuronal
+loss.
 
-A `DESeqDataset` object with raw counts, sample and gene annotations is available in my [rnaseq-examples](https://github.com/tomsing1/rnaseq-examples) github repository[^2].
+A `DESeqDataset` object with raw counts, sample and gene annotations is
+available in my [rnaseq-examples](https://github.com/tomsing1/rnaseq-examples) 
+github repository[^2].
 
-[^2]: The repository contains an installable R package, but here I am just retrieving the serialized R object and load it into the R session.
+[^2]: The repository contains an installable R package, but here I am just 
+retrieving the serialized R object and load it into the R session.
 
 ::: {.callout-note collapse="true"}
 #### Retrieving the raw RNA-seq counts 🧬
@@ -89,13 +113,16 @@ dge <- local({
 ```
 :::
 
-There are 4 animals in each of the `r nlevels(dge$samples$group)` experimental groups.
+There are 4 animals in each of the `r nlevels(dge$samples$group)` experimental 
+groups.
 
 ```{r}
 table(dge$samples$group)
 ```
 
-We can compare the different genotypes (and time points) e.g. using the [limma/voom](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29) workflow. Because there four different time points (2, 4, 6 and 8 months), we extract four different contrasts, each comparing Tau-expressing with wildtype animals.
+We can compare the different genotypes (and time points) e.g. using the [limma/voom](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2014-15-2-r29) workflow. Because there four different time points (2, 4, 6 and 8 months), we 
+extract four different contrasts, each comparing Tau-expressing with wildtype 
+animals.
 
 ::: {.callout-note collapse="true"}
 #### Differential expression analysis with limma / voom 📊
@@ -123,7 +150,8 @@ fit2 <- eBayes(fit2)
 ```
 :::
 
-At each time point, we detect a large number of differentially expressed genes (with the default FDR \< 5% threshold).
+At each time point, we detect a large number of differentially expressed genes
+(with the default FDR \< 5% threshold).
 
 ```{r}
 summary(decideTests(fit2))
@@ -132,7 +160,8 @@ summary(decideTests(fit2))
 ::: {.callout-note collapse="true"}
 #### Statistical results 📈
 
-The `fit2` MArrayLM object contains statistics for all of the contrasts, and this information can be extracted with the `limma::topTable` function.
+The `fit2` MArrayLM object contains statistics for all of the contrasts, and 
+this information can be extracted with the `limma::topTable` function.
 
 ```{r}
 #| cache: false
@@ -150,7 +179,8 @@ row.names(stats) <- NULL
 head(stats)
 ```
 
-We might also be interested in the raw counts and normalized expression scores (Counts per million reads) for each gene in each of the samples.
+We might also be interested in the raw counts and normalized expression scores
+(Counts per million reads) for each gene in each of the samples.
 
 ```{r}
 #| cache: false
@@ -182,16 +212,27 @@ head(exprs)
 
 We now have two large tables:
 
--   `exprs`: `r nrow(exprs)` rows and `r ncol(exprs)` columns with raw and normalized counts for each of the `r ncol(dge)` samples.
--   `stats`: `r nrow(stats)` rows and `r ncol(stats)` columns with the results of the differential expression analysis, across `r ncol(fit2)` contrasts.
+- `exprs`: `r nrow(exprs)` rows and `r ncol(exprs)` columns with raw and 
+normalized counts for each of the `r ncol(dge)` samples.
+- `stats`: `r nrow(stats)` rows and `r ncol(stats)` columns with the results of
+the differential expression analysis, across `r ncol(fit2)` contrasts.
 
-To make these tables easier to access from other tools (not just within R), let's create our first DuckLake!
+To make these tables easier to access from other tools (not just within R), 
+let's create our first DuckLake!
 
 ## Instantiating a DuckLake
 
-A `DuckLake` takes advantage of a *catalog database*, and we can choose among many different options [as outlined here](https://ducklake.select/docs/stable/duckdb/usage/choosing_a_catalog_database). For this example, I will use `duckdb` as the database engine, because there will only be a single client (e.g. my R session) that will interact with it.
+A `DuckLake` takes advantage of a *catalog database*, and we can choose among 
+many different options 
+[as outlined here](https://ducklake.select/docs/stable/duckdb/usage/choosing_a_catalog_database). 
+For this example, I will use `duckdb` as the database engine, because there will
+only be a single client (e.g. my R session) that will interact with it.
 
-All interactions with my `DuckLake` will be conducted using SQL, e.g. it is not tied to R (or python, etc). Here, I am leveraging the [duckdb R package](https://duckdb.r-universe.dev/duckdb) to connect to duckdb from within R, but the same functionality would be available e.g. by interacting with `duckdb` via the command line.
+All interactions with my `DuckLake` will be conducted using SQL, e.g. it is
+not tied to R (or python, etc). Here, I am leveraging the 
+[duckdb R package](https://duckdb.r-universe.dev/duckdb)
+to connect to duckdb from within R, but the same functionality would be 
+available e.g. by interacting with `duckdb` via the command line.
 
 ```{r}
 #| cache: false
@@ -201,7 +242,8 @@ work_dir <- file.path(tempdir(), "lake_data_files")  # <2>
 
 First, we define two paths:
 
-1.  The location of the metadata database. Here, we are using a `duckdb` instance, but we could also use another relational database (e.g. Postgres).
+1.  The location of the metadata database. Here, we are using a `duckdb` 
+  instance, but we could also use another relational database (e.g. Postgres).
 2.  The path to a folder that will contain the data in the form of parquet files.
 
 ```{r}
@@ -218,15 +260,24 @@ con <- dbConnect(duckdb())  # <1>
 db_path <- glue_sql('{paste0("ducklake:", db_file)}', .con = con)  # <2>
 ```
 
-1.  We instantiate a `duckdb` instance in memory and connect to it, to manage the connection to the metadata database (which also happens to be a `duckdb` instance, but a different one!)
+1.  We instantiate a `duckdb` instance in memory and connect to it, to manage 
+  the connection to the metadata database (which also happens to be a `duckdb`
+  instance, but a different one!)
 2.  The path to the data lake's metadata database is prefixed with`ducklake:`.
 
-The following SQL code first installs the `ducklake` extension, which is then used automatically when a `DuckLake` is attached by
+The following SQL code first installs the `ducklake` extension[^3], which is
+then used automatically when a `DuckLake` is attached by
 
 1.  Specifying the metadata database (by pointing to the `db_path` location) and
 2.  The location where data is stored in parquet files.
 
-Afterwards, we can work with the `my_ducklake` data lake in the same way we interact with any other database, e.g. we can create a table (`demo`) and insert values.
+[^3]: See the 
+[ducklake documentation](https://ducklake.select/docs/stable/duckdb/introduction)
+for details!
+
+Afterwards, we can work with the `my_ducklake` data lake in the same way we 
+interact with any other database, e.g. we can create a table (`demo`) and
+insert values.
 
 ```{sql}
 #| connection: con
@@ -356,9 +407,16 @@ GROUP BY snapshot_id;
 
 ## Exploring gene expression results
 
-Now that we have the results for multiple comparisons (aka contrasts) in place, we can e.g. look for genes that are significantly up- or down-regulated (FDR \< 5%) between Tau-transgenic and wildtype animals at *both* 6 and 8 months of age.
+Now that we have the results for multiple comparisons (aka contrasts) in place,
+we can e.g. look for genes that are significantly up- or down-regulated
+(FDR \< 5%) between Tau-transgenic and wildtype animals at *both* 6 and 8 
+months of age.
 
-To keep things readable, we create two Common Table Expressions (CTEs), each extracting the results of one contrast (e.g. either `six_months` or `four_months`). Then we join the results and limit the output to 1000 random genes that pass the FDR threshold. (We order the results by the `hash` of the gene symbol to obtain a pseudo-random ordering.)
+To keep things readable, we create two Common Table Expressions (CTEs), each
+extracting the results of one contrast (e.g. either `six_months` or 
+`four_months`). Then we join the results and limit the output to 1000 random
+genes that pass the FDR threshold. (We order the results by the `hash` of the
+gene symbol to obtain a pseudo-random ordering.)
 
 ```{sql}
 #| connection: con
@@ -383,7 +441,10 @@ ORDER BY hash(s.symbol, 1234)
 LIMIT 1000;
 ```
 
-We see that almost all genes that pass the FDR threshold at both time points are differentially regulated *in the same direction* at both time points (e.g. they fall into the top right or bottom left quadrants). Their log fold changes are highly correlated between the two ages as well (e.g. most of the points fall close to the diagonal).
+We see that almost all genes that pass the FDR threshold at both time points are differentially regulated *in the same direction* at both time points (e.g. they
+fall into the top right or bottom left quadrants). Their log fold changes are
+highly correlated between the two ages as well (e.g. most of the points fall
+close to the diagonal).
 
 ```{r}
 #| fig-width: 5
@@ -403,7 +464,9 @@ df |>
   )
 ```
 
-We can also plot the normalized expression of a specific gene across all samples collected in this study by querying the `exprs` table. For example, let's examine the expression of the *Apoe* gene:
+We can also plot the normalized expression of a specific gene across all samples
+collected in this study by querying the `exprs` table. For example, let's
+examine the expression of the *Apoe* gene:
 
 ```{sql}
 #| connection: con
@@ -434,15 +497,113 @@ data.frame(
        title = "Apoe"
   )
 ```
+## Disconnecting our R session from the data lake
 
-## Cleanup
-
-To disconnect, we first switch back to an in-memory `duckdb` connection, and then detach from the data lake.
+To disconnect, we first switch back to an in-memory `duckdb` connection, and
+then detach from the data lake.
 
 ```{r}
 #| cache: false
-dbExecute(conn = con, "USE memory;DETACH my_ducklake;")
+dbExecute(conn = con, "USE memory; DETACH my_ducklake;")
 dbDisconnect(con)
+```
+
+## Accessing the ducklake from python
+
+Even though created and populated the `my_ducklake` database using the R API,
+it is not tied to any specific language. That makes this setup
+a great tool for teams that use multiple languages. For example, we can access
+the datalake from python using 
+[duckdb's python API](https://duckdb.org/docs/stable/clients/python/overview) 
+instead:
+
+```{python}
+#| eval: true
+import duckdb
+
+con = duckdb.connect(database = ":memory:")  # <1>
+con.sql("INSTALL ducklake")  # <2>
+
+con.sql(  # 3>
+  f"""
+  ATTACH 'ducklake:{r.db_file}' AS my_ducklake (READ_ONLY);
+  """)
+df = con.sql(
+  """
+  USE my_ducklake;
+  SELECT * FROM stats LIMIT 1000;
+  """
+).to_df()  # <4>
+```
+
+1. First, we create an in-memory `duckdb` instance to communicate with the 
+  metadata database. 
+2. Next, we install the `ducklake` core extension, as we did in R above.
+3. We attach our metadata database - in this example in read-only mode. 
+  Here, we retrieve the path to the metadata database from the `db_file` R 
+  variable we defined up (see above)[^4]. But we could just as well hard-code
+  them or provide them in other ways.
+4. Calling the `.to_df()` method at the end of the command returns the results
+as a
+[pandas DataFrame](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html),
+ready for downstream data wrangling or visualization.
+
+[^4]: I love being able to use both R and python in the same quarto document,
+and exchanging objects between them. Nicola Rennie has a very helpful [blog post](https://nrennie.rbind.io/blog/combining-r-and-python-with-reticulate-and-quarto/)
+on how to get started.
+
+Now that we have established the connection, we can run SQL queries from
+python, e.g. retrieving 1000 rows from the (parquet-file backed) `stats` table 
+[^5].
+
+[^5]: Barry Smart demonstrates how to use python to manipulate a `ducklake`
+in
+[this blog post](https://endjin.com/blog/2025/06/ducklake-practice-hands-on-tutorial-core-features).
+
+```{python}
+#| eval: true
+df.head()
+```
+For example, we can create a volcano plot with the 
+[matplotlib](https://matplotlib.org/) 
+python module.
+
+```{python}
+#| fig-width: 5
+#| fig-height: 5
+import numpy as np
+import matplotlib.pyplot as plt
+
+df['neg_log10_pval'] = -np.log10(df['adj.P.Val'])
+pval_thresh = 0.05
+logfc_thresh = 1
+
+plt.figure(figsize=(8,6))
+plt.scatter(df['logFC'], df['neg_log10_pval'], color='grey', alpha=0.5)
+
+sig_up = df[(df['logFC'] > logfc_thresh) & (df['adj.P.Val'] < pval_thresh)]
+plt.scatter(sig_up['logFC'], sig_up['neg_log10_pval'], color='red', alpha=0.7,
+            label='Upregulated')
+
+sig_down = df[(df['logFC'] < -logfc_thresh) & (df['adj.P.Val'] < pval_thresh)]
+plt.scatter(sig_down['logFC'], sig_down['neg_log10_pval'], color='blue', 
+            alpha=0.7, label='Downregulated')
+plt.axhline(-np.log10(pval_thresh), color='black', linestyle='dashed', 
+            linewidth=1)
+
+plt.axvline(logfc_thresh, color='black', linestyle='dashed', linewidth=1)
+plt.axvline(-logfc_thresh, color='black', linestyle='dashed', linewidth=1)
+
+plt.xlabel('log2 Fold Change')
+plt.ylabel('-log10 Adjusted P-value')
+plt.title('Volcano Plot')
+plt.legend()
+plt.show()
+```
+
+```{python}
+#| eval: true
+con.close()
 ```
 
 ## Reproducibility

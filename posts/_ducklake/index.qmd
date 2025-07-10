@@ -1,14 +1,14 @@
 ---
-title: "ducklake: Managing gene expression data across studies"
+title: "Swimming across the ducklake: Exploring gene expression data with R and python"
 author: "Thomas Sandmann"
-date: "2025-07-07"
+date: "2025-07-09"
 execute:
   echo: true
   warning: false
   message: false
   cache: true
 freeze: true
-categories: [R, duckdb, TIL]
+categories: [R, duckdb, python, TIL]
 editor:
   markdown:
     wrap: 72
@@ -25,6 +25,94 @@ editor_options:
   chunk_output_type: inline
 ---
 
+## tl;dr
+
+This week I learned how to store 1) the gene-level results (raw and
+normalized counts) and 2) the results of multiple comparisons between sample
+groups (p-values, log2 fold change, etc) in a
+[data lake](https://en.wikipedia.org/wiki/Data_lake), specifically a `ducklake`
+managed by `duckdb`. It allows me to store large tables in parquet files on
+disk (or in the cloud), and to interact with them from R, python or via plain 
+SQL.
+
+::: {.callout-note}
+### Data lakes 💧
+A data lake describes a setup where (usually large) datasets are not added as
+tables to the relational database, but are stored in files instead. These files
+can be stored on the local system or in the cloud, and are queried as needed.
+Different file formats are used, including e.g. CSV or
+[parquet](https://parquet.apache.org/docs/file-format/).
+
+Keeping track of external files often requires additional infrastructure, e.g. a
+[catalog](https://www.ibm.com/think/topics/data-catalog), and updating /
+changing data while keeping track of file locations and names can pose
+challenges. The 
+[DuckLake release post](https://duckdb.org/2025/05/27/ducklake.html) 
+provides a great summary and explains the motivation behind the development of
+the extension.
+
+:::
+
+## Managing gene expression data across studies
+
+Over the years, I have been involved in planning, executing and analyzing 
+hundreds of RNA-seq experiments. First, I focus on a single study, performing
+exploratory and differential expression analyses to answer key scientific
+questions. Combining measurements (e.g. gene- or exon-level counts), sample and
+feature metadata in a single object, e.g. a 
+[SummarizedExperiment R object](https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html)
+or an 
+[AnnData python object](https://anndata.readthedocs.io/en/stable/)
+greatly facilitates these study-level analyses.
+
+But sooner or later, additional questions arise that require the analysis
+of _multiple_ experiments, e.g. comparing the results of different studies 
+performed using the same model system, employed the same perturbation or 
+were conducted at different time points. Now, I need to wrangle multiple
+_different datasets_ - each of which might contain multiple different
+experimental groups that can be compared to each other.
+
+For the longest time, I have stored data from individual studies as serialized
+R objects, e.g. `DGEList` or `MArrayLM` objects with RNA-seq counts and
+results of statistical comparisons, respectively. For cross-study comparisons I
+would load each of the required objects into an analysis session, extract the
+statistics of interest, stack them into a table, etc - writing lots of bespoke
+code for each analysis.
+
+In many cases, it is of interest to compare the _results_ of differential
+expression analysis, e.g. the observed fold changes and associated statistics 
+(p-values, FDR, confidence intervals, etc). What if I extracted the relevant 
+statistics as soon I first analysed a new study, and then stored them in
+a standardized, language-agnostic format? Over time, this collection of results
+would grow and could facilitate even complex cross-study analyses were 
+needed[^1].
+
+[^1]: Often, studies are carefully designed to support specific comparisons,
+e.g. they contain treatment and matched control groups who were assessed on
+the same day or within the same processing batches. This information is crucial
+for the analysis of treatment effects, and well-designed experiments can
+remove the unwanted variation introduced by batch effects. That's why it is
+often more useful to contrast the differential expression results (e.g. the 
+_changes_ observed between treatment and control conditions) recorded in two
+independent experiments than the trying to compare the raw measurements
+themselves (as each of the studies carries its own complement of batch effects,
+technical artifacts, etc).
+
+This flowchart illustrates my workflow for a single study, but it could
+be repeated for each new RNA-seq experiment I encounter:
+
+```{mermaid}
+%%| echo: false
+flowchart LR
+  Samples["Samples<br/>━━━━━<br/>A1,A2,A3<br>B1,B2,B3<br>C1,C2,C3"] --> Counts(RNAseq)
+  Counts --> NormCounts("Normalized counts")
+  NormCounts --> Results(Counts, CPMs)
+  NormCounts --> Comparisons("Comparisons<br/>━━━━━<br/>A vs B<br>B vs C<br>A vs C")
+  Comparisons --> Stats(Fold change, p-values)
+  Results --> ducklake[(ducklake 🦆)]
+  Stats --> ducklake
+```
+
 ```{r}
 #| message: false
 #| warning: false
@@ -34,6 +122,7 @@ suppressPackageStartupMessages({
   library(dbplyr)
   library(dplyr)
   library(duckdb)
+  library(DT)
   library(edgeR)
   library(fs)
   library(ggplot2)
@@ -43,54 +132,7 @@ suppressPackageStartupMessages({
   library(stringr)
   library(tidyr)
 })
-package.version("duckdb")  #  <1> 
 ```
-
-1.  We need version 1.3.1 of `duckdb` or above.
-
-## Overview
-
-```{mermaid}
-%%| echo: false
-flowchart LR
-  Samples["Samples<br/>━━━━━<br/>A1,A2,A3<br>B1,B2,B3<br>C1,C2,C3"] --> RNAseq(RNA-seq)
-  RNAseq --> Counts(Normalized counts)
-  Counts --> NormCounts("Samples<br/>━━━━━<br/>A1,A2,A3<br>B1,B2,B3<br>C1,C2,C3")
-  NormCounts --> Results(Counts, CPMs)
-  RNAseq --> Differential(Differential Expression)
-  Differential --> Comparisons("Comparisons<br/>━━━━━<br/>A vs B<br>B vs C<br>A vs C")
-  Comparisons --> Stats(Fold change, p-values)
-  Results --> ducklake[(ducklake 🦆)]
-  Stats --> ducklake
-```
-
-## ducklake
-
-In May 2025, the `duckdb` team released the 
-[DuckLake core extension](https://duckdb.org/docs/stable/core_extensions/ducklake) 
-to manage a 
-[data lake](https://en.wikipedia.org/wiki/Data_lake).
-
-::: {.callout-note}
-### Data lakes 💧
-A data lake describes a setup where (usually large) datasets are not added as
-tables to the relational database, but are stored in files instead. These files
-can be stored on the local system or in the cloud, and are queried as needed.
-Different file formats are used, including e.g. CSV or
-[parquet](https://parquet.apache.org/docs/file-format/).
-:::
-
-Keeping track of external files often requires additional infrastructure, e.g. a
-[catalog](https://www.ibm.com/think/topics/data-catalog), and updating /
-changing data while keeping track of file locations and names can pose
-challenges[^1].
-
-[^1]: The [DuckLake release post](https://duckdb.org/2025/05/27/ducklake.html) 
-provides a great summary and explains the motivation behind the development of
-the extension.
-
-Here, I am creating my first DuckLake to store transcriptome-wide results from a
-differential gene expression analysis.
 
 ## Differential gene expression data: Wang et al, 2018
 
@@ -238,6 +280,10 @@ let's create our first `ducklake`!
 
 ## Instantiating a DuckLake 🦆
 
+In May 2025, the `duckdb` team released the 
+[DuckLake core extension](https://duckdb.org/docs/stable/core_extensions/ducklake) 
+to manage a data lake.
+
 A `DuckLake` takes advantage of a *catalog database*, and we can choose among 
 many different options 
 [as outlined here](https://ducklake.select/docs/stable/duckdb/usage/choosing_a_catalog_database). 
@@ -250,17 +296,23 @@ not tied to R (or python, etc). Here, I am leveraging the
 to connect to duckdb from within R, but the same functionality would be 
 available e.g. by interacting with `duckdb` via the command line.
 
+We need version 1.3.1 of `duckdb` or above:
+
+```{r}
+package.version("duckdb")  #  <1> 
+```
+
+First, we define two paths:
+
 ```{r}
 #| cache: false
 db_file <- file.path(tempdir(), "metadata.ducklake") # <1>
 work_dir <- file.path(tempdir(), "lake_data_files")  # <2>
 ```
 
-First, we define two paths:
-
-1.  The location of the metadata database. Here, we are using a `duckdb` 
+1. The location of the metadata database. Here, we are using a `duckdb` 
   instance, but we could also use another relational database (e.g. Postgres).
-2.  The path to a folder that will contain the data in the form of parquet files.
+2. The path to a folder that will contain the data in the form of parquet files.
 
 ```{r}
 #| include: false
@@ -292,8 +344,9 @@ then used automatically when a `DuckLake` is attached by
 for details!
 
 Afterwards, we can work with the `my_ducklake` data lake in the same way we 
-interact with any other database, e.g. we can create a table (`demo`) and
-insert values.
+interact with any other database, e.g. we can create tables (`exprs` and 
+`stats`) and copy the gene expression measurements and differential expression
+statistics into them.
 
 ```{sql}
 #| connection: con
@@ -304,18 +357,27 @@ ATTACH ?db_path AS my_ducklake (DATA_PATH ?work_dir);
 USE my_ducklake;
 ```
 
+Let's start by copying the results of two of the comparisons into the `stats`
+table:
+
 ```{r}
 #| cache: false
 #| warning: false
-dbWriteTable(
+dbWriteTable(  # <1>
   conn = con, 
   name = "stats",
   value = dplyr::filter(stats, contrast %in% c("two_months", "four_months"))
 )
-dbWriteTable(con, "exprs", exprs)
+dbWriteTable(con, "exprs", exprs) # <2>
 ```
 
-To retrieve the data
+1. The `dbWriteTable` function creates a table and inserts the content
+  of a data.frame. First, we add only the results for two contrasts (by 
+  filtering the `stats` data.frame.)
+2. The second call to `dbWriteTable` inserts the full `exprs` table with
+  the raw and normalized expression scores for each gene in each sample.
+
+We can confirm that statistics for ~ 14,000 genes are now available:
 
 ```{sql}
 #| connection: con
@@ -323,11 +385,29 @@ To retrieve the data
 SELECT contrast, COUNT(symbol) FROM my_ducklake.stats GROUP BY contrast;
 ```
 
+For example, we can retrieve the differential expression results for a 
+single gene, _Cd34_:
+
 ```{r}
 #| cache: false
 tbl(con, "stats") |>
   dplyr::filter(symbol == "Cd34")
 ```
+
+Behind the scenes, `duckdb` has stored our data in two parquet files, one for
+each table:
+
+```{sql}
+#| connection: con
+#| cache: false
+FROM ducklake_table_info('my_ducklake')
+```
+
+The files themselves are stored in the `work_dir` directory we specified when we
+instantiated the `ducklake`. (Here, I am using a folder on the local system, but
+I could have provided a cloud location on AWS S3 or within a Google Cloud bucket
+instead.) The parquet file for the  `stats` table is in the eponymous 
+sub-directory:
 
 ```{r}
 #| cache: false
@@ -335,6 +415,9 @@ fs::dir_info(file.path(work_dir, "main", "stats")) |>
   dplyr::mutate(filename = basename(path)) |>
   dplyr::select(filename, size)
 ```
+
+Next, wee append the differential expression statistics for the remaining two
+comparisons to the same `stats` table in our `ducklake`:
 
 ```{r}
 #| cache: false
@@ -346,12 +429,17 @@ dbAppendTable(
 )
 ```
 
+Inspecting the `stats` directory now reveals that a second parquet has been
+created:
+
 ```{r}
 #| cache: false
 fs::dir_info(file.path(work_dir, "main", "stats")) |>
   dplyr::mutate(filename = basename(path)) |>
   dplyr::select(filename, size)
 ```
+
+and we now query results for all four comparisons:
 
 ```{sql}
 #| connection: con
@@ -362,19 +450,27 @@ SELECT contrast, COUNT(symbol) FROM my_ducklake.stats GROUP BY contrast;
 ::: {.callout-note collapse="true"}
 ## Time travel 🧭
 
+Data can change over time. For example, what if we decided to include an 
+additional covariate in our linear models? We would obtain an updated set of
+differential expression statistics, and could replace the old results in our
+`ducklake`. But what if a previous analysis used the old results? How could 
+we track the changes that were made over time - or even choose whether we want
+to use the old or the new results for a report?
+
+Actually, `ducklake` tracks all modifications that are made, including 
+schema changes or insertions / deletions or update of data. Every modification
+triggers the creation of a new 
+[snapshot](https://ducklake.select/docs/stable/duckdb/usage/snapshots):
+
 ```{sql}
 #| connection: con
 #| cache: false
 SELECT * FROM ducklake_snapshots('my_ducklake');
 ```
 
-```{sql}
-#| connection: con
-#| cache: false
-SELECT contrast, COUNT(symbol) 
-FROM my_ducklake.stats AT (VERSION => 2)
-GROUP BY contrast;
-```
+We can use the `AT` keyword to query the `ducklake` at any point in time.
+For example, we can query the latest snapshot of the database, e.g. the third
+snapshot:
 
 ```{sql}
 #| connection: con
@@ -384,13 +480,25 @@ FROM my_ducklake.stats AT (VERSION => 3)
 GROUP BY contrast;
 ```
 
+But we can also issue the same query to inspect the number of data points
+that were available after the second snapshot was taken:
+
 ```{sql}
 #| connection: con
 #| cache: false
-FROM ducklake_table_info('my_ducklake')
+SELECT contrast, COUNT(symbol) 
+FROM my_ducklake.stats AT (VERSION => 2)
+GROUP BY contrast;
 ```
 
-Get all changes in snapshot 1 and 2:
+Alternatively, we can also provide a timestamp or the time interval of interest,
+please check the
+[ducklate documentation](https://ducklake.select/docs/stable/duckdb/usage/time_travel.html)
+for more examples.
+
+The `ducklake` extension also provides helper functions, e.g. a call to the 
+`ducklake_table_changes` function can highlight changes that occured
+between snapshots 1 and 2:
 
 ```{sql}
 #| connection: con
@@ -400,7 +508,7 @@ FROM ducklake_table_changes('my_ducklake', 'main', 'stats', 1, 2)
 GROUP BY snapshot_id, change_type;
 ```
 
-Or in snapshots 2 and 3:
+Or between snapshots 2 and 3:
 
 ```{sql}
 #| connection: con
@@ -410,18 +518,20 @@ FROM ducklake_table_changes('my_ducklake', 'main', 'stats', 2, 3)
 GROUP BY snapshot_id, change_type;
 ```
 
-Query specifically the insertions performed in snapshot 2:
+Or we can count the number of insertions performed to create snapshot 1:
 
 ```{sql}
 #| connection: con
 #| cache: false
 SELECT snapshot_id, COUNT(*) 
-FROM ducklake_table_insertions('my_ducklake', 'main', 'stats', 2, 2)
+FROM ducklake_table_insertions('my_ducklake', 'main', 'stats', 1, 1)
 GROUP BY snapshot_id;
 ```
 :::
 
 ## Exploring gene expression results using SQL
+
+### Tau-dependent gene expression changes across time 
 
 Now that we have the results for multiple comparisons (aka contrasts) in place,
 we can e.g. look for genes that are significantly up- or down-regulated
@@ -457,7 +567,8 @@ ORDER BY hash(s.symbol, 1234)
 LIMIT 1000;
 ```
 
-We see that almost all genes that pass the FDR threshold at both time points are differentially regulated *in the same direction* at both time points (e.g. they
+We see that almost all genes that pass the FDR threshold at both time points are 
+differentially regulated *in the same direction* at both time points (e.g. they
 fall into the top right or bottom left quadrants). Their log fold changes are
 highly correlated between the two ages as well (e.g. most of the points fall
 close to the diagonal).
@@ -480,20 +591,37 @@ df |>
   )
 ```
 
+## Examining the expression of individual genes using dplyr
+
 We can also plot the normalized expression of a specific gene across all samples
 collected in this study by querying the `exprs` table. For example, let's
-examine the expression of the *Apoe* gene:
+examine the expression of the *Apoe* gene. 
 
-```{sql}
-#| connection: con
-#| cache: false
-#| output.var: df
-SELECT symbol, cpm, counts, "group"
-FROM exprs
-WHERE study = 'Wang_2018' AND symbol = 'Apoe';
+Instead of writing the SQL query ourselves, we can use 
+[dplyr](https://dplyr.tidyverse.org) 
+to do the job for us. 
+
+```{r}
+df <- tbl(con, "exprs") |>
+  dplyr::filter(study == "Wang_2018", symbol == "Apoe") |>
+  dplyr::select("symbol", "cpm", "counts", "group")
+dplyr::explain(df)  # <1> 
+```
+1. The `explain()` function shows us the query and the
+plan that will be executed by `duckdb`
+
+```{r}
+df <- dplyr::collect(df)  # <2>
+df |>
+  DT::datatable(rownames = FALSE) |>
+  DT::formatSignif(columns = "cpm", digits = 3)
 ```
 
-*Apoe* gene expression is stongly increased in the Tau transgenic animals:
+2. Calling `collect()` triggers the actuall database scan and returns the
+results in a `tibble`.
+
+A scatter plot reveals that *Apoe* gene expression is stongly increased in the
+Tau transgenic animals:
 
 ```{r}
 #| fig-width: 5
@@ -513,6 +641,12 @@ data.frame(
        title = "Apoe"
   )
 ```
+
+Right now, we only have data from a single study (albeit with four different
+comparisons) in our `ducklake`. As we keep adding additional datasets and
+contrasts, new parquet files will be added and our ability to compare and
+contrast across studies will grow!
+
 ## Disconnecting our R session from the data lake
 
 To disconnect, we first switch back to an in-memory `duckdb` connection, and
@@ -520,16 +654,20 @@ then detach from the data lake.
 
 ```{r}
 #| cache: false
+#| results: hide
 dbExecute(conn = con, "USE memory; DETACH my_ducklake;")
 dbDisconnect(con)
 ```
 
-## Accessing the ducklake from python 🐍
+## Exploring gene expression results using python 🐍
 
 Even though created and populated the `my_ducklake` database using the R API,
 it is not tied to any specific language. That makes this setup
-a great tool for teams that use multiple languages. For example, we can access
-the datalake from python using 
+a great tool for teams that use multiple languages. 
+
+### Connecting to our `ducklake`
+
+For example, we can access the datalake from python using 
 [duckdb's python API](https://duckdb.org/docs/stable/clients/python/overview) 
 instead:
 
@@ -580,6 +718,9 @@ in
 #| eval: true
 df.head()
 ```
+
+### Differential expression visualized in a volcano plot
+
 For example, we can create a volcano plot with the 
 [matplotlib](https://matplotlib.org/) 
 python module.
@@ -617,18 +758,46 @@ plt.legend()
 plt.show()
 ```
 
+## Disconnecting our python session from the ducklake
+
+As usual, we disconnect from the `ducklake` at the end of our analysis session.
+
 ```{python}
 #| eval: true
 con.close()
 ```
 
+## Conclusions
+
+In the past, I had considered storing gene expression data in parquet files, and
+to manage their location, updates and versions myself. The `ducklake` extension
+takes these tasks off my hand, and I am looking forward to exploring its 
+capabilities further. 
+
+I am already using a relational database to manage 
+study, sample and gene metadata, e.g. a study's title, GEO accession, abstract,
+etc or the properties of each of the samples that constitute an experiment. I
+envision tracking additional information about comparisons in the same way 
+(e.g. the specification of the linear model, or a human-readable description of
+the contrast). 
+
+The ability to join this metadata with the measurements (counts, CPMs) and the
+statistical results (log fold changes, p-values, etc) could make `duckdb` my 
+one-stop shop for data visualization and tertiary analysis. `ducklake` 
+could also become the foundation for dashboards and other visualization tools,
+allowing non-computational colleagues to explore a gene expression compendium
+on their own.
+
+I am a big fan of the well-designed classes offered by Bioconductor, and I take
+advantage of great R packages every day. But I also appreciate the opportunity
+to move results into a language-agnostic system, which can then fuel
+new analyses across a multilingual data science organization.
+
 ## Reproducibility
 
 ::: {.callout-note collapse="true"}
-
 ### Session Information ℹ️
 ```{r}
 sessioninfo::session_info()
 ```
-
 :::

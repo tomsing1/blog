@@ -416,7 +416,7 @@ fs::dir_info(file.path(work_dir, "main", "stats")) |>
   dplyr::select(filename, size)
 ```
 
-Next, wee append the differential expression statistics for the remaining two
+Next, we append the differential expression statistics for the remaining two
 comparisons to the same `stats` table in our `ducklake`:
 
 ```{r}

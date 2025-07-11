@@ -10,8 +10,20 @@
 <atom:link href="https://tomsing1.github.io/blog/index-r.xml" rel="self" type="application/rss+xml"/>
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
-<generator>quarto-1.7.29</generator>
-<lastBuildDate>Sun, 11 May 2025 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.7.32</generator>
+<lastBuildDate>Thu, 10 Jul 2025 07:00:00 GMT</lastBuildDate>
+<item>
+  <title>Dipping my toes into the ducklake: Exploring gene expression data with R and python</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/ducklake/</link>
+  <description><![CDATA[ This week I learned how to store 1) the gene-level results (raw and normalized counts) and 2) the results of multiple comparisons between sample groups (p-values, log2 fold change, etc) in a <a href="https://en.wikipedia.org/wiki/Data_lake">data lake</a>, specifically a <code>ducklake</code> managed by <code>duckdb</code>. It allows me to store large tables in parquet files on disk (or in the cloud), and to interact with them from R, python or via plain SQL. ]]></description>
+  <category>R</category>
+  <category>duckdb</category>
+  <category>python</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/ducklake/</guid>
+  <pubDate>Thu, 10 Jul 2025 07:00:00 GMT</pubDate>
+</item>
 <item>
   <title>CHOIR: A principled approach to clustering single-cell data</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -20,7 +32,7 @@
   <category>R</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/choir/</guid>
-  <pubDate>Sun, 11 May 2025 00:00:00 GMT</pubDate>
+  <pubDate>Sun, 11 May 2025 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>R 4.5: importing only selected objects &amp; functions from R packages</title>
@@ -29,7 +41,7 @@
   <description><![CDATA[ On Friday, <a href="https://cran.r-project.org/">R version 4.5</a> was released. If you are curious about what’s new and what’s changed, you might enjoy reading <a href="https://www.jumpingrivers.com/blog/whats-new-r45/">Russ Hyde’s blog post</a> or R’s official <a href="https://cran.r-project.org/bin/windows/base/NEWS.R-4.5.0rc.html">list of changes</a>. For me, the introduction of the <code>use()</code> function is the most interesting aspect of this update. ]]></description>
   <category>R</category>
   <guid>https://tomsing1.github.io/blog/posts/r4_5/</guid>
-  <pubDate>Sat, 12 Apr 2025 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 12 Apr 2025 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Compressing single-cell RNA-seq data with run-length encoding and LZW</title>
@@ -42,7 +54,7 @@
   <category>algorithms</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/lzw/</guid>
-  <pubDate>Mon, 23 Dec 2024 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 23 Dec 2024 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Interacting with box cloud storage: the boxr R package</title>
@@ -53,7 +65,7 @@
   <category>box</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/boxr/</guid>
-  <pubDate>Sat, 30 Nov 2024 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 30 Nov 2024 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Exploring the tidyHeatmap R package</title>
@@ -63,7 +75,7 @@
   <category>R</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/tidyHeatmap/</guid>
-  <pubDate>Sat, 12 Oct 2024 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 12 Oct 2024 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Exploring recipes with LLMs, Ollama and R</title>
@@ -74,7 +86,7 @@
   <category>Ollama</category>
   <category>LLM</category>
   <guid>https://tomsing1.github.io/blog/posts/vectorsearch/</guid>
-  <pubDate>Wed, 21 Aug 2024 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 21 Aug 2024 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Querying JSON files with AWS Athena and the noctua R package</title>
@@ -85,7 +97,7 @@
   <category>AWS</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/athena/</guid>
-  <pubDate>Wed, 17 Apr 2024 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 17 Apr 2024 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Interactive volcano plots with the ggiraph R package</title>
@@ -96,7 +108,7 @@
   <category>ggplot2</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/volcano_ggiraph/</guid>
-  <pubDate>Thu, 11 Apr 2024 00:00:00 GMT</pubDate>
+  <pubDate>Thu, 11 Apr 2024 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Conditional panels within shiny modules</title>
@@ -107,7 +119,7 @@
   <category>shiny</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/conditional_shiny_widgets/</guid>
-  <pubDate>Sun, 07 Apr 2024 00:00:00 GMT</pubDate>
+  <pubDate>Sun, 07 Apr 2024 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Collaborator-friendly volcano plots with ggplot2</title>
@@ -118,7 +130,7 @@
   <category>ggplot2</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/volcano/</guid>
-  <pubDate>Wed, 03 Apr 2024 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 03 Apr 2024 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Embedding R into Quarto documents with quarto-webr</title>
@@ -129,7 +141,7 @@
   <category>Quarto</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/quarto-webr/</guid>
-  <pubDate>Sat, 18 Nov 2023 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 18 Nov 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Adventures with parquet III: single-cell RNA-seq data and comparison with HDF5-backed arrays</title>
@@ -141,7 +153,7 @@
   <category>parquet</category>
   <category>Bioconductor</category>
   <guid>https://tomsing1.github.io/blog/posts/ParquetMatrix/</guid>
-  <pubDate>Wed, 13 Sep 2023 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 13 Sep 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Adventures with parquet II: Implementing the parquetArraySeed S4 class</title>
@@ -153,7 +165,7 @@
   <category>parquet</category>
   <category>Bioconductor</category>
   <guid>https://tomsing1.github.io/blog/posts/parquetArray/</guid>
-  <pubDate>Tue, 05 Sep 2023 00:00:00 GMT</pubDate>
+  <pubDate>Tue, 05 Sep 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Adventures with parquet: Storing &amp; quering gene expression data</title>
@@ -164,7 +176,7 @@
   <category>parquet</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/parquet/</guid>
-  <pubDate>Thu, 31 Aug 2023 00:00:00 GMT</pubDate>
+  <pubDate>Thu, 31 Aug 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Organizing sequencing metadata: experimenting with S7</title>
@@ -174,7 +186,7 @@
   <category>R</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/s7/</guid>
-  <pubDate>Wed, 30 Aug 2023 00:00:00 GMT</pubDate>
+  <pubDate>Wed, 30 Aug 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>tourrr: Exploring multi-dimensional data</title>
@@ -184,7 +196,7 @@
   <category>R</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/tourr/</guid>
-  <pubDate>Mon, 28 Aug 2023 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 28 Aug 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Documenting data wrangling with the dtrackr R package</title>
@@ -195,7 +207,7 @@
   <category>tidyverse</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/dtrackr/</guid>
-  <pubDate>Mon, 26 Jun 2023 00:00:00 GMT</pubDate>
+  <pubDate>Mon, 26 Jun 2023 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Lemur: analyzing multi-condition single-cell data</title>
@@ -206,7 +218,7 @@
   <category>R</category>
   <category>scRNAseq</category>
   <guid>https://tomsing1.github.io/blog/posts/lemur/</guid>
-  <pubDate>Sun, 12 Mar 2023 00:00:00 GMT</pubDate>
+  <pubDate>Sun, 12 Mar 2023 08:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Distributing R packages with a drat repository hosted on AWS S3</title>
@@ -217,18 +229,7 @@
   <category>AWS</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/drat/</guid>
-  <pubDate>Sat, 21 Jan 2023 00:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>QuantSeq RNAseq analysis (3): Validating published results (no UMIs)</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/</link>
-  <description><![CDATA[ This is the third of four posts documenting my progress toward processing and analyzing <a href="https://www.lexogen.com/quantseq-3mrna-sequencing/">QuantSeq FWD 3’ tag RNAseq</a> data with the <a href="https://nf-co.re/rnaseq">nf-core/rnaseq</a> workflow. ]]></description>
-  <category>R</category>
-  <category>nextflow</category>
-  <category>NGS</category>
-  <guid>https://tomsing1.github.io/blog/posts/nextflow-core-quantseq-3-xia/</guid>
-  <pubDate>Mon, 16 Jan 2023 00:00:00 GMT</pubDate>
+  <pubDate>Sat, 21 Jan 2023 08:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

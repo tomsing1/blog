@@ -1,7 +1,7 @@
 ---
-title: "Swimming across the ducklake: Exploring gene expression data with R and python"
+title: "Dipping my toes into the ducklake: Exploring gene expression data with R and python"
 author: "Thomas Sandmann"
-date: "2025-07-09"
+date: "2025-07-10"
 execute:
   echo: true
   warning: false

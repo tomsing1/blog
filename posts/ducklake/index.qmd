@@ -314,6 +314,17 @@ work_dir <- file.path(tempdir(), "lake_data_files")  # <2>
   instance, but we could also use another relational database (e.g. Postgres).
 2. The path to a folder that will contain the data in the form of parquet files.
 
+
+::: {.callout-warning collapse="false"}
+
+🚨 For this post, I am defining `db_file` and `work_dir` paths that point to 
+a temporary directory - so both the `duckdb` metadata database and the folder 
+with parquet files are automatically deleted once my R session is terminated. 
+For use within a real project, make sure to use paths to permanent storage 
+locations on your system instead!
+
+:::
+
 ```{r}
 #| include: false
 #| cache: false
@@ -356,6 +367,21 @@ INSTALL ducklake;
 ATTACH ?db_path AS my_ducklake (DATA_PATH ?work_dir);
 USE my_ducklake;
 ```
+
+::: {.callout-note collapse="true"}
+
+### Passing variables to SQL cells in Quarto
+
+This post is generated from a single Quarto markdown file, with R, SQL and
+python code cells. The `db_path` and `workdir` variables used in the SQL
+statement above were defined in a previous R cell. I can pass them into the 
+SQL cell by prefixing them with a question mark, e.g. `?db_path`, as
+documented in the
+[rmarkdown documentation](https://bookdown.org/yihui/rmarkdown/language-engines.html#sql).
+If you write standalone SQL code (e.g. outside a Quarto or R markdown document)
+you probably want to hard-code the paths (or perhaps use SQL variables).
+
+:::
 
 Let's start by copying the results of two of the comparisons into the `stats`
 table:

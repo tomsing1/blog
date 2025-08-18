@@ -1,0 +1,365 @@
+---
+title: "Matching genetic variants using parquet files and duckdb"
+author: "Thomas Sandmann"
+date: "2025-08-17"
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: true
+freeze: true
+categories: [R, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    anchor-sections: true
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+---
+
+[ClinVar](https://www.ncbi.nlm.nih.gov/clinvar/intro/)
+is a public archive of reports of human variations associated with 
+diseases and drug responses, with supporting evidence, hosted at the
+NCBI.
+
+## Retrieving ClinVar variants from the NCBI's FTP server
+
+First, we read information about disease-associated variants, available in
+a gzip-compressed tab-delimited text file 
+[from the NCBI](https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/), 
+and store information about single-nucleotide variants (SNVs) in a local
+parquet file.
+
+::: {.callout-info collapse="true"}
+### VCF format
+
+Frequently, information about genetic variation is shared using files in
+[Variant Call Format (VCF)](https://en.wikipedia.org/wiki/Variant_Call_Format)
+or variations of it, e.g. genomic VCF (gVCF).
+
+While widely used, VCF files for large collections of variants can become
+unwieldly. In 2021, researcher from 23&me explored other file formats and
+reported that storing variant data in
+[parquet files](https://medium.com/23andme-engineering/genetic-datastore-4b213256db31)
+might be adventageous.
+
+The NCBI makes ClinVar's information available in multiple formats, including
+VCF and tab-delimited text files. Here, I am retrieving the latter. Multiple
+solutions to convert VCF to character-delimited or parquet files exist, 
+including methods in the
+[GLOW Spark framework](https://glow.readthedocs.io/en/latest/etl/variant-data.html),
+or the `VariantsToTable` tool included in the 
+[GATK suite](https://gatk.broadinstitute.org/hc/en-us/articles/30332008315291-VariantsToTable).
+The
+[vcf-to-duckdb python module](https://pypi.org/project/vcf-to-duckdb/)
+goes one step further and converts a VCF file to a DuckDB database, encompassing
+both as Parquet files and accompanying SQL schema.
+
+:::
+
+
+```{r}
+library(DBI)
+library(duckdb)
+library(glue)
+```
+
+Let's start by creating an in-memory `duckdb` instance and install the `httpfs`
+extension to retrieve remote files.
+
+```{r}
+con <- dbConnect(duckdb())
+DBI::dbExecute(con, "INSTALL httpfs")
+```
+
+The latest release of ClinVar is available from its website. For this tutorial,
+I will convert it into a local parquet file stored in a temporary directory[^1].
+
+[^1]: For real use cases, you probably want to store the parquet file in a 
+permanent location, either locally or in a cloud bucket.
+
+```{r}
+kTab <- paste0(
+	"https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/",
+	"variant_summary.txt.gz"
+)
+kParquet <- tempfile(fileext = ".parquet")
+```
+
+ClinVar accepts reports about any type of genetic variant, including 
+single nucleotide variants (SNVs), small insertions/deletions or large copy 
+number variations for human genome assemblies GRCh37 and GRCh38. 
+Here, I will only retain rows describing single nucleotide variants and their
+location in the GRCh38 assembly.
+
+A single SQL query retrieves the ~ 380 MB tab-delimited file, filters for 
+single-nucleotide variants on the GRCh38 assembly, and writes them into a 
+~ 325 MB parquet file in a single step  [^2]
+
+[^2]: The same command could be used to convert very large files, as `duckdb` 
+does not need to retain all of the variants in memory at the same time.
+
+```{r}
+sql <- glue::glue_sql("
+	COPY (
+		SELECT *, 
+		FROM read_csv({kTab}, AUTO_DETECT = TRUE, NORMALIZE_NAMES = TRUE)
+		WHERE Assembly = 'GRCh38' AND _type = 'single nucleotide variant'
+	)
+	TO {kParquet} (FORMAT 'PARQUET');", .con = con)
+DBI::dbExecute(con, sql)
+```
+
+## Exploring genetic variants stored in parquet format
+
+I can access the parquet file in different ways from R (or python or other 
+environments). For example, I could read its entire content into my R session 
+using the
+- [{nanoparquet} R package](https://cran.r-project.org/package=nanoparquet), 
+or
+- [arrow::read_parquet](https://cran.r-project.org/package=arrow) from the
+`arrow` package, which supports `dplyr` verbs for downstream processing.
+
+Alternatively, I can use `duckdb`'s internal functionality to connect to
+external files, and then pass the database connection to `dbplyr`, which will
+translate common `dplyr` verbs into SQL for me. I will demonstrate this
+approach in the remainder of this post.
+
+::: {.callout-info collapse="true"}
+
+### duckplyr
+
+Recently, the
+[duckplyr R package](https://cran.r-project.org/package=duckplyr)
+was released, offering yet another way of using `duckdb` for data analysis.
+`duckplyr` was built around an embedded version of `duckdb` to provide a drop-in
+replacement for `dplyr's` functionality [^3], including automatic fall-back to
+`dplyr` functionality for any functionality that is not supported within
+the `duckdb` database instance.
+
+[^3]: With `duckplyr` there is no need to create and manage
+an in-memory `duckdb` instance - it's all handled internally.
+
+A main distinction between `duckplyr` and combining `duckdb` with `dbplyr` is
+that the former aims to support all R operators, functions, and data types [^4].
+It automatically decides when to pull data from the database instance into
+the R session (e.g. materialize it in memory). While that is often convenient,
+it might require some extract attention, especially when working with very 
+large datasets.
+
+[^4]: See [this github issue](https://github.com/tidyverse/duckplyr/issues/145)
+for details.
+
+```{r}
+suppressPackageStartupMessages(
+  library(duckplyr)
+)
+```
+
+The `duckplyr::read_parquet_duckdb` function connects to a parquet file and
+returns a `duckplyr_df` object.
+
+```{r}
+df <- read_parquet_duckdb(kParquet, prudence = "thrifty")
+class(df)
+```
+
+The function `read_parquet_duckdb()` function accepts a `prudence` argument, 
+which governs whether / when data is actually materialized in memory.
+
+- By default, `duckplyr` is `thrifty` and decides at each step of a workflow 
+whether the dataset is small enough (< 1 million cells = rows multiplied by 
+columns) to materialize in memory right away [^5]. 
+- Alternatively, we could choose a `lavish` approach, suitable for small 
+datasets, that will trigger the computation be triggered immediately. 
+- Finally, setting prudence to `stingy` will avoid automatic materialization 
+and requires the use of `collect()` or `as_tibble()` to materialize the data
+in a conventional data.frame.
+
+[^5]: Fore more details, please consult `duckplyr's` 
+[Memory protection: controlling automatic materialization](https://cran.r-project.org/web/packages/duckplyr/vignettes/prudence.html)
+vignette.
+
+:::
+
+### Registering ClinVar as a VIEW
+
+Currently, our in-memory `duckdb` database does not contain any tables.
+
+```{r}
+dbListTables(con)
+```
+
+Let's select a subset of field from the parquet file and also add a new `width` 
+column. Because we will use the output of this query multiple times,
+it is useful to add it to the database as a `VIEW`, e.g. a canned query that
+is accessible under the `clinvar` name. (Creating a `TABLE` instead of a `VIEW`
+would result importing an actual copy the data into the `duckdb` database.)
+
+Whenever we access the `clinvar` view, the SQL query that defines it is 
+re-executed, e.g. data is retrieved from the parquet file.
+
+```{sql}
+#| connection: con
+#| cache: false
+#| results: hide
+CREATE OR REPLACE VIEW clinvar as
+	SELECT cv.*, (cv.end - cv.start) + 1.0 AS width 
+	FROM (
+		SELECT
+			rcvaccession,
+			_name as name,
+			chromosomeaccession AS seqnames,
+			_start AS start,
+			stop AS end,
+			_type AS type,
+			clinicalsignificance,
+			clinsigsimple,
+			phenotypeids,
+			phenotypelist,
+			rs_dbsnp AS dbsnp,
+			nsvesv_dbvar AS dbvar,
+			otherids
+		FROM (FROM read_parquet(?kParquet)) AS cv
+	) AS cv
+```
+
+```{r}
+duckdb::dbListTables(con)
+```
+
+Next, let's create a toy example of a query, e.g. a genomic region of interest
+defined by its genomic coordinates. We could add this query as a 
+(potentially temporary) table to our database. Even more conveniently, the 
+`duckdb::duckdb_register` function allows us to make the database aware of 
+this data.frame without having to transfer any data; it is registered as a
+"virtual table" instead.
+
+```{r}
+query <- data.frame(
+  seqnames = "NC_000016.10",
+  start = 2765864,
+  end = 2765864
+)
+query
+```
+
+## Querying ClinVar with dplyr
+
+```{r}
+suppressPackageStartupMessages(
+  library(dbplyr)
+)
+```
+
+By passing the `duckdb` connection to the `tbl` function, I can use the
+database tables in dplyr workflows, e.g. to retrieve any ClinVar variants
+with _the same_ coordinates as my query.
+
+```{r}
+#| eval: false
+dplyr::inner_join(query, tbl(con, "clinvar"),
+                  by = join_by(seqnames, start, end))
+```
+
+Ouch, that didn't work - it triggered the following error:
+
+```
+Error in `auto_copy()`:
+! `x` and `y` must share the same src.
+ℹ `x` is a <tbl_duckdb_connection/tbl_dbi/tbl_sql/tbl_lazy/tbl> object.
+ℹ `y` is a <data.frame> object.
+ℹ Set `copy = TRUE` if `y` can be copied to the same source as `x` (may be slow).
+```
+
+The `query` data.frame exists in my R session, but the `clinvar` table
+is in the database. To join these two sources of information, I need to add
+the query to the database first.
+
+I could use the `dbWriteTable` function to create a new (potentially temporary)
+table to the database. But there is a more convenient option: the 
+`duckdb::duckdb_register` function makes the database aware of 
+a data.frame without having to transfer any data; it is registered as a
+"virtual table" instead.
+
+```{r}
+duckdb::duckdb_register(con, "query", query, overwrite = TRUE)
+duckdb::dbListTables(con)
+```
+
+Now the join can proceed, and we observe that this SNV corresponds to ClinVar
+report `RCV002776799`.
+
+```{r}
+dplyr::inner_join(tbl(con, "query"), tbl(con, "clinvar"),
+                  by = join_by(seqnames, start, end))
+```
+
+### Querying ClinVar using SQL
+
+```{sql}
+#| connection: con
+#| cache: false
+SELECT * FROM ?kParquet LIMIT 3;
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+#| results: hide
+SELECT * FROM ?kParquet WHERE rs_dbsnp == '1294019636';
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+#| results: hide
+SELECT * FROM ?kParquet WHERE rcvaccession == 'RCV000000014';
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+#| results: hide
+SELECT DISTINCT ChromosomeAccession AS chr FROM ?kParquet ORDER BY chr;
+```
+
+```{sql}
+#| connection: con
+#| cache: false
+#| results: hide
+SELECT * FROM clinvar
+INNER JOIN query
+ON (
+	clinvar.seqnames = query.seqnames AND
+	clinvar.start <= query.end AND
+	clinvar.end >= query.start
+	)
+```
+:::
+
+Finally, we close the connection to the in-memory database.
+
+```{r}
+duckdb::dbDisconnect(con)
+```
+
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessionInfo()
+```
+
+</details>

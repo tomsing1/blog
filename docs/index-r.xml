@@ -11,7 +11,7 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.8.21</generator>
-<lastBuildDate>Mon, 01 Sep 20245 07:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 01 Sep 2025 07:00:00 GMT</lastBuildDate>
 <item>
   <title>Managing project-specific R libraries with rv</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -20,7 +20,7 @@
   <category>R</category>
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/rv/</guid>
-  <pubDate>Mon, 01 Sep 20245 07:00:00 GMT</pubDate>
+  <pubDate>Mon, 01 Sep 2025 07:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Matching genetic variants using parquet files and duckdb</title>

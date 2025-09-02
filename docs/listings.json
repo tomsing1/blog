@@ -2,6 +2,8 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/rv/index.html",
+      "/posts/duckdb_variants/index.html",
       "/posts/ducklake/index.html",
       "/posts/choir/index.html",
       "/posts/r4_5/index.html",

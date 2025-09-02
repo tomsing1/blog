@@ -1,0 +1,540 @@
+---
+title: "Managing project-specific R libraries with `rv`"
+author: "Thomas Sandmann"
+date: "20245-09-01"
+freeze: true
+categories: [R, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+Today, I learned how to manage project-specific R libraries with 
+the `rv` command line tool.
+
+## Overview
+
+::: columns
+
+::: {.column width="75%"}
+
+The `rv` project is a relatively recent open source project, developed by 
+[A2-Ai](https://a2-ai.com/), a clinical consultancy firm, and first released
+under the 
+[MIT license](https://github.com/A2-ai/rv/blob/main/LICENSE)
+in March 2025. It manages a project-specific library of R packages, analogous
+to virtual environments created by 
+[uv](https://docs.astral.sh/uv/) or 
+[venv](https://docs.python.org/3/library/venv.html) in python.
+
+Users specify the required R packages in a configuration file first, together
+with their source repositories. Its functionality is similar to that of the
+[renv R package](https://rstudio.github.io/renv/), but `rv` is a command
+line utility written in rust and uses a declarative approach instead of 
+tracking the content current R library (more details below).
+
+Just like `renv`, `rv` caches packages across projects on the local system, 
+so they are only downloaded once. (More details are 
+[here](https://a2-ai.github.io/rv-docs/concepts/cache/)).
+
+:::
+::: {.column width="25%"}
+
+![](rv-logo.png){fig-pos='H'}
+
+:::
+:::
+
+## Installation
+
+`rv` binaries are available from its 
+[github repository](https://github.com/A2-ai/rv/releases)[^1].
+Alternatively, for Mac OS X, `rv` is available as a custom tap via
+[homebrew](https://brew.sh/2025/04/29/homebrew-4.5.0/)
+
+```
+brew tap a2-ai/homebrew-tap
+brew install a2-ai/homebrew-tap/rv
+```
+[^1]: For additional instructions, including how to install `rv` on Windows,
+please consult the `rv`
+[documentation website](https://a2-ai.github.io/rv-docs/intro/installation/)
+
+
+## Initializing an rv environment
+
+Currently, I am using Posit's RStudio IDE for my R projects and start by 
+creating an 
+[RStudio project](https://docs.posit.co/ide/user/ide/guide/code/projects.html),
+but any folder can be be used to create an `rv` project. Normally, I would
+install the
+[renv R package](https://pkgs.rstudio.com/renv/index.html)
+next, and initialize an `renv` environment within the RStudio project.
+
+To use `rv`, I follow a similar strategy:
+
+1. First, I create an RStudio project in a new directory.
+2. Next, I navigate to the directory and run `rv init .` to initialize the `rv`
+  environment within it [^2]. 
+  
+
+    ```
+    cd <RStudio Project Directory>
+    rv init .
+    ```
+
+  [^2]: `rv` can create a new folder on the fly, simply provide its name e.g.
+  `rv init <project name>`
+  
+  This command creates
+  
+  - the `rproject.toml` file
+  - the `rv` directory, containing the `library` and `scripts` subfolders
+  - the `.Rprofile` file that triggers the execution of the 
+    `rv/scripts/rvr.R` and `rv/scripts/activate.R` scripts when an R session
+    is (re)started in this directory[^3].
+    
+    [^3]: The `rv/scripts/rvr.R` script creates an environment called `.rv` in 
+    the local R session with functions that manage system calls to the `rv`
+    command line tool, check out `ls(envir = .rv)` for details. The 
+    `rv/scripts/activate.R` script reads the user-specified source repositories
+    from the `rproject.toml` file and (over-)writes `options("repos")`.
+    
+3. Finally, I restart my R session to activate the environment. R greets me with
+  the following messages, confirming that my `rv` environment is active:
+  
+    ```
+    rv repositories active!
+    repositories: 
+      CRAN: https://cloud.r-project.org/
+
+    rv libpaths active!
+    library paths: 
+      /Users/sandmann/repositories/rv/rv/library/4.5/arm64
+      /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/library
+    ```
+
+## Customizing the `rproject.toml` file
+
+The default `rproject.toml` that was created above contains the following
+content:
+
+```
+[project]
+name = "rv"
+r_version = "4.5"
+
+repositories = [
+    {alias = "CRAN", url = "https://cloud.r-project.org/"},
+]
+
+dependencies = [
+]
+```
+
+- `r_version` specfiies the R version used in this environment
+  - Usually whichever `R` command was found in the `PATH`, but this can 
+    be overriden by adding the `--r-version` argument to the `rv init` command.
+    
+- `repositories` specifies one or more CRAN-like repositories to retrieve 
+  packages from, optionally with an `alias` to refer to in other sections.
+    - By default, the cloud mirror of the `CRAN` repository is available, but it
+      can be suppressed if the `--no-repositories` argument is used with the
+      `rv init` command.
+      
+- `dependencies` is a list of R packages that should be installed in this
+  environment
+    - This field is empty by default, but packages can be added when the 
+      environment is created using the `--add` command line argument of the
+      `rv init` command.
+
+### Adding R packages to the environment
+
+The simplest way to add an R package to an environment is using the `rv add`
+command, e.g. let's add the `here` package to the config file - but delay its
+actual installation by specifying the `--no-sync` argument:
+
+```
+rv add --no-sync here
+```
+
+The `rproject.toml` file now contains
+
+```
+dependencies = [
+    "here",
+]
+```
+
+but the `here` package has neither been retrieved nor installed in the library,
+yet [^4].
+
+[^4]: At the time of writing, there is no equivalent `rv remove` sub-command
+to remove packages from the configuration file. Packages can be removed by
+editing the `rproject.toml` file manually.
+
+
+The `rv plan` command will prompt `rv` to look for installation candidates
+of the `here` package - and its dependencies - in the specified repositories.
+
+```
+rv plan
+
++ here (1.0.1, binary from https://cloud.r-project.org/)
++ rprojroot (2.1.1, binary from https://cloud.r-project.org/)
+```
+
+At the time of writing, `here` (version 1.0.1) is available from CRAN, along
+with its dependency `rprojectroot` (version 2.1.1).
+
+To install these two packages, we synchronize the environment with the newly
+updated configurlation file:
+
+```
+rv sync
+
++ here (1.0.1, binary from https://cloud.r-project.org/) in 639ms
++ rprojroot (2.1.1, binary from https://cloud.r-project.org/) in 898ms
+```
+
+## Managing Bioconductor packages
+
+[Bioconductor](https://www.bioconductor.org/) releases collections of R packages
+tied to a specific version of R. For example, Bioconductor 3.21 is 
+[compatible with R 4.5](https://bioconductor.org/about/release-announcements/).
+
+As opposed to CRAN, Bioconductor packages are managed across multiple CRAN-like
+repositories, which need to be added to the `rv` configuration file separately.
+
+Let's add the Bioconductor repositories for release 3.21, by manually adding
+the following lines into the `repositories` section of the `rproject.toml` file,
+(as described in the
+[rv documentation](https://a2-ai.github.io/rv-docs/config/repositories/#bioconductor)
+).
+
+```
+    { alias = "BioCsoft", url = "https://bioconductor.org/packages/3.21/bioc" },
+    { alias = "BioCann", url = "https://bioconductor.org/packages/3.21/data/annotation" },
+    { alias = "BioCexp", url = "https://bioconductor.org/packages/3.21/data/experiment" },
+    { alias = "BioCworkflows", url = "https://bioconductor.org/packages/3.21/workflows" },
+```
+
+Now, we can add e.g. the `limma` Bioconductor package (and its dependencies) to 
+our environment and install them at the same time:
+
+```
+rv add limma
+```
+
+## Specifying package versions
+
+`rv` offers 
+[two ways](https://a2-ai.github.io/rv-docs/cookbook/snapshot_pkg/)
+to control which version of a package is installed.
+
+1. Specifying which snapshot of a repository to use for a specific package, or
+2. Providing the URL of an archived package
+
+### Pinning repository snapshots
+
+For data analysis projects, it is often useful to pin the version of the R
+packages that are used, e.g. to restore the environment at a later date.
+
+Posit offers (nearly) daily snapshots of the CRAN repository, identified
+by date. For example, to pin version of packages available on 2025/08/29, 
+the 
+[Posit's Package Manager website](https://packagemanager.posit.co/client/#/repos/bioconductor/setup?snapshot=2025-08-29)
+provides the `https://packagemanager.posit.co/cran/2025-08-29` URL
+(for Mac OS X).
+
+::: {.callout-note}
+
+#### rv configure
+
+The `rv configure repository` command allows me to add, replace, update or
+remove individual repositories from the `rproject.toml` file - or to clear the
+`repositories` section entirely.
+
+💡 By default, new repositories as added to the end of the list; the `--first`, 
+`--before`, `--after` and `--last` arguments can be included to change this
+behavior.`
+
+:::
+
+Let's replace both the CRAN URL I added above with a pointer to the snapshot:
+
+```
+rv configure repository \
+  update CRAN \
+  --url https://packagemanager.posit.co/cran/2025-08-29
+```
+
+Going forward, the environment will always reflect the R package versions
+available on `2025/08/29`.
+
+::: {.callout-note}
+
+#### Bioconductor snapshots
+
+Posit offers snapshots of Bioconductor packages as well, but given the
+Bioconductor's 
+[semi-annual release cycle](https://bioconductor.org/about/release-announcements/)
+it is often sufficient to point to the specific bioconductor release instead,
+e.g. the Bioconductor URLs we added above point to release `3.21`. 
+
+If you would like to be extra thorough and pin a specific snapshot of the 
+Bioconductor repositories, 
+[Posit's package manager](https://packagemanager.posit.co/client/#/repos/bioconductor/setup?bioconductor_version=3.21&snapshot=2025-08-29)
+has you covered. But just a outlined above, we have to update all _four_
+Bioconductor repositories (BioCsoft, BioCann, BioCexp and BioCworkflows) with
+the corresponding URLs of their snapshots, e.g. to retrieve packages
+snapshot on 2025/08/22:
+
+```
+    { alias = "BioCsoft", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc" },
+    { alias = "BioCann", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/annotation" },
+    { alias = "BioCexp", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/experiment" },
+    { alias = "BioCworkflows", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/workflows" },
+```
+
+and then reinstall the packages from the selected snapshots:
+
+```
+rv sync
+
+Installing {"here", "limma"}                                                                               
++ here (1.0.1, binary from https://packagemanager.posit.co/cran/2025-08-29) in 2531ms
++ limma (3.64.3, source from https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc) in 8357ms
++ rprojroot (2.1.1, binary from https://packagemanager.posit.co/cran/2025-08-29) in 389ms
++ statmod (1.5.0, binary from https://packagemanager.posit.co/cran/2025-08-29) in 907ms
+```
+
+:::
+
+### Installing a package from a specific snapshot
+
+Sometimes, I need to revisit an analysis that was performed with a specific
+version of a single package. For example, I conducted an analysis with
+`limma` version `3.64.1` in June 2025. 
+
+But at the time of writing, the latest Bioconductor (release 3.21) repositories
+contains version `3.64.3` of the `limma` R package - the authors submitted a
+critical bugfix, and the release version of the package was updated.
+
+To obtain a copy of the previous version (say 3.64.1), I can leverage Posit's
+Package manager once again, and specify an earlier snapshot. But _this time_
+I only want to retrieve the older version of the `limma` package, while all
+of the other Bioconductor packages will be pull from the most recent snapshot.
+
+Luckily, I can add multiple repositories to the configuration file, which are
+accessed in the order they are listed. Let's add the `BioCsoft_old` alias.
+pointing to the snapshot from 2025-07-01, at the bottom of the list:
+
+```
+    { alias = "BioCsoft", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc" },
+    { alias = "BioCann", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/annotation" },
+    { alias = "BioCexp", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/experiment" },
+    { alias = "BioCworkflows", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/workflows" },
+        { alias = "BioCsoft_old", url = "https://packagemanager.posit.co/bioconductor/2025-07-01/packages/3.21/bioc" },
+```
+
+Now `limma` is available from two repositories - `BioCsoft` and `BioCsoft_old`.
+By default, the first repository that contains a requested package is used, and
+there is nothing to do:
+
+```
+rv plan
+Nothing to do
+```
+
+To force `rv` to install `limma` from the `BioCsoft_old` source, we 
+[specify it explicitly](https://a2-ai.github.io/rv-docs/cookbook/snapshot_pkg/)
+in the `dependencies` section:
+
+```
+dependencies = [
+    "here",
+    { name = "limma", repository = "BioCsoft_old" },
+]
+```
+
+Now, `rv sync` replaces the current version of limma with the older one -
+excellent!
+
+```
+rv sync
+
+- limma
++ limma (3.64.1, source from https://packagemanager.posit.co/bioconductor/2025-07-01/packages/3.21/bioc) in 10ms
+```
+
+### Installing an archived version of a CRAN package
+
+Version 1.0.1 of the `here` package was released on CRAN on 2020-12-13. But
+what if we wanted to reproduce an analysis environment that had been created
+before, with `here` version `1.0.0` instead?
+
+Luckily, CRAN stores copies of the archived R packages as well, including
+[here v1.0.0](https://cran.r-project.org/src/contrib/Archive/here/).
+
+To force `rv` to install this version of the package, we 
+[specify the URL](https://a2-ai.github.io/rv-docs/cookbook/archive_pkg/)
+in the `dependencies` section of the configuration file explicitely, e.g.
+
+```
+dependencies = [
+    { name = "here", url = "https://cran.r-project.org/src/contrib/Archive/here/here_1.0.0.tar.gz" },
+    { name = "limma", repository = "BioCsoft_old" },
+]
+```
+
+and then synchronize the environment with its config file
+
+```
+rv sync
+
+- here
++ here (1.0.0, source from https://cran.r-project.org/src/contrib/Archive/here/here_1.0.0.tar.gz) in 532ms
+```
+
+Great, the previously installed version of the `here` package has been 
+removed, and the (older) version 1.0.0 has been installed instead.
+
+## Collecting information about the environment
+
+Finally, `rv` also provides sub-commands to characterize the environment it
+manages, including e.g.
+
+### rv summary
+
+We can get a quick overview of the `rv` project with the `rv summary`
+command:
+
+```
+rv summary
+
+== System Information == 
+OS: macos (arm64)
+R Version: 4.5
+
+Num Workers for Sync: 8 (8 cpus available)
+Cache Location: /Users/sandmann/.cache/rv
+
+== Dependencies == 
+Library: rv/library/4.5/arm64
+Installed: 4/4
+
+Package Sources: 
+  BioCsoft: 1/1 binary packages
+  CRAN: 3/3 binary packages
+
+== Remote == 
+BioCann (https://bioconductor.org/packages/3.21/data/annotation): 0 binary packages, 928 source packages
+BioCexp (https://bioconductor.org/packages/3.21/data/experiment): 0 binary packages, 431 source packages
+BioCsoft (https://bioconductor.org/packages/3.21/bioc): 2237 binary packages, 2310 source packages
+BioCworkflows (https://bioconductor.org/packages/3.21/workflows): 0 binary packages, 27 source packages
+CRAN (https://packagemanager.posit.co/cran/2025-08-29): 19734 binary packages, 22598 source packages
+```
+
+### rv tree
+
+The `rv tree` command displays the dependency tree, optionally limited to a 
+user-specified depth (`--depth 1`: only root deps, `--depth 2`: 
+root dependencies & their direct  dependencies, and so on)
+
+```
+rv tree
+
+▶ here [version: 1.0.1, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]
+└─ rprojroot [version: 2.1.1, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]
+
+▶ limma [version: 3.64.3, source: https://bioconductor.org/packages/3.21/bioc, type: binary]
+└─ statmod [version: 1.5.0, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]
+```
+
+The `rv cache` and `rv library` commands return the path to the cached packages,
+and the library directory, respectively. `rv sysdeps` shows the status of
+required system dependencies (if any).
+
+::: {.callout-note}
+
+### rv versus renv
+
+`renv` allows users to install R packages interactively, e.g. using shims
+for the `install.packages()` or its own `renv::install()` functions. Afterwards,
+the `renv::snapshot()` function is used to record the versions and source URLs
+of each retrieved package in its `renv.lock` file. This file can be used to
+recreate the environment on a different system, as long as the packages 
+remain available under the same URLs.
+
+`rv` uses the reverse strategy: first, users add CRAN-style repositories to the
+`rproject.toml` file. Next, they specify which packages to install. Finally, 
+the `rv sync` command reads the `rproject.toml` file and installs the R
+packages, thus synchronizing the environment with its description in the
+configuration file. Importantly, which _version_ of an R package is installed
+by `rv` is entirely dictated by the available repositories, which are searched
+in the order they are listed. In other words, instead of specifying the
+desired version separately for each R package, users can specify a _snapshot_
+or an entire repository.
+
+|                     | renv                                  | rv                                                          |
+|---------------------|---------------------------------------|-------------------------------------------------------------|
+| License             | MIT                                   | MIT                                                         |
+| First released      | July, 2023                            | March, 2025                                                 |
+| Contributors        | 70                                    | 5                                                           |
+| Writen in           | R                                     | rust                                                        |
+| Developed by        | Posit                                 | A2-ai                                                       |
+| Documentation       | [https://rstudio.github.io/renv/](https://rstudio.github.io/renv/)       | [https://a2-ai.github.io/rv-docs/](https://a2-ai.github.io/rv-docs/)                          |
+| Version control     | Lock file pins exact package versions | Repository snapshots imply versions                         |
+| Bioconductor        | Supported explicitely                 | BioC repositories are accessed like other CRAN-like sources |
+| System dependencies | Not tracked or managed                | Can be enumerated with `rv sysdeps`                        |
+
+:::
+
+## Summary
+
+I am really impressed by `rv`. Its command line interface is very well designed
+and the documentation is top notch. So much so, that I will explore using
+it in my next analysis projects. 
+
+- `rv` is great new entry to managing a project-specific R library. I really
+  like its declarative approach and the fine-grained control over the 
+  source repositories. 
+  - I can see it work especially well for containerized (e.g. dockerized)
+  environments. 
+  - It's a relatively new tool, and time will tell how broadly it is adopted by
+  the R community (and how committed the authors are to maintaining it long
+  term, as for every open source project). 
+  - I would love to see a more convenient integration of the Bioconductor
+  repositories, which currently require manual adding / updating four
+  different CRAN-like sources.
+  - I also noticed that running `quarto render` in an `rv` project folder
+  is problematic: it appears that `quarto` recursively renders all R markdown
+  documents included in the `rv/library` subfolders [^5].
+
+  [^5]: This could be prevented by changing the folder name from `rv` into
+  `.rv` (similar to the `.renv` folder), as hidden folders are automatically
+  ignored by `quarto render`.
+
+- In contrast, `renv` is a well established tool, and integrates into Posit's
+  RStudio IDE. It mirrors the iterative way analysts add or update R packages 
+  during an analysis project, snapshoting the current state as they go along. 
+  By overloading base functions e.g. `install.packages()`, it offers a seamless
+  user experience. 
+  - `renv` works well for me, and I am very grateful to the Posit team - 
+  especially [Kevin Ushey](https://github.com/kevinushey) - for keeping it up to
+  date for, including the support of private github repositories and
+  Bioconductor 🧡.
+  

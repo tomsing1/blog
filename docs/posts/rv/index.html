@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Thomas Sandmann">
+
+<title>Managing project-specific R libraries with rv – Thomas Sandmann's blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../favicon.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c07affc570349fbc852954012c2f59b1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-0946a22cded24b7860b3b7ee991a1fe2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-c07affc570349fbc852954012c2f59b1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Thomas Sandmann’s blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/tomsing1"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/thomas-sandmann/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://genomic.social/@thomas_sandmann"> <i class="bi bi-mastodon" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <div class="quarto-title-block"><div><h1 class="title">Managing project-specific R libraries with <code>rv</code></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">TIL</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Thomas Sandmann </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 1, 20245</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">tl;dr</a></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
+  <li><a href="#initializing-an-rv-environment" id="toc-initializing-an-rv-environment" class="nav-link" data-scroll-target="#initializing-an-rv-environment">Initializing an rv environment</a></li>
+  <li><a href="#customizing-the-rproject.toml-file" id="toc-customizing-the-rproject.toml-file" class="nav-link" data-scroll-target="#customizing-the-rproject.toml-file">Customizing the <code>rproject.toml</code> file</a>
+  <ul>
+  <li><a href="#adding-r-packages-to-the-environment" id="toc-adding-r-packages-to-the-environment" class="nav-link" data-scroll-target="#adding-r-packages-to-the-environment">Adding R packages to the environment</a></li>
+  </ul></li>
+  <li><a href="#managing-bioconductor-packages" id="toc-managing-bioconductor-packages" class="nav-link" data-scroll-target="#managing-bioconductor-packages">Managing Bioconductor packages</a></li>
+  <li><a href="#specifying-package-versions" id="toc-specifying-package-versions" class="nav-link" data-scroll-target="#specifying-package-versions">Specifying package versions</a>
+  <ul>
+  <li><a href="#pinning-repository-snapshots" id="toc-pinning-repository-snapshots" class="nav-link" data-scroll-target="#pinning-repository-snapshots">Pinning repository snapshots</a></li>
+  <li><a href="#installing-a-package-from-a-specific-snapshot" id="toc-installing-a-package-from-a-specific-snapshot" class="nav-link" data-scroll-target="#installing-a-package-from-a-specific-snapshot">Installing a package from a specific snapshot</a></li>
+  <li><a href="#installing-an-archived-version-of-a-cran-package" id="toc-installing-an-archived-version-of-a-cran-package" class="nav-link" data-scroll-target="#installing-an-archived-version-of-a-cran-package">Installing an archived version of a CRAN package</a></li>
+  </ul></li>
+  <li><a href="#collecting-information-about-the-environment" id="toc-collecting-information-about-the-environment" class="nav-link" data-scroll-target="#collecting-information-about-the-environment">Collecting information about the environment</a>
+  <ul>
+  <li><a href="#rv-summary" id="toc-rv-summary" class="nav-link" data-scroll-target="#rv-summary">rv summary</a></li>
+  <li><a href="#rv-tree" id="toc-rv-tree" class="nav-link" data-scroll-target="#rv-tree">rv tree</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">tl;dr</h2>
+<p>Today, I learned how to manage project-specific R libraries with the <code>rv</code> command line tool.</p>
+</section>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<div class="columns">
+<div class="column" style="width:75%;">
+<p>The <code>rv</code> project is a relatively recent open source project, developed by <a href="https://a2-ai.com/">A2-Ai</a>, a clinical consultancy firm, and first released under the <a href="https://github.com/A2-ai/rv/blob/main/LICENSE">MIT license</a> in March 2025. It manages a project-specific library of R packages, analogous to virtual environments created by <a href="https://docs.astral.sh/uv/">uv</a> or <a href="https://docs.python.org/3/library/venv.html">venv</a> in python.</p>
+<p>Users specify the required R packages in a configuration file first, together with their source repositories. Its functionality is similar to that of the <a href="https://rstudio.github.io/renv/">renv R package</a>, but <code>rv</code> is a command line utility written in rust and uses a declarative approach instead of tracking the content current R library (more details below).</p>
+<p>Just like <code>renv</code>, <code>rv</code> caches packages across projects on the local system, so they are only downloaded once. (More details are <a href="https://a2-ai.github.io/rv-docs/concepts/cache/">here</a>).</p>
+</div><div class="column" style="width:25%;">
+<p><img src="rv-logo.png" class="img-fluid" data-fig-pos="H"></p>
+</div>
+</div>
+</section>
+<section id="installation" class="level2">
+<h2 class="anchored" data-anchor-id="installation">Installation</h2>
+<p><code>rv</code> binaries are available from its <a href="https://github.com/A2-ai/rv/releases">github repository</a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Alternatively, for Mac OS X, <code>rv</code> is available as a custom tap via <a href="https://brew.sh/2025/04/29/homebrew-4.5.0/">homebrew</a></p>
+<pre><code>brew tap a2-ai/homebrew-tap
+brew install a2-ai/homebrew-tap/rv</code></pre>
+</section>
+<section id="initializing-an-rv-environment" class="level2">
+<h2 class="anchored" data-anchor-id="initializing-an-rv-environment">Initializing an rv environment</h2>
+<p>Currently, I am using Posit’s RStudio IDE for my R projects and start by creating an <a href="https://docs.posit.co/ide/user/ide/guide/code/projects.html">RStudio project</a>, but any folder can be be used to create an <code>rv</code> project. Normally, I would install the <a href="https://pkgs.rstudio.com/renv/index.html">renv R package</a> next, and initialize an <code>renv</code> environment within the RStudio project.</p>
+<p>To use <code>rv</code>, I follow a similar strategy:</p>
+<ol type="1">
+<li><p>First, I create an RStudio project in a new directory.</p></li>
+<li><p>Next, I navigate to the directory and run <code>rv init .</code> to initialize the <code>rv</code> environment within it <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<pre><code>cd &lt;RStudio Project Directory&gt;
+rv init .</code></pre></li>
+</ol>
+<p>This command creates</p>
+<ul>
+<li>the <code>rproject.toml</code> file</li>
+<li>the <code>rv</code> directory, containing the <code>library</code> and <code>scripts</code> subfolders</li>
+<li>the <code>.Rprofile</code> file that triggers the execution of the <code>rv/scripts/rvr.R</code> and <code>rv/scripts/activate.R</code> scripts when an R session is (re)started in this directory<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>.</li>
+</ul>
+<ol start="3" type="1">
+<li><p>Finally, I restart my R session to activate the environment. R greets me with the following messages, confirming that my <code>rv</code> environment is active:</p>
+<pre><code>rv repositories active!
+repositories: 
+  CRAN: https://cloud.r-project.org/
+
+rv libpaths active!
+library paths: 
+  /Users/sandmann/repositories/rv/rv/library/4.5/arm64
+  /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/library</code></pre></li>
+</ol>
+</section>
+<section id="customizing-the-rproject.toml-file" class="level2">
+<h2 class="anchored" data-anchor-id="customizing-the-rproject.toml-file">Customizing the <code>rproject.toml</code> file</h2>
+<p>The default <code>rproject.toml</code> that was created above contains the following content:</p>
+<pre><code>[project]
+name = "rv"
+r_version = "4.5"
+
+repositories = [
+    {alias = "CRAN", url = "https://cloud.r-project.org/"},
+]
+
+dependencies = [
+]</code></pre>
+<ul>
+<li><code>r_version</code> specfiies the R version used in this environment
+<ul>
+<li>Usually whichever <code>R</code> command was found in the <code>PATH</code>, but this can be overriden by adding the <code>--r-version</code> argument to the <code>rv init</code> command.</li>
+</ul></li>
+<li><code>repositories</code> specifies one or more CRAN-like repositories to retrieve packages from, optionally with an <code>alias</code> to refer to in other sections.
+<ul>
+<li>By default, the cloud mirror of the <code>CRAN</code> repository is available, but it can be suppressed if the <code>--no-repositories</code> argument is used with the <code>rv init</code> command.</li>
+</ul></li>
+<li><code>dependencies</code> is a list of R packages that should be installed in this environment
+<ul>
+<li>This field is empty by default, but packages can be added when the environment is created using the <code>--add</code> command line argument of the <code>rv init</code> command.</li>
+</ul></li>
+</ul>
+<section id="adding-r-packages-to-the-environment" class="level3">
+<h3 class="anchored" data-anchor-id="adding-r-packages-to-the-environment">Adding R packages to the environment</h3>
+<p>The simplest way to add an R package to an environment is using the <code>rv add</code> command, e.g.&nbsp;let’s add the <code>here</code> package to the config file - but delay its actual installation by specifying the <code>--no-sync</code> argument:</p>
+<pre><code>rv add --no-sync here</code></pre>
+<p>The <code>rproject.toml</code> file now contains</p>
+<pre><code>dependencies = [
+    "here",
+]</code></pre>
+<p>but the <code>here</code> package has neither been retrieved nor installed in the library, yet <a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
+<p>The <code>rv plan</code> command will prompt <code>rv</code> to look for installation candidates of the <code>here</code> package - and its dependencies - in the specified repositories.</p>
+<pre><code>rv plan
+
++ here (1.0.1, binary from https://cloud.r-project.org/)
++ rprojroot (2.1.1, binary from https://cloud.r-project.org/)</code></pre>
+<p>At the time of writing, <code>here</code> (version 1.0.1) is available from CRAN, along with its dependency <code>rprojectroot</code> (version 2.1.1).</p>
+<p>To install these two packages, we synchronize the environment with the newly updated configurlation file:</p>
+<pre><code>rv sync
+
++ here (1.0.1, binary from https://cloud.r-project.org/) in 639ms
++ rprojroot (2.1.1, binary from https://cloud.r-project.org/) in 898ms</code></pre>
+</section>
+</section>
+<section id="managing-bioconductor-packages" class="level2">
+<h2 class="anchored" data-anchor-id="managing-bioconductor-packages">Managing Bioconductor packages</h2>
+<p><a href="https://www.bioconductor.org/">Bioconductor</a> releases collections of R packages tied to a specific version of R. For example, Bioconductor 3.21 is <a href="https://bioconductor.org/about/release-announcements/">compatible with R 4.5</a>.</p>
+<p>As opposed to CRAN, Bioconductor packages are managed across multiple CRAN-like repositories, which need to be added to the <code>rv</code> configuration file separately.</p>
+<p>Let’s add the Bioconductor repositories for release 3.21, by manually adding the following lines into the <code>repositories</code> section of the <code>rproject.toml</code> file, (as described in the <a href="https://a2-ai.github.io/rv-docs/config/repositories/#bioconductor">rv documentation</a> ).</p>
+<pre><code>    { alias = "BioCsoft", url = "https://bioconductor.org/packages/3.21/bioc" },
+    { alias = "BioCann", url = "https://bioconductor.org/packages/3.21/data/annotation" },
+    { alias = "BioCexp", url = "https://bioconductor.org/packages/3.21/data/experiment" },
+    { alias = "BioCworkflows", url = "https://bioconductor.org/packages/3.21/workflows" },</code></pre>
+<p>Now, we can add e.g.&nbsp;the <code>limma</code> Bioconductor package (and its dependencies) to our environment and install them at the same time:</p>
+<pre><code>rv add limma</code></pre>
+</section>
+<section id="specifying-package-versions" class="level2">
+<h2 class="anchored" data-anchor-id="specifying-package-versions">Specifying package versions</h2>
+<p><code>rv</code> offers <a href="https://a2-ai.github.io/rv-docs/cookbook/snapshot_pkg/">two ways</a> to control which version of a package is installed.</p>
+<ol type="1">
+<li>Specifying which snapshot of a repository to use for a specific package, or</li>
+<li>Providing the URL of an archived package</li>
+</ol>
+<section id="pinning-repository-snapshots" class="level3">
+<h3 class="anchored" data-anchor-id="pinning-repository-snapshots">Pinning repository snapshots</h3>
+<p>For data analysis projects, it is often useful to pin the version of the R packages that are used, e.g.&nbsp;to restore the environment at a later date.</p>
+<p>Posit offers (nearly) daily snapshots of the CRAN repository, identified by date. For example, to pin version of packages available on 2025/08/29, the <a href="https://packagemanager.posit.co/client/#/repos/bioconductor/setup?snapshot=2025-08-29">Posit’s Package Manager website</a> provides the <code>https://packagemanager.posit.co/cran/2025-08-29</code> URL (for Mac OS X).</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+rv configure
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <code>rv configure repository</code> command allows me to add, replace, update or remove individual repositories from the <code>rproject.toml</code> file - or to clear the <code>repositories</code> section entirely.</p>
+<p>💡 By default, new repositories as added to the end of the list; the <code>--first</code>, <code>--before</code>, <code>--after</code> and <code>--last</code> arguments can be included to change this behavior.`</p>
+</div>
+</div>
+<p>Let’s replace both the CRAN URL I added above with a pointer to the snapshot:</p>
+<pre><code>rv configure repository \
+  update CRAN \
+  --url https://packagemanager.posit.co/cran/2025-08-29</code></pre>
+<p>Going forward, the environment will always reflect the R package versions available on <code>2025/08/29</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Bioconductor snapshots
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Posit offers snapshots of Bioconductor packages as well, but given the Bioconductor’s <a href="https://bioconductor.org/about/release-announcements/">semi-annual release cycle</a> it is often sufficient to point to the specific bioconductor release instead, e.g.&nbsp;the Bioconductor URLs we added above point to release <code>3.21</code>.</p>
+<p>If you would like to be extra thorough and pin a specific snapshot of the Bioconductor repositories, <a href="https://packagemanager.posit.co/client/#/repos/bioconductor/setup?bioconductor_version=3.21&amp;snapshot=2025-08-29">Posit’s package manager</a> has you covered. But just a outlined above, we have to update all <em>four</em> Bioconductor repositories (BioCsoft, BioCann, BioCexp and BioCworkflows) with the corresponding URLs of their snapshots, e.g.&nbsp;to retrieve packages snapshot on 2025/08/22:</p>
+<pre><code>    { alias = "BioCsoft", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc" },
+    { alias = "BioCann", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/annotation" },
+    { alias = "BioCexp", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/experiment" },
+    { alias = "BioCworkflows", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/workflows" },</code></pre>
+<p>and then reinstall the packages from the selected snapshots:</p>
+<pre><code>rv sync
+
+Installing {"here", "limma"}                                                                               
++ here (1.0.1, binary from https://packagemanager.posit.co/cran/2025-08-29) in 2531ms
++ limma (3.64.3, source from https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc) in 8357ms
++ rprojroot (2.1.1, binary from https://packagemanager.posit.co/cran/2025-08-29) in 389ms
++ statmod (1.5.0, binary from https://packagemanager.posit.co/cran/2025-08-29) in 907ms</code></pre>
+</div>
+</div>
+</section>
+<section id="installing-a-package-from-a-specific-snapshot" class="level3">
+<h3 class="anchored" data-anchor-id="installing-a-package-from-a-specific-snapshot">Installing a package from a specific snapshot</h3>
+<p>Sometimes, I need to revisit an analysis that was performed with a specific version of a single package. For example, I conducted an analysis with <code>limma</code> version <code>3.64.1</code> in June 2025.</p>
+<p>But at the time of writing, the latest Bioconductor (release 3.21) repositories contains version <code>3.64.3</code> of the <code>limma</code> R package - the authors submitted a critical bugfix, and the release version of the package was updated.</p>
+<p>To obtain a copy of the previous version (say 3.64.1), I can leverage Posit’s Package manager once again, and specify an earlier snapshot. But <em>this time</em> I only want to retrieve the older version of the <code>limma</code> package, while all of the other Bioconductor packages will be pull from the most recent snapshot.</p>
+<p>Luckily, I can add multiple repositories to the configuration file, which are accessed in the order they are listed. Let’s add the <code>BioCsoft_old</code> alias. pointing to the snapshot from 2025-07-01, at the bottom of the list:</p>
+<pre><code>    { alias = "BioCsoft", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc" },
+    { alias = "BioCann", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/annotation" },
+    { alias = "BioCexp", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/experiment" },
+    { alias = "BioCworkflows", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/workflows" },
+        { alias = "BioCsoft_old", url = "https://packagemanager.posit.co/bioconductor/2025-07-01/packages/3.21/bioc" },</code></pre>
+<p>Now <code>limma</code> is available from two repositories - <code>BioCsoft</code> and <code>BioCsoft_old</code>. By default, the first repository that contains a requested package is used, and there is nothing to do:</p>
+<pre><code>rv plan
+Nothing to do</code></pre>
+<p>To force <code>rv</code> to install <code>limma</code> from the <code>BioCsoft_old</code> source, we <a href="https://a2-ai.github.io/rv-docs/cookbook/snapshot_pkg/">specify it explicitly</a> in the <code>dependencies</code> section:</p>
+<pre><code>dependencies = [
+    "here",
+    { name = "limma", repository = "BioCsoft_old" },
+]</code></pre>
+<p>Now, <code>rv sync</code> replaces the current version of limma with the older one - excellent!</p>
+<pre><code>rv sync
+
+- limma
++ limma (3.64.1, source from https://packagemanager.posit.co/bioconductor/2025-07-01/packages/3.21/bioc) in 10ms</code></pre>
+</section>
+<section id="installing-an-archived-version-of-a-cran-package" class="level3">
+<h3 class="anchored" data-anchor-id="installing-an-archived-version-of-a-cran-package">Installing an archived version of a CRAN package</h3>
+<p>Version 1.0.1 of the <code>here</code> package was released on CRAN on 2020-12-13. But what if we wanted to reproduce an analysis environment that had been created before, with <code>here</code> version <code>1.0.0</code> instead?</p>
+<p>Luckily, CRAN stores copies of the archived R packages as well, including <a href="https://cran.r-project.org/src/contrib/Archive/here/">here v1.0.0</a>.</p>
+<p>To force <code>rv</code> to install this version of the package, we <a href="https://a2-ai.github.io/rv-docs/cookbook/archive_pkg/">specify the URL</a> in the <code>dependencies</code> section of the configuration file explicitely, e.g.</p>
+<pre><code>dependencies = [
+    { name = "here", url = "https://cran.r-project.org/src/contrib/Archive/here/here_1.0.0.tar.gz" },
+    { name = "limma", repository = "BioCsoft_old" },
+]</code></pre>
+<p>and then synchronize the environment with its config file</p>
+<pre><code>rv sync
+
+- here
++ here (1.0.0, source from https://cran.r-project.org/src/contrib/Archive/here/here_1.0.0.tar.gz) in 532ms</code></pre>
+<p>Great, the previously installed version of the <code>here</code> package has been removed, and the (older) version 1.0.0 has been installed instead.</p>
+</section>
+</section>
+<section id="collecting-information-about-the-environment" class="level2">
+<h2 class="anchored" data-anchor-id="collecting-information-about-the-environment">Collecting information about the environment</h2>
+<p>Finally, <code>rv</code> also provides sub-commands to characterize the environment it manages, including e.g.</p>
+<section id="rv-summary" class="level3">
+<h3 class="anchored" data-anchor-id="rv-summary">rv summary</h3>
+<p>We can get a quick overview of the <code>rv</code> project with the <code>rv summary</code> command:</p>
+<pre><code>rv summary
+
+== System Information == 
+OS: macos (arm64)
+R Version: 4.5
+
+Num Workers for Sync: 8 (8 cpus available)
+Cache Location: /Users/sandmann/.cache/rv
+
+== Dependencies == 
+Library: rv/library/4.5/arm64
+Installed: 4/4
+
+Package Sources: 
+  BioCsoft: 1/1 binary packages
+  CRAN: 3/3 binary packages
+
+== Remote == 
+BioCann (https://bioconductor.org/packages/3.21/data/annotation): 0 binary packages, 928 source packages
+BioCexp (https://bioconductor.org/packages/3.21/data/experiment): 0 binary packages, 431 source packages
+BioCsoft (https://bioconductor.org/packages/3.21/bioc): 2237 binary packages, 2310 source packages
+BioCworkflows (https://bioconductor.org/packages/3.21/workflows): 0 binary packages, 27 source packages
+CRAN (https://packagemanager.posit.co/cran/2025-08-29): 19734 binary packages, 22598 source packages</code></pre>
+</section>
+<section id="rv-tree" class="level3">
+<h3 class="anchored" data-anchor-id="rv-tree">rv tree</h3>
+<p>The <code>rv tree</code> command displays the dependency tree, optionally limited to a user-specified depth (<code>--depth 1</code>: only root deps, <code>--depth 2</code>: root dependencies &amp; their direct dependencies, and so on)</p>
+<pre><code>rv tree
+
+▶ here [version: 1.0.1, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]
+└─ rprojroot [version: 2.1.1, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]
+
+▶ limma [version: 3.64.3, source: https://bioconductor.org/packages/3.21/bioc, type: binary]
+└─ statmod [version: 1.5.0, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]</code></pre>
+<p>The <code>rv cache</code> and <code>rv library</code> commands return the path to the cached packages, and the library directory, respectively. <code>rv sysdeps</code> shows the status of required system dependencies (if any).</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+rv versus renv
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>renv</code> allows users to install R packages interactively, e.g.&nbsp;using shims for the <code>install.packages()</code> or its own <code>renv::install()</code> functions. Afterwards, the <code>renv::snapshot()</code> function is used to record the versions and source URLs of each retrieved package in its <code>renv.lock</code> file. This file can be used to recreate the environment on a different system, as long as the packages remain available under the same URLs.</p>
+<p><code>rv</code> uses the reverse strategy: first, users add CRAN-style repositories to the <code>rproject.toml</code> file. Next, they specify which packages to install. Finally, the <code>rv sync</code> command reads the <code>rproject.toml</code> file and installs the R packages, thus synchronizing the environment with its description in the configuration file. Importantly, which <em>version</em> of an R package is installed by <code>rv</code> is entirely dictated by the available repositories, which are searched in the order they are listed. In other words, instead of specifying the desired version separately for each R package, users can specify a <em>snapshot</em> or an entire repository.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>renv</th>
+<th>rv</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>License</td>
+<td>MIT</td>
+<td>MIT</td>
+</tr>
+<tr class="even">
+<td>First released</td>
+<td>July, 2023</td>
+<td>March, 2025</td>
+</tr>
+<tr class="odd">
+<td>Contributors</td>
+<td>70</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>Writen in</td>
+<td>R</td>
+<td>rust</td>
+</tr>
+<tr class="odd">
+<td>Developed by</td>
+<td>Posit</td>
+<td>A2-ai</td>
+</tr>
+<tr class="even">
+<td>Documentation</td>
+<td><a href="https://rstudio.github.io/renv/">https://rstudio.github.io/renv/</a></td>
+<td><a href="https://a2-ai.github.io/rv-docs/">https://a2-ai.github.io/rv-docs/</a></td>
+</tr>
+<tr class="odd">
+<td>Version control</td>
+<td>Lock file pins exact package versions</td>
+<td>Repository snapshots imply versions</td>
+</tr>
+<tr class="even">
+<td>Bioconductor</td>
+<td>Supported explicitely</td>
+<td>BioC repositories are accessed like other CRAN-like sources</td>
+</tr>
+<tr class="odd">
+<td>System dependencies</td>
+<td>Not tracked or managed</td>
+<td>Can be enumerated with <code>rv sysdeps</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>I am really impressed by <code>rv</code>. Its command line interface is very well designed and the documentation is top notch. So much so, that I will explore using it in my next analysis projects.</p>
+<ul>
+<li><code>rv</code> is great new entry to managing a project-specific R library. I really like its declarative approach and the fine-grained control over the source repositories.
+<ul>
+<li>I can see it work especially well for containerized (e.g.&nbsp;dockerized) environments.</li>
+<li>It’s a relatively new tool, and time will tell how broadly it is adopted by the R community (and how committed the authors are to maintaining it long term, as for every open source project).</li>
+<li>I would love to see a more convenient integration of the Bioconductor repositories, which currently require manual adding / updating four different CRAN-like sources.</li>
+<li>I also noticed that running <code>quarto render</code> in an <code>rv</code> project folder is problematic: it appears that <code>quarto</code> recursively renders all R markdown documents included in the <code>rv/library</code> subfolders <a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.</li>
+</ul></li>
+<li>In contrast, <code>renv</code> is a well established tool, and integrates into Posit’s RStudio IDE. It mirrors the iterative way analysts add or update R packages during an analysis project, snapshoting the current state as they go along. By overloading base functions e.g.&nbsp;<code>install.packages()</code>, it offers a seamless user experience.
+<ul>
+<li><code>renv</code> works well for me, and I am very grateful to the Posit team - especially <a href="https://github.com/kevinushey">Kevin Ushey</a> - for keeping it up to date for, including the support of private github repositories and Bioconductor 🧡.</li>
+</ul></li>
+</ul>
+
+
+<!-- -->
+
+</section>
+
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>For additional instructions, including how to install <code>rv</code> on Windows, please consult the <code>rv</code> <a href="https://a2-ai.github.io/rv-docs/intro/installation/">documentation website</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><code>rv</code> can create a new folder on the fly, simply provide its name e.g. <code>rv init &lt;project name&gt;</code><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The <code>rv/scripts/rvr.R</code> script creates an environment called <code>.rv</code> in the local R session with functions that manage system calls to the <code>rv</code> command line tool, check out <code>ls(envir = .rv)</code> for details. The <code>rv/scripts/activate.R</code> script reads the user-specified source repositories from the <code>rproject.toml</code> file and (over-)writes <code>options("repos")</code>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>At the time of writing, there is no equivalent <code>rv remove</code> sub-command to remove packages from the configuration file. Packages can be removed by editing the <code>rproject.toml</code> file manually.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>This could be prevented by changing the folder name from <code>rv</code> into <code>.rv</code> (similar to the <code>.renv</code> folder), as hidden folders are automatically ignored by <code>quarto render</code>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
+          } else {
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
+          }
+        }
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
+        }
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/tomsing1\.github\.io\/blog\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      if (authorPrefersDark) {
+          [baseTheme, altTheme] = [altTheme, baseTheme];
+      }
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "tomsing1/blog";
+    script.dataset.repoId = "R_kgDOIZ9LJw";
+    script.dataset.category = "Announcements";
+    script.dataset.categoryId = "DIC_kwDOIZ9LJ84CTvnC";
+    script.dataset.mapping = "title";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb22" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Managing project-specific R libraries with `rv`"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "20245-09-01"</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="an">freeze:</span><span class="co"> true</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="an">categories:</span><span class="co"> [R, TIL]</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="an">editor:</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">  markdown:</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">    wrap: 72</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 4</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools:</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co">      source: true</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co">      toggle: false</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="co">      caption: none</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="an">editor_options:</span><span class="co"> </span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co">  chunk_output_type: console</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## tl;dr</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>Today, I learned how to manage project-specific R libraries with </span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>the <span class="in">`rv`</span> command line tool.</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview</span></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>::: columns</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>::: {.column width="75%"}</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>The <span class="in">`rv`</span> project is a relatively recent open source project, developed by </span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">A2-Ai</span><span class="co">](https://a2-ai.com/)</span>, a clinical consultancy firm, and first released</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>under the </span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">MIT license</span><span class="co">](https://github.com/A2-ai/rv/blob/main/LICENSE)</span></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>in March 2025. It manages a project-specific library of R packages, analogous</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>to virtual environments created by </span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">uv</span><span class="co">](https://docs.astral.sh/uv/)</span> or </span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">venv</span><span class="co">](https://docs.python.org/3/library/venv.html)</span> in python.</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>Users specify the required R packages in a configuration file first, together</span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>with their source repositories. Its functionality is similar to that of the</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">renv R package</span><span class="co">](https://rstudio.github.io/renv/)</span>, but <span class="in">`rv`</span> is a command</span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>line utility written in rust and uses a declarative approach instead of </span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>tracking the content current R library (more details below).</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>Just like <span class="in">`renv`</span>, <span class="in">`rv`</span> caches packages across projects on the local system, </span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>so they are only downloaded once. (More details are </span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">here</span><span class="co">](https://a2-ai.github.io/rv-docs/concepts/cache/)</span>).</span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a>::: {.column width="25%"}</span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a><span class="al">![](rv-logo.png)</span>{fig-pos='H'}</span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-57"><a href="#cb22-57" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb22-58"><a href="#cb22-58" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb22-59"><a href="#cb22-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-60"><a href="#cb22-60" aria-hidden="true" tabindex="-1"></a><span class="fu">## Installation</span></span>
+<span id="cb22-61"><a href="#cb22-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-62"><a href="#cb22-62" aria-hidden="true" tabindex="-1"></a><span class="in">`rv`</span> binaries are available from its </span>
+<span id="cb22-63"><a href="#cb22-63" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">github repository</span><span class="co">](https://github.com/A2-ai/rv/releases)</span><span class="ot">[^1]</span>.</span>
+<span id="cb22-64"><a href="#cb22-64" aria-hidden="true" tabindex="-1"></a>Alternatively, for Mac OS X, <span class="in">`rv`</span> is available as a custom tap via</span>
+<span id="cb22-65"><a href="#cb22-65" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">homebrew</span><span class="co">](https://brew.sh/2025/04/29/homebrew-4.5.0/)</span></span>
+<span id="cb22-66"><a href="#cb22-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-67"><a href="#cb22-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-68"><a href="#cb22-68" aria-hidden="true" tabindex="-1"></a><span class="in">brew tap a2-ai/homebrew-tap</span></span>
+<span id="cb22-69"><a href="#cb22-69" aria-hidden="true" tabindex="-1"></a><span class="in">brew install a2-ai/homebrew-tap/rv</span></span>
+<span id="cb22-70"><a href="#cb22-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-71"><a href="#cb22-71" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>For additional instructions, including how to install <span class="in">`rv`</span> on Windows,</span>
+<span id="cb22-72"><a href="#cb22-72" aria-hidden="true" tabindex="-1"></a>please consult the <span class="in">`rv`</span></span>
+<span id="cb22-73"><a href="#cb22-73" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">documentation website</span><span class="co">](https://a2-ai.github.io/rv-docs/intro/installation/)</span></span>
+<span id="cb22-74"><a href="#cb22-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-75"><a href="#cb22-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-76"><a href="#cb22-76" aria-hidden="true" tabindex="-1"></a><span class="fu">## Initializing an rv environment</span></span>
+<span id="cb22-77"><a href="#cb22-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-78"><a href="#cb22-78" aria-hidden="true" tabindex="-1"></a>Currently, I am using Posit's RStudio IDE for my R projects and start by </span>
+<span id="cb22-79"><a href="#cb22-79" aria-hidden="true" tabindex="-1"></a>creating an </span>
+<span id="cb22-80"><a href="#cb22-80" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">RStudio project</span><span class="co">](https://docs.posit.co/ide/user/ide/guide/code/projects.html)</span>,</span>
+<span id="cb22-81"><a href="#cb22-81" aria-hidden="true" tabindex="-1"></a>but any folder can be be used to create an <span class="in">`rv`</span> project. Normally, I would</span>
+<span id="cb22-82"><a href="#cb22-82" aria-hidden="true" tabindex="-1"></a>install the</span>
+<span id="cb22-83"><a href="#cb22-83" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">renv R package</span><span class="co">](https://pkgs.rstudio.com/renv/index.html)</span></span>
+<span id="cb22-84"><a href="#cb22-84" aria-hidden="true" tabindex="-1"></a>next, and initialize an <span class="in">`renv`</span> environment within the RStudio project.</span>
+<span id="cb22-85"><a href="#cb22-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-86"><a href="#cb22-86" aria-hidden="true" tabindex="-1"></a>To use <span class="in">`rv`</span>, I follow a similar strategy:</span>
+<span id="cb22-87"><a href="#cb22-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-88"><a href="#cb22-88" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>First, I create an RStudio project in a new directory.</span>
+<span id="cb22-89"><a href="#cb22-89" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Next, I navigate to the directory and run <span class="in">`rv init .`</span> to initialize the <span class="in">`rv`</span></span>
+<span id="cb22-90"><a href="#cb22-90" aria-hidden="true" tabindex="-1"></a>  environment within it <span class="ot">[^2]</span>. </span>
+<span id="cb22-91"><a href="#cb22-91" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-92"><a href="#cb22-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-93"><a href="#cb22-93" aria-hidden="true" tabindex="-1"></a>    <span class="in">```</span></span>
+<span id="cb22-94"><a href="#cb22-94" aria-hidden="true" tabindex="-1"></a><span class="in">    cd &lt;RStudio Project Directory&gt;</span></span>
+<span id="cb22-95"><a href="#cb22-95" aria-hidden="true" tabindex="-1"></a><span class="in">    rv init .</span></span>
+<span id="cb22-96"><a href="#cb22-96" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
+<span id="cb22-97"><a href="#cb22-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-98"><a href="#cb22-98" aria-hidden="true" tabindex="-1"></a>  <span class="ot">[^2]: </span><span class="in">`rv`</span> can create a new folder on the fly, simply provide its name e.g.</span>
+<span id="cb22-99"><a href="#cb22-99" aria-hidden="true" tabindex="-1"></a>  <span class="in">`rv init &lt;project name&gt;`</span></span>
+<span id="cb22-100"><a href="#cb22-100" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-101"><a href="#cb22-101" aria-hidden="true" tabindex="-1"></a>  This command creates</span>
+<span id="cb22-102"><a href="#cb22-102" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-103"><a href="#cb22-103" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>the <span class="in">`rproject.toml`</span> file</span>
+<span id="cb22-104"><a href="#cb22-104" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>the <span class="in">`rv`</span> directory, containing the <span class="in">`library`</span> and <span class="in">`scripts`</span> subfolders</span>
+<span id="cb22-105"><a href="#cb22-105" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>the <span class="in">`.Rprofile`</span> file that triggers the execution of the </span>
+<span id="cb22-106"><a href="#cb22-106" aria-hidden="true" tabindex="-1"></a>    <span class="in">`rv/scripts/rvr.R`</span> and <span class="in">`rv/scripts/activate.R`</span> scripts when an R session</span>
+<span id="cb22-107"><a href="#cb22-107" aria-hidden="true" tabindex="-1"></a>    is (re)started in this directory<span class="ot">[^3]</span>.</span>
+<span id="cb22-108"><a href="#cb22-108" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-109"><a href="#cb22-109" aria-hidden="true" tabindex="-1"></a>    <span class="ot">[^3]: </span>The <span class="in">`rv/scripts/rvr.R`</span> script creates an environment called <span class="in">`.rv`</span> in </span>
+<span id="cb22-110"><a href="#cb22-110" aria-hidden="true" tabindex="-1"></a>    the local R session with functions that manage system calls to the <span class="in">`rv`</span></span>
+<span id="cb22-111"><a href="#cb22-111" aria-hidden="true" tabindex="-1"></a>    command line tool, check out <span class="in">`ls(envir = .rv)`</span> for details. The </span>
+<span id="cb22-112"><a href="#cb22-112" aria-hidden="true" tabindex="-1"></a>    <span class="in">`rv/scripts/activate.R`</span> script reads the user-specified source repositories</span>
+<span id="cb22-113"><a href="#cb22-113" aria-hidden="true" tabindex="-1"></a>    from the <span class="in">`rproject.toml`</span> file and (over-)writes <span class="in">`options("repos")`</span>.</span>
+<span id="cb22-114"><a href="#cb22-114" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-115"><a href="#cb22-115" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Finally, I restart my R session to activate the environment. R greets me with</span>
+<span id="cb22-116"><a href="#cb22-116" aria-hidden="true" tabindex="-1"></a>  the following messages, confirming that my <span class="in">`rv`</span> environment is active:</span>
+<span id="cb22-117"><a href="#cb22-117" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-118"><a href="#cb22-118" aria-hidden="true" tabindex="-1"></a>    <span class="in">```</span></span>
+<span id="cb22-119"><a href="#cb22-119" aria-hidden="true" tabindex="-1"></a><span class="in">    rv repositories active!</span></span>
+<span id="cb22-120"><a href="#cb22-120" aria-hidden="true" tabindex="-1"></a><span class="in">    repositories: </span></span>
+<span id="cb22-121"><a href="#cb22-121" aria-hidden="true" tabindex="-1"></a><span class="in">      CRAN: https://cloud.r-project.org/</span></span>
+<span id="cb22-122"><a href="#cb22-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-123"><a href="#cb22-123" aria-hidden="true" tabindex="-1"></a><span class="in">    rv libpaths active!</span></span>
+<span id="cb22-124"><a href="#cb22-124" aria-hidden="true" tabindex="-1"></a><span class="in">    library paths: </span></span>
+<span id="cb22-125"><a href="#cb22-125" aria-hidden="true" tabindex="-1"></a><span class="in">      /Users/sandmann/repositories/rv/rv/library/4.5/arm64</span></span>
+<span id="cb22-126"><a href="#cb22-126" aria-hidden="true" tabindex="-1"></a><span class="in">      /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/library</span></span>
+<span id="cb22-127"><a href="#cb22-127" aria-hidden="true" tabindex="-1"></a><span class="in">    ```</span></span>
+<span id="cb22-128"><a href="#cb22-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-129"><a href="#cb22-129" aria-hidden="true" tabindex="-1"></a><span class="fu">## Customizing the `rproject.toml` file</span></span>
+<span id="cb22-130"><a href="#cb22-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-131"><a href="#cb22-131" aria-hidden="true" tabindex="-1"></a>The default <span class="in">`rproject.toml`</span> that was created above contains the following</span>
+<span id="cb22-132"><a href="#cb22-132" aria-hidden="true" tabindex="-1"></a>content:</span>
+<span id="cb22-133"><a href="#cb22-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-134"><a href="#cb22-134" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-135"><a href="#cb22-135" aria-hidden="true" tabindex="-1"></a><span class="in">[project]</span></span>
+<span id="cb22-136"><a href="#cb22-136" aria-hidden="true" tabindex="-1"></a><span class="in">name = "rv"</span></span>
+<span id="cb22-137"><a href="#cb22-137" aria-hidden="true" tabindex="-1"></a><span class="in">r_version = "4.5"</span></span>
+<span id="cb22-138"><a href="#cb22-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-139"><a href="#cb22-139" aria-hidden="true" tabindex="-1"></a><span class="in">repositories = [</span></span>
+<span id="cb22-140"><a href="#cb22-140" aria-hidden="true" tabindex="-1"></a><span class="in">    {alias = "CRAN", url = "https://cloud.r-project.org/"},</span></span>
+<span id="cb22-141"><a href="#cb22-141" aria-hidden="true" tabindex="-1"></a><span class="in">]</span></span>
+<span id="cb22-142"><a href="#cb22-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-143"><a href="#cb22-143" aria-hidden="true" tabindex="-1"></a><span class="in">dependencies = [</span></span>
+<span id="cb22-144"><a href="#cb22-144" aria-hidden="true" tabindex="-1"></a><span class="in">]</span></span>
+<span id="cb22-145"><a href="#cb22-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-146"><a href="#cb22-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-147"><a href="#cb22-147" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`r_version`</span> specfiies the R version used in this environment</span>
+<span id="cb22-148"><a href="#cb22-148" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>Usually whichever <span class="in">`R`</span> command was found in the <span class="in">`PATH`</span>, but this can </span>
+<span id="cb22-149"><a href="#cb22-149" aria-hidden="true" tabindex="-1"></a>    be overriden by adding the <span class="in">`--r-version`</span> argument to the <span class="in">`rv init`</span> command.</span>
+<span id="cb22-150"><a href="#cb22-150" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-151"><a href="#cb22-151" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`repositories`</span> specifies one or more CRAN-like repositories to retrieve </span>
+<span id="cb22-152"><a href="#cb22-152" aria-hidden="true" tabindex="-1"></a>  packages from, optionally with an <span class="in">`alias`</span> to refer to in other sections.</span>
+<span id="cb22-153"><a href="#cb22-153" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>By default, the cloud mirror of the <span class="in">`CRAN`</span> repository is available, but it</span>
+<span id="cb22-154"><a href="#cb22-154" aria-hidden="true" tabindex="-1"></a>      can be suppressed if the <span class="in">`--no-repositories`</span> argument is used with the</span>
+<span id="cb22-155"><a href="#cb22-155" aria-hidden="true" tabindex="-1"></a>      <span class="in">`rv init`</span> command.</span>
+<span id="cb22-156"><a href="#cb22-156" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb22-157"><a href="#cb22-157" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`dependencies`</span> is a list of R packages that should be installed in this</span>
+<span id="cb22-158"><a href="#cb22-158" aria-hidden="true" tabindex="-1"></a>  environment</span>
+<span id="cb22-159"><a href="#cb22-159" aria-hidden="true" tabindex="-1"></a><span class="ss">    - </span>This field is empty by default, but packages can be added when the </span>
+<span id="cb22-160"><a href="#cb22-160" aria-hidden="true" tabindex="-1"></a>      environment is created using the <span class="in">`--add`</span> command line argument of the</span>
+<span id="cb22-161"><a href="#cb22-161" aria-hidden="true" tabindex="-1"></a>      <span class="in">`rv init`</span> command.</span>
+<span id="cb22-162"><a href="#cb22-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-163"><a href="#cb22-163" aria-hidden="true" tabindex="-1"></a><span class="fu">### Adding R packages to the environment</span></span>
+<span id="cb22-164"><a href="#cb22-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-165"><a href="#cb22-165" aria-hidden="true" tabindex="-1"></a>The simplest way to add an R package to an environment is using the <span class="in">`rv add`</span></span>
+<span id="cb22-166"><a href="#cb22-166" aria-hidden="true" tabindex="-1"></a>command, e.g. let's add the <span class="in">`here`</span> package to the config file - but delay its</span>
+<span id="cb22-167"><a href="#cb22-167" aria-hidden="true" tabindex="-1"></a>actual installation by specifying the <span class="in">`--no-sync`</span> argument:</span>
+<span id="cb22-168"><a href="#cb22-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-169"><a href="#cb22-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-170"><a href="#cb22-170" aria-hidden="true" tabindex="-1"></a><span class="in">rv add --no-sync here</span></span>
+<span id="cb22-171"><a href="#cb22-171" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-172"><a href="#cb22-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-173"><a href="#cb22-173" aria-hidden="true" tabindex="-1"></a>The <span class="in">`rproject.toml`</span> file now contains</span>
+<span id="cb22-174"><a href="#cb22-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-175"><a href="#cb22-175" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-176"><a href="#cb22-176" aria-hidden="true" tabindex="-1"></a><span class="in">dependencies = [</span></span>
+<span id="cb22-177"><a href="#cb22-177" aria-hidden="true" tabindex="-1"></a><span class="in">    "here",</span></span>
+<span id="cb22-178"><a href="#cb22-178" aria-hidden="true" tabindex="-1"></a><span class="in">]</span></span>
+<span id="cb22-179"><a href="#cb22-179" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-180"><a href="#cb22-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-181"><a href="#cb22-181" aria-hidden="true" tabindex="-1"></a>but the <span class="in">`here`</span> package has neither been retrieved nor installed in the library,</span>
+<span id="cb22-182"><a href="#cb22-182" aria-hidden="true" tabindex="-1"></a>yet <span class="ot">[^4]</span>.</span>
+<span id="cb22-183"><a href="#cb22-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-184"><a href="#cb22-184" aria-hidden="true" tabindex="-1"></a><span class="ot">[^4]: </span>At the time of writing, there is no equivalent <span class="in">`rv remove`</span> sub-command</span>
+<span id="cb22-185"><a href="#cb22-185" aria-hidden="true" tabindex="-1"></a>to remove packages from the configuration file. Packages can be removed by</span>
+<span id="cb22-186"><a href="#cb22-186" aria-hidden="true" tabindex="-1"></a>editing the <span class="in">`rproject.toml`</span> file manually.</span>
+<span id="cb22-187"><a href="#cb22-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-188"><a href="#cb22-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-189"><a href="#cb22-189" aria-hidden="true" tabindex="-1"></a>The <span class="in">`rv plan`</span> command will prompt <span class="in">`rv`</span> to look for installation candidates</span>
+<span id="cb22-190"><a href="#cb22-190" aria-hidden="true" tabindex="-1"></a>of the <span class="in">`here`</span> package - and its dependencies - in the specified repositories.</span>
+<span id="cb22-191"><a href="#cb22-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-192"><a href="#cb22-192" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-193"><a href="#cb22-193" aria-hidden="true" tabindex="-1"></a><span class="in">rv plan</span></span>
+<span id="cb22-194"><a href="#cb22-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-195"><a href="#cb22-195" aria-hidden="true" tabindex="-1"></a><span class="in">+ here (1.0.1, binary from https://cloud.r-project.org/)</span></span>
+<span id="cb22-196"><a href="#cb22-196" aria-hidden="true" tabindex="-1"></a><span class="in">+ rprojroot (2.1.1, binary from https://cloud.r-project.org/)</span></span>
+<span id="cb22-197"><a href="#cb22-197" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-198"><a href="#cb22-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-199"><a href="#cb22-199" aria-hidden="true" tabindex="-1"></a>At the time of writing, <span class="in">`here`</span> (version 1.0.1) is available from CRAN, along</span>
+<span id="cb22-200"><a href="#cb22-200" aria-hidden="true" tabindex="-1"></a>with its dependency <span class="in">`rprojectroot`</span> (version 2.1.1).</span>
+<span id="cb22-201"><a href="#cb22-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-202"><a href="#cb22-202" aria-hidden="true" tabindex="-1"></a>To install these two packages, we synchronize the environment with the newly</span>
+<span id="cb22-203"><a href="#cb22-203" aria-hidden="true" tabindex="-1"></a>updated configurlation file:</span>
+<span id="cb22-204"><a href="#cb22-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-205"><a href="#cb22-205" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-206"><a href="#cb22-206" aria-hidden="true" tabindex="-1"></a><span class="in">rv sync</span></span>
+<span id="cb22-207"><a href="#cb22-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-208"><a href="#cb22-208" aria-hidden="true" tabindex="-1"></a><span class="in">+ here (1.0.1, binary from https://cloud.r-project.org/) in 639ms</span></span>
+<span id="cb22-209"><a href="#cb22-209" aria-hidden="true" tabindex="-1"></a><span class="in">+ rprojroot (2.1.1, binary from https://cloud.r-project.org/) in 898ms</span></span>
+<span id="cb22-210"><a href="#cb22-210" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-211"><a href="#cb22-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-212"><a href="#cb22-212" aria-hidden="true" tabindex="-1"></a><span class="fu">## Managing Bioconductor packages</span></span>
+<span id="cb22-213"><a href="#cb22-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-214"><a href="#cb22-214" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Bioconductor</span><span class="co">](https://www.bioconductor.org/)</span> releases collections of R packages</span>
+<span id="cb22-215"><a href="#cb22-215" aria-hidden="true" tabindex="-1"></a>tied to a specific version of R. For example, Bioconductor 3.21 is </span>
+<span id="cb22-216"><a href="#cb22-216" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">compatible with R 4.5</span><span class="co">](https://bioconductor.org/about/release-announcements/)</span>.</span>
+<span id="cb22-217"><a href="#cb22-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-218"><a href="#cb22-218" aria-hidden="true" tabindex="-1"></a>As opposed to CRAN, Bioconductor packages are managed across multiple CRAN-like</span>
+<span id="cb22-219"><a href="#cb22-219" aria-hidden="true" tabindex="-1"></a>repositories, which need to be added to the <span class="in">`rv`</span> configuration file separately.</span>
+<span id="cb22-220"><a href="#cb22-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-221"><a href="#cb22-221" aria-hidden="true" tabindex="-1"></a>Let's add the Bioconductor repositories for release 3.21, by manually adding</span>
+<span id="cb22-222"><a href="#cb22-222" aria-hidden="true" tabindex="-1"></a>the following lines into the <span class="in">`repositories`</span> section of the <span class="in">`rproject.toml`</span> file,</span>
+<span id="cb22-223"><a href="#cb22-223" aria-hidden="true" tabindex="-1"></a>(as described in the</span>
+<span id="cb22-224"><a href="#cb22-224" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">rv documentation</span><span class="co">](https://a2-ai.github.io/rv-docs/config/repositories/#bioconductor)</span></span>
+<span id="cb22-225"><a href="#cb22-225" aria-hidden="true" tabindex="-1"></a>).</span>
+<span id="cb22-226"><a href="#cb22-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-227"><a href="#cb22-227" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-228"><a href="#cb22-228" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCsoft", url = "https://bioconductor.org/packages/3.21/bioc" },</span></span>
+<span id="cb22-229"><a href="#cb22-229" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCann", url = "https://bioconductor.org/packages/3.21/data/annotation" },</span></span>
+<span id="cb22-230"><a href="#cb22-230" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCexp", url = "https://bioconductor.org/packages/3.21/data/experiment" },</span></span>
+<span id="cb22-231"><a href="#cb22-231" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCworkflows", url = "https://bioconductor.org/packages/3.21/workflows" },</span></span>
+<span id="cb22-232"><a href="#cb22-232" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-233"><a href="#cb22-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-234"><a href="#cb22-234" aria-hidden="true" tabindex="-1"></a>Now, we can add e.g. the <span class="in">`limma`</span> Bioconductor package (and its dependencies) to </span>
+<span id="cb22-235"><a href="#cb22-235" aria-hidden="true" tabindex="-1"></a>our environment and install them at the same time:</span>
+<span id="cb22-236"><a href="#cb22-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-237"><a href="#cb22-237" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-238"><a href="#cb22-238" aria-hidden="true" tabindex="-1"></a><span class="in">rv add limma</span></span>
+<span id="cb22-239"><a href="#cb22-239" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-240"><a href="#cb22-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-241"><a href="#cb22-241" aria-hidden="true" tabindex="-1"></a><span class="fu">## Specifying package versions</span></span>
+<span id="cb22-242"><a href="#cb22-242" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-243"><a href="#cb22-243" aria-hidden="true" tabindex="-1"></a><span class="in">`rv`</span> offers </span>
+<span id="cb22-244"><a href="#cb22-244" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">two ways</span><span class="co">](https://a2-ai.github.io/rv-docs/cookbook/snapshot_pkg/)</span></span>
+<span id="cb22-245"><a href="#cb22-245" aria-hidden="true" tabindex="-1"></a>to control which version of a package is installed.</span>
+<span id="cb22-246"><a href="#cb22-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-247"><a href="#cb22-247" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Specifying which snapshot of a repository to use for a specific package, or</span>
+<span id="cb22-248"><a href="#cb22-248" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Providing the URL of an archived package</span>
+<span id="cb22-249"><a href="#cb22-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-250"><a href="#cb22-250" aria-hidden="true" tabindex="-1"></a><span class="fu">### Pinning repository snapshots</span></span>
+<span id="cb22-251"><a href="#cb22-251" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-252"><a href="#cb22-252" aria-hidden="true" tabindex="-1"></a>For data analysis projects, it is often useful to pin the version of the R</span>
+<span id="cb22-253"><a href="#cb22-253" aria-hidden="true" tabindex="-1"></a>packages that are used, e.g. to restore the environment at a later date.</span>
+<span id="cb22-254"><a href="#cb22-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-255"><a href="#cb22-255" aria-hidden="true" tabindex="-1"></a>Posit offers (nearly) daily snapshots of the CRAN repository, identified</span>
+<span id="cb22-256"><a href="#cb22-256" aria-hidden="true" tabindex="-1"></a>by date. For example, to pin version of packages available on 2025/08/29, </span>
+<span id="cb22-257"><a href="#cb22-257" aria-hidden="true" tabindex="-1"></a>the </span>
+<span id="cb22-258"><a href="#cb22-258" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Posit's Package Manager website</span><span class="co">](https://packagemanager.posit.co/client/#/repos/bioconductor/setup?snapshot=2025-08-29)</span></span>
+<span id="cb22-259"><a href="#cb22-259" aria-hidden="true" tabindex="-1"></a>provides the <span class="in">`https://packagemanager.posit.co/cran/2025-08-29`</span> URL</span>
+<span id="cb22-260"><a href="#cb22-260" aria-hidden="true" tabindex="-1"></a>(for Mac OS X).</span>
+<span id="cb22-261"><a href="#cb22-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-262"><a href="#cb22-262" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb22-263"><a href="#cb22-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-264"><a href="#cb22-264" aria-hidden="true" tabindex="-1"></a><span class="fu">#### rv configure</span></span>
+<span id="cb22-265"><a href="#cb22-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-266"><a href="#cb22-266" aria-hidden="true" tabindex="-1"></a>The <span class="in">`rv configure repository`</span> command allows me to add, replace, update or</span>
+<span id="cb22-267"><a href="#cb22-267" aria-hidden="true" tabindex="-1"></a>remove individual repositories from the <span class="in">`rproject.toml`</span> file - or to clear the</span>
+<span id="cb22-268"><a href="#cb22-268" aria-hidden="true" tabindex="-1"></a><span class="in">`repositories`</span> section entirely.</span>
+<span id="cb22-269"><a href="#cb22-269" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-270"><a href="#cb22-270" aria-hidden="true" tabindex="-1"></a>💡 By default, new repositories as added to the end of the list; the <span class="in">`--first`</span>, </span>
+<span id="cb22-271"><a href="#cb22-271" aria-hidden="true" tabindex="-1"></a><span class="in">`--before`</span>, <span class="in">`--after`</span> and <span class="in">`--last`</span> arguments can be included to change this</span>
+<span id="cb22-272"><a href="#cb22-272" aria-hidden="true" tabindex="-1"></a>behavior.`</span>
+<span id="cb22-273"><a href="#cb22-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-274"><a href="#cb22-274" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb22-275"><a href="#cb22-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-276"><a href="#cb22-276" aria-hidden="true" tabindex="-1"></a>Let's replace both the CRAN URL I added above with a pointer to the snapshot:</span>
+<span id="cb22-277"><a href="#cb22-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-278"><a href="#cb22-278" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-279"><a href="#cb22-279" aria-hidden="true" tabindex="-1"></a><span class="in">rv configure repository \</span></span>
+<span id="cb22-280"><a href="#cb22-280" aria-hidden="true" tabindex="-1"></a><span class="in">  update CRAN \</span></span>
+<span id="cb22-281"><a href="#cb22-281" aria-hidden="true" tabindex="-1"></a><span class="in">  --url https://packagemanager.posit.co/cran/2025-08-29</span></span>
+<span id="cb22-282"><a href="#cb22-282" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-283"><a href="#cb22-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-284"><a href="#cb22-284" aria-hidden="true" tabindex="-1"></a>Going forward, the environment will always reflect the R package versions</span>
+<span id="cb22-285"><a href="#cb22-285" aria-hidden="true" tabindex="-1"></a>available on <span class="in">`2025/08/29`</span>.</span>
+<span id="cb22-286"><a href="#cb22-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-287"><a href="#cb22-287" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb22-288"><a href="#cb22-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-289"><a href="#cb22-289" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Bioconductor snapshots</span></span>
+<span id="cb22-290"><a href="#cb22-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-291"><a href="#cb22-291" aria-hidden="true" tabindex="-1"></a>Posit offers snapshots of Bioconductor packages as well, but given the</span>
+<span id="cb22-292"><a href="#cb22-292" aria-hidden="true" tabindex="-1"></a>Bioconductor's </span>
+<span id="cb22-293"><a href="#cb22-293" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">semi-annual release cycle</span><span class="co">](https://bioconductor.org/about/release-announcements/)</span></span>
+<span id="cb22-294"><a href="#cb22-294" aria-hidden="true" tabindex="-1"></a>it is often sufficient to point to the specific bioconductor release instead,</span>
+<span id="cb22-295"><a href="#cb22-295" aria-hidden="true" tabindex="-1"></a>e.g. the Bioconductor URLs we added above point to release <span class="in">`3.21`</span>. </span>
+<span id="cb22-296"><a href="#cb22-296" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-297"><a href="#cb22-297" aria-hidden="true" tabindex="-1"></a>If you would like to be extra thorough and pin a specific snapshot of the </span>
+<span id="cb22-298"><a href="#cb22-298" aria-hidden="true" tabindex="-1"></a>Bioconductor repositories, </span>
+<span id="cb22-299"><a href="#cb22-299" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Posit's package manager</span><span class="co">](https://packagemanager.posit.co/client/#/repos/bioconductor/setup?bioconductor_version=3.21&amp;snapshot=2025-08-29)</span></span>
+<span id="cb22-300"><a href="#cb22-300" aria-hidden="true" tabindex="-1"></a>has you covered. But just a outlined above, we have to update all _four_</span>
+<span id="cb22-301"><a href="#cb22-301" aria-hidden="true" tabindex="-1"></a>Bioconductor repositories (BioCsoft, BioCann, BioCexp and BioCworkflows) with</span>
+<span id="cb22-302"><a href="#cb22-302" aria-hidden="true" tabindex="-1"></a>the corresponding URLs of their snapshots, e.g. to retrieve packages</span>
+<span id="cb22-303"><a href="#cb22-303" aria-hidden="true" tabindex="-1"></a>snapshot on 2025/08/22:</span>
+<span id="cb22-304"><a href="#cb22-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-305"><a href="#cb22-305" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-306"><a href="#cb22-306" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCsoft", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc" },</span></span>
+<span id="cb22-307"><a href="#cb22-307" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCann", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/annotation" },</span></span>
+<span id="cb22-308"><a href="#cb22-308" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCexp", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/experiment" },</span></span>
+<span id="cb22-309"><a href="#cb22-309" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCworkflows", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/workflows" },</span></span>
+<span id="cb22-310"><a href="#cb22-310" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-311"><a href="#cb22-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-312"><a href="#cb22-312" aria-hidden="true" tabindex="-1"></a>and then reinstall the packages from the selected snapshots:</span>
+<span id="cb22-313"><a href="#cb22-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-314"><a href="#cb22-314" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-315"><a href="#cb22-315" aria-hidden="true" tabindex="-1"></a><span class="in">rv sync</span></span>
+<span id="cb22-316"><a href="#cb22-316" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-317"><a href="#cb22-317" aria-hidden="true" tabindex="-1"></a><span class="in">Installing {"here", "limma"}                                                                               </span></span>
+<span id="cb22-318"><a href="#cb22-318" aria-hidden="true" tabindex="-1"></a><span class="in">+ here (1.0.1, binary from https://packagemanager.posit.co/cran/2025-08-29) in 2531ms</span></span>
+<span id="cb22-319"><a href="#cb22-319" aria-hidden="true" tabindex="-1"></a><span class="in">+ limma (3.64.3, source from https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc) in 8357ms</span></span>
+<span id="cb22-320"><a href="#cb22-320" aria-hidden="true" tabindex="-1"></a><span class="in">+ rprojroot (2.1.1, binary from https://packagemanager.posit.co/cran/2025-08-29) in 389ms</span></span>
+<span id="cb22-321"><a href="#cb22-321" aria-hidden="true" tabindex="-1"></a><span class="in">+ statmod (1.5.0, binary from https://packagemanager.posit.co/cran/2025-08-29) in 907ms</span></span>
+<span id="cb22-322"><a href="#cb22-322" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-323"><a href="#cb22-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-324"><a href="#cb22-324" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb22-325"><a href="#cb22-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-326"><a href="#cb22-326" aria-hidden="true" tabindex="-1"></a><span class="fu">### Installing a package from a specific snapshot</span></span>
+<span id="cb22-327"><a href="#cb22-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-328"><a href="#cb22-328" aria-hidden="true" tabindex="-1"></a>Sometimes, I need to revisit an analysis that was performed with a specific</span>
+<span id="cb22-329"><a href="#cb22-329" aria-hidden="true" tabindex="-1"></a>version of a single package. For example, I conducted an analysis with</span>
+<span id="cb22-330"><a href="#cb22-330" aria-hidden="true" tabindex="-1"></a><span class="in">`limma`</span> version <span class="in">`3.64.1`</span> in June 2025. </span>
+<span id="cb22-331"><a href="#cb22-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-332"><a href="#cb22-332" aria-hidden="true" tabindex="-1"></a>But at the time of writing, the latest Bioconductor (release 3.21) repositories</span>
+<span id="cb22-333"><a href="#cb22-333" aria-hidden="true" tabindex="-1"></a>contains version <span class="in">`3.64.3`</span> of the <span class="in">`limma`</span> R package - the authors submitted a</span>
+<span id="cb22-334"><a href="#cb22-334" aria-hidden="true" tabindex="-1"></a>critical bugfix, and the release version of the package was updated.</span>
+<span id="cb22-335"><a href="#cb22-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-336"><a href="#cb22-336" aria-hidden="true" tabindex="-1"></a>To obtain a copy of the previous version (say 3.64.1), I can leverage Posit's</span>
+<span id="cb22-337"><a href="#cb22-337" aria-hidden="true" tabindex="-1"></a>Package manager once again, and specify an earlier snapshot. But _this time_</span>
+<span id="cb22-338"><a href="#cb22-338" aria-hidden="true" tabindex="-1"></a>I only want to retrieve the older version of the <span class="in">`limma`</span> package, while all</span>
+<span id="cb22-339"><a href="#cb22-339" aria-hidden="true" tabindex="-1"></a>of the other Bioconductor packages will be pull from the most recent snapshot.</span>
+<span id="cb22-340"><a href="#cb22-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-341"><a href="#cb22-341" aria-hidden="true" tabindex="-1"></a>Luckily, I can add multiple repositories to the configuration file, which are</span>
+<span id="cb22-342"><a href="#cb22-342" aria-hidden="true" tabindex="-1"></a>accessed in the order they are listed. Let's add the <span class="in">`BioCsoft_old`</span> alias.</span>
+<span id="cb22-343"><a href="#cb22-343" aria-hidden="true" tabindex="-1"></a>pointing to the snapshot from 2025-07-01, at the bottom of the list:</span>
+<span id="cb22-344"><a href="#cb22-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-345"><a href="#cb22-345" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-346"><a href="#cb22-346" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCsoft", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc" },</span></span>
+<span id="cb22-347"><a href="#cb22-347" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCann", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/annotation" },</span></span>
+<span id="cb22-348"><a href="#cb22-348" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCexp", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/experiment" },</span></span>
+<span id="cb22-349"><a href="#cb22-349" aria-hidden="true" tabindex="-1"></a><span class="in">    { alias = "BioCworkflows", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/workflows" },</span></span>
+<span id="cb22-350"><a href="#cb22-350" aria-hidden="true" tabindex="-1"></a><span class="in">        { alias = "BioCsoft_old", url = "https://packagemanager.posit.co/bioconductor/2025-07-01/packages/3.21/bioc" },</span></span>
+<span id="cb22-351"><a href="#cb22-351" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-352"><a href="#cb22-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-353"><a href="#cb22-353" aria-hidden="true" tabindex="-1"></a>Now <span class="in">`limma`</span> is available from two repositories - <span class="in">`BioCsoft`</span> and <span class="in">`BioCsoft_old`</span>.</span>
+<span id="cb22-354"><a href="#cb22-354" aria-hidden="true" tabindex="-1"></a>By default, the first repository that contains a requested package is used, and</span>
+<span id="cb22-355"><a href="#cb22-355" aria-hidden="true" tabindex="-1"></a>there is nothing to do:</span>
+<span id="cb22-356"><a href="#cb22-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-357"><a href="#cb22-357" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-358"><a href="#cb22-358" aria-hidden="true" tabindex="-1"></a><span class="in">rv plan</span></span>
+<span id="cb22-359"><a href="#cb22-359" aria-hidden="true" tabindex="-1"></a><span class="in">Nothing to do</span></span>
+<span id="cb22-360"><a href="#cb22-360" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-361"><a href="#cb22-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-362"><a href="#cb22-362" aria-hidden="true" tabindex="-1"></a>To force <span class="in">`rv`</span> to install <span class="in">`limma`</span> from the <span class="in">`BioCsoft_old`</span> source, we </span>
+<span id="cb22-363"><a href="#cb22-363" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">specify it explicitly</span><span class="co">](https://a2-ai.github.io/rv-docs/cookbook/snapshot_pkg/)</span></span>
+<span id="cb22-364"><a href="#cb22-364" aria-hidden="true" tabindex="-1"></a>in the <span class="in">`dependencies`</span> section:</span>
+<span id="cb22-365"><a href="#cb22-365" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-366"><a href="#cb22-366" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-367"><a href="#cb22-367" aria-hidden="true" tabindex="-1"></a><span class="in">dependencies = [</span></span>
+<span id="cb22-368"><a href="#cb22-368" aria-hidden="true" tabindex="-1"></a><span class="in">    "here",</span></span>
+<span id="cb22-369"><a href="#cb22-369" aria-hidden="true" tabindex="-1"></a><span class="in">    { name = "limma", repository = "BioCsoft_old" },</span></span>
+<span id="cb22-370"><a href="#cb22-370" aria-hidden="true" tabindex="-1"></a><span class="in">]</span></span>
+<span id="cb22-371"><a href="#cb22-371" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-372"><a href="#cb22-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-373"><a href="#cb22-373" aria-hidden="true" tabindex="-1"></a>Now, <span class="in">`rv sync`</span> replaces the current version of limma with the older one -</span>
+<span id="cb22-374"><a href="#cb22-374" aria-hidden="true" tabindex="-1"></a>excellent!</span>
+<span id="cb22-375"><a href="#cb22-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-376"><a href="#cb22-376" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-377"><a href="#cb22-377" aria-hidden="true" tabindex="-1"></a><span class="in">rv sync</span></span>
+<span id="cb22-378"><a href="#cb22-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-379"><a href="#cb22-379" aria-hidden="true" tabindex="-1"></a><span class="in">- limma</span></span>
+<span id="cb22-380"><a href="#cb22-380" aria-hidden="true" tabindex="-1"></a><span class="in">+ limma (3.64.1, source from https://packagemanager.posit.co/bioconductor/2025-07-01/packages/3.21/bioc) in 10ms</span></span>
+<span id="cb22-381"><a href="#cb22-381" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-382"><a href="#cb22-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-383"><a href="#cb22-383" aria-hidden="true" tabindex="-1"></a><span class="fu">### Installing an archived version of a CRAN package</span></span>
+<span id="cb22-384"><a href="#cb22-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-385"><a href="#cb22-385" aria-hidden="true" tabindex="-1"></a>Version 1.0.1 of the <span class="in">`here`</span> package was released on CRAN on 2020-12-13. But</span>
+<span id="cb22-386"><a href="#cb22-386" aria-hidden="true" tabindex="-1"></a>what if we wanted to reproduce an analysis environment that had been created</span>
+<span id="cb22-387"><a href="#cb22-387" aria-hidden="true" tabindex="-1"></a>before, with <span class="in">`here`</span> version <span class="in">`1.0.0`</span> instead?</span>
+<span id="cb22-388"><a href="#cb22-388" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-389"><a href="#cb22-389" aria-hidden="true" tabindex="-1"></a>Luckily, CRAN stores copies of the archived R packages as well, including</span>
+<span id="cb22-390"><a href="#cb22-390" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">here v1.0.0</span><span class="co">](https://cran.r-project.org/src/contrib/Archive/here/)</span>.</span>
+<span id="cb22-391"><a href="#cb22-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-392"><a href="#cb22-392" aria-hidden="true" tabindex="-1"></a>To force <span class="in">`rv`</span> to install this version of the package, we </span>
+<span id="cb22-393"><a href="#cb22-393" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">specify the URL</span><span class="co">](https://a2-ai.github.io/rv-docs/cookbook/archive_pkg/)</span></span>
+<span id="cb22-394"><a href="#cb22-394" aria-hidden="true" tabindex="-1"></a>in the <span class="in">`dependencies`</span> section of the configuration file explicitely, e.g.</span>
+<span id="cb22-395"><a href="#cb22-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-396"><a href="#cb22-396" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-397"><a href="#cb22-397" aria-hidden="true" tabindex="-1"></a><span class="in">dependencies = [</span></span>
+<span id="cb22-398"><a href="#cb22-398" aria-hidden="true" tabindex="-1"></a><span class="in">    { name = "here", url = "https://cran.r-project.org/src/contrib/Archive/here/here_1.0.0.tar.gz" },</span></span>
+<span id="cb22-399"><a href="#cb22-399" aria-hidden="true" tabindex="-1"></a><span class="in">    { name = "limma", repository = "BioCsoft_old" },</span></span>
+<span id="cb22-400"><a href="#cb22-400" aria-hidden="true" tabindex="-1"></a><span class="in">]</span></span>
+<span id="cb22-401"><a href="#cb22-401" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-402"><a href="#cb22-402" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-403"><a href="#cb22-403" aria-hidden="true" tabindex="-1"></a>and then synchronize the environment with its config file</span>
+<span id="cb22-404"><a href="#cb22-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-405"><a href="#cb22-405" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-406"><a href="#cb22-406" aria-hidden="true" tabindex="-1"></a><span class="in">rv sync</span></span>
+<span id="cb22-407"><a href="#cb22-407" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-408"><a href="#cb22-408" aria-hidden="true" tabindex="-1"></a><span class="in">- here</span></span>
+<span id="cb22-409"><a href="#cb22-409" aria-hidden="true" tabindex="-1"></a><span class="in">+ here (1.0.0, source from https://cran.r-project.org/src/contrib/Archive/here/here_1.0.0.tar.gz) in 532ms</span></span>
+<span id="cb22-410"><a href="#cb22-410" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-411"><a href="#cb22-411" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-412"><a href="#cb22-412" aria-hidden="true" tabindex="-1"></a>Great, the previously installed version of the <span class="in">`here`</span> package has been </span>
+<span id="cb22-413"><a href="#cb22-413" aria-hidden="true" tabindex="-1"></a>removed, and the (older) version 1.0.0 has been installed instead.</span>
+<span id="cb22-414"><a href="#cb22-414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-415"><a href="#cb22-415" aria-hidden="true" tabindex="-1"></a><span class="fu">## Collecting information about the environment</span></span>
+<span id="cb22-416"><a href="#cb22-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-417"><a href="#cb22-417" aria-hidden="true" tabindex="-1"></a>Finally, <span class="in">`rv`</span> also provides sub-commands to characterize the environment it</span>
+<span id="cb22-418"><a href="#cb22-418" aria-hidden="true" tabindex="-1"></a>manages, including e.g.</span>
+<span id="cb22-419"><a href="#cb22-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-420"><a href="#cb22-420" aria-hidden="true" tabindex="-1"></a><span class="fu">### rv summary</span></span>
+<span id="cb22-421"><a href="#cb22-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-422"><a href="#cb22-422" aria-hidden="true" tabindex="-1"></a>We can get a quick overview of the <span class="in">`rv`</span> project with the <span class="in">`rv summary`</span></span>
+<span id="cb22-423"><a href="#cb22-423" aria-hidden="true" tabindex="-1"></a>command:</span>
+<span id="cb22-424"><a href="#cb22-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-425"><a href="#cb22-425" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-426"><a href="#cb22-426" aria-hidden="true" tabindex="-1"></a><span class="in">rv summary</span></span>
+<span id="cb22-427"><a href="#cb22-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-428"><a href="#cb22-428" aria-hidden="true" tabindex="-1"></a><span class="in">== System Information == </span></span>
+<span id="cb22-429"><a href="#cb22-429" aria-hidden="true" tabindex="-1"></a><span class="in">OS: macos (arm64)</span></span>
+<span id="cb22-430"><a href="#cb22-430" aria-hidden="true" tabindex="-1"></a><span class="in">R Version: 4.5</span></span>
+<span id="cb22-431"><a href="#cb22-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-432"><a href="#cb22-432" aria-hidden="true" tabindex="-1"></a><span class="in">Num Workers for Sync: 8 (8 cpus available)</span></span>
+<span id="cb22-433"><a href="#cb22-433" aria-hidden="true" tabindex="-1"></a><span class="in">Cache Location: /Users/sandmann/.cache/rv</span></span>
+<span id="cb22-434"><a href="#cb22-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-435"><a href="#cb22-435" aria-hidden="true" tabindex="-1"></a><span class="in">== Dependencies == </span></span>
+<span id="cb22-436"><a href="#cb22-436" aria-hidden="true" tabindex="-1"></a><span class="in">Library: rv/library/4.5/arm64</span></span>
+<span id="cb22-437"><a href="#cb22-437" aria-hidden="true" tabindex="-1"></a><span class="in">Installed: 4/4</span></span>
+<span id="cb22-438"><a href="#cb22-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-439"><a href="#cb22-439" aria-hidden="true" tabindex="-1"></a><span class="in">Package Sources: </span></span>
+<span id="cb22-440"><a href="#cb22-440" aria-hidden="true" tabindex="-1"></a><span class="in">  BioCsoft: 1/1 binary packages</span></span>
+<span id="cb22-441"><a href="#cb22-441" aria-hidden="true" tabindex="-1"></a><span class="in">  CRAN: 3/3 binary packages</span></span>
+<span id="cb22-442"><a href="#cb22-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-443"><a href="#cb22-443" aria-hidden="true" tabindex="-1"></a><span class="in">== Remote == </span></span>
+<span id="cb22-444"><a href="#cb22-444" aria-hidden="true" tabindex="-1"></a><span class="in">BioCann (https://bioconductor.org/packages/3.21/data/annotation): 0 binary packages, 928 source packages</span></span>
+<span id="cb22-445"><a href="#cb22-445" aria-hidden="true" tabindex="-1"></a><span class="in">BioCexp (https://bioconductor.org/packages/3.21/data/experiment): 0 binary packages, 431 source packages</span></span>
+<span id="cb22-446"><a href="#cb22-446" aria-hidden="true" tabindex="-1"></a><span class="in">BioCsoft (https://bioconductor.org/packages/3.21/bioc): 2237 binary packages, 2310 source packages</span></span>
+<span id="cb22-447"><a href="#cb22-447" aria-hidden="true" tabindex="-1"></a><span class="in">BioCworkflows (https://bioconductor.org/packages/3.21/workflows): 0 binary packages, 27 source packages</span></span>
+<span id="cb22-448"><a href="#cb22-448" aria-hidden="true" tabindex="-1"></a><span class="in">CRAN (https://packagemanager.posit.co/cran/2025-08-29): 19734 binary packages, 22598 source packages</span></span>
+<span id="cb22-449"><a href="#cb22-449" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-450"><a href="#cb22-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-451"><a href="#cb22-451" aria-hidden="true" tabindex="-1"></a><span class="fu">### rv tree</span></span>
+<span id="cb22-452"><a href="#cb22-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-453"><a href="#cb22-453" aria-hidden="true" tabindex="-1"></a>The <span class="in">`rv tree`</span> command displays the dependency tree, optionally limited to a </span>
+<span id="cb22-454"><a href="#cb22-454" aria-hidden="true" tabindex="-1"></a>user-specified depth (<span class="in">`--depth 1`</span>: only root deps, <span class="in">`--depth 2`</span>: </span>
+<span id="cb22-455"><a href="#cb22-455" aria-hidden="true" tabindex="-1"></a>root dependencies &amp; their direct  dependencies, and so on)</span>
+<span id="cb22-456"><a href="#cb22-456" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-457"><a href="#cb22-457" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-458"><a href="#cb22-458" aria-hidden="true" tabindex="-1"></a><span class="in">rv tree</span></span>
+<span id="cb22-459"><a href="#cb22-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-460"><a href="#cb22-460" aria-hidden="true" tabindex="-1"></a><span class="in">▶ here [version: 1.0.1, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]</span></span>
+<span id="cb22-461"><a href="#cb22-461" aria-hidden="true" tabindex="-1"></a><span class="in">└─ rprojroot [version: 2.1.1, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]</span></span>
+<span id="cb22-462"><a href="#cb22-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-463"><a href="#cb22-463" aria-hidden="true" tabindex="-1"></a><span class="in">▶ limma [version: 3.64.3, source: https://bioconductor.org/packages/3.21/bioc, type: binary]</span></span>
+<span id="cb22-464"><a href="#cb22-464" aria-hidden="true" tabindex="-1"></a><span class="in">└─ statmod [version: 1.5.0, source: https://packagemanager.posit.co/cran/2025-08-29, type: binary]</span></span>
+<span id="cb22-465"><a href="#cb22-465" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb22-466"><a href="#cb22-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-467"><a href="#cb22-467" aria-hidden="true" tabindex="-1"></a>The <span class="in">`rv cache`</span> and <span class="in">`rv library`</span> commands return the path to the cached packages,</span>
+<span id="cb22-468"><a href="#cb22-468" aria-hidden="true" tabindex="-1"></a>and the library directory, respectively. <span class="in">`rv sysdeps`</span> shows the status of</span>
+<span id="cb22-469"><a href="#cb22-469" aria-hidden="true" tabindex="-1"></a>required system dependencies (if any).</span>
+<span id="cb22-470"><a href="#cb22-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-471"><a href="#cb22-471" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb22-472"><a href="#cb22-472" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-473"><a href="#cb22-473" aria-hidden="true" tabindex="-1"></a><span class="fu">### rv versus renv</span></span>
+<span id="cb22-474"><a href="#cb22-474" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-475"><a href="#cb22-475" aria-hidden="true" tabindex="-1"></a><span class="in">`renv`</span> allows users to install R packages interactively, e.g. using shims</span>
+<span id="cb22-476"><a href="#cb22-476" aria-hidden="true" tabindex="-1"></a>for the <span class="in">`install.packages()`</span> or its own <span class="in">`renv::install()`</span> functions. Afterwards,</span>
+<span id="cb22-477"><a href="#cb22-477" aria-hidden="true" tabindex="-1"></a>the <span class="in">`renv::snapshot()`</span> function is used to record the versions and source URLs</span>
+<span id="cb22-478"><a href="#cb22-478" aria-hidden="true" tabindex="-1"></a>of each retrieved package in its <span class="in">`renv.lock`</span> file. This file can be used to</span>
+<span id="cb22-479"><a href="#cb22-479" aria-hidden="true" tabindex="-1"></a>recreate the environment on a different system, as long as the packages </span>
+<span id="cb22-480"><a href="#cb22-480" aria-hidden="true" tabindex="-1"></a>remain available under the same URLs.</span>
+<span id="cb22-481"><a href="#cb22-481" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-482"><a href="#cb22-482" aria-hidden="true" tabindex="-1"></a><span class="in">`rv`</span> uses the reverse strategy: first, users add CRAN-style repositories to the</span>
+<span id="cb22-483"><a href="#cb22-483" aria-hidden="true" tabindex="-1"></a><span class="in">`rproject.toml`</span> file. Next, they specify which packages to install. Finally, </span>
+<span id="cb22-484"><a href="#cb22-484" aria-hidden="true" tabindex="-1"></a>the <span class="in">`rv sync`</span> command reads the <span class="in">`rproject.toml`</span> file and installs the R</span>
+<span id="cb22-485"><a href="#cb22-485" aria-hidden="true" tabindex="-1"></a>packages, thus synchronizing the environment with its description in the</span>
+<span id="cb22-486"><a href="#cb22-486" aria-hidden="true" tabindex="-1"></a>configuration file. Importantly, which _version_ of an R package is installed</span>
+<span id="cb22-487"><a href="#cb22-487" aria-hidden="true" tabindex="-1"></a>by <span class="in">`rv`</span> is entirely dictated by the available repositories, which are searched</span>
+<span id="cb22-488"><a href="#cb22-488" aria-hidden="true" tabindex="-1"></a>in the order they are listed. In other words, instead of specifying the</span>
+<span id="cb22-489"><a href="#cb22-489" aria-hidden="true" tabindex="-1"></a>desired version separately for each R package, users can specify a _snapshot_</span>
+<span id="cb22-490"><a href="#cb22-490" aria-hidden="true" tabindex="-1"></a>or an entire repository.</span>
+<span id="cb22-491"><a href="#cb22-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-492"><a href="#cb22-492" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>                     <span class="pp">|</span> renv                                  <span class="pp">|</span> rv                                                          <span class="pp">|</span></span>
+<span id="cb22-493"><a href="#cb22-493" aria-hidden="true" tabindex="-1"></a><span class="pp">|---------------------|---------------------------------------|-------------------------------------------------------------|</span></span>
+<span id="cb22-494"><a href="#cb22-494" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> License             <span class="pp">|</span> MIT                                   <span class="pp">|</span> MIT                                                         <span class="pp">|</span></span>
+<span id="cb22-495"><a href="#cb22-495" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> First released      <span class="pp">|</span> July, 2023                            <span class="pp">|</span> March, 2025                                                 <span class="pp">|</span></span>
+<span id="cb22-496"><a href="#cb22-496" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Contributors        <span class="pp">|</span> 70                                    <span class="pp">|</span> 5                                                           <span class="pp">|</span></span>
+<span id="cb22-497"><a href="#cb22-497" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Writen in           <span class="pp">|</span> R                                     <span class="pp">|</span> rust                                                        <span class="pp">|</span></span>
+<span id="cb22-498"><a href="#cb22-498" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Developed by        <span class="pp">|</span> Posit                                 <span class="pp">|</span> A2-ai                                                       <span class="pp">|</span></span>
+<span id="cb22-499"><a href="#cb22-499" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Documentation       <span class="pp">|</span> <span class="co">[</span><span class="ot">https://rstudio.github.io/renv/</span><span class="co">](https://rstudio.github.io/renv/)</span>       <span class="pp">|</span> <span class="co">[</span><span class="ot">https://a2-ai.github.io/rv-docs/</span><span class="co">](https://a2-ai.github.io/rv-docs/)</span>                          <span class="pp">|</span></span>
+<span id="cb22-500"><a href="#cb22-500" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Version control     <span class="pp">|</span> Lock file pins exact package versions <span class="pp">|</span> Repository snapshots imply versions                         <span class="pp">|</span></span>
+<span id="cb22-501"><a href="#cb22-501" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Bioconductor        <span class="pp">|</span> Supported explicitely                 <span class="pp">|</span> BioC repositories are accessed like other CRAN-like sources <span class="pp">|</span></span>
+<span id="cb22-502"><a href="#cb22-502" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> System dependencies <span class="pp">|</span> Not tracked or managed                <span class="pp">|</span> Can be enumerated with <span class="in">`rv sysdeps`</span>                        <span class="pp">|</span></span>
+<span id="cb22-503"><a href="#cb22-503" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-504"><a href="#cb22-504" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb22-505"><a href="#cb22-505" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-506"><a href="#cb22-506" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
+<span id="cb22-507"><a href="#cb22-507" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-508"><a href="#cb22-508" aria-hidden="true" tabindex="-1"></a>I am really impressed by <span class="in">`rv`</span>. Its command line interface is very well designed</span>
+<span id="cb22-509"><a href="#cb22-509" aria-hidden="true" tabindex="-1"></a>and the documentation is top notch. So much so, that I will explore using</span>
+<span id="cb22-510"><a href="#cb22-510" aria-hidden="true" tabindex="-1"></a>it in my next analysis projects. </span>
+<span id="cb22-511"><a href="#cb22-511" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-512"><a href="#cb22-512" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`rv`</span> is great new entry to managing a project-specific R library. I really</span>
+<span id="cb22-513"><a href="#cb22-513" aria-hidden="true" tabindex="-1"></a>  like its declarative approach and the fine-grained control over the </span>
+<span id="cb22-514"><a href="#cb22-514" aria-hidden="true" tabindex="-1"></a>  source repositories. </span>
+<span id="cb22-515"><a href="#cb22-515" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>I can see it work especially well for containerized (e.g. dockerized)</span>
+<span id="cb22-516"><a href="#cb22-516" aria-hidden="true" tabindex="-1"></a>  environments. </span>
+<span id="cb22-517"><a href="#cb22-517" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>It's a relatively new tool, and time will tell how broadly it is adopted by</span>
+<span id="cb22-518"><a href="#cb22-518" aria-hidden="true" tabindex="-1"></a>  the R community (and how committed the authors are to maintaining it long</span>
+<span id="cb22-519"><a href="#cb22-519" aria-hidden="true" tabindex="-1"></a>  term, as for every open source project). </span>
+<span id="cb22-520"><a href="#cb22-520" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>I would love to see a more convenient integration of the Bioconductor</span>
+<span id="cb22-521"><a href="#cb22-521" aria-hidden="true" tabindex="-1"></a>  repositories, which currently require manual adding / updating four</span>
+<span id="cb22-522"><a href="#cb22-522" aria-hidden="true" tabindex="-1"></a>  different CRAN-like sources.</span>
+<span id="cb22-523"><a href="#cb22-523" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span>I also noticed that running <span class="in">`quarto render`</span> in an <span class="in">`rv`</span> project folder</span>
+<span id="cb22-524"><a href="#cb22-524" aria-hidden="true" tabindex="-1"></a>  is problematic: it appears that <span class="in">`quarto`</span> recursively renders all R markdown</span>
+<span id="cb22-525"><a href="#cb22-525" aria-hidden="true" tabindex="-1"></a>  documents included in the <span class="in">`rv/library`</span> subfolders <span class="ot">[^5]</span>.</span>
+<span id="cb22-526"><a href="#cb22-526" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-527"><a href="#cb22-527" aria-hidden="true" tabindex="-1"></a>  <span class="ot">[^5]: </span>This could be prevented by changing the folder name from <span class="in">`rv`</span> into</span>
+<span id="cb22-528"><a href="#cb22-528" aria-hidden="true" tabindex="-1"></a>  <span class="in">`.rv`</span> (similar to the <span class="in">`.renv`</span> folder), as hidden folders are automatically</span>
+<span id="cb22-529"><a href="#cb22-529" aria-hidden="true" tabindex="-1"></a>  ignored by <span class="in">`quarto render`</span>.</span>
+<span id="cb22-530"><a href="#cb22-530" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-531"><a href="#cb22-531" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>In contrast, <span class="in">`renv`</span> is a well established tool, and integrates into Posit's</span>
+<span id="cb22-532"><a href="#cb22-532" aria-hidden="true" tabindex="-1"></a>  RStudio IDE. It mirrors the iterative way analysts add or update R packages </span>
+<span id="cb22-533"><a href="#cb22-533" aria-hidden="true" tabindex="-1"></a>  during an analysis project, snapshoting the current state as they go along. </span>
+<span id="cb22-534"><a href="#cb22-534" aria-hidden="true" tabindex="-1"></a>  By overloading base functions e.g. <span class="in">`install.packages()`</span>, it offers a seamless</span>
+<span id="cb22-535"><a href="#cb22-535" aria-hidden="true" tabindex="-1"></a>  user experience. </span>
+<span id="cb22-536"><a href="#cb22-536" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`renv`</span> works well for me, and I am very grateful to the Posit team - </span>
+<span id="cb22-537"><a href="#cb22-537" aria-hidden="true" tabindex="-1"></a>  especially <span class="co">[</span><span class="ot">Kevin Ushey</span><span class="co">](https://github.com/kevinushey)</span> - for keeping it up to</span>
+<span id="cb22-538"><a href="#cb22-538" aria-hidden="true" tabindex="-1"></a>  date for, including the support of private github repositories and</span>
+<span id="cb22-539"><a href="#cb22-539" aria-hidden="true" tabindex="-1"></a>  Bioconductor 🧡.</span>
+<span id="cb22-540"><a href="#cb22-540" aria-hidden="true" tabindex="-1"></a>  </span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

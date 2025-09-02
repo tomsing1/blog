@@ -6,7 +6,7 @@ execute:
   echo: true
   warning: false
   message: false
-  cache: true
+  cache: false
 freeze: true
 categories: [R, TIL]
 editor:
@@ -36,7 +36,7 @@ a gzip-compressed tab-delimited text file
 and store information about single-nucleotide variants (SNVs) in a local
 parquet file.
 
-::: {.callout-info collapse="true"}
+::: {.callout-note collapse="true"}
 ### VCF format
 
 Frequently, information about genetic variation is shared using files in
@@ -103,7 +103,10 @@ single-nucleotide variants on the GRCh38 assembly, and writes them into a
 ~ 325 MB parquet file in a single step  [^2]
 
 [^2]: The same command could be used to convert very large files, as `duckdb` 
-does not need to retain all of the variants in memory at the same time.
+does not need to retain all of the variants in memory at the same time. If not
+all of the columns included in the source file are needed, selecting only a
+subset of fields can also dramatically decrease the size of the final parquet
+file.
 
 ```{r}
 sql <- glue::glue_sql("
@@ -131,7 +134,7 @@ external files, and then pass the database connection to `dbplyr`, which will
 translate common `dplyr` verbs into SQL for me. I will demonstrate this
 approach in the remainder of this post.
 
-::: {.callout-info collapse="true"}
+::: {.callout-note collapse="true"}
 
 ### duckplyr
 
@@ -166,8 +169,14 @@ The `duckplyr::read_parquet_duckdb` function connects to a parquet file and
 returns a `duckplyr_df` object.
 
 ```{r}
+#| eval: false 
 df <- read_parquet_duckdb(kParquet, prudence = "thrifty")
 class(df)
+```
+
+```
+[1] "prudent_duckplyr_df" "duckplyr_df"         "tbl_df"              "tbl"                
+[5] "data.frame"         
 ```
 
 The function `read_parquet_duckdb()` function accepts a `prudence` argument, 
@@ -294,7 +303,8 @@ duckdb::dbListTables(con)
 ```
 
 Now the join can proceed, and we observe that this SNV corresponds to ClinVar
-report `RCV002776799`.
+report `RCV002776799`, e.g. by using `dplyr` to write a JOIN SQL statement
+for us.
 
 ```{r}
 dplyr::inner_join(tbl(con, "query"), tbl(con, "clinvar"),
@@ -303,32 +313,41 @@ dplyr::inner_join(tbl(con, "query"), tbl(con, "clinvar"),
 
 ### Querying ClinVar using SQL
 
+We can also write and submit SQL statements directly, and `duckdb` will
+search the parquet file (represented by the `clinvar` view) for us.
+
+For example, we can request three rows:
+
 ```{sql}
 #| connection: con
 #| cache: false
-SELECT * FROM ?kParquet LIMIT 3;
+SELECT * FROM clinvar LIMIT 3;
 ```
+information about a specific dbSNP identifier (rsid),
+```{sql}
+#| connection: con
+#| cache: false
+#| results: hide
+SELECT * FROM clinvar WHERE dbsnp == '1294019636';
+```
+look up a variant by its ClinVar identifier,
 
 ```{sql}
 #| connection: con
 #| cache: false
 #| results: hide
-SELECT * FROM ?kParquet WHERE rs_dbsnp == '1294019636';
+SELECT * FROM clinvar WHERE rcvaccession == 'RCV000000014';
 ```
+list all chromosome names that are included in the ClinVar file,
 
 ```{sql}
 #| connection: con
 #| cache: false
 #| results: hide
-SELECT * FROM ?kParquet WHERE rcvaccession == 'RCV000000014';
+SELECT DISTINCT seqnames AS chr FROM clinvar ORDER BY chr;
 ```
-
-```{sql}
-#| connection: con
-#| cache: false
-#| results: hide
-SELECT DISTINCT ChromosomeAccession AS chr FROM ?kParquet ORDER BY chr;
-```
+or retrieve variants include in a specified range (in this case the same
+query we made with `dplyr` above).
 
 ```{sql}
 #| connection: con
@@ -342,14 +361,27 @@ ON (
 	clinvar.end >= query.start
 	)
 ```
-:::
 
-Finally, we close the connection to the in-memory database.
+Finally, we close the connectsion to the in-memory database.
 
 ```{r}
 duckdb::dbDisconnect(con)
 ```
 
+## Conclusions
+
+Storing large datasets in parquet files and querying them using `duckdb` is one
+of my favorite things I learned this year. In this example, I am using a local 
+in-memory duckdb instance to search a local file, but I could do the same with
+files stored remotely e.g. on AWS S3. 
+
+Eventually, as file sizes increase, it will become too slow to query files over
+the network, and I will have to consider moving my query engine closer to the
+data, e.g. by running `duckdb` on a cloud instance, or e.g. by querying the
+parquet files through a cloud database such as 
+[motherduck](https://motherduck.com) or
+[AWS Athena](https://tomsing1.github.io/blog/posts/athena/index.html#creating-an-external-table-with-aws-athena). But or prototyping and medium sized datasets, `duckdb` is a 
+powerful addition to my genetics toolkit.
 
 ## Reproducibility
 

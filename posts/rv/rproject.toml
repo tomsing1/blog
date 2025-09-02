@@ -1,0 +1,18 @@
+[project]
+name = "rv"
+r_version = "4.5"
+
+repositories = [
+    { alias = "CRAN", url = "https://packagemanager.posit.co/cran/2025-08-29" },
+    { alias = "BioCsoft", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/bioc" },
+    { alias = "BioCann", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/annotation" },
+    { alias = "BioCexp", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/data/experiment" },
+    { alias = "BioCworkflows", url = "https://packagemanager.posit.co/bioconductor/2025-08-22/packages/3.21/workflows" },
+    { alias = "BioCsoft_old", url = "https://packagemanager.posit.co/bioconductor/2025-07-01/packages/3.21/bioc" },
+]
+
+dependencies = [
+      "rmarkdown",
+    { name = "here", url = "https://cran.r-project.org/src/contrib/Archive/here/here_1.0.0.tar.gz" },
+    { name = "limma", repository = "BioCsoft_old" },
+]

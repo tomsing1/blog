@@ -1,6 +1,10 @@
 project:
   type: website
   output-dir: docs
+  render:
+    - "*.qmd"
+    - "*.md"
+    - "!rv/rv/"
 website:
   title: "Thomas Sandmann's blog"
   navbar:

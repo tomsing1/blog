@@ -11,7 +11,27 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.7.32</generator>
-<lastBuildDate>Thu, 10 Jul 2025 07:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 01 Sep 20245 07:00:00 GMT</lastBuildDate>
+<item>
+  <title>Managing project-specific R libraries with rv</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/rv/</link>
+  <description><![CDATA[ Today, I learned how to manage project-specific R libraries with the <code>rv</code> command line tool. ]]></description>
+  <category>R</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/rv/</guid>
+  <pubDate>Mon, 01 Sep 20245 07:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Matching genetic variants using parquet files and duckdb</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/duckdb_variants/</link>
+  <description><![CDATA[ <a href="https://www.ncbi.nlm.nih.gov/clinvar/intro/">ClinVar</a> is a public archive of reports of human variations associated with diseases and drug responses, with supporting evidence, hosted at the NCBI. ]]></description>
+  <category>R</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/duckdb_variants/</guid>
+  <pubDate>Sun, 17 Aug 2025 07:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Dipping my toes into the ducklake: Exploring gene expression data with R and python</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -208,29 +228,6 @@
   <category>Bioconductor</category>
   <guid>https://tomsing1.github.io/blog/posts/ParquetMatrix/</guid>
   <pubDate>Wed, 13 Sep 2023 07:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Adventures with parquet II: Implementing the parquetArraySeed S4 class</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/parquetArray/</link>
-  <description><![CDATA[ <a href="../parquet/">Previously</a>, I learned how to export gene expression data from Bioconductor/R objects as parquet files. Today, I am exploring Hervé Pagès’s awesome <a href="https://bioconductor.org/packages/release/bioc/html/DelayedArray.html">DelayedArray Bioconductor package</a> to represent data stored in parquet files as R matrices - retrieving only those subsets needed for downstream analysis. ]]></description>
-  <category>R</category>
-  <category>TIL</category>
-  <category>parquet</category>
-  <category>Bioconductor</category>
-  <guid>https://tomsing1.github.io/blog/posts/parquetArray/</guid>
-  <pubDate>Tue, 05 Sep 2023 07:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Adventures with parquet: Storing &amp; quering gene expression data</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/parquet/</link>
-  <description><![CDATA[ Today I explored storing gene expression data in <a href="https://parquet.apache.org/">parquet files</a>, and querying them with the <code>arrow</code>, <code>duckdb</code> or <code>sparklyr</code> R packages. ]]></description>
-  <category>R</category>
-  <category>parquet</category>
-  <category>TIL</category>
-  <guid>https://tomsing1.github.io/blog/posts/parquet/</guid>
-  <pubDate>Thu, 31 Aug 2023 07:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

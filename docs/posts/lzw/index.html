@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.21">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -70,18 +70,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../favicon.png" rel="icon" type="image/png">
 <script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-c07affc570349fbc852954012c2f59b1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../../site_libs/bootstrap/bootstrap-dark-0946a22cded24b7860b3b7ee991a1fe2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../../site_libs/bootstrap/bootstrap-c07affc570349fbc852954012c2f59b1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-2e1fd584193e1434597286615fb1cd93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-29305b11c46af019fb2cac822a0a4902.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2e1fd584193e1434597286615fb1cd93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -282,6 +283,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Thomas Sandmann’s blog</span>
     </a>
@@ -408,16 +411,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="sparse-information-single-cell-rna-seq-data">Sparse information: single-cell RNA-seq data</h2>
 <p>Single-cell RNA-seq data are notoriously sparse, e.g.&nbsp;the majority of counts across genes &amp; cells is zero. For example, 96% of all counts in the PBMC 4k single-cell experiment shared by 10X Genomics (and available via the <a href="https://bioconductor.org/packages/release/data/experiment/html/TENxPBMCData.html">TENxPBMCData</a> Bioconductor package) are zero:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TENxPBMCData)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TENxPBMCData)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>tenx_pbmc4k <span class="ot">&lt;-</span> <span class="fu">suppressMessages</span>(<span class="fu">TENxPBMCData</span>(<span class="at">dataset =</span> <span class="st">"pbmc4k"</span>))</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">counts</span>(tenx_pbmc4k) <span class="sc">==</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">counts</span>(tenx_pbmc4k) <span class="sc">==</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.9608314</code></pre>
 </div>
 </div>
 <p>Most of the remaining counts are integers smaller than ten, with fewer than 0.2% of values exceeding that range:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">counts</span>(tenx_pbmc4k) <span class="sc">&gt;</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">counts</span>(tenx_pbmc4k) <span class="sc">&gt;</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.002338497</code></pre>
 </div>
@@ -425,11 +428,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This leads to very long runs of identical integers (most often zero), which can efficiently be represented through <a href="https://en.wikipedia.org/wiki/Run-length_encoding">run-length encoding</a></p>
 <p>For example, the expression of the transcription facto <em>MYC</em> gene is highly skewed towards zero counts:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>myc <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>myc <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  ensembl <span class="ot">&lt;-</span> <span class="fu">row.names</span>(tenx_pbmc4k)[<span class="fu">which</span>(<span class="fu">rowData</span>(tenx_pbmc4k)<span class="sc">$</span>Symbol <span class="sc">==</span> <span class="st">"MYC"</span>)]</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">counts</span>(tenx_pbmc4k)[ensembl, ]</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(myc, <span class="at">breaks =</span> <span class="dv">100</span>, <span class="at">xlab =</span> <span class="st">"MYC (raw counts)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(myc, <span class="at">breaks =</span> <span class="dv">100</span>, <span class="at">xlab =</span> <span class="st">"MYC (raw counts)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -440,7 +443,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>and there are long sequences of zeros and some shorter sequences of ones in the count vector. (Here, I am only showing counts for the the first 100 of the 4340 cells.)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(myc, <span class="at">n =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(myc, <span class="at">n =</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  [1] 0 0 0 1 3 0 0 0 1 0 0 0 0 1 1 1 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0
  [38] 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 1 0 0 0
@@ -453,8 +456,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="run-length-encoding">Run length encoding</h2>
 <p>This information can be communicated more concisely by noting each integer (e.g. zero) and the number of times it is repeated. The <code>stats::rle</code> function performs this conversion:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>run_lengths <span class="ot">&lt;-</span> <span class="fu">rle</span>(myc)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>run_lengths</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>run_lengths <span class="ot">&lt;-</span> <span class="fu">rle</span>(myc)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>run_lengths</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Run Length Encoding
   lengths: int [1:1195] 3 1 1 3 1 4 3 3 2 14 ...
@@ -466,7 +469,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>a vector of values:</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(run_lengths<span class="sc">$</span>values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(run_lengths<span class="sc">$</span>values)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0 1 3 0 1 0</code></pre>
 </div>
@@ -475,7 +478,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>a vector with the number of times each of them is repeated:</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(run_lengths<span class="sc">$</span>lengths)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(run_lengths<span class="sc">$</span>lengths)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 3 1 1 3 1 4</code></pre>
 </div>
@@ -494,19 +497,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 =&gt; 0,0,0,1,3,0,0,0,1,0,0,0,0,1,1,1,...</code></pre>
 <p>or via <code>inverse.rle</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">inverse.rle</span>(run_lengths), <span class="at">n =</span> <span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">inverse.rle</span>(run_lengths), <span class="at">n =</span> <span class="dv">16</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 0 0 0 1 3 0 0 0 1 0 0 0 0 1 1 1</code></pre>
 </div>
 </div>
 <p>To store run-length encoded values e.g.&nbsp;in a text (or HTML) file, we can also represent them as characters, similar to our manual reconstruction above, e.g. separating values and lengths with an <code>x</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>myc_rle_separated <span class="ot">&lt;-</span> <span class="fu">mapply</span>(paste, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>myc_rle_separated <span class="ot">&lt;-</span> <span class="fu">mapply</span>(paste, </span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    run_lengths<span class="sc">$</span>values, </span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    run_lengths<span class="sc">$</span>length, </span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">MoreArgs =</span> <span class="fu">list</span>(<span class="at">sep =</span> <span class="st">"x"</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="at">collapse =</span> <span class="st">";"</span>)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">substr</span>(myc_rle_separated, <span class="dv">1</span>, <span class="dv">40</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">substr</span>(myc_rle_separated, <span class="dv">1</span>, <span class="dv">40</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "0x3;1x1;3x1;0x3;1x1;0x4;1x3;0x3;1x2;0x14"</code></pre>
 </div>
@@ -514,8 +517,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This representation occupies only 4.9 KiB of memory - but <em>half</em> of the character string is required to encode the <code>x</code> and <code>;</code> separators. We can do better!</p>
 <p>To avoid including any separators, we can represent one of the numbers, e.g.&nbsp;the values, as a single character instead. For the <em>MYC</em> gene, the largest observed integer count is 7. So let’s represent all 8 values (including 0) with a letter of the alphabet instead:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dictionary <span class="ot">&lt;-</span> <span class="fu">setNames</span>(letters[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">max</span>(myc) <span class="sc">+</span> <span class="dv">1</span>)], <span class="dv">0</span><span class="sc">:</span><span class="fu">max</span>(myc))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>dictionary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dictionary <span class="ot">&lt;-</span> <span class="fu">setNames</span>(letters[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">max</span>(myc) <span class="sc">+</span> <span class="dv">1</span>)], <span class="dv">0</span><span class="sc">:</span><span class="fu">max</span>(myc))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>dictionary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  0   1   2   3   4   5   6   7 
 "a" "b" "c" "d" "e" "f" "g" "h" </code></pre>
@@ -524,11 +527,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>For example, the letter <code>a</code> represents <code>0</code>, <code>b</code> represents <code>1</code> and so on.</p>
 <p>Now we can omit the <code>x</code> and <code>;</code> separators, as each run is unambiguously represented by one character and an integer <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a>myc_rle_character <span class="ot">&lt;-</span> <span class="fu">mapply</span>(paste0, </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a>myc_rle_character <span class="ot">&lt;-</span> <span class="fu">mapply</span>(paste0, </span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-12-2" class="code-annotation-target"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a>    dictionary[<span class="fu">as.character</span>(run_lengths<span class="sc">$</span>values)],</span>
 <span id="annotated-cell-12-3"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>    run_lengths<span class="sc">$</span>length) <span class="sc">|&gt;</span></span>
 <span id="annotated-cell-12-4"><a href="#annotated-cell-12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="at">collapse =</span> <span class="st">""</span>)</span>
-<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">substr</span>(myc_rle_character, <span class="dv">1</span>, <span class="dv">21</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-12-5"><a href="#annotated-cell-12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">substr</span>(myc_rle_character, <span class="dv">1</span>, <span class="dv">21</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
@@ -548,21 +551,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Encoding larger numbers of values
+<span class="screen-reader-only">Note</span>Encoding larger numbers of values
 </div>
 </div>
 <div class="callout-body-container callout-body">
 <p>In this example, we only needed 8 letters to encode all observed unique counts for the <em>MYC</em> gene. But for other genes, especially those expressed at higher levels, we might observe many more possible values - even more than the 26 lower case letters of the English alphabet.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>gapdh <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>gapdh <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  ensembl <span class="ot">&lt;-</span> <span class="fu">row.names</span>(tenx_pbmc4k)[</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">which</span>(<span class="fu">rowData</span>(tenx_pbmc4k)<span class="sc">$</span>Symbol <span class="sc">==</span> <span class="st">"GAPDH"</span>)]</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">counts</span>(tenx_pbmc4k)[ensembl, ]</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>For example, in this dataset we observe 59 distinct count values for the highly abundant <em>GAPDH</em> gene:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(gapdh)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(gapdh)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>gapdh
   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19 
@@ -576,9 +579,9 @@ Encoding larger numbers of values
 <p>Luckily, we are not restricted to the English alphabet. For example, we can map to any character in the <a href="https://en.wikipedia.org/wiki/UTF-8">Unicode Transformation Format – 8-bit (UTF-8)</a> character encoding instead.</p>
 <p>To encode e.g.&nbsp;all integers from 1 to 256 (more than enough for <em>GAPDH</em>) - but <em>avoiding those that represent a space, quote, etc or integers</em> - we can use UTF-8 codes 64 to 319:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>codes <span class="ot">&lt;-</span> <span class="dv">64</span><span class="sc">:</span><span class="dv">319</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>codes <span class="ot">&lt;-</span> <span class="dv">64</span><span class="sc">:</span><span class="dv">319</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>dictionary <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">intToUtf8</span>(codes, <span class="at">multiple =</span> <span class="cn">TRUE</span>), <span class="dv">0</span><span class="sc">:</span><span class="dv">255</span>)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dictionary, <span class="at">n =</span> <span class="dv">66</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dictionary, <span class="at">n =</span> <span class="dv">66</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       0        1        2        3        4        5        6        7 
      "@"      "A"      "B"      "C"      "D"      "E"      "F"      "G" 
@@ -602,20 +605,20 @@ Encoding larger numbers of values
 </div>
 <p>And then use this dictionary to encode the <em>GAPDH</em> counts:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(gapdh, <span class="at">n =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(gapdh, <span class="at">n =</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1]  4  5  1  2  1  2  3 26  2 13  1  5  2  3 24  4  3  3  9  9</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>gapdh_character <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>gapdh_character <span class="ot">&lt;-</span> <span class="fu">local</span>({</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  run_lengths <span class="ot">&lt;-</span> <span class="fu">rle</span>(gapdh)</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mapply</span>(paste0, </span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>         dictionary[<span class="fu">as.character</span>(run_lengths<span class="sc">$</span>values)],</span>
 <span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>         run_lengths<span class="sc">$</span>length) <span class="sc">|&gt;</span></span>
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">paste0</span>(<span class="at">collapse =</span> <span class="st">""</span>)</span>
 <span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">substr</span>(gapdh_character, <span class="dv">1</span>, <span class="dv">36</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">substr</span>(gapdh_character, <span class="dv">1</span>, <span class="dv">36</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "D1E1A1B1A1B1C1Z1B1M1A1E1B1C1X1D1C2I2"</code></pre>
 </div>
@@ -624,7 +627,7 @@ Encoding larger numbers of values
 </div>
 </div>
 <div class="callout callout-style-default callout-caution callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -647,7 +650,7 @@ Caution
 <h2 class="anchored" data-anchor-id="lzw-compression">LZW compression</h2>
 <p>At this point, we are representing the original count vectors as character strings. Some of these string representation contain repeated patterns, which we can exploit to compress them even further.</p>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -667,7 +670,7 @@ Note
 <section id="lzw-encoding" class="level3">
 <h3 class="anchored" data-anchor-id="lzw-encoding">LZW encoding</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a>compress_lzw <span class="ot">&lt;-</span> <span class="cf">function</span>(input_string) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a>compress_lzw <span class="ot">&lt;-</span> <span class="cf">function</span>(input_string) {</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-13-2" class="code-annotation-target"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a>  dictionary <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">intToUtf8</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">256</span>, <span class="at">multiple =</span> <span class="cn">TRUE</span>),</span>
 <span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">intToUtf8</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">256</span>, <span class="at">multiple =</span> <span class="cn">TRUE</span>)</span>
 <span id="annotated-cell-13-4"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a>  )</span>
@@ -692,7 +695,7 @@ Note
 <span id="annotated-cell-13-23"><a href="#annotated-cell-13-23" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">&lt;-</span> <span class="fu">paste0</span>(output, dictionary[[previous_pattern]])</span>
 <span id="annotated-cell-13-24"><a href="#annotated-cell-13-24" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="annotated-cell-13-25"><a href="#annotated-cell-13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(output)</span>
-<span id="annotated-cell-13-26"><a href="#annotated-cell-13-26" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-13-26"><a href="#annotated-cell-13-26" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
@@ -737,8 +740,8 @@ Note
 </ol>
 <p>Let’s apply our LZW compression function to the run-length encoded <em>MYC</em> expression we generated above:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>myc_lzw <span class="ot">&lt;-</span> <span class="fu">compress_lzw</span>(myc_rle_character)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>myc_lzw</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>myc_lzw <span class="ot">&lt;-</span> <span class="fu">compress_lzw</span>(myc_rle_character)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>myc_lzw</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "a3b1d1āăa4b3ć2a1ĊĆ1ĂĒ7ăcĒĈ6Ĉ8Ĉ9Ĉ1ĞėĆ2bĎđa5ĈĪħīĈĖĆ6ąa2ĳ5ĘďĈĥıĦĉĔĴ2ĘĠŁĤĚįĠ0ĮĆ3ĸ1ĸ6ōŃĸĪĒġĒōĿŔĹĒěĆğĎ9ōłĎŚ1ŖĉĺĠĺfĆĨĨŧēĽĝŋœĽĿ20eŭōĻćŴŅĕżŪĒĨ7ąĚĳŰğŋĈ4őĆŚƋāĶĽŰĽƎĆİŨŋŎŕũŭƟĩłŗļıĸƘĩĽŽĖĎŐƥď0Əďŧŝžďĸ3ƇƠĤƵ5ĳěČ8ƸŇĒŉƐŊďƒƒ1ŚĲƀưƈƌſĺƵ7ƣĴƍƃƧƃď4ąĸŽǂǏŧǞƞƌ4aǋhƌĎǢaƵƴĘĳĨ8ƺƩħǠĳǋĿŧĻcĎƝǘĤƲ1ŽƵ2ŚųśȂďǺĚǠǙǅĈŷĜǜŦȕęĒķƐţĴŚƆƐźĴȝŚůƵȇăgǽŪĭƙũƭĠŧĝĎƚƬƛƓȒĆȳȞŃņȜĕňĠœĳǖƻƩȮȿƉȾĴǆȌťɍěȀĳƹȚīǗǋŒļȭȸƶƚȁŌǤĸƚůůȁɣƸǳȱīȢƮĴɅďťĨĬɰĽƾȫɀƻɊƯĂȀƗĞǶĿǼƣǠǠƘȽɛȊɷďȻɯɔƪƂĤĨ3ƅģȷŰǗǕŏǛȹȋȊ3ȪǃșaʞĢ1ȢɠƶűǒƶƒĥĎǼįȐĤǶɣơɤȘʣȱōɍțāŢŧɯŽǤȑȌŽʔȁȁ˂ĺĳĵɆɞǡăŬʾ1ȪȋȅżʛƳȖĠȉƉġĎŽʭȖŧɏʕŽŷ2źơ1ƱǏńžʧʸˬȓȖĨ23˪ſȷƫœƏǗ˟ĉōˈȊ˧ʲƶ˷ōƵʨĔ̉˄ŖʚǣɍŽ̓ƕ˶Ȗŏɪęʯĺɍ3ǎƷǏȊƅʡư˒ĄƄŶ˫ǋɑď˱ŅȰ˺ȔȿȌǀƶ̬˂ʿďɭŚƑơǋŧʨ̬ġʨŚɼaİĸƒʤʢ̤͋ǍƧǶȊ5ǫōźƇȀʨʭƉɯ˃ǇĒʨˡȕČĿɭǌ˄̄ǶʊǵɆ˳ŻŜɋȗŞȢĊɛŷɍˤăƔƠČƵƎɽ̳̱ͦơ̸ĤȢ̔ŭ˂5ͳȖͤ˫ɐʥɇɜȊş˖Ǽ̀Ίͯŋǡͺʩ̲ǩįƿȽĒĥČɷˌǜʉ\u03a2ɜƨ˸ȃƤȣʫ\u0378ŋƉ0ȎɕƯ6"</code></pre>
 </div>
@@ -749,7 +752,7 @@ Note
 <section id="lzw-decoding" class="level3">
 <h3 class="anchored" data-anchor-id="lzw-decoding">LZW decoding</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a>decompress_lzw <span class="ot">&lt;-</span> <span class="cf">function</span>(compressed) {</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a>decompress_lzw <span class="ot">&lt;-</span> <span class="cf">function</span>(compressed) {</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-15-2" class="code-annotation-target"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a>  dictionary <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">intToUtf8</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">256</span>, <span class="at">multiple =</span> <span class="cn">TRUE</span>),</span>
 <span id="annotated-cell-15-3"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">intToUtf8</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">256</span>, <span class="at">multiple =</span> <span class="cn">TRUE</span>)</span>
 <span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a>  )</span>
@@ -778,7 +781,7 @@ Note
 <span id="annotated-cell-15-27"><a href="#annotated-cell-15-27" aria-hidden="true" tabindex="-1"></a>    previous_string <span class="ot">&lt;-</span> current_string</span>
 <span id="annotated-cell-15-28"><a href="#annotated-cell-15-28" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="annotated-cell-15-29"><a href="#annotated-cell-15-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(output)</span>
-<span id="annotated-cell-15-30"><a href="#annotated-cell-15-30" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-15-30"><a href="#annotated-cell-15-30" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
@@ -815,28 +818,28 @@ Note
 </ol>
 <p>Let’s test the function by restoring the RLE-encoded <em>MYC</em> counts we compressed above:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>myc_lzw_decompressed <span class="ot">&lt;-</span> <span class="fu">decompress_lzw</span>(myc_lzw)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(myc_lzw_decompressed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>myc_lzw_decompressed <span class="ot">&lt;-</span> <span class="fu">decompress_lzw</span>(myc_lzw)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(myc_lzw_decompressed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "a3b1d1a3b1a4b3a3b2a14b1a13b1a17b1c1a1b1a6b1a8b1a9b1a1b1a9b1c1a2b2a4b1a5b1a5b2a4b1a5b1a7b1a6d1a2d1a5c1a1b1a2b1a6b2a43b1a22c1b1a12c1a2b1a6b1a7b1a10b1a5b1a3c1a1c1a6c1a1b1a12c1a5b1a11b1a1c1a13b1a5b1a1b1a16b1a9b2a9c1a1c1b2a5b1a11b1a4b1a2b1a1b1a2f1a4b1a4b1a1b1a13b2a8b1a3c1a5b2a3b1a20e1a4c1a12b1a3b1a3c1a2b1a17c1a12b1a1b1a14b1a7d1b1a6d1a1b1a19b1a3b1a4c1a1b1a5b1a9b1a3d1a5b2a1b1a1b2a4c1a7b1a4b1a31c1a11b1a2b1a4b1a2b1a5c1b1a1c1a6b1a6c1a4c1a5b2a2b1a7b2a6c1a6b1a10c1a1b1a11b1a6b1a3b1a1c1a3d1b1a4b1a26b1a5d1a6b3a8c1a3b1a7b1a10b1a5b1a5b1a19b1a9b1a15b1a6d1a2b1a10b1a6d1a3b1a3c1b1a26b1a7c1b1a2b1a4b1a1b1c1a4b1a1b1a14d1c1a2b1a8c1a2b1a1b1a4d1a11b1a3b4a9b1a1h1a3b2a8c1a6b1a1b1a6c1d1a4b1a8d1b1a5b2a4c1a2d1a9b1a13b1a1b1a2b1c2a1c1a2b1a2c1a1b1a12b1a6b1a25b1a8b1a1b1a2b1a1d1a9b1a6c1a2b1a4b1a10b1a3b1a2b1a8b1a1b1a11b1a8b1a1b1a15c1a5c1b2a25b1a7d1a5e1a2c1b2a5b1a4b1a16b1a6b1a2b1g1b1a2b1a1b2a4b1a7b1a2b2a6b1a11b1a8b2a7b1a7b2a4b1a3d1a10b1a8b2a25b1a12b1a6b1a5c1a17b1a10b1a1c1a5d1a7c1a4b1a5b1a7b1a5c1d1a1b1a6b1a20b1a2b1a5b1a10b1a6b2a1d1a3d1a15b1a5c1b1a9b1a1b1a12c1a6b2a4b1a3d1a3b1a7b1a1c1a3c1b1a4c1a7b1a4b1a14b1a11c1a7b1a4c1a3d1a4b1a11b1a5e1a6c1a27c1a15b1a14b1a5b2a15b2a5d1b1a2b1a17b1a4b1d1a1b1a6b1a3b2a1b2a4b1a9d1b1a3b1a3b1a1c1b1c1a2c1a24c1b1a12b2a4b1a8b1a1b1a2b1a18b2a7c1a3d1b2a2c1a12b1a24b1a34b1a7b1c1a4b1a1b1a1c1b1a6b1a7c1a6c1a4b1a10b1a1b1a8b1a3g1c1a3b1a1b1a8b1a3b1a9b1e1a3c1a3b1a13b1a3b1a3b1a9b1a2b2a3b1a1b1a7c1a2b1a2d1b1a7b1a4b1a2b1a4b1a14b1a8b1a8b1a11c1a10b1a5c1a3c1a1c1b1a7c1a2b1a1b1a4b1a4b1a2b1a2b1a4b1a7b1c1a1c1a2b1a1b1a2d1a2d1a4b1a7b1a12b1a8b1f1a3c1g1a1b1a12c1a12c1a4b1a11b1a1b1a1b1a15b1a8d1a11b2a2b1a9b1a2b1a1b1a11b1a5b1a10b1c1a2b1a3b1a22e1b1a2b1a10c1a2b1a2c1a3b1e1a3b1a8b1a10b1a3b1a1b1a14b1a23e1b1a3c1a4b1a2b1a7c1a5c1a1b1c1b1a1b2a4c1a11c1a18b1a2b1a3c1a2b1a3b1a23c1a16b1a3c1a3b1c1a16b1a4b1a1b1c1a6c1a2b1a10b1a2b1a2b1a2b2a14b1a2b1a1b1a1c1a6b1a11b1a1b2a3b1a20b1a36d1a1c1a2b1a8b1a4b1a7c1a3b1a10f1a1d1a14b2a3b1a2b1a19b1a16b2a1e1a3b1a2b2a6b1a3c1a3b1a2b1a5c1a2b1a6b3a3b1a6b2a2b1a1c1a1c1a16c1a5b1a5b1a9b1a2b1a9b1a11b1a3c1a6b2a1b3c1a5b1a3b2a7b1c1a9b1a8b1a3b1a1b1a8b1a3b1c1a3b1a5b1a6c1a4d1b1a8b1a5h1c1a1e1d1b2a13c1a9b1a2d1a17c1a1b1a4b1a5b1a13c1a2b1a9b1a8b3a3b1a6c1a15b1a4b1a8b1a2d1b1a1b1a2b1a8d1a4b1a10b1a4c1a16b1a6b1a11b1a9e1a4b2a4b1a3b1a20b1a1b1a5b1d1a5b1a4b3a6b1a4c2a1b1a5c1a15b1a3c1a3b1a2b1a2b1a1c1a2e1a2b1a2b1a42b1a15e1a4b1a1b1a13b1a6b1a2b1a10b1a6b1a9b1a5b1a3d1a8b1a9b2a1b1a13b1a11b2a5e1a16b1a32b1a8d1a5b1a3b1a13b1a2b1a9b1a7d1a6b1a12b1a12b3a1b1a2b1d1a2b1a1b1a8b1a1b1a12b1a3d1a4c1a3e1a2c1a1c1a2c1a3b1a1b1a5b1a3d1a10d1a9b1a15b1a6b1a6"</code></pre>
 </div>
 </div>
 <p>Are the results of sequention compression &amp; decompression really identical to the input string?</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decompress_lzw</span>(<span class="fu">compress_lzw</span>(myc_rle_character)), </span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  myc_rle_character)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  myc_rle_character)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Compression / decompression example
+<span class="screen-reader-only">Note</span>Compression / decompression example
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -844,9 +847,9 @@ Compression / decompression example
 <div class="callout-body-container callout-body">
 <p>Because it’s hard to visually compare the long vectors we have compressed &amp; decompressed above, here is a toy example:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>original_string <span class="ot">&lt;-</span> <span class="st">"MARYHADALITTLELAMBMARYHADALITTLELAMBMARYHAD"</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>original_string <span class="ot">&lt;-</span> <span class="st">"MARYHADALITTLELAMBMARYHADALITTLELAMBMARYHAD"</span></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>compressed <span class="ot">&lt;-</span> <span class="fu">compress_lzw</span>(original_string)</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>decompressed <span class="ot">&lt;-</span> <span class="fu">decompress_lzw</span>(compressed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>decompressed <span class="ot">&lt;-</span> <span class="fu">decompress_lzw</span>(compressed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -882,7 +885,7 @@ Compression / decompression example
 Session Information
 </summary>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: x86_64-pc-linux-gnu
@@ -1455,7 +1458,7 @@ loaded via a namespace (and not attached):
   }
   loadGiscus();
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb43" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Compressing single-cell RNA-seq data with run-length encoding and LZW"</span></span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Thomas Sandmann"</span></span>
 <span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "2024-12-23"</span></span>
@@ -2007,7 +2010,7 @@ loaded via a namespace (and not attached):
 <span id="cb43-604"><a href="#cb43-604" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb43-605"><a href="#cb43-605" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb43-606"><a href="#cb43-606" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">details</span><span class="dt">&gt;</span></span>
-</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

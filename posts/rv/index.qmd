@@ -522,11 +522,20 @@ it in my next analysis projects.
   different CRAN-like sources.
   - I also noticed that running `quarto render` in an `rv` project folder
   is problematic: it appears that `quarto` recursively renders all R markdown
-  documents included in the `rv/library` subfolders [^5].
+  documents included in the `rv/library` subfolders [^5]. (See github issue
+  [filed here](https://github.com/A2-ai/rv/issues/332).)
 
   [^5]: This could be prevented by changing the folder name from `rv` into
   `.rv` (similar to the `.renv` folder), as hidden folders are automatically
-  ignored by `quarto render`.
+  ignored by `quarto render`. Alternatively, you can exclude the `rv` subfolder
+  from rending by adding the following section to the `project` section of your 
+  `_quarto.yml` file:
+  ```
+  render:
+    - "*.qmd"
+    - "*.md"
+    - "!rv/rv/"
+  ```
 
 - In contrast, `renv` is a well established tool, and integrates into Posit's
   RStudio IDE. It mirrors the iterative way analysts add or update R packages 

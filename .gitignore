@@ -11,3 +11,5 @@ env
 **derby.log
 posts/*/index_cache/*
 posts/*/index_files/*
+
+**/*.quarto_ipynb

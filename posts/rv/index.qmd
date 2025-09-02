@@ -533,8 +533,7 @@ it in my next analysis projects.
   ```
   render:
     - "*.qmd"
-    - "*.md"
-    - "!rv/rv/"
+    - "!rv/"
   ```
 
 - In contrast, `renv` is a well established tool, and integrates into Posit's

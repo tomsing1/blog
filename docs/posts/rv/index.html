@@ -756,8 +756,7 @@ CRAN (https://packagemanager.posit.co/cran/2025-08-29): 19734 binary packages, 2
 <li id="fn5"><p>This could be prevented by changing the folder name from <code>rv</code> into <code>.rv</code> (similar to the <code>.renv</code> folder), as hidden folders are automatically ignored by <code>quarto render</code>. Alternatively, you can exclude the <code>rv</code> subfolder from rending by adding the following section to the <code>project</code> section of your <code>_quarto.yml</code> file:</p>
 <pre><code>render:
   - "*.qmd"
-  - "*.md"
-  - "!rv/rv/"</code></pre>
+  - "!rv/"</code></pre>
 <a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></li>
 </ol>
 </section></div></main> <!-- /main -->
@@ -1791,20 +1790,19 @@ CRAN (https://packagemanager.posit.co/cran/2025-08-29): 19734 binary packages, 2
 <span id="cb23-533"><a href="#cb23-533" aria-hidden="true" tabindex="-1"></a>  <span class="in">```</span></span>
 <span id="cb23-534"><a href="#cb23-534" aria-hidden="true" tabindex="-1"></a><span class="in">  render:</span></span>
 <span id="cb23-535"><a href="#cb23-535" aria-hidden="true" tabindex="-1"></a><span class="in">    - "*.qmd"</span></span>
-<span id="cb23-536"><a href="#cb23-536" aria-hidden="true" tabindex="-1"></a><span class="in">    - "*.md"</span></span>
-<span id="cb23-537"><a href="#cb23-537" aria-hidden="true" tabindex="-1"></a><span class="in">    - "!rv/rv/"</span></span>
-<span id="cb23-538"><a href="#cb23-538" aria-hidden="true" tabindex="-1"></a><span class="in">  ```</span></span>
-<span id="cb23-539"><a href="#cb23-539" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-540"><a href="#cb23-540" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>In contrast, <span class="in">`renv`</span> is a well established tool, and integrates into Posit's</span>
-<span id="cb23-541"><a href="#cb23-541" aria-hidden="true" tabindex="-1"></a>  RStudio IDE. It mirrors the iterative way analysts add or update R packages </span>
-<span id="cb23-542"><a href="#cb23-542" aria-hidden="true" tabindex="-1"></a>  during an analysis project, snapshoting the current state as they go along. </span>
-<span id="cb23-543"><a href="#cb23-543" aria-hidden="true" tabindex="-1"></a>  By overloading base functions e.g. <span class="in">`install.packages()`</span>, it offers a seamless</span>
-<span id="cb23-544"><a href="#cb23-544" aria-hidden="true" tabindex="-1"></a>  user experience. </span>
-<span id="cb23-545"><a href="#cb23-545" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`renv`</span> works well for me, and I am very grateful to the Posit team - </span>
-<span id="cb23-546"><a href="#cb23-546" aria-hidden="true" tabindex="-1"></a>  especially <span class="co">[</span><span class="ot">Kevin Ushey</span><span class="co">](https://github.com/kevinushey)</span> - for keeping it up to</span>
-<span id="cb23-547"><a href="#cb23-547" aria-hidden="true" tabindex="-1"></a>  date for, including the support of private github repositories and</span>
-<span id="cb23-548"><a href="#cb23-548" aria-hidden="true" tabindex="-1"></a>  Bioconductor 🧡.</span>
-<span id="cb23-549"><a href="#cb23-549" aria-hidden="true" tabindex="-1"></a>  </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb23-536"><a href="#cb23-536" aria-hidden="true" tabindex="-1"></a><span class="in">    - "!rv/"</span></span>
+<span id="cb23-537"><a href="#cb23-537" aria-hidden="true" tabindex="-1"></a><span class="in">  ```</span></span>
+<span id="cb23-538"><a href="#cb23-538" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-539"><a href="#cb23-539" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>In contrast, <span class="in">`renv`</span> is a well established tool, and integrates into Posit's</span>
+<span id="cb23-540"><a href="#cb23-540" aria-hidden="true" tabindex="-1"></a>  RStudio IDE. It mirrors the iterative way analysts add or update R packages </span>
+<span id="cb23-541"><a href="#cb23-541" aria-hidden="true" tabindex="-1"></a>  during an analysis project, snapshoting the current state as they go along. </span>
+<span id="cb23-542"><a href="#cb23-542" aria-hidden="true" tabindex="-1"></a>  By overloading base functions e.g. <span class="in">`install.packages()`</span>, it offers a seamless</span>
+<span id="cb23-543"><a href="#cb23-543" aria-hidden="true" tabindex="-1"></a>  user experience. </span>
+<span id="cb23-544"><a href="#cb23-544" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`renv`</span> works well for me, and I am very grateful to the Posit team - </span>
+<span id="cb23-545"><a href="#cb23-545" aria-hidden="true" tabindex="-1"></a>  especially <span class="co">[</span><span class="ot">Kevin Ushey</span><span class="co">](https://github.com/kevinushey)</span> - for keeping it up to</span>
+<span id="cb23-546"><a href="#cb23-546" aria-hidden="true" tabindex="-1"></a>  date for, including the support of private github repositories and</span>
+<span id="cb23-547"><a href="#cb23-547" aria-hidden="true" tabindex="-1"></a>  Bioconductor 🧡.</span>
+<span id="cb23-548"><a href="#cb23-548" aria-hidden="true" tabindex="-1"></a>  </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

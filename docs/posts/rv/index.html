@@ -753,7 +753,7 @@ CRAN (https://packagemanager.posit.co/cran/2025-08-29): 19734 binary packages, 2
 <li id="fn2"><p><code>rv</code> can create a new folder on the fly, simply provide its name e.g. <code>rv init &lt;project name&gt;</code><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>The <code>rv/scripts/rvr.R</code> script creates an environment called <code>.rv</code> in the local R session with functions that manage system calls to the <code>rv</code> command line tool, check out <code>ls(envir = .rv)</code> for details. The <code>rv/scripts/activate.R</code> script reads the user-specified source repositories from the <code>rproject.toml</code> file and (over-)writes <code>options("repos")</code>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>At the time of writing, there is no equivalent <code>rv remove</code> sub-command to remove packages from the configuration file. Packages can be removed by editing the <code>rproject.toml</code> file manually.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>This could be prevented by changing the folder name from <code>rv</code> into <code>.rv</code> (similar to the <code>.renv</code> folder), as hidden folders are automatically ignored by <code>quarto render</code>. Alternatively, you can exclude the <code>rv</code> subfolder from rending by adding the following section to the <code>project</code> section of your <code>_quarto.yml</code> file:</p>
+<li id="fn5"><p>You can exclude the <code>rv</code> subfolder from rendering by adding the following section to the <code>project</code> section of your <code>_quarto.yml</code> file:</p>
 <pre><code>render:
   - "*.qmd"
   - "!rv/"</code></pre>
@@ -1782,27 +1782,24 @@ CRAN (https://packagemanager.posit.co/cran/2025-08-29): 19734 binary packages, 2
 <span id="cb23-525"><a href="#cb23-525" aria-hidden="true" tabindex="-1"></a>  documents included in the <span class="in">`rv/library`</span> subfolders <span class="ot">[^5]</span>. (See github issue</span>
 <span id="cb23-526"><a href="#cb23-526" aria-hidden="true" tabindex="-1"></a>  <span class="co">[</span><span class="ot">filed here</span><span class="co">](https://github.com/A2-ai/rv/issues/332)</span>.)</span>
 <span id="cb23-527"><a href="#cb23-527" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-528"><a href="#cb23-528" aria-hidden="true" tabindex="-1"></a>  <span class="ot">[^5]: </span>This could be prevented by changing the folder name from <span class="in">`rv`</span> into</span>
-<span id="cb23-529"><a href="#cb23-529" aria-hidden="true" tabindex="-1"></a>  <span class="in">`.rv`</span> (similar to the <span class="in">`.renv`</span> folder), as hidden folders are automatically</span>
-<span id="cb23-530"><a href="#cb23-530" aria-hidden="true" tabindex="-1"></a>  ignored by <span class="in">`quarto render`</span>. Alternatively, you can exclude the <span class="in">`rv`</span> subfolder</span>
-<span id="cb23-531"><a href="#cb23-531" aria-hidden="true" tabindex="-1"></a>  from rending by adding the following section to the <span class="in">`project`</span> section of your </span>
-<span id="cb23-532"><a href="#cb23-532" aria-hidden="true" tabindex="-1"></a>  <span class="in">`_quarto.yml`</span> file:</span>
-<span id="cb23-533"><a href="#cb23-533" aria-hidden="true" tabindex="-1"></a>  <span class="in">```</span></span>
-<span id="cb23-534"><a href="#cb23-534" aria-hidden="true" tabindex="-1"></a><span class="in">  render:</span></span>
-<span id="cb23-535"><a href="#cb23-535" aria-hidden="true" tabindex="-1"></a><span class="in">    - "*.qmd"</span></span>
-<span id="cb23-536"><a href="#cb23-536" aria-hidden="true" tabindex="-1"></a><span class="in">    - "!rv/"</span></span>
-<span id="cb23-537"><a href="#cb23-537" aria-hidden="true" tabindex="-1"></a><span class="in">  ```</span></span>
-<span id="cb23-538"><a href="#cb23-538" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-539"><a href="#cb23-539" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>In contrast, <span class="in">`renv`</span> is a well established tool, and integrates into Posit's</span>
-<span id="cb23-540"><a href="#cb23-540" aria-hidden="true" tabindex="-1"></a>  RStudio IDE. It mirrors the iterative way analysts add or update R packages </span>
-<span id="cb23-541"><a href="#cb23-541" aria-hidden="true" tabindex="-1"></a>  during an analysis project, snapshoting the current state as they go along. </span>
-<span id="cb23-542"><a href="#cb23-542" aria-hidden="true" tabindex="-1"></a>  By overloading base functions e.g. <span class="in">`install.packages()`</span>, it offers a seamless</span>
-<span id="cb23-543"><a href="#cb23-543" aria-hidden="true" tabindex="-1"></a>  user experience. </span>
-<span id="cb23-544"><a href="#cb23-544" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`renv`</span> works well for me, and I am very grateful to the Posit team - </span>
-<span id="cb23-545"><a href="#cb23-545" aria-hidden="true" tabindex="-1"></a>  especially <span class="co">[</span><span class="ot">Kevin Ushey</span><span class="co">](https://github.com/kevinushey)</span> - for keeping it up to</span>
-<span id="cb23-546"><a href="#cb23-546" aria-hidden="true" tabindex="-1"></a>  date for, including the support of private github repositories and</span>
-<span id="cb23-547"><a href="#cb23-547" aria-hidden="true" tabindex="-1"></a>  Bioconductor 🧡.</span>
-<span id="cb23-548"><a href="#cb23-548" aria-hidden="true" tabindex="-1"></a>  </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb23-528"><a href="#cb23-528" aria-hidden="true" tabindex="-1"></a>  <span class="ot">[^5]: </span>You can exclude the <span class="in">`rv`</span> subfolder from rendering by adding the</span>
+<span id="cb23-529"><a href="#cb23-529" aria-hidden="true" tabindex="-1"></a>  following section to the <span class="in">`project`</span> section of your <span class="in">`_quarto.yml`</span> file:</span>
+<span id="cb23-530"><a href="#cb23-530" aria-hidden="true" tabindex="-1"></a>  <span class="in">```</span></span>
+<span id="cb23-531"><a href="#cb23-531" aria-hidden="true" tabindex="-1"></a><span class="in">  render:</span></span>
+<span id="cb23-532"><a href="#cb23-532" aria-hidden="true" tabindex="-1"></a><span class="in">    - "*.qmd"</span></span>
+<span id="cb23-533"><a href="#cb23-533" aria-hidden="true" tabindex="-1"></a><span class="in">    - "!rv/"</span></span>
+<span id="cb23-534"><a href="#cb23-534" aria-hidden="true" tabindex="-1"></a><span class="in">  ```</span></span>
+<span id="cb23-535"><a href="#cb23-535" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-536"><a href="#cb23-536" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>In contrast, <span class="in">`renv`</span> is a well established tool, and integrates into Posit's</span>
+<span id="cb23-537"><a href="#cb23-537" aria-hidden="true" tabindex="-1"></a>  RStudio IDE. It mirrors the iterative way analysts add or update R packages </span>
+<span id="cb23-538"><a href="#cb23-538" aria-hidden="true" tabindex="-1"></a>  during an analysis project, snapshoting the current state as they go along. </span>
+<span id="cb23-539"><a href="#cb23-539" aria-hidden="true" tabindex="-1"></a>  By overloading base functions e.g. <span class="in">`install.packages()`</span>, it offers a seamless</span>
+<span id="cb23-540"><a href="#cb23-540" aria-hidden="true" tabindex="-1"></a>  user experience. </span>
+<span id="cb23-541"><a href="#cb23-541" aria-hidden="true" tabindex="-1"></a><span class="ss">  - </span><span class="in">`renv`</span> works well for me, and I am very grateful to the Posit team - </span>
+<span id="cb23-542"><a href="#cb23-542" aria-hidden="true" tabindex="-1"></a>  especially <span class="co">[</span><span class="ot">Kevin Ushey</span><span class="co">](https://github.com/kevinushey)</span> - for keeping it up to</span>
+<span id="cb23-543"><a href="#cb23-543" aria-hidden="true" tabindex="-1"></a>  date for, including the support of private github repositories and</span>
+<span id="cb23-544"><a href="#cb23-544" aria-hidden="true" tabindex="-1"></a>  Bioconductor 🧡.</span>
+<span id="cb23-545"><a href="#cb23-545" aria-hidden="true" tabindex="-1"></a>  </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

@@ -525,11 +525,8 @@ it in my next analysis projects.
   documents included in the `rv/library` subfolders [^5]. (See github issue
   [filed here](https://github.com/A2-ai/rv/issues/332).)
 
-  [^5]: This could be prevented by changing the folder name from `rv` into
-  `.rv` (similar to the `.renv` folder), as hidden folders are automatically
-  ignored by `quarto render`. Alternatively, you can exclude the `rv` subfolder
-  from rending by adding the following section to the `project` section of your 
-  `_quarto.yml` file:
+  [^5]: You can exclude the `rv` subfolder from rendering by adding the
+  following section to the `project` section of your `_quarto.yml` file:
   ```
   render:
     - "*.qmd"

@@ -148,6 +148,7 @@ volcano plot and highlight significantly up- and down-regulated genes in red and
 blue, respectively.
 
 ![First plot](images/1.jpg)
+
 > Please add vertical dashed lines to indicate the log2 cutoff, and add a 
 caption that explains which cutoffs were applied.
 

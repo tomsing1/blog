@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/ggbot2/index.html",
       "/posts/rv/index.html",
       "/posts/duckdb_variants/index.html",
       "/posts/ducklake/index.html",

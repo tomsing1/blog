@@ -11,7 +11,18 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.8.21</generator>
-<lastBuildDate>Mon, 01 Sep 2025 07:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 27 Sep 2025 07:00:00 GMT</lastBuildDate>
+<item>
+  <title>Creating a volcano plot with your voice</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/ggbot2/</link>
+  <description><![CDATA[ <a href="https://github.com/jcheng5">Joe Cheng</a>, <a href="https://github.com/skaltman">Sara Altman</a> and <a href="https://github.com/DavisVaughan">Davis Vaughan</a> showed off their <a href="https://github.com/tidyverse/ggbot2">ggbot2</a> R package at the recent <a href="https://posit.co/conference/">Posit conference</a> to demonstrate how multiple R packages from the <a href="https://www.tidyverse.org">tidyverse</a> can be combined into a web application that generates plots based on voice commands. ]]></description>
+  <category>R</category>
+  <category>ggplot2</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/ggbot2/</guid>
+  <pubDate>Sat, 27 Sep 2025 07:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Managing project-specific R libraries with rv</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -216,18 +227,6 @@
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/dbgap/</guid>
   <pubDate>Sun, 17 Sep 2023 07:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Adventures with parquet III: single-cell RNA-seq data and comparison with HDF5-backed arrays</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/ParquetMatrix/</link>
-  <description><![CDATA[ Today, I learned how to store single-cell RNA-seq data in a parquet file, created the <code>ParquetMatrix</code> class to retrieve them, and I started to compare the performance of reading from parquet and HDF5 files. ]]></description>
-  <category>R</category>
-  <category>TIL</category>
-  <category>parquet</category>
-  <category>Bioconductor</category>
-  <guid>https://tomsing1.github.io/blog/posts/ParquetMatrix/</guid>
-  <pubDate>Wed, 13 Sep 2023 07:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

@@ -69,63 +69,19 @@
     <lastmod>2025-07-07T02:07:20.297Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
+    <loc>https://tomsing1.github.io/blog/posts/geneset-sqlite-db/index.html</loc>
     <lastmod>2025-07-07T02:07:20.296Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/duckdb_variants/index.html</loc>
-    <lastmod>2025-09-02T03:51:28.802Z</lastmod>
+    <loc>https://tomsing1.github.io/blog/posts/ducklake/index.html</loc>
+    <lastmod>2025-07-13T16:58:11.816Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/dtrackr/index.html</loc>
+    <loc>https://tomsing1.github.io/blog/posts/duckdb/index.html</loc>
     <lastmod>2025-07-07T02:07:20.295Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/dbgap/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.294Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/conditional_shiny_widgets/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.294Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/choir/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.292Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/aws-export-credentials/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.290Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/ParquetMatrix/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.287Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/30days-of-streamlit/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.286Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/about.html</loc>
-    <lastmod>2025-07-07T02:07:20.096Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.285Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/CarpentryCon2018/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.286Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/athena/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.289Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/boxr/index.html</loc>
-    <lastmod>2025-07-07T02:07:20.290Z</lastmod>
-  </url>
-  <url>
-    <loc>https://tomsing1.github.io/blog/posts/conda-speedup/index.html</loc>
+    <loc>https://tomsing1.github.io/blog/posts/drat/index.html</loc>
     <lastmod>2025-07-07T02:07:20.294Z</lastmod>
   </url>
   <url>
@@ -133,20 +89,68 @@
     <lastmod>2025-07-07T02:07:20.294Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/drat/index.html</loc>
+    <loc>https://tomsing1.github.io/blog/posts/conda-speedup/index.html</loc>
     <lastmod>2025-07-07T02:07:20.294Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/duckdb/index.html</loc>
+    <loc>https://tomsing1.github.io/blog/posts/boxr/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.290Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/athena/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.289Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/CarpentryCon2018/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.286Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.285Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/about.html</loc>
+    <lastmod>2025-07-07T02:07:20.096Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/30days-of-streamlit/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.286Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/ParquetMatrix/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.287Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/aws-export-credentials/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.290Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/choir/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.292Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/conditional_shiny_widgets/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.294Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/dbgap/index.html</loc>
+    <lastmod>2025-07-07T02:07:20.294Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/dtrackr/index.html</loc>
     <lastmod>2025-07-07T02:07:20.295Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/ducklake/index.html</loc>
-    <lastmod>2025-07-13T16:58:11.816Z</lastmod>
+    <loc>https://tomsing1.github.io/blog/posts/duckdb_variants/index.html</loc>
+    <lastmod>2025-09-02T03:51:28.802Z</lastmod>
   </url>
   <url>
-    <loc>https://tomsing1.github.io/blog/posts/geneset-sqlite-db/index.html</loc>
+    <loc>https://tomsing1.github.io/blog/posts/fujita_2022/index.html</loc>
     <lastmod>2025-07-07T02:07:20.296Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tomsing1.github.io/blog/posts/ggbot2/index.html</loc>
+    <lastmod>2025-09-27T20:36:58.240Z</lastmod>
   </url>
   <url>
     <loc>https://tomsing1.github.io/blog/posts/interactive-gene-set-results/index.html</loc>

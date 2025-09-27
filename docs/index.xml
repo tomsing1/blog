@@ -13,7 +13,7 @@
 <generator>quarto-1.8.21</generator>
 <lastBuildDate>Sat, 27 Sep 2025 07:00:00 GMT</lastBuildDate>
 <item>
-  <title>Creating a volcano plot with your voice</title>
+  <title>Exploring ggbot2: Creating a volcano plot with your voice</title>
   <dc:creator>Thomas Sandmann</dc:creator>
   <link>https://tomsing1.github.io/blog/posts/ggbot2/</link>
   <description><![CDATA[ <a href="https://github.com/jcheng5">Joe Cheng</a>, <a href="https://github.com/skaltman">Sara Altman</a> and <a href="https://github.com/DavisVaughan">Davis Vaughan</a> showed off their <a href="https://github.com/tidyverse/ggbot2">ggbot2</a> R package at the recent <a href="https://posit.co/conference/">Posit conference</a> to demonstrate how multiple R packages from the <a href="https://www.tidyverse.org">tidyverse</a> can be combined into a web application that generates plots based on voice commands. ]]></description>

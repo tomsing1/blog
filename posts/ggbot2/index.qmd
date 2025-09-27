@@ -132,7 +132,6 @@ trial and error to attach these packages to the R session _before_ calling
 
 ```{r}
 #| eval: false
-library(dplyr)
 library(ggrastr)
 library(ggrepel)
 ggbot2::ggbot(df)
@@ -186,6 +185,11 @@ Here is the final code, written entirely by the LLM [^2], and its output
 [^2]: Note the missing declaration of the `dplyr` dependency, e.g. this code
 will only run if the `dplyr` library has been attached to the session
 previously.
+
+```{r}
+#| include: false
+library(dplyr)
+```
 
 [^3]: As will most LLM setups, every `ggbot2` session will yield slightly
 different results, so your mileage will vary.

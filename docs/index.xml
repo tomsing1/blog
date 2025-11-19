@@ -11,7 +11,19 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.8.21</generator>
-<lastBuildDate>Sat, 27 Sep 2025 07:00:00 GMT</lastBuildDate>
+<lastBuildDate>Tue, 18 Nov 2025 08:00:00 GMT</lastBuildDate>
+<item>
+  <title>Setting up a local HPC cluster with SLURM for testing &amp; learning</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/slurm_docker_cluster/</link>
+  <description><![CDATA[ Today I learned how to create a high performance compute (HPC) cluster on my local system using <code>docker</code> and <code>docker-compose</code> with the <a href="https://github.com/giovtorres/slurm-docker-cluster">slurm-docker-cluster</a> project. It allowed me to experiment with an HPC environment and with the SLURM scheduler - using either its native commands (e.g.&nbsp;<code>srun</code> and <code>sbatch</code>) or from within R (e.g.&nbsp;with the <a href="https://mschubert.github.io/clustermq/">clustermq</a> package) - all from the comfort of my own laptop (a Macbook Air M4 with Mac OS 26.0.1). ]]></description>
+  <category>TIL</category>
+  <category>HPC</category>
+  <category>SLURM</category>
+  <category>R</category>
+  <guid>https://tomsing1.github.io/blog/posts/slurm_docker_cluster/</guid>
+  <pubDate>Tue, 18 Nov 2025 08:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Exploring ggbot2: Creating a volcano plot with your voice</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -216,17 +228,6 @@
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/quarto-webr/</guid>
   <pubDate>Sat, 18 Nov 2023 08:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Retrieving access-controlled data from NCBI’s dbGAP repository</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/dbgap/</link>
-  <description><![CDATA[ Today I learned about different ways to retrieve access-controlled short read data from <a href="https://www.ncbi.nlm.nih.gov/gap/">NCBI’s dbGAP repository</a>. dbGAP hosts both publicly available and <em>Access Controlled</em> data. The latter is usually used to disseminate data from individual human participants and requires a data access application. ]]></description>
-  <category>NCBI</category>
-  <category>dbGAP</category>
-  <category>TIL</category>
-  <guid>https://tomsing1.github.io/blog/posts/dbgap/</guid>
-  <pubDate>Sun, 17 Sep 2023 07:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

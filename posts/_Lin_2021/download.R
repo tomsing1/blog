@@ -2,16 +2,37 @@
 #'
 #' @param experiment Scalar character, the experiment to download
 #' @return Scalar character, the path to the downloaded file
-#' @details
+#' @details The Seurat files were referenced in the
+#' [preprint](https://www.biorxiv.org/content/10.1101/2020.11.19.389445v1.full)
+#' and it is possible that the final results published in Stem Cell Reports
+#' are (slightly) different. Available serialized Seurat objects:
 #' - `d14`:
 #'   - ScRNA-seq data of Ngn2-iNeuron at d14, varied Dox duration during culture
-#'  - 284.3 MB
+#'   - RDS file size: 284.3 MB
+#'   - 51723 features across 2767 cells:
+#     - iN_Dox_ctrl: 1351 cells
+#     - iN_Dox_d1: 311 cells
+#     - iN_Dox_d3: 378 cells:
+#     - iN_Dox_d5: 727 cells
 #' - `w5`:
 #'   - ScRNA-seq data of w5 Ngn2-iNeuron from different cell types and clones
-#'   - 114 MB
+#'   - RDS file size: 114 MB
+#'   - 17546 features across 3866 cells:
+#     - line 09b2: 993 cells
+#     - line 409b2_clone: 1654 cells
+#     - line sc102a1: 1219 cells
 #' - `timecourse`:
 #'   - Time-course scRNA-seq data of Ngn2-induced neuron differentiation
-#'   - 1454.1 MB
+#'   - RDS file size: 1454.1 MB
+#'   - 17546 features across 29554 cells:
+#     - h0: 1636 cells
+#     - h6/12: 6874 cells
+#     - d1: 3148 cells
+#     - d2: 6350 cells
+#     - d5: 1907 cells
+#     - w2: 1508 cells
+#     - w4: 7141 cells
+#     - w5: 990 cells
 download_seurat_object <- function(experiment = c("d14", "w5", "timecourse")) {
   experiment <- match.arg(experiment)
   root <- "https://data.mendeley.com/public-files/datasets/y3s4hnyvg6/files/"

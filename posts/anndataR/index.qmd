@@ -1,0 +1,298 @@
+---
+title: "anndataR: converting single-cell data, from R to python and back"
+author: "Thomas Sandmann"
+date: "2026-02-08"
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+freeze: true
+categories: [R, TIL]
+editor:
+  markdown:
+    wrap: 72
+format:
+  html:
+    anchor-sections: true
+    toc: true
+    toc-depth: 4
+    code-tools:
+      source: true
+      toggle: false
+      caption: none
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+Both the R and python communities have created amazing software tools to analyze
+single-cell data. It used to be tricky to convert between the most prominent
+serialized data structures: `SingleCellExperiment` and `Seurat` R objects and
+`AnnData` python objects. Luckily, Bioconductor release 3.22 introduced the
+[anndataR R package](https://bioconductor.org/packages//release/bioc/html/anndataR.html),
+authored by 
+[Robrecht Cannoodt](https://cannoodt.dev),
+[Luke Zappia](https://lazappi.id.au),
+[Martin Morgan](https://mtmorgan.github.io) and
+[Louise Deconinck](https://orcid.org/0000-0001-8100-6823), 
+which offers a reliable solution [^1].
+
+[^1]: For a comparison with other R packages that offer similar functionality,
+check out the vignettes that accompany the `anndataR` package, for example
+[this one](https://bioconductor.org/packages//release/bioc/vignettes/anndataR/inst/doc/anndataR.html).
+
+## Lin et al's single-cell RNA-seq datasets
+
+In 2021, 
+[Lin et al](https://pubmed.ncbi.nlm.nih.gov/34358451/) 
+published three separate single-cell RNA-seq datasets 
+that characterize the transcriptomes of neurons differentiated from induced
+pluripotent stem cells (iPSC) through overexpression of the NGN2 transcription
+factor. The authors made the data available as serialized Seurat objects 
+(version 3.1), available for download from 
+[Mendeley Data](https://data.mendeley.com/datasets/y3s4hnyvg6/1).
+
+```{r}
+suppressPackageStartupMessages({
+  library(anndataR)
+  library(fs)
+  library(rhdf5)
+  library(Seurat)
+})
+```
+
+Let's start with a function that allows us to download a deposited file and
+store it in a temporary location on the local system.
+
+<details>
+<summary>
+Download function
+</summary>
+
+```{r}
+#' Download a serialized Seurat object published by Lin et al from Mendeley data
+#'
+#' @param experiment Scalar character, the experiment to download
+#' @return Scalar character, the path to the downloaded file
+#' @details The Seurat files were referenced in the
+#' [preprint](https://www.biorxiv.org/content/10.1101/2020.11.19.389445v1.full)
+#' and it is possible that the final results published in Stem Cell Reports
+#' are (slightly) different. Available serialized Seurat objects:
+#' - `d14`:
+#'   - ScRNA-seq data of Ngn2-iNeuron at d14, varied Dox duration during culture
+#'   - RDS file size: 284.3 MB
+#'   - 51723 features across 2767 cells:
+#     - iN_Dox_ctrl: 1351 cells
+#     - iN_Dox_d1: 311 cells
+#     - iN_Dox_d3: 378 cells:
+#     - iN_Dox_d5: 727 cells
+#' - `w5`:
+#'   - ScRNA-seq data of w5 Ngn2-iNeuron from different cell types and clones
+#'   - RDS file size: 114 MB
+#'   - 17546 features across 3866 cells:
+#     - line 09b2: 993 cells
+#     - line 409b2_clone: 1654 cells
+#     - line sc102a1: 1219 cells
+#' - `timecourse`:
+#'   - Time-course scRNA-seq data of Ngn2-induced neuron differentiation
+#'   - RDS file size: 1454.1 MB
+#'   - 17546 features across 29554 cells:
+#     - h0: 1636 cells
+#     - h6/12: 6874 cells
+#     - d1: 3148 cells
+#     - d2: 6350 cells
+#     - d5: 1907 cells
+#     - w2: 1508 cells
+#     - w4: 7141 cells
+#     - w5: 990 cells
+download_seurat_object <- function(experiment = c("d14", "w5", "timecourse")) {
+  experiment <- match.arg(experiment)
+  root <- "https://data.mendeley.com/public-files/datasets/y3s4hnyvg6/files/"
+  url <- switch(
+    experiment,
+    "d14" = paste0(
+      root,
+      "b33734ff-8f10-4bf1-8bde-d7af79f4177f/file_downloaded"
+    ),
+    "w5" = paste0(
+      root,
+      "c3b21223-bd13-4bd4-82e3-1cb143136244/file_downloaded"
+    ),
+    "timecourse" = paste0(
+      root,
+      "27ec7771-eda0-44d4-9ae5-0859e26fabb5/file_downloaded"
+    )
+  )
+  temp_file <- tempfile(fileext = ".rds")
+  download.file(url, destfile = temp_file)
+  return(temp_file)
+}
+```
+
+</details>
+
+For example, we can retrieve the `w5` dataset, containing data from 
+Ngn2-iNeurons derived from different cell types and clones, and then load it 
+into our R session. Because the definition of Seurat objects has been updated 
+since the authored deposited the files, we update it on the fly with 
+`Seurat::UpdateSeuratObject`.
+
+::: {.callout-wqrning}
+
+The following call will download 114.3 MB of data.
+
+:::
+
+```{r}
+#| warning: false
+seurat_obj <- download_seurat_object('w5') |>
+  readRDS() |>
+  Seurat::UpdateSeuratObject()
+```
+
+Next, let's take a look at the Seurat object itself. It contains data from two 
+`assays`: "RNA" and "integrated". Because we can only store results from a 
+single assay in an `annData` object, we will focus on the `RNA` assay here.
+
+```{r}
+names(seurat_obj@assays)
+```
+
+The Seurat object includes multiple metadata columns that provide information
+about each cell in the dataset.
+
+```{r}
+colnames(seurat_obj@meta.data)
+```
+
+In addition, the cell identity vector assigns each cell to one of 
+`r nlevels(Idents(seurat_obj))` clusters. Let's add this information to the
+`metadata` slot [^2].
+
+[^2]: The `integrated_snn_res.0.3_merged` metadata column contains _almost_ 
+the same information as the cell identities, but it only defines `r length(unique(seurat_obj$integrated_snn_res.0.3_merged))` clusters: 
+<pre>
+`r paste(capture.output(table(seurat_obj$integrated_snn_res.0.3_merged, Idents(seurat_obj))), collapse = "\n")`
+</pre>
+
+The object also contains the reduced dimensions the authors calculated in the
+`pca` and `umap`. Let's plot the cells along their UMAP coordinates and color
+them by their assigned clusters:
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5
+seurat_obj$seurat_clusters <- Seurat::Idents(seurat_obj) 
+Seurat::DimPlot(seurat_obj)
+```
+
+## Converating from Seurat to an AnnData object
+
+Converting the Seurat object to an `InMemoryAnnData` R object is as simple
+as calling `anndataR::as_AnnData`. By default, the function will try to guess
+which slots of the Seurat object should be mapped to the corresponding slots 
+of the `annData` object. Here, we specify the layers, reduced dimensions 
+(`pca` and `umap`) and nearest neighbor graphs explicitely, to make sure they
+are correctly included in the converted object.
+
+```{r}
+adata <- anndataR::as_AnnData(
+  x = seurat_obj,
+  assay_name = "RNA",
+  layers_mapping = c(
+    counts = "counts",
+    data = "data"
+  ),
+  x_mapping = "counts",
+  obsp_mapping = c(
+    integrated_nn = "integrated_nn",
+    integrated_snn = "integrated_snn"
+  ),
+  obsm_mapping = c(X_pca = "pca", X_umap = "umap"),
+  output_class = "InMemory"
+)
+adata
+```
+
+The `adata` object mirrors the structure of the python [AnnData](https://anndata.readthedocs.io/en/stable/generated/anndata.AnnData.html)
+class, defined in the 
+[anndata python module](https://anndata.readthedocs.io/en/stable/index.html).
+
+By default, the data is kept in memory, e.g. the `output_class` is set to 
+`InMemory`. Alternatively, we can request `HDF5AnnData` or 
+`ReticulateAnnData` output objects.
+
+::: {.callout-info}
+
+- A `ReticulateAnnData` object wraps a python `anndata.AnnData` object using 
+[reticulate](https://rstudio.github.io/reticulate/). 
+This allows direct interaction with python `AnnData` objects while maintaining
+the R interface, but it requires the configuration of a python virtual
+environment.
+- An `HDF5AnnData` class stores the assay data inside an HDF5 file on disk; 
+to request this output class, a `file` argument is specified. This class 
+provides an interface to a H5AD file and minimal data is stored in memory 
+until it is requested. This is a great option when the Seurat object is very
+large, and we don't want to load the entire dataset into memory at once. 
+
+:::
+
+Because this dataset is relatively small, we can load it into memory first
+(see above) and then write it to disk as an `h5ad` file:
+
+```{r}
+#| warning: false
+#| message: false
+h5ad_file_path <- file.path(tempdir(), "anndata.h5ad")
+anndataR::write_h5ad(
+  object = adata,
+  compression = "gzip",
+  path = h5ad_file_path
+)
+fs::file_info(h5ad_file_path)[, c("path", "type", "size")]
+```
+
+Alternatively, e.g. for large datasets, we can specify the 
+`output_class = "HDF5AnnData", file = hd5a_file_path` arguments. To demonstrate,
+we remove the h5ad file we create above, and write it to disk directly. The
+returned object is an `HDF5AnnData`:
+
+```{r}
+fs::file_delete(h5ad_file_path)
+adata <- anndataR::as_AnnData(
+  x = seurat_obj,
+  assay_name = "RNA",
+  layers_mapping = c(
+    counts = "counts",
+    data = "data"
+  ),
+  x_mapping = "counts",
+  obsp_mapping = c(
+    integrated_nn = "integrated_nn",
+    integrated_snn = "integrated_snn"
+  ),
+  obsm_mapping = c(X_pca = "pca", X_umap = "umap"),
+  output_class = "HDF5AnnData", 
+  file = h5ad_file_path
+)
+adata
+```
+
+The `anndataR` package not only simplifies the conversion between different
+single-cell objects, but it also enables R users to interact with `h5ad` files
+directly - awesome!
+
+## Reproducibility
+
+<details>
+<summary>
+Session Information
+</summary>
+
+```{r}
+sessionInfo()
+```
+
+</details>

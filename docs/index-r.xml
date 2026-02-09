@@ -11,7 +11,17 @@
 <description>Thomas&#39; personal thoughts, opinions, learnings and code examples
 </description>
 <generator>quarto-1.8.21</generator>
-<lastBuildDate>Tue, 18 Nov 2025 08:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 08 Feb 2026 08:00:00 GMT</lastBuildDate>
+<item>
+  <title>anndataR: converting single-cell data, from R to python and back</title>
+  <dc:creator>Thomas Sandmann</dc:creator>
+  <link>https://tomsing1.github.io/blog/posts/anndataR/</link>
+  <description><![CDATA[ Both the R and python communities have created amazing software tools to analyze single-cell data. It used to be tricky to convert between the most prominent serialized data structures: <code>SingleCellExperiment</code> and <code>Seurat</code> R objects and <code>AnnData</code> python objects. Luckily, Bioconductor release 3.22 introduced the <a href="https://bioconductor.org/packages//release/bioc/html/anndataR.html">anndataR R package</a>, authored by <a href="https://cannoodt.dev">Robrecht Cannoodt</a>, <a href="https://lazappi.id.au">Luke Zappia</a>, <a href="https://mtmorgan.github.io">Martin Morgan</a> and <a href="https://orcid.org/0000-0001-8100-6823">Louise Deconinck</a>, which offers a reliable solution <sup>1</sup>. ]]></description>
+  <category>R</category>
+  <category>TIL</category>
+  <guid>https://tomsing1.github.io/blog/posts/anndataR/</guid>
+  <pubDate>Sun, 08 Feb 2026 08:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Setting up a local HPC cluster with SLURM for testing &amp; learning</title>
   <dc:creator>Thomas Sandmann</dc:creator>
@@ -220,16 +230,6 @@
   <category>TIL</category>
   <guid>https://tomsing1.github.io/blog/posts/parquet/</guid>
   <pubDate>Thu, 31 Aug 2023 07:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Organizing sequencing metadata: experimenting with S7</title>
-  <dc:creator>Thomas Sandmann</dc:creator>
-  <link>https://tomsing1.github.io/blog/posts/s7/</link>
-  <description><![CDATA[ This week I learned about R’s new S7 object oriented programming (OOP) system by experimenting with classes that represent the main metadata entities of a next-generation sequencing experiment. ]]></description>
-  <category>R</category>
-  <category>TIL</category>
-  <guid>https://tomsing1.github.io/blog/posts/s7/</guid>
-  <pubDate>Wed, 30 Aug 2023 07:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>

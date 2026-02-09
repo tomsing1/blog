@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/anndataR/index.html",
       "/posts/slurm_docker_cluster/index.html",
       "/posts/ggbot2/index.html",
       "/posts/rv/index.html",

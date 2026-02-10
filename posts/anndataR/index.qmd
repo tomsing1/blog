@@ -61,6 +61,7 @@ suppressPackageStartupMessages({
   library(rhdf5)
   library(Seurat)
 })
+options(timeout=3600)  # avoid timeouts while downloading large files
 ```
 
 Let's start with a function that allows us to download a deposited file and
@@ -81,7 +82,7 @@ Download function
 #' and it is possible that the final results published in Stem Cell Reports
 #' are (slightly) different. Available serialized Seurat objects:
 #' - `d14`:
-#'   - ScRNA-seq data of Ngn2-iNeuron at d14, varied Dox duration during culture
+#'   - scRNA-seq data of Ngn2-iNeuron at d14, varied Dox duration during culture
 #'   - RDS file size: 284.3 MB
 #'   - 51723 features across 2767 cells:
 #     - iN_Dox_ctrl: 1351 cells
@@ -89,7 +90,7 @@ Download function
 #     - iN_Dox_d3: 378 cells:
 #     - iN_Dox_d5: 727 cells
 #' - `w5`:
-#'   - ScRNA-seq data of w5 Ngn2-iNeuron from different cell types and clones
+#'   - scRNA-seq data of w5 Ngn2-iNeuron from different cell types and clones
 #'   - RDS file size: 114 MB
 #'   - 17546 features across 3866 cells:
 #     - line 09b2: 993 cells
@@ -147,7 +148,7 @@ The following call will download 114.3 MB of data.
 
 ```{r}
 #| warning: false
-seurat_obj <- download_seurat_object('w5') |>
+seurat_obj <- download_seurat_object('timecourse') |>
   readRDS() |>
   Seurat::UpdateSeuratObject()
 ```

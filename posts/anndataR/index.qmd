@@ -148,7 +148,7 @@ The following call will download 114.3 MB of data.
 
 ```{r}
 #| warning: false
-seurat_obj <- download_seurat_object('timecourse') |>
+seurat_obj <- download_seurat_object('w5') |>
   readRDS() |>
   Seurat::UpdateSeuratObject()
 ```
